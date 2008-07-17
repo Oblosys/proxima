@@ -124,7 +124,7 @@ construct_ParseErrEnrichedDoc (StructuralTk _ _ pres _ _) ~[] = Clip_EnrichedDoc
 construct_RootDoc tk ~[mClip0] = Clip_Document $ reuseRootDoc [tk]  (retrieveArg "RootDoc" "root::Root" mClip0)
 construct_HoleDocument tk ~[] = Clip_Document $ hole
 construct_ParseErrDocument (StructuralTk _ _ pres _ _) ~[] = Clip_Document $ parseErr (StructuralParseErr pres)
-construct_Root tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Root $ reuseRoot [tk]  (retrieveArg "Root" "graph::Graph" mClip0) (retrieveArg "Root" "probtables::List_Probtable" mClip1) (retrieveArg "Root" "title::String" mClip2) (retrieveArg "Root" "sections::List_Section" mClip3)
+construct_Root tk ~[mClip0,mClip1,mClip2,mClip3,mClip4,mClip5] = Clip_Root $ reuseRoot [tk]  (retrieveArg "Root" "graph::Graph" mClip0) (retrieveArg "Root" "caption::String" mClip1) (retrieveArg "Root" "label::String" mClip2) (retrieveArg "Root" "probtables::List_Probtable" mClip3) (retrieveArg "Root" "title::String" mClip4) (retrieveArg "Root" "sections::List_Section" mClip5)
 construct_HoleRoot tk ~[] = Clip_Root $ hole
 construct_ParseErrRoot (StructuralTk _ _ pres _ _) ~[] = Clip_Root $ parseErr (StructuralParseErr pres)
 construct_Section tk ~[mClip0,mClip1,mClip2] = Clip_Section $ reuseSection [tk]  (retrieveArg "Section" "title::String" mClip0) (retrieveArg "Section" "paragraphs::List_Paragraph" mClip1) (retrieveArg "Section" "subsections::List_Subsection" mClip2)
@@ -137,7 +137,7 @@ construct_Subsubsection tk ~[mClip0,mClip1] = Clip_Subsubsection $ reuseSubsubse
 construct_HoleSubsubsection tk ~[] = Clip_Subsubsection $ hole
 construct_ParseErrSubsubsection (StructuralTk _ _ pres _ _) ~[] = Clip_Subsubsection $ parseErr (StructuralParseErr pres)
 construct_Paragraph tk ~[mClip0] = Clip_Paragraph $ reuseParagraph [tk]  (retrieveArg "Paragraph" "words::List_Word" mClip0)
-construct_SubgraphPara tk ~[mClip0,mClip1] = Clip_Paragraph $ reuseSubgraphPara [tk]  (retrieveArg "SubgraphPara" "subgraph::Subgraph" mClip0) (retrieveArg "SubgraphPara" "caption::String" mClip1)
+construct_SubgraphPara tk ~[mClip0,mClip1,mClip2] = Clip_Paragraph $ reuseSubgraphPara [tk]  (retrieveArg "SubgraphPara" "subgraph::Subgraph" mClip0) (retrieveArg "SubgraphPara" "caption::String" mClip1) (retrieveArg "SubgraphPara" "label::String" mClip2)
 construct_ProbtablePara tk ~[mClip0] = Clip_Paragraph $ reuseProbtablePara [tk]  (retrieveArg "ProbtablePara" "probtable::Probtable" mClip0)
 construct_HoleParagraph tk ~[] = Clip_Paragraph $ hole
 construct_ParseErrParagraph (StructuralTk _ _ pres _ _) ~[] = Clip_Paragraph $ parseErr (StructuralParseErr pres)
@@ -237,10 +237,10 @@ reuseRootDoc nodes ma0
            (RootDoc a0) -> genericReuse1 RootDoc a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseRootDoc"
 
-reuseRoot :: [Token doc Node clip token] -> Maybe Graph -> Maybe List_Probtable -> Maybe String -> Maybe List_Section -> Root
-reuseRoot nodes ma0 ma1 ma2 ma3
+reuseRoot :: [Token doc Node clip token] -> Maybe Graph -> Maybe String -> Maybe String -> Maybe List_Probtable -> Maybe String -> Maybe List_Section -> Root
+reuseRoot nodes ma0 ma1 ma2 ma3 ma4 ma5
   = case extractFromTokens extractRoot defaultRoot nodes of
-           (Root a0 a1 a2 a3) -> genericReuse4 Root a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (Root a0 a1 a2 a3 a4 a5) -> genericReuse6 Root a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
            _ -> error "Internal error:ProxParser_Generated.reuseRoot"
 
 reuseSection :: [Token doc Node clip token] -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
@@ -267,10 +267,10 @@ reuseParagraph nodes ma0
            (Paragraph a0) -> genericReuse1 Paragraph a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseParagraph"
 
-reuseSubgraphPara :: [Token doc Node clip token] -> Maybe Subgraph -> Maybe String -> Paragraph
-reuseSubgraphPara nodes ma0 ma1
+reuseSubgraphPara :: [Token doc Node clip token] -> Maybe Subgraph -> Maybe String -> Maybe String -> Paragraph
+reuseSubgraphPara nodes ma0 ma1 ma2
   = case extractFromTokens extractSubgraphPara defaultSubgraphPara nodes of
-           (SubgraphPara a0 a1) -> genericReuse2 SubgraphPara a0 a1 ma0 ma1
+           (SubgraphPara a0 a1 a2) -> genericReuse3 SubgraphPara a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseSubgraphPara"
 
 reuseProbtablePara :: [Token doc Node clip token] -> Maybe Probtable -> Paragraph
@@ -469,7 +469,7 @@ extractRootDoc (Just (Node_RootDoc x@(RootDoc _) _)) = Just x
 extractRootDoc _ = Nothing
 
 extractRoot :: Maybe Node -> Maybe Root
-extractRoot (Just (Node_Root x@(Root _ _ _ _) _)) = Just x
+extractRoot (Just (Node_Root x@(Root _ _ _ _ _ _) _)) = Just x
 extractRoot _ = Nothing
 
 extractSection :: Maybe Node -> Maybe Section
@@ -489,7 +489,7 @@ extractParagraph (Just (Node_Paragraph x@(Paragraph _) _)) = Just x
 extractParagraph _ = Nothing
 
 extractSubgraphPara :: Maybe Node -> Maybe Paragraph
-extractSubgraphPara (Just (Node_SubgraphPara x@(SubgraphPara _ _) _)) = Just x
+extractSubgraphPara (Just (Node_SubgraphPara x@(SubgraphPara _ _ _) _)) = Just x
 extractSubgraphPara _ = Nothing
 
 extractProbtablePara :: Maybe Node -> Maybe Paragraph
@@ -626,7 +626,7 @@ defaultRootDoc :: Document
 defaultRootDoc = RootDoc hole
 
 defaultRoot :: Root
-defaultRoot = Root hole hole hole hole
+defaultRoot = Root hole hole hole hole hole hole
 
 defaultSection :: Section
 defaultSection = Section hole hole hole
@@ -641,7 +641,7 @@ defaultParagraph :: Paragraph
 defaultParagraph = Paragraph hole
 
 defaultSubgraphPara :: Paragraph
-defaultSubgraphPara = SubgraphPara hole hole
+defaultSubgraphPara = SubgraphPara hole hole hole
 
 defaultProbtablePara :: Paragraph
 defaultProbtablePara = ProbtablePara hole
@@ -786,6 +786,12 @@ genericReuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
                  Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
 genericReuse5 f a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4)
+
+genericReuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
+genericReuse6 f a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5)
 
 
 

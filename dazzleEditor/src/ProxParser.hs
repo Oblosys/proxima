@@ -29,13 +29,20 @@ recognizeEnrichedDoc = pStr $
 
 recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
 recognizeRoot = pStr $
-          (\str graph title sections ->
-          reuseRoot [str] (Just graph) Nothing (Just title) (Just sections))
+          (\str title graph caption label sections ->
+          reuseRoot [str] (Just graph) (Just caption) (Just label) Nothing (Just title) (Just sections))
       <$> pStructuralTk Node_Root
-      <*> recognizeGraph
       <*> pPrs pLine 
+--      <*  recognizeTOC
+      <*> recognizeGraph
+      <*> pPrs pLine
+      <*> pPrs pText 
       <*> recognizeList_Section
 
+recognizeTOC = pStr $
+          ""
+      <$  pStructuralTk Node_List_Section
+      
 recognizeList_Section = pStr $ 
           (\str lst -> List_Section (toConsList_Section lst))
       <$> pStructuralTk Node_List_Section
@@ -162,13 +169,16 @@ parseParagraph =
           (reuseSubgraphPara [] (Just $ Subgraph Dirty
                                           (List_Vertex Nil_Vertex)
                                           (List_Edge Nil_Edge)
-                                          ) (Just " ")) -- we need a FreshIDD here    
+                                          )
+                                (Just "caption")
+                                (Just "label")) -- we need a FreshIDD here    
       <$  pKey "\\graph"
   <|>
       (   pStrAlt Node_SubgraphPara $
-          (\str sg caption -> reuseSubgraphPara [str] (Just sg) (Just caption))
+          (\str sg caption label -> reuseSubgraphPara [str] (Just sg) (Just caption) (Just label))
       <$> pStructuralTk Node_SubgraphPara
       <*> recognizeSubgraph
+      <*> pPrs pLine
       <*> pPrs pText
       )
   <|>
@@ -180,11 +190,11 @@ parseParagraph =
 
 
 parseWord = 
-          (\str -> reuseWord [] (Just str))
+          (\word -> reuseWord [] (Just word))
       <$> pText
       <*  pList (pKey " ")  
   <|>
-          (\str -> reuseNodeRef [] (Just $ NodeName  (tokenString str)))
+          (\ref -> reuseNodeRef [] (Just $ NodeName  (tokenString ref)))
       <$> pNodeRef
       <*  pList (pKey " ")  
   <|>
@@ -192,15 +202,21 @@ parseWord =
           (\str name -> reuseNodeRef [str] (Just $ NodeName name))
       <$> pStructuralTk Node_NodeRef
       <*> pPrs pText
-      )
+      ) <*  pList (pKey " ")  
   <|>
-          (\str -> reuseLabel [] (Just $ tokenString str))
+          (\label -> reuseLabel [] (Just $ tokenString label))
       <$> pLabel
       <*  pList (pKey " ")  
   <|>
-          (\str -> reuseLabelRef [] (Just $ tokenString str))
+          (\ref -> reuseLabelRef [] (Just $ tokenString ref))
       <$> pLabelRef
       <*  pList (pKey " ")  
+  <|>
+      (   pStrAlt Node_LabelRef $
+          (\str name -> reuseLabelRef [str] (Just $ name))
+      <$> pStructuralTk Node_LabelRef
+      <*> pPrs pText
+      ) <*  pList (pKey " ")  
       -- the Scanner produces " " tokens, which are converted to key tokens
       -- split adds a " \n", so maybe we encounter two spaces
 

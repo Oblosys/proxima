@@ -33,7 +33,7 @@ data Document = RootDoc Root
               | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
-data Root = Root Graph List_Probtable String List_Section
+data Root = Root Graph String String List_Probtable String List_Section
           | HoleRoot
           | ParseErrRoot (ParseError Document Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
@@ -54,7 +54,7 @@ data Subsubsection = Subsubsection String List_Paragraph
                        deriving (Show, Data, Typeable)
 
 data Paragraph = Paragraph List_Word
-               | SubgraphPara Subgraph String
+               | SubgraphPara Subgraph String String
                | ProbtablePara Probtable
                | HoleParagraph
                | ParseErrParagraph (ParseError Document Node ClipDoc UserToken)

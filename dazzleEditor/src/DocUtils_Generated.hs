@@ -14,9 +14,10 @@ import Common.CommonTypes hiding (Clean, Dirty)
 
 initialDocument :: IO Document
 initialDocument = return (RootDoc (Root (Graph Clean (toList_Vertex []) (toList_Edge [])) 
-                                  (toList_Probtable [])
-                                  "" 
-                                  (toList_Section [])))
+                                        "" "" 
+                                        (toList_Probtable [])
+                                        "Initial document" 
+                                        (toList_Section [])))
 
 parseXML_List_Int = pList_ng parseXML_Int
 toXMLList_Int = map toXMLInt
@@ -256,7 +257,7 @@ toXMLEnrichedDoc (ParseErrEnrichedDoc error) = EmptyElt "ParseErrEnrichedDoc" []
 toXMLDocument (RootDoc root) = Elt "RootDoc" [] $ [toXMLRoot root]
 toXMLDocument (HoleDocument) = EmptyElt "HoleDocument" [] 
 toXMLDocument (ParseErrDocument error) = EmptyElt "ParseErrDocument" []
-toXMLRoot (Root graph probtables title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ toXMLList_Probtable probtables ++ [toXMLString title] ++ toXMLList_Section sections
+toXMLRoot (Root graph caption label probtables title sections) = Elt "Root" [] $ [toXMLGraph graph] ++ [toXMLString caption] ++ [toXMLString label] ++ toXMLList_Probtable probtables ++ [toXMLString title] ++ toXMLList_Section sections
 toXMLRoot (HoleRoot) = EmptyElt "HoleRoot" [] 
 toXMLRoot (ParseErrRoot error) = EmptyElt "ParseErrRoot" []
 toXMLSection (Section title paragraphs subsections) = Elt "Section" [] $ [toXMLString title] ++ toXMLList_Paragraph paragraphs ++ toXMLList_Subsection subsections
@@ -269,7 +270,7 @@ toXMLSubsubsection (Subsubsection title paragraphs) = Elt "Subsubsection" [] $ [
 toXMLSubsubsection (HoleSubsubsection) = EmptyElt "HoleSubsubsection" [] 
 toXMLSubsubsection (ParseErrSubsubsection error) = EmptyElt "ParseErrSubsubsection" []
 toXMLParagraph (Paragraph words) = Elt "Paragraph" [] $ toXMLList_Word words
-toXMLParagraph (SubgraphPara subgraph caption) = Elt "SubgraphPara" [] $ [toXMLSubgraph subgraph] ++ [toXMLString caption]
+toXMLParagraph (SubgraphPara subgraph caption label) = Elt "SubgraphPara" [] $ [toXMLSubgraph subgraph] ++ [toXMLString caption] ++ [toXMLString label]
 toXMLParagraph (ProbtablePara probtable) = Elt "ProbtablePara" [] $ [toXMLProbtable probtable]
 toXMLParagraph (HoleParagraph) = EmptyElt "HoleParagraph" [] 
 toXMLParagraph (ParseErrParagraph error) = EmptyElt "ParseErrParagraph" []
@@ -384,7 +385,7 @@ parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Root<* endTag "
 parseXML_Document = parseXMLCns_RootDoc <|> parseHoleAndParseErr "Document" HoleDocument
 parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_Root<* endTag "RootDoc"
 parseXML_Root = parseXMLCns_Root <|> parseHoleAndParseErr "Root" HoleRoot
-parseXMLCns_Root = Root <$ startTag "Root" <*> parseXML_Graph <*> parseXML_List_Probtable <*> parseXML_String <*> parseXML_List_Section<* endTag "Root"
+parseXMLCns_Root = Root <$ startTag "Root" <*> parseXML_Graph <*> parseXML_String <*> parseXML_String <*> parseXML_List_Probtable <*> parseXML_String <*> parseXML_List_Section<* endTag "Root"
 parseXML_Section = parseXMLCns_Section <|> parseHoleAndParseErr "Section" HoleSection
 parseXMLCns_Section = Section <$ startTag "Section" <*> parseXML_String <*> parseXML_List_Paragraph <*> parseXML_List_Subsection<* endTag "Section"
 parseXML_Subsection = parseXMLCns_Subsection <|> parseHoleAndParseErr "Subsection" HoleSubsection
@@ -393,7 +394,7 @@ parseXML_Subsubsection = parseXMLCns_Subsubsection <|> parseHoleAndParseErr "Sub
 parseXMLCns_Subsubsection = Subsubsection <$ startTag "Subsubsection" <*> parseXML_String <*> parseXML_List_Paragraph<* endTag "Subsubsection"
 parseXML_Paragraph = parseXMLCns_Paragraph <|> parseXMLCns_SubgraphPara <|> parseXMLCns_ProbtablePara <|> parseHoleAndParseErr "Paragraph" HoleParagraph
 parseXMLCns_Paragraph = Paragraph <$ startTag "Paragraph" <*> parseXML_List_Word<* endTag "Paragraph"
-parseXMLCns_SubgraphPara = SubgraphPara <$ startTag "SubgraphPara" <*> parseXML_Subgraph <*> parseXML_String<* endTag "SubgraphPara"
+parseXMLCns_SubgraphPara = SubgraphPara <$ startTag "SubgraphPara" <*> parseXML_Subgraph <*> parseXML_String <*> parseXML_String<* endTag "SubgraphPara"
 parseXMLCns_ProbtablePara = ProbtablePara <$ startTag "ProbtablePara" <*> parseXML_Probtable<* endTag "ProbtablePara"
 parseXML_Word = parseXMLCns_Word <|> parseXMLCns_NodeRef <|> parseXMLCns_Label <|> parseXMLCns_LabelRef <|> parseHoleAndParseErr "Word" HoleWord
 parseXMLCns_Word = Word <$ startTag "Word" <*> parseXML_String<* endTag "Word"

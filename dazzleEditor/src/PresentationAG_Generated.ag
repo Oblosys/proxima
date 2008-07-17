@@ -40,7 +40,7 @@ DATA EnrichedDoc
   | ParseErrEnrichedDoc error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Root
-  | Root graph:Graph probtables:List_Probtable title:String sections:List_Section
+  | Root graph:Graph caption:String label:String probtables:List_Probtable title:String sections:List_Section
   | HoleRoot
   | ParseErrRoot error:{(ParseError Document Node ClipDoc UserToken)}
 
@@ -61,7 +61,7 @@ DATA Subsubsection
 
 DATA Paragraph
   | Paragraph words:List_Word
-  | SubgraphPara subgraph:Subgraph caption:String
+  | SubgraphPara subgraph:Subgraph caption:String label:String
   | ProbtablePara probtable:Probtable
   | HoleParagraph
   | ParseErrParagraph error:{(ParseError Document Node ClipDoc UserToken)}
@@ -291,12 +291,12 @@ SEM Root
       sections.pIdC = @probtables.pIdC
       lhs.pIdC = @sections.pIdC
       graph.path  = @lhs.path++[0]
-      probtables.path  = @lhs.path++[1]
-      sections.path  = @lhs.path++[3]
+      probtables.path  = @lhs.path++[3]
+      sections.path  = @lhs.path++[5]
   | Root
     graph.ix = 0
-    probtables.ix = 1
-    sections.ix = 3
+    probtables.ix = 3
+    sections.ix = 5
   | Root
       lhs.pres = loc (Node_Root @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -1152,7 +1152,7 @@ SEM List_Probability
 
 SEM Root
   | Root
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Root @self @lhs.path) @lhs.path "Root" [ @graph.presXML, @probtables.presXML, presentPrimXMLString @title, @sections.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Root @self @lhs.path) @lhs.path "Root" [ @graph.presXML, presentPrimXMLString @caption, presentPrimXMLString @label, @probtables.presXML, presentPrimXMLString @title, @sections.presXML ] 
   | HoleRoot     lhs.presXML = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
   | ParseErrRoot lhs.presXML = presParseErr (Node_ParseErrRoot @self @lhs.path) @error
 
@@ -1178,7 +1178,7 @@ SEM Paragraph
   | Paragraph
       lhs.presXML = presentElementXML @lhs.focusD (Node_Paragraph @self @lhs.path) @lhs.path "Paragraph" [ @words.presXML ] 
   | SubgraphPara
-      lhs.presXML = presentElementXML @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presXML, presentPrimXMLString @caption ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presXML, presentPrimXMLString @caption, presentPrimXMLString @label ] 
   | ProbtablePara
       lhs.presXML = presentElementXML @lhs.focusD (Node_ProbtablePara @self @lhs.path) @lhs.path "ProbtablePara" [ @probtable.presXML ] 
   | HoleParagraph     lhs.presXML = presHole @lhs.focusD "Paragraph" (Node_HoleParagraph @self @lhs.path) @lhs.path
@@ -1446,7 +1446,7 @@ SEM ConsList_Probability
 
 SEM Root
   | Root
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Root @self @lhs.path) @lhs.path "Root" [ @graph.presTree, @probtables.presTree, presentPrimXMLString @title, @sections.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Root @self @lhs.path) @lhs.path "Root" [ @graph.presTree, presentPrimXMLString @caption, presentPrimXMLString @label, @probtables.presTree, presentPrimXMLString @title, @sections.presTree ] 
   | HoleRoot     lhs.presTree = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
   | ParseErrRoot lhs.presTree = presParseErr (Node_ParseErrRoot @self @lhs.path) @error
 
@@ -1472,7 +1472,7 @@ SEM Paragraph
   | Paragraph
       lhs.presTree = presentElementTree @lhs.focusD (Node_Paragraph @self @lhs.path) @lhs.path "Paragraph" [ @words.presTree ] 
   | SubgraphPara
-      lhs.presTree = presentElementTree @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presTree, presentPrimXMLString @caption ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presTree, presentPrimXMLString @caption, presentPrimXMLString @label ] 
   | ProbtablePara
       lhs.presTree = presentElementTree @lhs.focusD (Node_ProbtablePara @self @lhs.path) @lhs.path "ProbtablePara" [ @probtable.presTree ] 
   | HoleParagraph     lhs.presTree = presHole @lhs.focusD "Paragraph" (Node_HoleParagraph @self @lhs.path) @lhs.path

@@ -31,6 +31,12 @@ vLine'' = empty `withWidth` 2 `withVStretch` True `withbgColor` red
 
 labelYellow = (236, 236, 169)
 nodeBlue = (200, 255, 255)
+
+presLabel isDefined label = row [ hSpace 1, move 0 (-6) $ 
+                                    scaleFont (squiggle red (not isDefined) $ 
+                                                 parsing (text label) `withbgColor` lightBlue) 60
+                                ]
+
 }
 
 SEM EnrichedDoc
@@ -39,17 +45,26 @@ SEM EnrichedDoc
 SEM Root
   | Root
       loc.pres = structural $
-                     (row [ text "   ", 
-                            col $ [ @graph.pres
-                            , text ""
-                            , row [ parsing $ text @title, empty `withHStretch` True ]
-                                  `withFontSize_` (percent 160) 
-                                  `addPopupItems`
-                                [ ("Add Section", insertAtHeadSection @sections.path) ]  
-                            , text ""
-                            , @sections.pres
-                                  ]
-                          ]) `withFont'` ("Times New Roman", 12)  `withWidth` 800
+                   row [ text "   "
+                       , col $ [ row [ parsing $ text @title, empty `withHStretch` True ]
+                                       `withFontSize_` (percent 160) 
+                                       `addPopupItems`
+                                       [ ("Add Section", insertAtHeadSection @sections.path) ]  
+                               
+                               -- , structural $ col @sections.tocPress
+                               , col [ @graph.pres
+                                     , hAlignCenter $
+                                         row [ text $ "Figuur 1: "
+                                             , row [ parsing $ text @caption
+                                                   , presLabel True @label
+                                                   ]
+                                             ]
+                                     ]
+                               , text ""
+                               , @sections.pres
+                               ]
+                       , empty `withHStretch` True
+                       ] `withFont'` ("Times New Roman", 12) -- `withWidth` 800
 {
 divide n [] = []
 divide n xs = let (h,t) = splitAt n xs
@@ -64,7 +79,7 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
   | Section
       loc.numberStr = show @sectionNr
       loc.pres = structural $
-                     (col [ vSpace 20
+                     (col [ vSpace 40
                           , col [ row [ text (@numberStr++"   ")
                                       , parsing $ text @title
                                       ] `withFontSize_` (percent 150)
@@ -91,7 +106,8 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
   | Subsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr
       loc.pres = structural $
-                     (col $ [ col [ row [ text (@numberStr++"   ")
+                     (col $ [ col [ vSpace 32
+                                  , row [ text (@numberStr++"   ")
                                         , parsing $ text @title, empty `withHStretch` True
                                         ] `withFontSize_` (percent 130)
                                           `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) 
@@ -117,7 +133,8 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
   | Subsubsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
       loc.pres = structural $
-                     (col $ [ row [ text (@numberStr++"   ")
+                     (col $ [ vSpace 25
+                            , row [ text (@numberStr++"   ")
                                   , parsing $ text @title, empty `withHStretch` True
                                   ] `withFontSize_` (percent 130)  
                                     `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) 
@@ -152,8 +169,11 @@ SEM Paragraph
                      row [ hSpace 200, col [ @subgraph.pres
                                            , hAlignCenter $
                                                row [ text $ "Figuur " ++ show @lhs.figureCounter ++ ": "
-                                                   , parsing $ text @caption
+                                                   , row [ parsing $ text @caption
+                                                         , presLabel True @label
+                                                         ]
                                                    ]
+                                           , vSpace 20
                                            ]
                          , empty `withHStretch` True ]
                        `addPopupItems` [ ("Delete Graph", deleteAtPath @lhs.path)
@@ -196,7 +216,15 @@ SEM Word [ || ]
                        , text " "
                        ]
   | LabelRef
-      loc.pres = parsing $
+      loc.pres = structural $
+                   let mLabelNr = lookup @label @lhs.allLabels   
+                   in  row [ case mLabelNr of
+                               Nothing -> text "?" `withColor` red
+                               Just nr -> text nr `withColor` blue
+                           , presLabel (isJust mLabelNr) @label
+                           ]
+{-      
+                 parsing $
                    let mLabelNr = lookup @label @lhs.allLabels   
                    in row [ text "\\ref{" `withColor` blue
                           , case mLabelNr of
@@ -209,6 +237,7 @@ SEM Word [ || ]
                           , text "}" `withColor` blue
                           , text " "
                           ]
+-}
 
 SEM NodeName
   | NodeName
@@ -220,7 +249,7 @@ SEM Graph
       loc.pres = structural $
                      row [ text " "
                          , boxed $ graph 950 650 @edges.edges @vertices.press
-                         ]
+                         , empty `withHStretch` True ]
       
 SEM Vertex [ || ] 
   | Vertex
@@ -268,7 +297,7 @@ SEM Subgraph [||]
                      -- only present vertices that are in the supergraph
                      subEdges = [ (fromV,toV) | (fromV, toV) <- @lhs.edges, fromV `elem` subVertices && toV `elem` subVertices]
                  in  structural $ 
-                     (boxed $ graph 400 200 subEdges @vertices.press
+                     (boxed $ graph 375 177 subEdges @vertices.press
                      `addPopupItems` [ ("Add node " ++ show name, pasteInSubgraph @lhs.path id name @self)
                                      | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
                                      , id `notElem` (fst . unzip $ @vertices.vertexIDNames)
@@ -456,44 +485,6 @@ SEM List_Probability
 
 
 
--- Counters
-
-
-SEM Section [ || ]
-  | Section
-      loc.sectionNr = @lhs.ix + 1
-
-SEM Subsection [ || ]
-  | Subsection
-      loc.subsectionNr = @lhs.ix + 1
-
-SEM Subsubsection [ || ]
-  | Subsubsection
-      loc.subsubsectionNr = @lhs.ix + 1
-
--- counters are inherited so sub- and subsubsection titles can refer to them.
-
-ATTR List_Subsection ConsList_Subsection Subsection 
-             List_Subsubsection ConsList_Subsubsection Subsubsection [ sectionNr : Int || ]
-
-
-ATTR List_Subsubsection ConsList_Subsubsection Subsubsection [ subsectionNr : Int || ]
-
-
-ATTR List_Section ConsList_Section Section 
-     List_Subsection ConsList_Subsection Subsection
-     List_Subsubsection ConsList_Subsubsection Subsubsection
-     List_Paragraph ConsList_Paragraph Paragraph
-     [ | figureCounter : Int | ]
-
-SEM Root
-    | Root
-       sections.figureCounter = 1
-       
-SEM Paragraph
-    | SubgraphPara
-        lhs.figureCounter = @lhs.figureCounter + 1
-      
 {-
 Graph synthesizes vertexIDNames and edges. At Root, vertexIDNames is unzipped, and inherited attributes
 vertexIDs, vertexNames, and edges are copied down to the subgraphs.
@@ -550,7 +541,8 @@ newSubgraphPara = Clip_Paragraph $
                       (Subgraph Dirty
                         (toList_Vertex [])
                         (toList_Edge []))
-                       " "
+                       "caption"
+                       "label"
                      ) 
 
 newProbtablePara = Clip_Paragraph $
@@ -560,19 +552,19 @@ newProbtablePara = Clip_Paragraph $
                        
 newSection = Clip_Section $
                Section
-                 "<new section>"
+                 " "
                  (List_Paragraph Nil_Paragraph) 
                  (List_Subsection Nil_Subsection)
 
 newSubsection = Clip_Subsection $
                     Subsection
-                      "<new subsection>"
+                      " "
                       (List_Paragraph Nil_Paragraph) 
                       (List_Subsubsection Nil_Subsubsection) 
 
 newSubsubsection = Clip_Subsubsection $
                     Subsubsection
-                      "<new subsubsection>"
+                      " "
                       (List_Paragraph Nil_Paragraph) 
 
 newValue = Clip_Value $ Value "new"
@@ -627,6 +619,48 @@ pasteInSubgraph pth id name subgraph =
 
 }
 
+
+-- Counters
+
+
+SEM Section [ || ]
+  | Section
+      loc.sectionNr = @lhs.ix + 1
+
+SEM Subsection [ || ]
+  | Subsection
+      loc.subsectionNr = @lhs.ix + 1
+
+SEM Subsubsection [ || ]
+  | Subsubsection
+      loc.subsubsectionNr = @lhs.ix + 1
+
+-- counters are inherited so sub- and subsubsection titles can refer to them.
+
+ATTR List_Subsection ConsList_Subsection Subsection 
+             List_Subsubsection ConsList_Subsubsection Subsubsection [ sectionNr : Int || ]
+
+
+ATTR List_Subsubsection ConsList_Subsubsection Subsubsection [ subsectionNr : Int || ]
+
+-- figure counting & refs is now hard coded for graph in root. Should be done more general.
+-- (also see computation of @sections.allLabels)
+
+ATTR List_Section ConsList_Section Section 
+     List_Subsection ConsList_Subsection Subsection
+     List_Subsubsection ConsList_Subsubsection Subsubsection
+     List_Paragraph ConsList_Paragraph Paragraph
+     [ | figureCounter : Int | ]
+
+SEM Root
+    | Root
+       sections.figureCounter = 2
+       
+SEM Paragraph
+    | SubgraphPara
+        lhs.figureCounter = @lhs.figureCounter + 1
+      
+
 -- labels and refs
 
 -- copy upward, taking the first label that is not Nothing
@@ -650,26 +684,33 @@ takeFirst left right = case left of
 SEM List_Section ConsList_Section Section 
     List_Subsection ConsList_Subsection Subsection 
     List_Subsubsection ConsList_Subsubsection Subsubsection 
+    List_Paragraph ConsList_Paragraph Paragraph
     [ | | labels USE {++} {[]} : {[(String,String)]} ]
 
 SEM Section
   | Section
-      lhs.labels = case @paragraphs.myLabel of
+      lhs.labels = @paragraphs.labels ++
+                   case @paragraphs.myLabel of
                      Just label -> (label, @numberStr) : @subsections.labels
                      Nothing    -> @subsections.labels
 
 SEM Subsection
   | Subsection
-      lhs.labels = case @paragraphs.myLabel of
+      lhs.labels = @paragraphs.labels ++
+                   case @paragraphs.myLabel of
                      Just label -> (label, @numberStr) : @subsubsections.labels
                      Nothing    -> @subsubsections.labels
                        
 SEM Subsubsection
   | Subsubsection
-      lhs.labels = case @paragraphs.myLabel of
+      lhs.labels = @paragraphs.labels ++
+                   case @paragraphs.myLabel of
                      Just label -> [(label, @numberStr)]
                      Nothing    -> []
 
+SEM Paragraph
+  | SubgraphPara
+      lhs.labels = [(@label, show @lhs.figureCounter)]
 
 -- the inherited attribute is allLabels, to prevent the copy rule from threading the attribute.
 
@@ -682,7 +723,7 @@ ATTR List_Section ConsList_Section Section
 
 SEM Root
   | Root
-      sections.allLabels = @sections.labels
+      sections.allLabels = (@label, "1") : @sections.labels -- hard-coded, not nice
            
            
            

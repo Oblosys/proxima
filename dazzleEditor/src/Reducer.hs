@@ -17,12 +17,12 @@ instance ReductionSheet Document EnrichedDoc ClipDoc where
   reductionSheetSimplest HoleEnrichedDoc           = HoleDocument
   reductionSheetSimplest (ParseErrEnrichedDoc prs) = ParseErrDocument prs
 
-reduceRoot (Root graph probtables title sections) =
+reduceRoot (Root graph caption label probtables title sections) =
   let subgraphs = getSubgraphs sections
       (graph', subgraphs') = resolveSubgraphs graph subgraphs
       probtables' = updateProbtables (mkProbtableMap (getProbtables sections)) probtables
       probtables'' = syncProbtables graph probtables'
-  in  Root graph' (toList_Probtable probtables'') title 
+  in  Root graph' caption label (toList_Probtable probtables'') title 
            (replaceSubgraphs subgraphs' sections)
 reduceRoot r = r
 
@@ -227,8 +227,9 @@ replaceSubgraphsSubsubsections sgs (Subsubsection title paras : subsubsections) 
 
 
 replaceSubgraphsParas sgs [] = ([], sgs)
-replaceSubgraphsParas (sg:sgs) (SubgraphPara _ cap :paras) = let (paras',sgs')= replaceSubgraphsParas sgs paras
-                                                         in  (SubgraphPara sg cap : paras', sgs') 
+replaceSubgraphsParas (sg:sgs) (SubgraphPara _ cap lab :paras) 
+                                                       = let (paras',sgs')= replaceSubgraphsParas sgs paras
+                                                         in  (SubgraphPara sg cap lab : paras', sgs') 
 replaceSubgraphsParas sgs      (para:paras)            = let (paras',sgs')= replaceSubgraphsParas sgs paras
                                                          in  (para : paras', sgs')
 replaceSubgraphsParas [] (para:paras)                  = 

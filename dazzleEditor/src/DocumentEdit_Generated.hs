@@ -312,25 +312,29 @@ instance Editable Document Document Node ClipDoc UserToken where
 
 instance Editable Root Document Node ClipDoc UserToken where
   select [] x = Clip_Root x
-  select (0:p) (Root x0 x1 x2 x3) = select p x0
-  select (1:p) (Root x0 x1 x2 x3) = select p x1
-  select (2:p) (Root x0 x1 x2 x3) = select p x2
-  select (3:p) (Root x0 x1 x2 x3) = select p x3
+  select (0:p) (Root x0 x1 x2 x3 x4 x5) = select p x0
+  select (1:p) (Root x0 x1 x2 x3 x4 x5) = select p x1
+  select (2:p) (Root x0 x1 x2 x3 x4 x5) = select p x2
+  select (3:p) (Root x0 x1 x2 x3 x4 x5) = select p x3
+  select (4:p) (Root x0 x1 x2 x3 x4 x5) = select p x4
+  select (5:p) (Root x0 x1 x2 x3 x4 x5) = select p x5
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Root c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Root") x
-  paste (0:p) c (Root x0 x1 x2 x3) = Root (paste p c x0) x1 x2 x3
-  paste (1:p) c (Root x0 x1 x2 x3) = Root x0 (paste p c x1) x2 x3
-  paste (2:p) c (Root x0 x1 x2 x3) = Root x0 x1 (paste p c x2) x3
-  paste (3:p) c (Root x0 x1 x2 x3) = Root x0 x1 x2 (paste p c x3)
+  paste (0:p) c (Root x0 x1 x2 x3 x4 x5) = Root (paste p c x0) x1 x2 x3 x4 x5
+  paste (1:p) c (Root x0 x1 x2 x3 x4 x5) = Root x0 (paste p c x1) x2 x3 x4 x5
+  paste (2:p) c (Root x0 x1 x2 x3 x4 x5) = Root x0 x1 (paste p c x2) x3 x4 x5
+  paste (3:p) c (Root x0 x1 x2 x3 x4 x5) = Root x0 x1 x2 (paste p c x3) x4 x5
+  paste (4:p) c (Root x0 x1 x2 x3 x4 x5) = Root x0 x1 x2 x3 (paste p c x4) x5
+  paste (5:p) c (Root x0 x1 x2 x3 x4 x5) = Root x0 x1 x2 x3 x4 (paste p c x5)
   paste _ _ x = x
 
-  alternatives _ = [ ("Root {Graph} {List_Probtable} {String} {List_Section} "  , Clip_Root $ Root hole hole hole hole)
+  alternatives _ = [ ("Root {Graph} {String} {String} {List_Probtable} {String} {List_Section} "  , Clip_Root $ Root hole hole hole hole hole hole)
                    ,("{Root}", Clip_Root hole)
                    ]
 
-  arity (Root x0 x1 x2 x3) = 4
+  arity (Root x0 x1 x2 x3 x4 x5) = 6
   arity _                        = 0
 
   toClip t = Clip_Root t
@@ -457,27 +461,29 @@ instance Editable Subsubsection Document Node ClipDoc UserToken where
 instance Editable Paragraph Document Node ClipDoc UserToken where
   select [] x = Clip_Paragraph x
   select (0:p) (Paragraph x0) = select p x0
-  select (0:p) (SubgraphPara x0 x1) = select p x0
-  select (1:p) (SubgraphPara x0 x1) = select p x1
+  select (0:p) (SubgraphPara x0 x1 x2) = select p x0
+  select (1:p) (SubgraphPara x0 x1 x2) = select p x1
+  select (2:p) (SubgraphPara x0 x1 x2) = select p x2
   select (0:p) (ProbtablePara x0) = select p x0
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Paragraph c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Paragraph") x
   paste (0:p) c (Paragraph x0) = Paragraph (paste p c x0)
-  paste (0:p) c (SubgraphPara x0 x1) = SubgraphPara (paste p c x0) x1
-  paste (1:p) c (SubgraphPara x0 x1) = SubgraphPara x0 (paste p c x1)
+  paste (0:p) c (SubgraphPara x0 x1 x2) = SubgraphPara (paste p c x0) x1 x2
+  paste (1:p) c (SubgraphPara x0 x1 x2) = SubgraphPara x0 (paste p c x1) x2
+  paste (2:p) c (SubgraphPara x0 x1 x2) = SubgraphPara x0 x1 (paste p c x2)
   paste (0:p) c (ProbtablePara x0) = ProbtablePara (paste p c x0)
   paste _ _ x = x
 
   alternatives _ = [ ("Paragraph {List_Word} "  , Clip_Paragraph $ Paragraph hole)
-                   , ("SubgraphPara {Subgraph} {String} "  , Clip_Paragraph $ SubgraphPara hole hole)
+                   , ("SubgraphPara {Subgraph} {String} {String} "  , Clip_Paragraph $ SubgraphPara hole hole hole)
                    , ("ProbtablePara {Probtable} "  , Clip_Paragraph $ ProbtablePara hole)
                    ,("{Paragraph}", Clip_Paragraph hole)
                    ]
 
   arity (Paragraph x0) = 1
-  arity (SubgraphPara x0 x1) = 2
+  arity (SubgraphPara x0 x1 x2) = 3
   arity (ProbtablePara x0) = 1
   arity _                        = 0
 

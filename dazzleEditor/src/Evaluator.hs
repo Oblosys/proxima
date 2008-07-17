@@ -17,8 +17,8 @@ instance EvaluationSheet Document EnrichedDoc ClipDoc where
 -- The extra doc parameter is necessary for popups in the current version of Proxima
 
 
-evaluateRoot (Root graph probtables title sections) =
-  Root graph probtables title (everywhere (mkT (setProbtablePara probtableMap)) sections)
+evaluateRoot (Root graph caption label probtables title sections) =
+  Root graph caption label probtables title (everywhere (mkT (setProbtablePara probtableMap)) sections)
  where probtableMap = map probtableMapEntry (fromList_Probtable probtables)
        probtableMapEntry probtable@(Probtable id _ _) = (id,probtable)
 

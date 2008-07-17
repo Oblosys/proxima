@@ -1,6 +1,6 @@
 data Document = RootDoc root:Root
 
-data Root = Root graph:Graph probtables:[Probtable] title:String sections:[Section]
+data Root = Root graph:Graph caption:String label:String probtables:[Probtable] title:String sections:[Section]
 
 data Section = Section title:String paragraphs:[Paragraph] subsections:[Subsection]
 
@@ -9,7 +9,7 @@ data Subsection = Subsection title:String paragraphs:[Paragraph] subsubsections:
 data Subsubsection = Subsubsection title:String paragraphs:[Paragraph]
 
 data Paragraph = Paragraph words:[Word]
-               | SubgraphPara subgraph:Subgraph caption:String
+               | SubgraphPara subgraph:Subgraph caption:String label:String
                | ProbtablePara probtable:Probtable
                
 data Word = Word word:String
@@ -19,6 +19,7 @@ data Word = Word word:String
 
 data NodeName = NodeName name:String
 -- extra indirection, so NodeName can have structural pres, while name is parsing
+-- for the caption in SubgraphPara we do it the dirty way.
           
 data Graph = Graph dirty:Dirty vertices:[Vertex] edges:[Edge]
 
