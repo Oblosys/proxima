@@ -115,9 +115,27 @@ genSemBasicDecl decls (Decl (LHSBasicType typeNm) prods) =
        
               
 genSemListDecl (Decl (LHSListType typeName) _) = 
-  [ "SEM List_%1"
+  [ "ATTR List_%1 ConsList_%1 [ offset : Int pIdC' : Int sepSigns : {[ImplicitToken]} || ]"
+  , "SEM List_%1 [ idps' : {[IDP]} || ]"
   , "  | List_%1"
-  , "      loc.pres' = (row @elts.press, [], __WT_(elts))"
+  , "      loc.pres' = (@elts.pres, @elts.idps, __WT_(elts))"
+  , "      elts.offset = 0"
+  , "      elts.idps = drop @lhs.offset @lhs.idps'"
+  , "      elts.pIdC' = @lhs.pIdC' + @lhs.offset"
+  , "SEM ConsList_%1 [ | idps : {[IDP]} | pres : Pres ]"
+  , "  | Cons_%1"
+  , "       ((lhs.pres, lhs.idps, (lhs.whitespaceMapCreated, lhs.commentMap), lhs.tokStr), tail.tokStr)"
+  , "                 = mkPres1 [ IncOffsetBy @lhs.offset"
+  , "                           , _O(head)"
+  , "                           , HandleExtraTokens @lhs.sepSigns"
+  , "                           , _O(tail)"
+  , "                           ] @lhs.idps @lhs.pIdC' (@tail.whitespaceMapCreated, @tail.commentMap) @lhs.tokStr"
+  , "                     `addIdps2` @tail.idps"
+  , "       tail.offset = @lhs.offset + 1"
+  , "  | Nil_%1"
+  , "       lhs.pres = empty"
+  , "       lhs.idps = []"
+  , ""
   ] <~ [typeName]
 
 

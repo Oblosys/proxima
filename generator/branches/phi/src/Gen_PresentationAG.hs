@@ -110,29 +110,38 @@ genDataType decls = genBanner "AG data type" $
 
 -- TODO enriched can be treated more uniformly
 genAttr decls = genBanner "Attr declarations" $
- ([ "ATTR %1" -- all types including EnrichedDoc, lists and conslists
-  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs checkedModule : CheckedModule |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : TokenStreamT commentMap : CommentMap' | ]" -- Phi
-  -- , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
+ ([ -- "SET All = EnrichedDoc All_NoEnr"
+  -- , "SET All_NoCons = EnrichedDoc All_NoEnr_NoCons"
+  -- , "SET All_NoEnr = All_NoLists Lists ConsLists"
+  -- , "SET All_NoEnr_NoCons = All_NoLists Lists"
+  -- , "SET Lists_ConsLists = Lists ConsLists"
+    "SET ConsLists = %6"
+  , ""
+  , "SET Lists = %7"
+  , ""
+  , "SET AllTypes = %8"
+  , ""
+  , "ATTR AllTypes Lists ConsLists" -- all types including EnrichedDoc, lists and conslists
+  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs checkedModule : CheckedModule |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : TokenStreamT commentMap : CommentMap' | ]"
   , ""  -- Document is for popups, will be removed in the future
-  , "ATTR %2" -- all types including EnrichedDoc except lists and conslists
-  , "     [ | | pres : Presentation_Doc_Node_Clip_Token noIdps : Int pres' : {(Presentation_Doc_Node_Clip_Token, [IDP], WsMap, TokenStreamT)} ]" -- Phi
-  -- , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
+  , "ATTR AllTypes Lists" -- all types including EnrichedDoc except lists and conslists
+  , "     [ | | pres : Presentation_Doc_Node_Clip_Token noIdps : Int pres' : {(Presentation_Doc_Node_Clip_Token, [IDP], WsMap, TokenStreamT)} ]"
   , ""
   ] ++ if null (removeEnrichedDocDecl (addListDecls decls)) then [] else
-  [ "ATTR %3"  -- all types except EnrichedDoc, including lists and conslists
+  [ "ATTR AllTypes Lists ConsLists - EnrichedDoc"  -- all types except EnrichedDoc, including lists and conslists
   , "     [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]"
   , ""
-  , "ATTR %4" -- all types except EnrichedDoc, including lists
+  , "ATTR AllTypes Lists - EnrichedDoc" -- all types except EnrichedDoc, including lists
   , "     [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
   , ""
   ] ++ if null listTypeNames then [] else
-  [ "ATTR %5" -- all lists and conslists
+  [ "ATTR Lists ConsLists" -- all lists and conslists
   , "     [ || press : {[Presentation_Doc_Node_Clip_Token]} ]"
   , ""
-  , "ATTR %6"  -- all conslists
+  , "ATTR ConsLists"  -- all conslists
   , "     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]"
   , ""
-  , "ATTR %7"  -- all lists, no conslists
+  , "ATTR Lists"  -- all lists, no conslists
   , "     [ | | idps : {[IDP]} ]"
   , ""
   ]) <~ [ separateBy " " $ getAllDeclaredTypeNames (addConsListDecls (addListDecls decls))
@@ -142,6 +151,7 @@ genAttr decls = genBanner "Attr declarations" $
         , separateBy " " $ listNames ++ consListNames
         , separateBy " " $ consListNames
         , separateBy " " $ listNames
+        , separateBy " " $ getAllDeclaredTypeNames decls
         ]
  where listTypeNames = map typeName $ getAllUsedListTypes decls
        listNames = map ("List_"++) listTypeNames
@@ -186,12 +196,13 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
                   | (i,field) <- zip [0..] fields, isDeclaredType decls $ fieldType field 
                   ] -- only generate for AG field types, but do include the others in the index computation
                where addPlus (l:ls) = (l ++ " + @loc.noIdps") : ls -- Phi: [IDP]
-             pres' = [ "__ADMINISTRATE"
-                     ]
-         in {- if not $ null pIdCs 
-            then "  | %1 " <~ [cnstrName] : pIdCs
-            else [] -}
-            "  | %1 " <~ [cnstrName] : map ("      "++) (pIdCs ++ pres')
+             phiSpecifics = [ "__ADMINISTRATE"
+                            , "loc.idps' = @idps"
+                            , "loc.offset = 0"
+                            , "loc.pIdC' = @lhs.pIdC"
+                            , "loc.sepSigns = []"
+                            ]
+         in "  | %1 " <~ [cnstrName] : map ("      "++) (pIdCs ++ phiSpecifics)
               -- this computation goes wrong when there are lists of idps (but it will be obsolete in a future version)
        genSemIxProd (Prod _ cnstrName idpFields fields) =
          let ixs = 
