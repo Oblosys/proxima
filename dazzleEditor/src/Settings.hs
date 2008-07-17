@@ -22,12 +22,13 @@ import Common.CommonTypes
 settings =
   Settings { applicationName = "Dazzle documentation editor"
 
-           , rendererIncrementality = False
-           , arrangerIncrementality = False
+           , rendererIncrementality = True
+           , arrangerIncrementality = True
 
              -- use a smaller rectangle as viewed area to see what happens outside it
            , reducedViewedArea = False            
 
              -- updated parts of the rendering are surrounded by red rectangles
-           , markUpdatedRenderingArea = True
+           , markUpdatedRenderingArea = False
            }
+           

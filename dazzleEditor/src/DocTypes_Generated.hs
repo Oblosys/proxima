@@ -54,19 +54,24 @@ data Subsubsection = Subsubsection String List_Paragraph
                        deriving (Show, Data, Typeable)
 
 data Paragraph = Paragraph List_Word
-               | SubgraphPara Subgraph
+               | SubgraphPara Subgraph String
                | ProbtablePara Probtable
                | HoleParagraph
                | ParseErrParagraph (ParseError Document Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data Word = Word String
-          | NodeRef String
+          | NodeRef NodeName
           | Label String
           | LabelRef String
           | HoleWord
           | ParseErrWord (ParseError Document Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
+
+data NodeName = NodeName String
+              | HoleNodeName
+              | ParseErrNodeName (ParseError Document Node ClipDoc UserToken)
+                  deriving (Show, Data, Typeable)
 
 data Graph = Graph Dirty List_Vertex List_Edge
            | HoleGraph
@@ -239,6 +244,7 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Subsubsection Subsubsection
              | Clip_Paragraph Paragraph
              | Clip_Word Word
+             | Clip_NodeName NodeName
              | Clip_Graph Graph
              | Clip_Vertex Vertex
              | Clip_Shape Shape
@@ -303,6 +309,9 @@ data Node = NoNode
           | Node_LabelRef Word Path
           | Node_HoleWord Word Path
           | Node_ParseErrWord Word Path
+          | Node_NodeName NodeName Path
+          | Node_HoleNodeName NodeName Path
+          | Node_ParseErrNodeName NodeName Path
           | Node_Graph Graph Path
           | Node_HoleGraph Graph Path
           | Node_ParseErrGraph Graph Path
@@ -410,6 +419,9 @@ instance Show Node where
   show (Node_LabelRef _ _) = "Node_LabelRef" 
   show (Node_HoleWord _ _) = "Node_HoleWord" 
   show (Node_ParseErrWord _ _) = "Node_ParseErrWord" 
+  show (Node_NodeName _ _) = "Node_NodeName" 
+  show (Node_HoleNodeName _ _) = "Node_HoleNodeName" 
+  show (Node_ParseErrNodeName _ _) = "Node_ParseErrNodeName" 
   show (Node_Graph _ _) = "Node_Graph" 
   show (Node_HoleGraph _ _) = "Node_HoleGraph" 
   show (Node_ParseErrGraph _ _) = "Node_ParseErrGraph" 

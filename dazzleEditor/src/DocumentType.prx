@@ -9,13 +9,16 @@ data Subsection = Subsection title:String paragraphs:[Paragraph] subsubsections:
 data Subsubsection = Subsubsection title:String paragraphs:[Paragraph]
 
 data Paragraph = Paragraph words:[Word]
-               | SubgraphPara subgraph:Subgraph
+               | SubgraphPara subgraph:Subgraph caption:String
                | ProbtablePara probtable:Probtable
                
 data Word = Word word:String
-          | NodeRef nodeName:String
+          | NodeRef nodeName:NodeName
           | Label label:String
           | LabelRef label:String
+
+data NodeName = NodeName name:String
+-- extra indirection, so NodeName can have structural pres, while name is parsing
           
 data Graph = Graph dirty:Dirty vertices:[Vertex] edges:[Edge]
 

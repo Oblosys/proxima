@@ -61,18 +61,23 @@ DATA Subsubsection
 
 DATA Paragraph
   | Paragraph words:List_Word
-  | SubgraphPara subgraph:Subgraph
+  | SubgraphPara subgraph:Subgraph caption:String
   | ProbtablePara probtable:Probtable
   | HoleParagraph
   | ParseErrParagraph error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Word
   | Word word:String
-  | NodeRef nodeName:String
+  | NodeRef nodeName:NodeName
   | Label label:String
   | LabelRef label:String
   | HoleWord
   | ParseErrWord error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA NodeName
+  | NodeName name:String
+  | HoleNodeName
+  | ParseErrNodeName error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Graph
   | Graph dirty:Dirty vertices:List_Vertex edges:List_Edge
@@ -237,16 +242,16 @@ DATA ConsList_Probability
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge ConsList_Value ConsList_Axis ConsList_Probability
+ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word NodeName Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge ConsList_Value ConsList_Axis ConsList_Probability
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability
+ATTR EnrichedDoc Root Section Subsection Subsubsection Paragraph Word NodeName Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
-ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge ConsList_Value ConsList_Axis ConsList_Probability
+ATTR Root Section Subsection Subsubsection Paragraph Word NodeName Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge ConsList_Value ConsList_Axis ConsList_Probability
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
-ATTR Root Section Subsection Subsubsection Paragraph Word Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability
+ATTR Root Section Subsection Subsubsection Paragraph Word NodeName Graph Vertex Shape Edge Subgraph Dirty Probtable Value Table Axis Probability List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability
      [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Probtable List_Section List_Paragraph List_Subsection List_Subsubsection List_Word List_Vertex List_Edge List_Value List_Axis List_Probability ConsList_Probtable ConsList_Section ConsList_Paragraph ConsList_Subsection ConsList_Subsubsection ConsList_Word ConsList_Vertex ConsList_Edge ConsList_Value ConsList_Axis ConsList_Probability
@@ -403,13 +408,16 @@ SEM Word
   | Word 
       lhs.pIdC = @lhs.pIdC + 0
   | NodeRef 
-      lhs.pIdC = @lhs.pIdC + 0
+      nodeName.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @nodeName.pIdC
+      nodeName.path  = @lhs.path++[0]
   | Label 
       lhs.pIdC = @lhs.pIdC + 0
   | LabelRef 
       lhs.pIdC = @lhs.pIdC + 0
   | Word
   | NodeRef
+    nodeName.ix = 0
   | Label
   | LabelRef
   | Word
@@ -429,6 +437,21 @@ SEM Word
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | ParseErrWord
       lhs.pres = presParseErr (Node_ParseErrWord @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM NodeName
+  | NodeName 
+      lhs.pIdC = @lhs.pIdC + 0
+  | NodeName
+  | NodeName
+      lhs.pres = loc (Node_NodeName @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleNodeName
+      lhs.pres = presHole @lhs.focusD "NodeName" (Node_HoleNodeName @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrNodeName
+      lhs.pres = presParseErr (Node_ParseErrNodeName @self @lhs.path) @error
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
@@ -1049,6 +1072,9 @@ SEM Word
   | Label lhs.path = @lhs.path
   | LabelRef lhs.path = @lhs.path
 
+SEM NodeName
+  | NodeName lhs.path = @lhs.path
+
 SEM Graph
   | Graph lhs.path = @lhs.path
 
@@ -1152,7 +1178,7 @@ SEM Paragraph
   | Paragraph
       lhs.presXML = presentElementXML @lhs.focusD (Node_Paragraph @self @lhs.path) @lhs.path "Paragraph" [ @words.presXML ] 
   | SubgraphPara
-      lhs.presXML = presentElementXML @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presXML, presentPrimXMLString @caption ] 
   | ProbtablePara
       lhs.presXML = presentElementXML @lhs.focusD (Node_ProbtablePara @self @lhs.path) @lhs.path "ProbtablePara" [ @probtable.presXML ] 
   | HoleParagraph     lhs.presXML = presHole @lhs.focusD "Paragraph" (Node_HoleParagraph @self @lhs.path) @lhs.path
@@ -1162,13 +1188,19 @@ SEM Word
   | Word
       lhs.presXML = presentElementXML @lhs.focusD (Node_Word @self @lhs.path) @lhs.path "Word" [ presentPrimXMLString @word ] 
   | NodeRef
-      lhs.presXML = presentElementXML @lhs.focusD (Node_NodeRef @self @lhs.path) @lhs.path "NodeRef" [ presentPrimXMLString @nodeName ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_NodeRef @self @lhs.path) @lhs.path "NodeRef" [ @nodeName.presXML ] 
   | Label
       lhs.presXML = presentElementXML @lhs.focusD (Node_Label @self @lhs.path) @lhs.path "Label" [ presentPrimXMLString @label ] 
   | LabelRef
       lhs.presXML = presentElementXML @lhs.focusD (Node_LabelRef @self @lhs.path) @lhs.path "LabelRef" [ presentPrimXMLString @label ] 
   | HoleWord     lhs.presXML = presHole @lhs.focusD "Word" (Node_HoleWord @self @lhs.path) @lhs.path
   | ParseErrWord lhs.presXML = presParseErr (Node_ParseErrWord @self @lhs.path) @error
+
+SEM NodeName
+  | NodeName
+      lhs.presXML = presentElementXML @lhs.focusD (Node_NodeName @self @lhs.path) @lhs.path "NodeName" [ presentPrimXMLString @name ] 
+  | HoleNodeName     lhs.presXML = presHole @lhs.focusD "NodeName" (Node_HoleNodeName @self @lhs.path) @lhs.path
+  | ParseErrNodeName lhs.presXML = presParseErr (Node_ParseErrNodeName @self @lhs.path) @error
 
 SEM Graph
   | Graph
@@ -1440,7 +1472,7 @@ SEM Paragraph
   | Paragraph
       lhs.presTree = presentElementTree @lhs.focusD (Node_Paragraph @self @lhs.path) @lhs.path "Paragraph" [ @words.presTree ] 
   | SubgraphPara
-      lhs.presTree = presentElementTree @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_SubgraphPara @self @lhs.path) @lhs.path "SubgraphPara" [ @subgraph.presTree, presentPrimXMLString @caption ] 
   | ProbtablePara
       lhs.presTree = presentElementTree @lhs.focusD (Node_ProbtablePara @self @lhs.path) @lhs.path "ProbtablePara" [ @probtable.presTree ] 
   | HoleParagraph     lhs.presTree = presHole @lhs.focusD "Paragraph" (Node_HoleParagraph @self @lhs.path) @lhs.path
@@ -1450,13 +1482,19 @@ SEM Word
   | Word
       lhs.presTree = presentElementTree @lhs.focusD (Node_Word @self @lhs.path) @lhs.path "Word" [ presentPrimXMLString @word ] 
   | NodeRef
-      lhs.presTree = presentElementTree @lhs.focusD (Node_NodeRef @self @lhs.path) @lhs.path "NodeRef" [ presentPrimXMLString @nodeName ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_NodeRef @self @lhs.path) @lhs.path "NodeRef" [ @nodeName.presTree ] 
   | Label
       lhs.presTree = presentElementTree @lhs.focusD (Node_Label @self @lhs.path) @lhs.path "Label" [ presentPrimXMLString @label ] 
   | LabelRef
       lhs.presTree = presentElementTree @lhs.focusD (Node_LabelRef @self @lhs.path) @lhs.path "LabelRef" [ presentPrimXMLString @label ] 
   | HoleWord     lhs.presTree = presHole @lhs.focusD "Word" (Node_HoleWord @self @lhs.path) @lhs.path
   | ParseErrWord lhs.presTree = presParseErr (Node_ParseErrWord @self @lhs.path) @error
+
+SEM NodeName
+  | NodeName
+      lhs.presTree = presentElementTree @lhs.focusD (Node_NodeName @self @lhs.path) @lhs.path "NodeName" [ presentPrimXMLString @name ] 
+  | HoleNodeName     lhs.presTree = presHole @lhs.focusD "NodeName" (Node_HoleNodeName @self @lhs.path) @lhs.path
+  | ParseErrNodeName lhs.presTree = presParseErr (Node_ParseErrNodeName @self @lhs.path) @error
 
 SEM Graph
   | Graph

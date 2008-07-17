@@ -47,6 +47,9 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_LabelRef _ _) = construct_LabelRef
   construct (Node_HoleWord _ _) = construct_HoleWord
   construct (Node_ParseErrWord _ _) = construct_ParseErrWord
+  construct (Node_NodeName _ _) = construct_NodeName
+  construct (Node_HoleNodeName _ _) = construct_HoleNodeName
+  construct (Node_ParseErrNodeName _ _) = construct_ParseErrNodeName
   construct (Node_Graph _ _) = construct_Graph
   construct (Node_HoleGraph _ _) = construct_HoleGraph
   construct (Node_ParseErrGraph _ _) = construct_ParseErrGraph
@@ -134,16 +137,19 @@ construct_Subsubsection tk ~[mClip0,mClip1] = Clip_Subsubsection $ reuseSubsubse
 construct_HoleSubsubsection tk ~[] = Clip_Subsubsection $ hole
 construct_ParseErrSubsubsection (StructuralTk _ _ pres _ _) ~[] = Clip_Subsubsection $ parseErr (StructuralParseErr pres)
 construct_Paragraph tk ~[mClip0] = Clip_Paragraph $ reuseParagraph [tk]  (retrieveArg "Paragraph" "words::List_Word" mClip0)
-construct_SubgraphPara tk ~[mClip0] = Clip_Paragraph $ reuseSubgraphPara [tk]  (retrieveArg "SubgraphPara" "subgraph::Subgraph" mClip0)
+construct_SubgraphPara tk ~[mClip0,mClip1] = Clip_Paragraph $ reuseSubgraphPara [tk]  (retrieveArg "SubgraphPara" "subgraph::Subgraph" mClip0) (retrieveArg "SubgraphPara" "caption::String" mClip1)
 construct_ProbtablePara tk ~[mClip0] = Clip_Paragraph $ reuseProbtablePara [tk]  (retrieveArg "ProbtablePara" "probtable::Probtable" mClip0)
 construct_HoleParagraph tk ~[] = Clip_Paragraph $ hole
 construct_ParseErrParagraph (StructuralTk _ _ pres _ _) ~[] = Clip_Paragraph $ parseErr (StructuralParseErr pres)
 construct_Word tk ~[mClip0] = Clip_Word $ reuseWord [tk]  (retrieveArg "Word" "word::String" mClip0)
-construct_NodeRef tk ~[mClip0] = Clip_Word $ reuseNodeRef [tk]  (retrieveArg "NodeRef" "nodeName::String" mClip0)
+construct_NodeRef tk ~[mClip0] = Clip_Word $ reuseNodeRef [tk]  (retrieveArg "NodeRef" "nodeName::NodeName" mClip0)
 construct_Label tk ~[mClip0] = Clip_Word $ reuseLabel [tk]  (retrieveArg "Label" "label::String" mClip0)
 construct_LabelRef tk ~[mClip0] = Clip_Word $ reuseLabelRef [tk]  (retrieveArg "LabelRef" "label::String" mClip0)
 construct_HoleWord tk ~[] = Clip_Word $ hole
 construct_ParseErrWord (StructuralTk _ _ pres _ _) ~[] = Clip_Word $ parseErr (StructuralParseErr pres)
+construct_NodeName tk ~[mClip0] = Clip_NodeName $ reuseNodeName [tk]  (retrieveArg "NodeName" "name::String" mClip0)
+construct_HoleNodeName tk ~[] = Clip_NodeName $ hole
+construct_ParseErrNodeName (StructuralTk _ _ pres _ _) ~[] = Clip_NodeName $ parseErr (StructuralParseErr pres)
 construct_Graph tk ~[mClip0,mClip1,mClip2] = Clip_Graph $ reuseGraph [tk]  (retrieveArg "Graph" "dirty::Dirty" mClip0) (retrieveArg "Graph" "vertices::List_Vertex" mClip1) (retrieveArg "Graph" "edges::List_Edge" mClip2)
 construct_HoleGraph tk ~[] = Clip_Graph $ hole
 construct_ParseErrGraph (StructuralTk _ _ pres _ _) ~[] = Clip_Graph $ parseErr (StructuralParseErr pres)
@@ -261,10 +267,10 @@ reuseParagraph nodes ma0
            (Paragraph a0) -> genericReuse1 Paragraph a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseParagraph"
 
-reuseSubgraphPara :: [Token doc Node clip token] -> Maybe Subgraph -> Paragraph
-reuseSubgraphPara nodes ma0
+reuseSubgraphPara :: [Token doc Node clip token] -> Maybe Subgraph -> Maybe String -> Paragraph
+reuseSubgraphPara nodes ma0 ma1
   = case extractFromTokens extractSubgraphPara defaultSubgraphPara nodes of
-           (SubgraphPara a0) -> genericReuse1 SubgraphPara a0 ma0
+           (SubgraphPara a0 a1) -> genericReuse2 SubgraphPara a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseSubgraphPara"
 
 reuseProbtablePara :: [Token doc Node clip token] -> Maybe Probtable -> Paragraph
@@ -279,7 +285,7 @@ reuseWord nodes ma0
            (Word a0) -> genericReuse1 Word a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseWord"
 
-reuseNodeRef :: [Token doc Node clip token] -> Maybe String -> Word
+reuseNodeRef :: [Token doc Node clip token] -> Maybe NodeName -> Word
 reuseNodeRef nodes ma0
   = case extractFromTokens extractNodeRef defaultNodeRef nodes of
            (NodeRef a0) -> genericReuse1 NodeRef a0 ma0
@@ -296,6 +302,12 @@ reuseLabelRef nodes ma0
   = case extractFromTokens extractLabelRef defaultLabelRef nodes of
            (LabelRef a0) -> genericReuse1 LabelRef a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseLabelRef"
+
+reuseNodeName :: [Token doc Node clip token] -> Maybe String -> NodeName
+reuseNodeName nodes ma0
+  = case extractFromTokens extractNodeName defaultNodeName nodes of
+           (NodeName a0) -> genericReuse1 NodeName a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseNodeName"
 
 reuseGraph :: [Token doc Node clip token] -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Graph
 reuseGraph nodes ma0 ma1 ma2
@@ -477,7 +489,7 @@ extractParagraph (Just (Node_Paragraph x@(Paragraph _) _)) = Just x
 extractParagraph _ = Nothing
 
 extractSubgraphPara :: Maybe Node -> Maybe Paragraph
-extractSubgraphPara (Just (Node_SubgraphPara x@(SubgraphPara _) _)) = Just x
+extractSubgraphPara (Just (Node_SubgraphPara x@(SubgraphPara _ _) _)) = Just x
 extractSubgraphPara _ = Nothing
 
 extractProbtablePara :: Maybe Node -> Maybe Paragraph
@@ -499,6 +511,10 @@ extractLabel _ = Nothing
 extractLabelRef :: Maybe Node -> Maybe Word
 extractLabelRef (Just (Node_LabelRef x@(LabelRef _) _)) = Just x
 extractLabelRef _ = Nothing
+
+extractNodeName :: Maybe Node -> Maybe NodeName
+extractNodeName (Just (Node_NodeName x@(NodeName _) _)) = Just x
+extractNodeName _ = Nothing
 
 extractGraph :: Maybe Node -> Maybe Graph
 extractGraph (Just (Node_Graph x@(Graph _ _ _) _)) = Just x
@@ -625,7 +641,7 @@ defaultParagraph :: Paragraph
 defaultParagraph = Paragraph hole
 
 defaultSubgraphPara :: Paragraph
-defaultSubgraphPara = SubgraphPara hole
+defaultSubgraphPara = SubgraphPara hole hole
 
 defaultProbtablePara :: Paragraph
 defaultProbtablePara = ProbtablePara hole
@@ -641,6 +657,9 @@ defaultLabel = Label hole
 
 defaultLabelRef :: Word
 defaultLabelRef = LabelRef hole
+
+defaultNodeName :: NodeName
+defaultNodeName = NodeName hole
 
 defaultGraph :: Graph
 defaultGraph = Graph hole hole hole

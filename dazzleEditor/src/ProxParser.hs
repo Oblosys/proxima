@@ -161,13 +161,15 @@ parseParagraph =
   <|> 
           (reuseSubgraphPara [] (Just $ Subgraph Dirty
                                           (List_Vertex Nil_Vertex)
-                                          (List_Edge Nil_Edge))) -- we need a FreshIDD here    
+                                          (List_Edge Nil_Edge)
+                                          ) (Just " ")) -- we need a FreshIDD here    
       <$  pKey "\\graph"
   <|>
       (   pStrAlt Node_SubgraphPara $
-          (\str sg -> reuseSubgraphPara [str] (Just sg))
+          (\str sg caption -> reuseSubgraphPara [str] (Just sg) (Just caption))
       <$> pStructuralTk Node_SubgraphPara
       <*> recognizeSubgraph
+      <*> pPrs pText
       )
   <|>
       (   pStrAlt Node_ProbtablePara $
@@ -182,9 +184,15 @@ parseWord =
       <$> pText
       <*  pList (pKey " ")  
   <|>
-          (\str -> reuseNodeRef [] (Just $ tokenString str))
+          (\str -> reuseNodeRef [] (Just $ NodeName  (tokenString str)))
       <$> pNodeRef
       <*  pList (pKey " ")  
+  <|>
+      (   pStrAlt Node_NodeRef $
+          (\str name -> reuseNodeRef [str] (Just $ NodeName name))
+      <$> pStructuralTk Node_NodeRef
+      <*> pPrs pText
+      )
   <|>
           (\str -> reuseLabel [] (Just $ tokenString str))
       <$> pLabel
@@ -195,6 +203,7 @@ parseWord =
       <*  pList (pKey " ")  
       -- the Scanner produces " " tokens, which are converted to key tokens
       -- split adds a " \n", so maybe we encounter two spaces
+
 
 pLine = 
       (\wrds -> concat wrds)

@@ -227,8 +227,8 @@ replaceSubgraphsSubsubsections sgs (Subsubsection title paras : subsubsections) 
 
 
 replaceSubgraphsParas sgs [] = ([], sgs)
-replaceSubgraphsParas (sg:sgs) (SubgraphPara _ :paras) = let (paras',sgs')= replaceSubgraphsParas sgs paras
-                                                         in  (SubgraphPara sg : paras', sgs') 
+replaceSubgraphsParas (sg:sgs) (SubgraphPara _ cap :paras) = let (paras',sgs')= replaceSubgraphsParas sgs paras
+                                                         in  (SubgraphPara sg cap : paras', sgs') 
 replaceSubgraphsParas sgs      (para:paras)            = let (paras',sgs')= replaceSubgraphsParas sgs paras
                                                          in  (para : paras', sgs')
 replaceSubgraphsParas [] (para:paras)                  = 

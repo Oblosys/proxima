@@ -26,6 +26,7 @@ instance Clip ClipDoc where
   arityClip (Clip_Subsubsection x) = arity x
   arityClip (Clip_Paragraph x) = arity x
   arityClip (Clip_Word x) = arity x
+  arityClip (Clip_NodeName x) = arity x
   arityClip (Clip_Graph x) = arity x
   arityClip (Clip_Vertex x) = arity x
   arityClip (Clip_Shape x) = arity x
@@ -62,6 +63,7 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Subsubsection x) = alternatives x
   alternativesClip (Clip_Paragraph x) = alternatives x
   alternativesClip (Clip_Word x) = alternatives x
+  alternativesClip (Clip_NodeName x) = alternatives x
   alternativesClip (Clip_Graph x) = alternatives x
   alternativesClip (Clip_Vertex x) = alternatives x
   alternativesClip (Clip_Shape x) = alternatives x
@@ -98,6 +100,7 @@ instance Clip ClipDoc where
   holeClip (Clip_Subsubsection x) = Clip_Subsubsection hole
   holeClip (Clip_Paragraph x) = Clip_Paragraph hole
   holeClip (Clip_Word x) = Clip_Word hole
+  holeClip (Clip_NodeName x) = Clip_NodeName hole
   holeClip (Clip_Graph x) = Clip_Graph hole
   holeClip (Clip_Vertex x) = Clip_Vertex hole
   holeClip (Clip_Shape x) = Clip_Shape hole
@@ -134,6 +137,7 @@ instance Clip ClipDoc where
   isListClip (Clip_Subsubsection x) = isList x
   isListClip (Clip_Paragraph x) = isList x
   isListClip (Clip_Word x) = isList x
+  isListClip (Clip_NodeName x) = isList x
   isListClip (Clip_Graph x) = isList x
   isListClip (Clip_Vertex x) = isList x
   isListClip (Clip_Shape x) = isList x
@@ -170,6 +174,7 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Subsubsection x) = insertList i c x
   insertListClip i c (Clip_Paragraph x) = insertList i c x
   insertListClip i c (Clip_Word x) = insertList i c x
+  insertListClip i c (Clip_NodeName x) = insertList i c x
   insertListClip i c (Clip_Graph x) = insertList i c x
   insertListClip i c (Clip_Vertex x) = insertList i c x
   insertListClip i c (Clip_Shape x) = insertList i c x
@@ -206,6 +211,7 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Subsubsection x) = removeList i x
   removeListClip i (Clip_Paragraph x) = removeList i x
   removeListClip i (Clip_Word x) = removeList i x
+  removeListClip i (Clip_NodeName x) = removeList i x
   removeListClip i (Clip_Graph x) = removeList i x
   removeListClip i (Clip_Vertex x) = removeList i x
   removeListClip i (Clip_Shape x) = removeList i x
@@ -451,25 +457,27 @@ instance Editable Subsubsection Document Node ClipDoc UserToken where
 instance Editable Paragraph Document Node ClipDoc UserToken where
   select [] x = Clip_Paragraph x
   select (0:p) (Paragraph x0) = select p x0
-  select (0:p) (SubgraphPara x0) = select p x0
+  select (0:p) (SubgraphPara x0 x1) = select p x0
+  select (1:p) (SubgraphPara x0 x1) = select p x1
   select (0:p) (ProbtablePara x0) = select p x0
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Paragraph c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Paragraph") x
   paste (0:p) c (Paragraph x0) = Paragraph (paste p c x0)
-  paste (0:p) c (SubgraphPara x0) = SubgraphPara (paste p c x0)
+  paste (0:p) c (SubgraphPara x0 x1) = SubgraphPara (paste p c x0) x1
+  paste (1:p) c (SubgraphPara x0 x1) = SubgraphPara x0 (paste p c x1)
   paste (0:p) c (ProbtablePara x0) = ProbtablePara (paste p c x0)
   paste _ _ x = x
 
   alternatives _ = [ ("Paragraph {List_Word} "  , Clip_Paragraph $ Paragraph hole)
-                   , ("SubgraphPara {Subgraph} "  , Clip_Paragraph $ SubgraphPara hole)
+                   , ("SubgraphPara {Subgraph} {String} "  , Clip_Paragraph $ SubgraphPara hole hole)
                    , ("ProbtablePara {Probtable} "  , Clip_Paragraph $ ProbtablePara hole)
                    ,("{Paragraph}", Clip_Paragraph hole)
                    ]
 
   arity (Paragraph x0) = 1
-  arity (SubgraphPara x0) = 1
+  arity (SubgraphPara x0 x1) = 2
   arity (ProbtablePara x0) = 1
   arity _                        = 0
 
@@ -505,7 +513,7 @@ instance Editable Word Document Node ClipDoc UserToken where
   paste _ _ x = x
 
   alternatives _ = [ ("Word {String} "  , Clip_Word $ Word hole)
-                   , ("NodeRef {String} "  , Clip_Word $ NodeRef hole)
+                   , ("NodeRef {NodeName} "  , Clip_Word $ NodeRef hole)
                    , ("Label {String} "  , Clip_Word $ Label hole)
                    , ("LabelRef {String} "  , Clip_Word $ LabelRef hole)
                    ,("{Word}", Clip_Word hole)
@@ -527,6 +535,38 @@ instance Editable Word Document Node ClipDoc UserToken where
   hole = HoleWord
 
   holeNodeConstr = Node_HoleWord
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable NodeName Document Node ClipDoc UserToken where
+  select [] x = Clip_NodeName x
+  select (0:p) (NodeName x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_NodeName c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on NodeName") x
+  paste (0:p) c (NodeName x0) = NodeName (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("NodeName {String} "  , Clip_NodeName $ NodeName hole)
+                   ,("{NodeName}", Clip_NodeName hole)
+                   ]
+
+  arity (NodeName x0) = 1
+  arity _                        = 0
+
+  toClip t = Clip_NodeName t
+
+  fromClip (Clip_NodeName t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrNodeName
+
+  hole = HoleNodeName
+
+  holeNodeConstr = Node_HoleNodeName
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
