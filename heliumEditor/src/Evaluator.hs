@@ -24,7 +24,7 @@ instance EvaluationSheet Document EnrichedDoc ClipDoc where
 evalTypes :: Document -> EnrichedDoc -> EnrichedDoc
 evalTypes doc (RootEnr rootE _) = 
   let (errs, env, tps) = evaluate doc
-  in  debug Eva ("ERRS AND TYPES: "++show errs++show tps) $
+  in  debug Eva ("ERRS AND TYPES: "++show errs++show tps++"\n"++unlines (map show env)) $
       RootEnr rootE (errs, tps, env)
 
 
