@@ -10,6 +10,7 @@ import Presentation.XLatex hiding (bold)
 import Evaluation.DocumentEdit
 
 import List
+
 import qualified Data.Map as Map
 import Data.Map (Map)
 
@@ -112,14 +113,30 @@ SEM RootE
   | RootE
       loc.pres = structural $
                    col [ row [ hSpace 3
-                              , text $ "Document focus: " ++show @lhs.focusD
-                              , text "Focused expression"  `withFontFam` "verdana"
+                              -- , text $ "Document focus: " ++show @lhs.focusD
+                              , case lookup @lhs.focusD @lhs.typeEnv of
+                                  Nothing -> text "Focused expression has no type" `withFontFam` "verdana"
+                                  Just tp -> text "Focused expression"  `withFontFam` "verdana"
                               , typeD NoIDP $ ( case lookup @lhs.focusD @lhs.typeEnv of
-                                                 Nothing -> "no type"
+                                                 Nothing -> ""
                                                  Just tp -> " :: "++tp)
                                                ++ replicate 80 ' '
                                 -- so hline stretches beyond longest line
                               ] `withFontSize` 10
+                      
+                      {-
+                       -- strange bug, uncommenting the first `with .. verdana" causes the presentation of fractions to go wrong.
+                      row [ hSpace 3
+                              -- , text $ "Document focus: " ++show @lhs.focusD
+                              , text "Focused expression " -- `withFontFam` "verdana"
+                              , case lookup @lhs.focusD @lhs.typeEnv of
+                                  Nothing -> text $ " has no type" ++ replicate 80 ' '
+                                  Just tp -> typeD NoIDP $ " :: "++tp ++ replicate 80 ' '
+                                               
+                                -- so hline stretches beyond longest line
+                              ] `withFontSize` 10 
+                       , 
+                      -}
                        , row [ hSpace 3
                              , row[ text "Top level identifiers: " `withFontFam` "verdana", @idListDecls.idsPres] `withFontSize` 10
                       --        , row[ text "Top level identifiers disabled" `withFontFam` "verdana"] `withFontSize` 10
@@ -144,10 +161,8 @@ SEM RootE
                        , hLine
                        , vSpace 4
                        , text "Variables in scope:" `withFont'` ("verdana",10)
-                       , let tweakPath (PathD []) = PathD []
-                             tweakPath (PathD pth) = PathD $ if last pth == 2 then init pth ++ [3] else pth
-                         in  col [ typeD NoIDP (var++" :: "++ maybe "" id (lookup (tweakPath pth) @lhs.typeEnv) ++":" ++ show pth) `link` pth
-                                | (var,(pth,tpStr)) <- Map.toList @decls.varsInScopeAtFocus ]
+                       , col [ typeD NoIDP (var++" :: "++ tpStr) `link` pth
+                             | (var,(pth,tpStr)) <- Map.toList @decls.varsInScopeAtFocus ]
 
                        ]
                      `withFont'` ("Courier New",14)
@@ -516,17 +531,28 @@ SEM EnrichedDoc [ | | ]
   | RootEnr
 --            lhs.whitespaceMap = @lhs.whitespaceMap -- no auto layout
 
+{- Simple whitespace calculation that only puts newline after generated type sig
+-- can be used instead of complex calculation below (which allows auto-layout)
 SEM Decl
   | Decl    lhs.whitespaceMap = 
               if @idP2 == NoIDP && @lhs.level == 0 
               then debug Prs ("Inserting:"++show (mkIDP @idP2 @lhs.pIdC 2)) $
-                      Map.insert (mkIDP @idP2 @lhs.pIdC 2) (TokenLayout (1,0) (Nothing,Nothing) (Nothing,Nothing)) @lhs.whitespaceMap
+                      updateLayout (mkIDP @idP2 @lhs.pIdC 2) (1,0) @lhs.whitespaceMap
               else @lhs.whitespaceMap
+-}
+{
+updateLayoutList :: [(IDP,Whitespace)] -> WhitespaceMap -> WhitespaceMap
+updateLayoutList xs wm = foldr (uncurry updateLayout) wm xs 
+
+updateLayout :: IDP -> Whitespace -> WhitespaceMap -> WhitespaceMap
+updateLayout idp ws whitespaceMap = 
+  Map.insertWith (updateWhitespace ws) idp freshLayout whitespaceMap
+ where updateWhitespace ws _ layout = layout { whitespace = ws }  
+       freshLayout = TokenLayout ws (Nothing, Nothing) (Nothing, Nothing)
+
+}
 
 
--- old auto layout has been disabled. It will become somewhat more complex now that the scanner also records
--- the focus
-{-
 
 {-
 CREATION OF NEW PRES ELTS:
@@ -536,7 +562,8 @@ and on parsing, the doc->pres mapping will be set correctly
 
 -- merge the counters
 
-ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt [ | newlines, spaces, col : Int | ]
+ATTR List_Decl ConsList_Decl Decl Ident Exp List_Exp ConsList_Exp List_Alt ConsList_Alt Alt 
+     [ newlines, spaces : Int | col : Int | ]
 
 
 SEM RootE
@@ -548,93 +575,106 @@ SEM RootE
             decls.spaces = 0
             lhs.whitespaceMap = @decls.whitespaceMap
 
-
 -- to get good type sig layout behaviour, layout must be fixed when sig appears for the first time,
 -- as well as when a sig has disappeared (last one might be tricky to detect).
---SEM Decls
- -- | ConsDecls decl.col = @lhs.col
---              decls.col = @lhs.col
+ATTR Decl [ isLast : Bool | | ]
+
+SEM ConsList_Decl [ | | isNil : Bool ]
+  | Nil_Decl  lhs.isNil = True
+  | Cons_Decl lhs.isNil = False
+              head.isLast = @tail.isNil
+  
 SEM Decl -- nested decls do produce auto layout, so top level decl can determine whether to use it.
 
-{- condition seems weird, why take autolayout if level /=0? because at top-level
-   lhs.whitespaceMap is used anyway when autolayout == False?
--}   
+-- condition seems weird, why take autolayout if level /=0? because at top-level
+-- lhs.whitespaceMap is used anyway when autolayout == False?
+--   
   | Decl    lhs.whitespaceMap = let lm = if @autoLayout || @lhs.level /= 0 then @exp.whitespaceMap else @lhs.whitespaceMap
-                              in if @idP2 /= NoIDP || @lhs.level /= 0 then lm
-                                 else debug Prs ("Inserting:"++show (mkIDP @idP2 @lhs.pIdC 2)) $ Map.insert (mkIDP @idP2 @lhs.pIdC 2) (0,1) lm
+                                in if @idP2 /= NoIDP || @lhs.level /= 0 then lm
+                                 else debug Prs ("Inserting:"++show (mkIDP @idP2 @lhs.pIdC 2)) $
+                                      updateLayout (mkIDP @idP2 @lhs.pIdC 2) (1,0) lm
 
-               -- the whitespace from the first token is used to create whitespace for the type sig
-
-            ident.whitespaceMap = mapInsertList [(@idP0, (0,1)), (@idP1, (0,0))] @lhs.whitespaceMap
+        
+            ident.whitespaceMap = updateLayoutList ([(@idP0, (0,1))
+                                                   ]
+                                                   ++
+                                                   -- on top level, don't change layout after ';'
+                                                   if @lhs.level /= 0 
+                                                   then [ (@idP1, 
+                                                            (@lhs.newlines,
+                                                            @lhs.spaces -
+                                                            -- trailing spaces of last decl are 4 less because of "in  "
+                                                            if @lhs.isLast then 4 else 0
+                                                            )) ]
+                                                   
+                                                   
+                                                   else []
+                                                   ) @lhs.whitespaceMap
             ident.col       = @lhs.col
-            ident.newlines  = @lhs.newlines
-            ident.spaces    = @lhs.spaces
+            ident.newlines  = 0
+            ident.spaces    = 1
             exp.col = @ident.col+2+1 -- " = "
             exp.newlines = 0
-            exp.spaces = 1
+            exp.spaces = 0
             lhs.col = @lhs.col
-            lhs.newlines = 1
-            lhs.spaces = @lhs.col
 
-SEM Ident [ | | firstToken : IDP ]
-  | Ident  lhs.whitespaceMap = Map.insert @idP0 (@lhs.newlines,@lhs.spaces) @lhs.whitespaceMap
+SEM Ident [ | | ]
+  | Ident  lhs.whitespaceMap = updateLayout @idP0 (@lhs.newlines,@lhs.spaces) @lhs.whitespaceMap
            lhs.col = @lhs.col+ length @string
-           lhs.firstToken = @idP0
-  | ParseErrIdent
-           lhs.firstToken = NoIDP
-  | HoleIdent
-           lhs.firstToken = NoIDP
 
 -- put layout for tokens in front of whitespaceMap and pass on to left child, or parent (chain)
 -- assign correct col's for children, possibly using synthesized col's from children
 -- assign (or add) whitespace to newlines and spaces attrs, which will be set to first token in chain
 
 SEM Exp
-  | PlusExp exp1.whitespaceMap = Map.insert @idP0 (0,1) @lhs.whitespaceMap
+  | PlusExp exp1.whitespaceMap = updateLayout @idP0 (0,1) @lhs.whitespaceMap
             exp1.col = @lhs.col
             exp2.col = @exp1.col + 3
-            exp2.newlines = 0
-            exp2.spaces = 1
+            exp1.newlines = 0
+            exp1.spaces = 1
+            -- exp2 newlines and spaces are copied inherited
             lhs.col = @exp2.col
-  | TimesExp exp1.whitespaceMap = Map.insert @idP0 (0,1) @lhs.whitespaceMap
+  | TimesExp exp1.whitespaceMap = updateLayout @idP0 (0,1) @lhs.whitespaceMap
             exp1.col = @lhs.col
             exp2.col = @exp1.col + 3
-            exp2.newlines = 0
-            exp2.spaces = 1
+            exp1.newlines = 0
+            exp1.spaces = 1
             lhs.col = @exp2.col
-  | DivExp exp1.whitespaceMap = Map.insert @idP0 (0,0) @lhs.whitespaceMap
+  | DivExp exp1.whitespaceMap = updateLayout @idP0 (@lhs.newlines,@lhs.spaces) @lhs.whitespaceMap
             exp1.col = 0
             exp1.newlines = 0
             exp1.spaces = 0
             exp2.col = 0
             exp2.newlines = 0
             exp2.spaces = 0
-            lhs.col = @exp1.col
-  | PowerExp exp1.whitespaceMap = Map.insert @idP0 (0,0) @lhs.whitespaceMap
-            exp1.col = @lhs.col
+            lhs.col = @lhs.col + (@exp1.col `max` @exp2.col) -- does not take into account smaller font
+  | PowerExp exp1.whitespaceMap = updateLayout @idP0 (@lhs.newlines,@lhs.spaces) @lhs.whitespaceMap
+            exp1.col = 0
+            exp1.newlines = 0
+            exp1.spaces = 0
             exp2.col = 0
             exp2.newlines = 0
             exp2.spaces = 0
-            lhs.col = @exp2.col
-  | IntExp lhs.whitespaceMap = Map.insert @idP0 (@lhs.newlines,@lhs.spaces) @lhs.whitespaceMap
+            lhs.col = @lhs.col + @exp1.col + @exp2.col -- does not take into account smaller font
+  | IntExp lhs.whitespaceMap = updateLayout @idP0 (@lhs.newlines,@lhs.spaces) @lhs.whitespaceMap
            lhs.col = @lhs.col+length (show @int)
-  | BoolExp lhs.whitespaceMap = Map.insert @idP0 (@lhs.newlines,@lhs.spaces) @lhs.whitespaceMap
-  | LamExp  ident.whitespaceMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+  | BoolExp lhs.whitespaceMap = updateLayout @idP0 (@lhs.newlines,@lhs.spaces) @lhs.whitespaceMap
+  | LamExp  ident.whitespaceMap = updateLayoutList [ (@idP0, (0,0))
                                             , (@idP1, (0,1)) ]
                                             @lhs.whitespaceMap
             ident.col = @lhs.col + 1 -- "\"
             ident.newlines = 0
-            ident.spaces = 0
+            ident.spaces = 1
             exp.col = @ident.col + 3 --       "\arrow"  4 --" -> "
             exp.newlines = 0
-            exp.spaces = 1
+            exp.spaces = 0
             lhs.col = @exp.col
   | AppExp  exp1.whitespaceMap = @lhs.whitespaceMap
             exp2.col = @exp1.col+1  --" "
-            exp2.newlines = 0
-            exp2.spaces = 1
-            lhs.col = @lhs.col
-  | CaseExp exp.whitespaceMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+            exp1.newlines = @lhs.newlines
+            exp1.spaces = @lhs.spaces
+            lhs.col = @exp2.col
+  | CaseExp exp.whitespaceMap = updateLayoutList [ (@idP0, (@lhs.newlines,@lhs.spaces))
                                           , (@idP1, (0,1)) ]
                                           @lhs.whitespaceMap
             exp.col = @lhs.col + 5 -- "case "
@@ -645,17 +685,18 @@ SEM Exp
             alts.spaces = @lhs.col + 2
             lhs.col = @alts.col
             alts.totalMaxLHSLength = @alts.maxLHSLength
-  | LetExp  decls.whitespaceMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                                            , (@idP1, (1,@lhs.col))]
+  | LetExp  decls.whitespaceMap = updateLayoutList [ (@idP0, (0,1))
+                                            , (@idP1, (0,2))]
                                             @lhs.whitespaceMap
           decls.col = @lhs.col + 3+1 -- "let "
           exp.col = @lhs.col + 3+1 --   "in   "
-          decls.newlines = 0
-          decls.spaces = 1
-          exp.newlines = 0
-          exp.spaces = 2
- -- | IdentExp                    Chained
-  | IfExp  exp1.whitespaceMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
+          decls.newlines = 1
+          decls.spaces = @lhs.col + 3 + 1
+          exp.newlines = @lhs.newlines
+          exp.spaces = @lhs.spaces
+ -- | IdentExp                    has no tokens, so attrs are chained
+--
+  | IfExp  exp1.whitespaceMap = updateLayoutList [ (@idP0, (@lhs.newlines,@lhs.spaces))
                                           , (@idP1, (1,@lhs.col))
                                           , (@idP2, (1,@lhs.col)) ]
                                           @lhs.whitespaceMap
@@ -668,33 +709,29 @@ SEM Exp
           exp2.spaces = 1
           exp3.newlines = 0
           exp3.spaces = 1
-  | ParenExp exp.whitespaceMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                                           , (@idP1, (0,1)) ]
+  | ParenExp exp.whitespaceMap = updateLayoutList [ (@idP0, (0,0))
+                                           , (@idP1, (@lhs.newlines,@lhs.spaces)) ]
                                            @lhs.whitespaceMap
-             exp.col = @lhs.col + 1+1 -- "( "
+             exp.col = @lhs.col + 1 -- "("
              exp.newlines = 0
-             exp.spaces = 1
-             lhs.col = @exp.col + 1+1 --" )"
-             lhs.newlines = 0
-             lhs.spaces = 0
-  | ListExp exps.whitespaceMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                                           , (@idP1, (0,1)) ]
+             exp.spaces = 0
+             lhs.col = @exp.col + 1 --")"
+  | ListExp exps.whitespaceMap = updateLayoutList 
+                                   ([ (@idP0, (0,1))
+                                    , (@idP1, (@lhs.newlines,@lhs.spaces)) ]
+                                   ++ [ (idp, (0,1)) | idp <- @ids] )
                                            @lhs.whitespaceMap
             exps.col = @lhs.col + 1+1 -- "[ "
             exps.newlines = 0
             exps.spaces = 1
             lhs.col = @exps.col + 1+1 --" ]"
-            lhs.newlines = 0
-            lhs.spaces = 0
-  | ProductExp exps.whitespaceMap = mapInsertList [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                                              , (@idP1, (0,1)) ]
+  | ProductExp exps.whitespaceMap = updateLayoutList [ (@idP0, (0,1))
+                                              , (@idP1, (@lhs.newlines,@lhs.spaces)) ]
                                               @lhs.whitespaceMap
             exps.col = @lhs.col + 1+1 -- "( "
             exps.newlines = 0
             exps.spaces = 1
             lhs.col = @exps.col + 1+1 --" )"
-            lhs.newlines = 0
-            lhs.spaces = 0
 
 SEM ConsList_Exp -- all exps get same (newlines, spaces)
   | Cons_Exp
@@ -702,7 +739,7 @@ SEM ConsList_Exp -- all exps get same (newlines, spaces)
 
 -- alts compute a maximum lefthand side length, which is sent back down at the case node.
 SEM Alt [ totalMaxLHSLength : Int | | lhsLength : Int ]
-  | Alt     ident.whitespaceMap = mapInsertList [(@idP0, (0,@lhs.totalMaxLHSLength - @lhsLength+1)), (@idP1, (0,0))] @lhs.whitespaceMap
+  | Alt     ident.whitespaceMap = updateLayoutList [(@idP0, (0,@lhs.totalMaxLHSLength - @lhsLength+1)), (@idP1, (0,0))] @lhs.whitespaceMap
             ident.col       = @lhs.col
             ident.newlines  = @lhs.newlines
             ident.spaces    = @lhs.spaces
@@ -729,7 +766,9 @@ SEM ConsList_Alt [ totalMaxLHSLength : Int | | maxLHSLength : Int ]
         lhs.maxLHSLength = @head.lhsLength `max` @tail.maxLHSLength
     | Nil_Alt
         lhs.maxLHSLength = 0
--}
+
+
+
 
 --------------------------------------------------------------
 --
