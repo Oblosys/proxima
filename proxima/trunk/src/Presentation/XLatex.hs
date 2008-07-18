@@ -130,7 +130,8 @@ presType :: String -> Xprez doc node clip token
 presType tpStr = row $ intersperse rightArrow (map text (splitAtArrows "" tpStr))
 
 rightArrow :: Xprez doc node clip token
-rightArrow = text  "\174" `withFontFam` "symbol"
+rightArrow = text "->" -- text  "\174" `withFontFam` "Symbol"
+ -- Symbol font does not seem to load with Gtk2hs, maybe migration to Cairo will solve this
 
 
 splitAtArrows :: String -> String -> [String]
