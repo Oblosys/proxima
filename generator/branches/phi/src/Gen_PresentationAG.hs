@@ -56,6 +56,7 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "                           , whitespaceMap_Inh_EnrichedDoc = whitespaceMap"
   , "                           , whitespaceMapCreated_Inh_EnrichedDoc = initLayout"
   , "                           , commentMap_Inh_EnrichedDoc = commentMap"
+  , "                           , commentMapCreated_Inh_EnrichedDoc = Map.empty"
   , "                           })"
   , "  in  (whitespaceMap', pIdC', pres, self)"
   , ""
@@ -74,7 +75,7 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "modifiedTree enrichedDoc = "
   , "  let (Syn_EnrichedDoc { self_Syn_EnrichedDoc = self"
   , "                       , whitespaceMapCreated_Syn_EnrichedDoc = whitespaceMap2'"
-  , "                       , commentMap_Syn_EnrichedDoc = commentMap'"
+  , "                       , commentMapCreated_Syn_EnrichedDoc = commentMap'"
   , "                       }) ="
   , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc)"
   , "          (Inh_EnrichedDoc { checkedModule_Inh_EnrichedDoc = undefined"
@@ -87,6 +88,7 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "                           , whitespaceMap_Inh_EnrichedDoc = initLayout"
   , "                           , whitespaceMapCreated_Inh_EnrichedDoc = initLayout"
   , "                           , commentMap_Inh_EnrichedDoc = Map.empty"
+  , "                           , commentMapCreated_Inh_EnrichedDoc = Map.empty"
   , "                           })"
   , "   in (self, whitespaceMap2', commentMap')"
   , ""
@@ -122,7 +124,7 @@ genAttr decls = genBanner "Attr declarations" $
   , "SET AllTypes = %8"
   , ""
   , "ATTR AllTypes Lists ConsLists" -- all types including EnrichedDoc, lists and conslists
-  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs checkedModule : CheckedModule |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : TokenStreamT commentMap : CommentMap' | ]"
+  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs checkedModule : CheckedModule |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : TokenStreamT commentMapCreated : CommentMap' commentMap : CommentMap' | ]"
   , ""  -- Document is for popups, will be removed in the future
   , "ATTR AllTypes Lists" -- all types including EnrichedDoc except lists and conslists
   , "     [ | | pres : Presentation_Doc_Node_Clip_Token noIdps : Int pres' : {(Presentation_Doc_Node_Clip_Token, [IDP], WsMap, TokenStreamT)} ]"
