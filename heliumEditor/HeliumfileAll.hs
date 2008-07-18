@@ -13,13 +13,13 @@ Inv: inv myddId ( []+> "hallo")
 
 list = [ 1+2, 27, 3*5 ];
 
-large = \ x -> \ y -> \ z -> x+y+z+1;
+large = \x -> \y -> \z -> x+y+z+1;
 
-x = f 3;
+s = \f -> \g -> \x -> f x (g x);
 
-s = \ f -> \ g -> \ x -> f x (g x);
+f = \x -> x^2+2*x+(3+x)*(2+x)*1%(x+1)^2;
 
-f = \ x -> x^2+2*x+(3+x)*(2+x)*1%(x+1)^2;
+c = f 3;
 
 
 
