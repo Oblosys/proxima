@@ -22,12 +22,12 @@ import Common.CommonTypes
 settings =
   Settings { applicationName = "Helium editor"
 
-           , rendererIncrementality = False
+           , rendererIncrementality = True
            , arrangerIncrementality = False
 
              -- use a smaller rectangle as viewed area to see what happens outside it
-           , reducedViewedArea = False            
+           , reducedViewedArea = False           
 
              -- updated parts of the rendering are surrounded by red rectangles
-           , markUpdatedRenderingArea = True
+           , markUpdatedRenderingArea = False
            }
