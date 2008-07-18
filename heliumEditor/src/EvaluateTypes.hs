@@ -9,6 +9,7 @@ import Common.CommonTypes
 import Common.DebugLevels
 import System.IO.Unsafe -- evaluate has IO, so the unsafePerformIO is only temporary
 import Char
+import Maybe
 import qualified Data.Map as Map
 
 import Evaluation.DocumentEdit
@@ -211,10 +212,14 @@ henk2 mod =
                             ; return errs
                             } of
     Left errs -> debug Prs (show (map showMessage errs)) (map hErrFromErr errs, [], [])
-    Right (types,typeEnv) ->
-      let typeEnv'  =[ (pathFromRange r, show t) | (r,t)<- typeEnv ]
+    Right (types,typeEnvRange) ->
+      let typeEnv  =[ (pathFromRange r, show t) | (r,t)<- typeEnvRange ]
+          lhsTypeEnv = [ (PathD (init pth ++ [2]), t)
+                       | (PathD (pth@(_:_)),t) <- typeEnv
+                       , last pth == 3 && isNothing (lookup (PathD $ init pth ++ [2]) typeEnv)
+                       ]
           toplvlEnv = [ (getNameName nm,show tp) | (nm,tp) <- Map.toList types ]
-      in  ( [], typeEnv', toplvlEnv )
+      in  ( [], typeEnv++lhsTypeEnv, toplvlEnv )
 
 
 hErrFromErr = either hErrFromStaticErr hErrFromTypeErr
