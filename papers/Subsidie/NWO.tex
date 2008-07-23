@@ -1,0 +1,230 @@
+\documentclass[10pt]{article}
+
+\usepackage{../Utils}
+\usepackage{eurosym}
+\bc
+
+Web-based editing
+
+vb google docs, wikipedia.
+
+Web 2.0 requires editing. Examples wikipedia (more). Enter formula is just text. More interesting editors are desireable.
+
+
+
+
+
+
+Proxima generic editor is system that can be used to create editors. Can be easily extended to run server-based with a light client.
+
+Internet connections no longer slow and haperend. e-mail clients now have ajax interfaces. More small terminals (phones etc.) Time is ripe to make server based editors. Allowing advanced editing on these machines.
+
+
+VNC shows that it works. Latency is a problem. will get better, and also Proxima can do much better than that.
+
+minimale communicatie, minimale client belasting
+  snelheid
+  batterij
+
+
+
+
+
+
+
+Introduction to generic editing, and Proxima's layered architecture. Proxima used to be server based.
+
+**** Proxima
+
+Description of the Proxima architecture and basic layers (take from paper)
+
+Web based version is basically swapping the lower layer to render to command strings and changing the GUI to a HTTP server. Then add a light client to render and capture events.
+
+The challenge however is rather than send entire screens over the net, to only send a minimal update on a key press or mouse event. We need incrementality. 
+
+**** Incrementality
+
+to make it faster, we need incremental behavior
+
+**** Other kinds of editors
+
+examples
+
+**** Research questions
+
+Summarizing, we can identify the following research questions.
+
+Research questions:
+  incrementality in presentation system. Incremental ag evaluation, incremental presentation.
+  
+  lot of work done, but we have a specific situation. maybe anotations(automatically inferred)
+  
+  incremental parsing
+  
+  related to that parsing two dimensional structures in incremental way.
+
+  handling absence of network connection. 
+
+
+
+
+
+
+
+More complicated editors. Pipes (Mashup?). Full visual parsing is tricky, but with incrementality, we can do better. Also parsing math, and parsing word-processor text (italic, bold, colors, etc.)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lambert:
+1 iets waar ze geld aan willen geven
+
+  - hier zit de wereld op te wachten
+  - tijd is rijp, computers snel genoeg
+  - we hebben speelgoed ding
+  
+  
+2 hoe gaan we het bereiken.
+
+Web pagina aanpassen.
+
+\ec
+
+
+
+\title{}
+\author{}
+\date{}
+\begin{document}
+\maketitle
+
+
+\section{Project Title, Acronym, Principal Investigator}
+%% 1
+
+\subsection{Project Title}
+Multi-user editing in a structured document editor
+
+\subsection{Project Acronym}
+Proxima
+
+\subsection{Principal Investigator}
+Dr.~M.\,M.~Schrage
+
+\subsection{Renewed Application}
+
+This is not a renewed application.
+
+%% 2
+\section{Summaries}
+
+\subsection{Summary}
+
+\subsection{Samenvatting}
+
+
+%% 3
+\section{Classification: science field and discipline}
+
+\noindent Computer Science:
+NOAG-ict theme 3.7: Methods for design and development, main discipline
+Programming Languages, and subsidiary disciplines Software Engineering and
+Algorithms and Computation Theory.
+
+%% 4
+\section{Composition of the Research Group}
+
+\begin{tabular}{l||l||p{0.7cm}||l||p{2.5cm}}
+name & position & hours p/w & affiliation & expertise \\ \hline
+dr.~M.\,M.~Schrage & ? & 32 & UU &  \\
+prof.\,dr.~S.\,D.~Swierstra & ? & 1 &  UU & PL, CC, FP, TC \\
+\end{tabular}\\
+$\mbox{}$\\
+where FP is Functional Programming, PL is Programming Languages, PA is Program Analysis,
+CC is Compiler Construction, AL is algorithms, and TC is Tool Construction.
+
+% 5
+\section{Research School}
+The proposed research will be carried out in the Software Technology
+area of the IPA research school (Instituut voor Programmatuurkunde en Algoritmiek).
+
+%% 6   Max. 3500 words for 6,7 & 8
+\section*{6a~~Description of the Proposed Research}
+\addtocounter{section}{1}
+
+
+%wetenschappelijke vraagstelling en de beoogde onderzoeksresultaten;
+
+%onderzoeksaanpak en –methodologie;
+
+%wetenschappelijk belang en urgentie van het voorgestelde onderzoek;
+
+%verhouding van het voorgestelde onderzoek tot overeenkomstig onderzoek dat elders verricht wordt;
+
+%inpassing van het voorgestelde onderzoek in het lopende onderzoek van de groep(en) waarin de aan te trekken projectmedewerker werkzaam zal zijn.
+
+Proxima~\cite{schrage04Proxima}.
+
+\section*{6b~~Application perspective}
+
+% 7
+\section{Planning}
+
+%%8
+\section{Expected use of Instrumentation}
+
+Not applicable.
+
+%% 9
+\section*{Literature}
+
+\bibliographystyle{plain}
+\bibliography{../proxima}
+
+
+\noindent At most five references to work done by members of the research team, ordered chronologically:
+
+\renewcommand\refname{The 5 key publications of the research team}
+
+\begin{thebibliography}{10}
+
+\bibitem{schrage04Proxima}
+Martijn~M. Schrage.
+\newblock {\em Proxima -- a presentation-oriented editor for structured
+  documents}.
+\newblock PhD thesis, Utrecht University, The Netherlands, Oct 2004.
+
+\end{thebibliography}
+
+
+%% 10
+\section{Requested Budget}
+
+We are applying for the total of one postdoc (1,0 fte) for three years.\\
+
+\noindent(1) PhD student, postdoc or other personnel\\
+\begin{tabular}{lll}
+a) appointment   &   1,0 x \euro 174.911 & = \euro 174.911  \\
+b) personal benchfee & 1,0 x \euro 5.000 & = \euro 5.000 \\
+c) additional travelling budget & &  = \euro 0.0 \\
+d) project related apparatus/software & & = \underline{\euro 0.0 ~~~~+}\\
+Subtotal PhD student, postdoc or other personnel & & = \euro 179.911
+\end{tabular}\\
+
+\noindent(2) Investments
+
+\noindent Not applicable.
+
+\end{document}
+
