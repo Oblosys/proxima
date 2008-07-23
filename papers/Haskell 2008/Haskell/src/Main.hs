@@ -39,7 +39,7 @@ editLoop present doc =
     ; editLoop present' doc'
     }
 -}
-main = undefined -- Magic.main layer0 layer1 layer2 -- combineTest
+main = Magic.combineTest  -- Magic.main layer0 layer1 layer2 -- combineTest
 {-
  do { (state0, state1, state2) <- initStates
     ; doc <- initDoc 

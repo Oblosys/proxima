@@ -262,7 +262,7 @@ combineTest =
     --; let (pres , Comp (DownStep interpretStep)) = presentStep $ doc
     ; let (pres :: Rendering , compInterpretStep) = presentStep $ doc
     ; let interpretStep = unCompStep compInterpretStep
-    ; print pres
+--    ; print pres
     ; gesture <- getGesture
 --    ; let gesture = "Gest"
     

@@ -263,20 +263,20 @@ combineTest =
     
     ; let layers =                lift layer0 state0 
                    `genericCombine` lift layer1 state1
-                   `genericCombine` lift layer2 state2
-                   :: Layer2 Document Rendering EditRendering EditDocument
+       --            :: Layer2 Document Arrangement EditArrangement EditDocument
+       --            `genericCombine` lift layer2 state2
+                   -- :: Layer2 Document Rendering EditRendering EditDocument
                    -- :: Layer2 String String String String
     ; let (Fix (compPresentStep)) = layers
     ; let (Comp (Step presentStep)) = compPresentStep
     ; let (pres , Comp (Step interpretStep)) = presentStep $ doc
-    ; let interpretStep = interpretStep
     ; print pres
     ; gesture <- getGesture
 --    ; let gesture = "Gest"
     
-    ; let (update::EditDocument, next) = interpretStep $ gesture
+    ; let (update, next) = interpretStep $ (undefined :: EditArrangement)
     
---    ; print update
+    ; print update
     ; return ()
     } 
 

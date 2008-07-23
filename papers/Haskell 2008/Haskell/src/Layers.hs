@@ -37,10 +37,10 @@ data State0
 data State1
 data State2
 
-data EditDocument
-data EditPresentation
-data EditArrangement
-data EditRendering
+data EditDocument = EditDocument deriving Show
+data EditPresentation = EditPresentation deriving Show
+data EditArrangement = EditArrangement deriving Show
+data EditRendering = EditRendering deriving Show
 
 
 data Gesture
