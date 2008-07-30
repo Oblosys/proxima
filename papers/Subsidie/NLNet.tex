@@ -1,46 +1,35 @@
 \documentclass[10pt]{article}
 
+\addtolength{\textwidth}{1in}    
+\addtolength{\hoffset}{-0.5in}
+%\addtolength{\textheight}{cin}
+%\addtolength{\voffset}{-cin}
+
+
 \usepackage{../Utils}
 \usepackage{eurosym}
 \bc
-Internet connections no longer slow and haperend. e-mail clients now have ajax interfaces. More small terminals (phones etc.) Time is ripe to make server based editors. Allowing advanced editing on these machines.
 
+Mention open source
 
-VNC shows that it works. Latency is a problem. will get better, and also Proxima can do much better than that.
-
-
-
-Ajax front end for Proxima
-
-
-Proxima's layered architecture makes it relatively easy to change the front end. In fact, a previous version made use of a stand-alone renderer that communicated through a socket. Incrementality takes care that minimal updates are sent to the renderer.
-
-Two components change: the renderer and the GUI module that is the current event loop.
-
-The renderer will be modified to produce XML strings instead of rendering commands. 
-
-The GUI event loop will become a HTTP server that takes requests (edit gestures) lets Proxima handle these and sends the resulting XML from the rendering back to the client.
-
-Apart from this, we need an Ajax front-end in Java script. It should render the XML commands received from Proxima, and capture user edit gestures.
-
-
-Links:
-
-graphical elements:
-http://www.walterzorn.com/jsgraphics/jsgraphics_e.htm
-
-key events:
-http://unixpapa.com/js/key.html
-
-mouse events:
-http://javascript.internet.com/page-details/mouse-coordinates.html
-http://unixpapa.com/js/testmouse.html
 
 Open questions:
 
 Where is the source located? What happens to images? Efficiency of client when many strings are present?
 
 Need to encode rendering? 
+\ec
+
+
+\bc
+Which parts of the project will NLnet's contribution be used for:
+
+The NLnet contribution will be used to realize the web-based client-server version of Proxima. Furthermore, a number of novel editors will be 
+
+
+Compare your own project with existing projects; what's new and original?
+
+
 \ec
 
 
@@ -62,10 +51,13 @@ Need to encode rendering?
 
 \ec
 
+\setlength{\parskip}{\baselineskip}
+\addtolength{\topsep}{-\baselineskip}
+\setlength{\parindent}{0em}
 
 
-\title{Web-based generic editing}
-\author{dr. Martijn M. Schrage}
+\title{A generic editor for Web 2.0}
+\author{dr Martijn M. Schrage}
 \date{\version}
 \begin{document}
 \maketitle
@@ -73,18 +65,60 @@ Need to encode rendering?
 \section{Introduction}
 %    * Introduction --short description of the project and goals;
 
-Web 2.0 is advancing. users edit pages. Text only. Wikipedia (more examples) Formula is plain text. Wysiwyg editing is interesting. Ajax, DHTML and Flash make it possible to create them (eg. Yahoo pipes), but difficult to build them.
 
-Moreover, editors put a burden on the client. Clients are getting smaller, and internet is getting more stable. So it makes sense to take the editing away from the local device and make a server based editor. VNC shows this to be possible.
+\todo{online quiz}
+\todo{doaitse: wiki and computations in pres}
+% web 2.0 more editors. Editors are basic. Complex editors tricky. hand-held devices.
+With the advance of Web 2.0, an increasing number of web sites offer visitors the possibility to create content by editing the content of the visited page. An example is Wikipedia, which allows anyone visiting the site to edit its content. 
 
-vb google docs
+
+Ideally, a visitor should be able to modify and add content in a WYSIWYG fashion, meaning that during editing, the content looks the same way as when simply viewing it. But unfortunately this is often not the case. For example, in Wikipedia, the editor offers a plain text view of the edited content. Hence, text markup such as bold and italic styles are shown as tags in the editor. Moreover, a graphical entity such as a formula is shown as text as well. For example, the simple formula $b^2 = a^2 + ab$ needs to be edited as:
+ 
+\verb|''b''<sup>2</sup>&nbsp;=&nbsp;''a''<sup>2</sup>&nbsp;+&nbsp;''ab''|
+
+Buttons are available for inserting the text for certain tags, but these work purely textual. Hence it is possible to insert a new tag in the text of another tag, invalidating the structure. Furthermore, when an invalid structure arises, the editor offers no support to fix it or point out where the problem is. 
 
 
-The Proxima generic editor can offer wysiwyg editors that can be constructed with little effort. Specifying a document type, a presentation and the edit behavior, a editor is created quickly.
+Some sites provide more advanced editors. Take for example the editor for Yahoo! Pipes~\cite{yahoo08pipes}, which provides a graphical interface to create web-based applications using web services from various sources. Structures can be created by dragging them onto a canvas and connecting them with  Such custom-made editors however require a significant engineering effort, which puts them out of reach for small sites.
 
-Because of its architecture, it is rather straightforward to provide Proxima with a web-interface. Instead of rendering the presentation on a screen, it is an HTTP server that sends the rendering and updates to a client. The client has a lightweight Ajax renderer that draws the screen and captures mouse and keyboard events.
+Moreover, it is difficult to combine them. Other than letting each editor run in a separate part of the screen. Problem for wiki sites that have plugins each with their own specific editor. 
 
-The web-based Proxima can provide wysiwyg editors. That expect very little from a client. Moreover, graphical editors can be built easily. 
+
+\todo{noemen?}
+Furthermore, a complex editor requires a considerable amount of processing power from the device on which the page is edited. This is not an issue for a desktop or laptop computer, but web pages are being viewed increasingly on small handheld devices and mobile phones. 
+
+\bc
+The goal of this project is to create a web-based cleint-server version for Proxima. This consists of modifying the rendering part of Proxima to act as a server and communicate with an external rendering client. The client itself will be  a light-weight Ajax script that draws the rendering and captures edit events.  
+\ec
+
+To tackle the problem, server based. Internet connections getting faster and more available. So a solution can be toSolution is to use a server based generic editor that abstracts from pres and given a doc type plus presentation . Mixing different editors together is easier.
+
+
+like a text wiki, but riched document types. text with markup. headings. Formulas images. Or further, connecting things like yahoo pipes. or more exotically, on-line tests with scoring and answers.
+
+
+The proxima editor is generic editor with an architecture bla Our solution is to provide the generic editor Proxima with a web interface. The resulting web-based editor can provide WYSIWYG editing functionality for web pages with only a fraction of the effort required for a custom-made editor. The client only runs a light-weight script, so no plug-ins need to be installed. Moreover, the editors will have little processing impact on the device that is used to edit the page. 
+
+
+Our short-term goal is to showcase the potential of the technology behind Proxima in order to attract the attention of possible contributors. Proxima is an open-ended system: new object types and presentations can be added to enable the creation of increasingly powerful document types. The hope is that eventually a vibrant community will contribute to a shared repository of resources and push the development of Proxima beyond what a small academia-based group can hope to achieve by itself.
+
+
+\bc
+
+Using Ajax and Flash technology, user-friendly WYSIWYG editors can be created. Take for example the editor for Yahoo! Pipes~\cite{yahoo08pipes}, which provides a graphical interface to create web-based applications using web services from various sources. However, such editors are hard to build. Furthermore, a complex editor requires a considerable amount of processing power from the device on which the page is edited. This is not an issue for a desktop or laptop computer, but web pages are being viewed increasingly on small handheld devices and mobile phones. 
+
+% internet getting better. Create server-based editor
+At the same time, the availability of (wireless) Internet is on the rise, with connection speeds rising and costs dropping. Hence, it makes sense to take the editor application away from the local device, and create a server-based editor that processes edit events and communicates changes in the presentation to a light-weight client. The fact that this is feasible can be seen from technologies such as Virtual Network Computing (VNC).
+
+% Proxima good for making editors
+The Proxima generic editor~\cite{schrage08proximaHome, schrage04proxima} can be used to easily create WYSIWYG editors for a wide range of document types. An editor can be instantiated by specifying a document type, a document presentation and the edit behavior. Presentations can be a mix of text and graphical elements.The resulting editors allow edit operations on the document structure as well as on its screen representation (i.e.\ free-text editing), without the need to switch between the two modes.
+
+% easy to maked server-based
+Because of its architecture, it is straightforward to provide Proxima with a web-based interface. Instead of rendering the presentation to a screen, the updates on the rendering are sent over an HTTP connection to a remote client. The client has a light-weight Ajax renderer that draws the rendering on the browser screen and captures mouse and keyboard events, which are sent back. Since the Proxima has support for incrementality, only updates to the rendering are sent to the client.
+
+\ec
+
+% Project goal
 
 
 
@@ -94,18 +128,34 @@ The web-based Proxima can provide wysiwyg editors. That expect very little from 
 %          o the relative advantage of the proposed innovation;
 %          o usability: for whom and to what purpose;
 
-\subsection{The problem(?)} 
+\subsection{The problem} 
 
-Web-based editing. Either built in text fields, such as most wikis. Or custom made editors written in Flash or Javascrips. Yahoo pipes, Google docs.
+%web 2.0 meer editing, basic
+In line with the Web 2.0 trend, more and more web pages allow visitors to add or modify the content on the page. Among the many examples are Wikipedia, social network sites such as Myspace, or auction sites such as del.ici.ous. The facilities for editing, however, are often rather basic. 
 
-Internet getting faster. Devices getting smaller. 
+% beter kan, maar is duur.
+Of course, it is possible to provide custom-made editors, for example, by using Javascript or Flash, or through plug-ins. Examples are the advanced graphical editor for Yahoo! pipes, and the editors that are part of Google docs suite. Regarding functionality, these systems approach desktop applications. However, the effort required to build such a custom editor is considerable.
+
+% internet sneller apparaten kleiner.
+Another trend is that Internet is increasingly available on mobile devices such as PDA's and mobile phones. Not only are connection speed and network availability increasing each year, but also the costs for mobile communication are dropping. 
+%And although editing on mobile phones is not yet common, 
+\todo{right now, don't really use these for editing}
+
+% take editor application away from the client.
+This state of affairs suggests that the time is ripe for web-based editors. Rather than running a local editor application, the local machine only runs a light-weight client, which is also suitable for devices with little processing power. A server computes a rendering of the document, which is sent to the local client. The client draws the rendering on the screen and catches mouse and keyboard events, which are sent back to the server. Subsequently, the server computes the corresponding update on the rendering and sends it to the client.
+
+% in e-mail we see it already
+The migration from desktop applications to server based applications is already taking place in other areas. E-mail clients are a good example. The first web interfaces were rather static, but more recent Ajax interfaces such as GMail and Yahoo! allow access to e-mail and folders comparable to stand-alone mail clients. Although a mail client requires less communication than an editor, applications of Virtual Network Computing show that server based applications that let all processing be done by the server are feasible. Moreover, since a generic editor does not simply send a bitmap but a much more efficient incremental update, the speed will be much higher than when a VNC protocol is used for editing. 
+
 
 \subsection{Proxima}
-Proxima. What is proxima and generic editing
+%Proxima. What is proxima and generic editing
 
-Proxima is an generic editor is system that can be used to create editors. Can be easily extended to run server-based with a light client.
+Proxima is a generic editor system developed at Utrecht University. A generic editor is a system that can be used to create editors. To create, or {\em instantiate}, an editor, Proxima needs to be provide with a document type and a number of sheets that describe the presentation of the document and the edit behavior. The content of a Proxima document can be mixed text, images and diagrams. A key feature of Proxima is that the instantiated editors are presentation-oriented. This means that the user performs the edit operations on the WYSIWYG screen presentation of the document. At the same time, edit operations on the document structure (such as changing a section to a subsection) are also possible. The system is written in the functional language Haskell and consists of about 15000 lines of code.
 
-Editor for documenting Bayesian networks. Network and views on this network. check consitencies.
+An example of an editor for a sophisticated document type created this way is the Dazzle documentation editor, an editor for the documentation of Bayesian networks. This editor combines graph editing with word-processor functionality. A document contains a Bayesian network (which is essentially a graph) and a list of sections, which contain a view on small part of the graph together with the documentation of that part. 
+
+Figure~\ref{fig:bayesDocEditor} shows a screenshot of the editor. The graph in the figure is an editable subgraph of the main network, so any changes to the edges are also applied to the main network, thereby solving the major problem of maintaining consistency. In the text, tags can be added to denote a reference to a network node. The text also contains references to sections and figures, the numbers of which are automatically computed. Missing references are signaled with squiggly lines.
 
 \begin{figure}
 \includegraphics[width=12cm]{images/subgraph}
@@ -113,9 +163,16 @@ Editor for documenting Bayesian networks. Network and views on this network. che
 \label{fig:levelsAndLayers}
 \end{figure}
 
-Another bla.
+Another example of an editor that has been obtained from generic Proxima by instantiation is a source code editor for the functional language Helium (see Figure~\ref{fig:heliumEditor}). The editor shows parse and type errors in place, and allows for graphical presentations of language constructs. Structural edit operations can be combined with free-text editing. Hence, we can use a structural operation to delete an element from a list, removing the associated comma. But it is also possible to delete from the expression \p{[ 1+2, 3]},  the substring ``\p{+2, }'' (which does not correspond to a structural edit operation), which results in \p{[ 13 ]}. \todo{beetje beter uitleggen waarom structure handig is}
 
-General description of what Proxima is good for.
+
+\begin{figure}
+\includegraphics[width=12cm]{images/heliumMainWindow}
+\caption{The Helium editor.}
+\label{fig:heliumEditor}
+\end{figure}
+
+Besides these two editors a multitude of editors can be implemented with Proxima. One can think of equation editors, spreadsheets, or text editors for an abbreviated syntax for XML standards such as XML Schema and XSLT, but also more exotic applications, such as a chess board, a family-tree editor, or an on-line multiple choice quiz that keeps track of the score.
 
 
 \subsection{The Proxima architecture}
@@ -134,19 +191,18 @@ A data level in Proxima is not simply an intermediate value in the presentation 
 \bl
 \o {\bf Document:} The document structure.
 
-\o {\bf Enriched Document:} The document attributed with derived values and structures, such as the type of a function or a table of contents, typically computed by an attribute grammar~\cite{reps84synGen}.
+\o {\bf Enriched Document:} The document attributed with derived values and structures, such as the type of a function or a table of contents.
 
 \o{\bf Presentation:} A logical description of the presentation of the document, consisting of rows and columns of presentation elements with attributes. The presentation also supports formatting based on available space (e.g.\ line breaking).
 
-\o{\bf Layout:} A presentation with explicit white space, which does not contain tokens.
+\o{\bf Layout:} A presentation with explicit white space. 
+%, which does not contain tokens.
 
 \o{\bf Arrangement:} A formatted layout with absolute size and position information.
 
 \o{\bf Rendering:} A bitmap of the arrangement.
 \el
 
-
-Discuss sheets.
 
 \bc
 We briefly discuss each of the five layers.
@@ -169,80 +225,172 @@ The renderer creates a bitmap for the arrangement. In the other direction is the
 \ec
 
 %\bl
-%\o implementation: layer combinators.
 %\o sometimes awkward, because we have to conform to the layers.
 %\o but this has advantages: new GUI lib in a matter of days.
 %\el
 
 
 
+\bc
+Presentation-oriented editing actually takes place at the layout level rather than the presentation level, thus allowing free-text editing also on white space (which is absent on the presentation level). Hence the two levels that are directly editable are the document level and the layout level. 
+\ec
 
-Presentation-oriented editing actually takes place at the layout level rather than the presentation level, thus allowing free-text editing also on white space (which is absent on the presentation level). Hence the two levels that are directly editable are the document level and the layout level. After an edit operation on the document, all levels from document to rendering are updated to reflect the update. After an edit operation on the layout level, the modified layout is scanned, parsed and reduced, to obtain the corresponding updated document, from which an updated rendering is computed. Scanning and parsing does not occur after every presentation edit operation. Depending on the editor, it may occur either on a navigation operation, after a certain time interval, or at an explicit request by the user.
+After an edit operation on the document, all levels from document to rendering are updated to reflect the update. After an edit operation on the layout level, the modified layout is scanned, parsed and reduced, to obtain the corresponding updated document, from which an updated rendering is computed. Scanning and parsing does not occur after every presentation edit operation. Depending on the editor, it may occur either on a navigation operation, after a certain time interval, or at an explicit request by the user.
+
+In order to instantiate an editor, a number of so called {\em sheets} must be provided:
+
+\bl
+\o{\bf Document type definition:} 
+A EBNF grammar representation of the document type. It is similar to a monomorphic Haskell data type or an XML Schema, with support for lists.
+
+\o{\bf Presentation sheet:} 
+An attribute grammar that specifies for each language construct how it is presented. Simple computations, such as section counters, or static checks on the document (e.g.\ whether a reference is defined) can be implemented as well.
+
+\o{\bf Scanning sheet:}
+A set of regular expressions for the tokens in the textual parts of the presentation.
+
+\o{\bf Parsing sheet:} 
+A module that contains the parsers for each part of the presentation that is presented textually.
+\el
+
+For most editors, the computations can be specified in the presentation sheet. However, for more complex editors, two extra sheets can be provided to deal with derived structures and values: the {\em evaluation sheet} and its inverse, the {\em reduction sheet}.  
+
+\bl
+\o{\bf Evaluation sheet:}
+Can be used to specify derived structures, such as a table of contents, or a table whose structure depends on information in the document. 
+
+\o{\bf Reduction sheet:}
+
+The reduction sheet specifies how updates on derived structures are mapped back onto the document. In many cases, derived values are not editable, in which case the reduction sheet simply ignores the value. However, in some cases, updates on a derived structure correspond to logical updates on the document. One can think of editing the title in a table of contents, or swapping two section titles, which causes the actual sections to swap as well. 
+\el
 
 
 \subsection{A web-based Proxima}
 
-A web-based Proxima requires the development of three aspects:
-\bl
-\o An Ajax client that renders a presentation (or part of it) on the screen and captures key and mouse events, sent back as edit commands to the server.
-\o An HTTP server that sends a rendering to a client and retrieves the edit commands.
-\o A Proxima rendering module that renders to a string based format that is handled by the client.
-\el
 
-Proxima is layered. Separation. Gui specific stuff only in a couple of places. Changing to different GUI library is a matter of days. In fact the early version had a stand-alone renderer that was being communicated with through a socket.
+Because of the strict separation between layers, which is enforced by the architecture, 
+only four relatively small modules contain GUI-specific code. When the system needed to be ported to a new GUI library, this only took a couple of days. Hence, implementing support for an external renderer will be a relatively straightforward operation. In fact, an early version of Proxima actually used a stand-alone renderer client that it communicated with through a socket connection.
+
+In order to realize the web-based functionality, three components need to be developed:
+
+\bl
+\o An HTTP server that sends a rendering to a client and retrieves the edit commands. 
+
+\o A Proxima rendering module that renders the arrangement to an XML string that is handled by the client.
+
+\o An Ajax client that renders a presentation on the screen and captures edit events, which are sent to the server.
+\el
 
 \subsubsection{HTTP server}
 
-Currently the GUI module. Event loop that catches an event. Creates an edit command that is sent to Proxima. The result is a rendering (now a set of gui commands) which is drawn on a buffer.
-
-Rather than a GUI event loop. It becomes an HTTP server. Incoming connections
+A simple HTTP server will handle incoming requests and start a Proxima session for each new request. The Proxima session is quite similar to an ordinary Proxima session, except that instead of catching edit events directly and drawing the rendering updates on the screen, the events are received from a socket connection, and updates are sent over  this socket. This functionality can be added to the current GUI module, which contains the event loop that handles events and draws the rendering onto the screen. 
  
 \subsubsection{The web-based renderer}
-The current renderer creates gui commands for GTK. It walks over arrangement data structure that describes the positions. For changed parts, commands are generated. New renderer rather similar, but will generate a string. 
+
+The current renderer creates drawing commands for the GTK windowing toolkit. It traverses the arrangement data structure, and generates commands for changed parts of the arrangement. The new renderer will be very similar but instead of a list of commands, it will generate an XML string.
 
 \subsubsection{Ajax client}
 
-Main project. Use DHTML to update rendering.
+The main implementation effort of the project will be the Ajax client. It will capture mouse and keyboard events and send these to the Proxima server. In response, it will receive an XML structure that corresponds to the update on the rendering. Textual parts of the rendering, as well as images, can be mapped onto HTML elements. Other graphical elements, such as lines, need to be drawn separately.
 
-Because of latency, edit operations must be collected. Because focus is known, typed characters can be added to the string containing the focus.
+\subsection{Efficiency}
+
+\todo{Lambert: Deze sectie gaat te diep in op technische details}
+The applicability of the web-based Proxima editors depends largely on efficiency. Because Proxima has incremental behavior, only updates to rendering are sent over the socket. At the moment, moved blocks are not recognized, since the screen renderer performed well enough without this. For web-based editors, however, this is more important, as the creation of a new line would cause half the page to be transmitted. Fortunately, the renderer provides hooks to be extended to recognize moved blocks, and create a move command for these.
+
+Another aspect of efficiency is the latency in the server connection. Even if the transfer is fast enough, there might be a delay in the response from the server. In order to handle this, the render can create a predictive rendering in response to an edit event, which is updated when the result of the server is received. A simple solution would be to simply insert characters at the location of the focus in the current rendering, copying the style from surrounding characters. For mouse drag events, an outline of the focused object could me shown at the current mouse position. To what extent the rendering client should support such predictive rendering will have to determined through experiments with a prototype.
 
 \subsection{Further development}
 %          o perspectives for further development of this innovation and/or other technologies. 
-Works well enough for small docs. 
 
+\bc
+When the web-based functionality has been added to Proxima, an interesting extension will be the connection of Proxima to a database. Documents are now internal data structures, but it will be interesting to obtain subtrees of the document from a database. Furthermore, More incrementality, so larger documents can be edited. Also focus on parsing. Now only graphs and text which is parsed. To do Yahoo pipes, more general graphical editing. Formula editing.
 
-\section{Project planning}
+Also infrastructure, multiple requests, servers? 
+\ec
+
+An logical extension would be to establish connection to database. Instead of a document containing all values, the presentation will (also) contain content obtained from database. Possible.
+
+Large documents. increases load on server. incremental behavior in parsing and presentation. small change on presentation, small change in doc small change in rendering updat.
+
+More interesting edit model. Now graphs and text. drag and drop, connecting pipes. also incremental
+
+\bl
+\o Database connections
+\o Incrementality in parser for larger documents
+\o Graphical editing
+\el
+
+\section{Project setup}
 %    * Project setup --organizational, technical, eventual partners, dependencies on other projects, licenses, and such;
 
+Work can be done at UU. Software technology group. Swierstra.
 
+Builds upon the Proxima research project.
+
+Resulting code open source. Lot of expertise in the group.
+
+\subsection{Planning}
 
 %    * Project planning --milestones and related results;
-investigate Ajax an DHTML technologies
-setup implement Ajax client
-determine format of rendering
+\bl
+\o investigate Ajax an DHTML technologies
+\o setup Web server on simple web server and implement simple Ajax client
+\o determine format of rendering
+\o implement web server connections, and url that describes document location.
+\o perhaps make more efficient encoding of rendering.
+\o add compression to data using gzip library
+\o implement an editor plugin for wiki
+\el
 
-first just socket thing
-sending simple tree rep.
-later full http. with the url describing the document to be edited.
-later better string encoding
-
+\subsection{Budget}
 %    * Project budgeting;
 
 30.000 \euro
 
+\subsection{Risks}
 %    * Project risks --which risks can be overseen from the start of the project;
 
-%    * Project results dissemination --how the project team is going to disseminate results and to whom, publicity, diffusion of the produced innovation;
+Efficiency. Experiments are positive.
 
-Tja..
+Adoptation. community. 
+
+\subsection{Dissemination of results}
+
+Implement plugin for wiki
+
+De aanvraag zegt:
+
+\bl
+\o Project results dissemination --how the project team is going to disseminate results and to whom, publicity, diffusion of the produced innovation;
+\el
+
+
+\subsection{Follow-ups}
 
 %    * Possibly, follow-ups on the project. 
 
-With more incremental behavior, larger editors can be written. Application for NWO is on its way.
-
+\bl
+\o Mention NWO and incrementality stuff?
+\o Connection with databases?
+\el
 
 
 \bibliographystyle{plain}
 \bibliography{../proxima}
 
 \end{document}
+
+\bc
+Links for the implementation:
+
+graphical elements:
+http://www.walterzorn.com/jsgraphics/jsgraphics_e.htm
+
+key events:
+http://unixpapa.com/js/key.html
+
+mouse events:
+http://javascript.internet.com/page-details/mouse-coordinates.html
+http://unixpapa.com/js/testmouse.html
+\ec
