@@ -21,7 +21,7 @@ import Arrangement.FontLib
 import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout)
 import System.IO.Unsafe
 import Data.IORef
-
+import System.IO
 -----
 
 arrowHeadSize :: Double
@@ -86,8 +86,10 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
     --; debugLnIO Ren ("Arrangement is "++show arrangement)
     --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     ; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
-    ; renderArr clipRegion
+    ; fh <- openFile "rendering.html" WriteMode
+    ; renderArr fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
+    ; hClose fh
     }
 
 
@@ -98,9 +100,10 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
 renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
  do { clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
 
+    ; fh <- openFile "focusRendering.html" WriteMode
     ; let focusArrList = arrangeFocus focus arrangement
 --    ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
-    ; renderArr clipRegion
+    ; renderArr fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea
                 (DiffLeaf False)
                 (OverlayA NoIDA (xA arrangement) (yA arrangement)  
@@ -108,12 +111,44 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
                                 0 0 transparent
                           HeadInFront
                           focusArrList) 
+   ; hClose fh
    }
 
+divOpen fh x y w h (r,g,b) = hPutStr fh $ 
+  "<div style='position: absolute; left:"++show x++"; top:"++show y++";"++
+                "width:"++show w++"height:"++show h++";"++
+                (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
+                           else "")++
+                "'>"
+divClose fh = hPutStr fh "</div>"
 
-renderArr :: (DocNode node, DrawableClass drawWindow) => Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
+polyHTML fh x y w h pts (r,g,b) = hPutStr fh $
+  "<div style='position: absolute; left:"++show x++"; top:"++show y++";"++
+                "width:"++show w++"; height:"++show h++";"++
+                "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
+                "'></div>"
+ 
+stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) = hPutStr fh $ 
+  "<div style='position:absolute;left:"++show x++";top:"++show y++";"++
+                "width:"++show w++"; height:"++show h++";"++
+                "font-family:"++show fFam++";"++
+                "font-size:"++show fSiz++"pt;"++
+                (if fBld then "font-weight: bold;" else "")++
+                (if fItlc then "font-style: italic;" else "")++
+                "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
+                "'>"++
+                concatMap htmlChar str ++ "</div>"
+ where htmlChar '\n' = "<br/>"
+       --htmlChar ' '  = "&#8194;"
+       htmlChar ' '  = "&nbsp;"
+       htmlChar '<'  = "&lt;"
+       htmlChar '>'  = "&gt;"
+       htmlChar c    = [c]
+
+
+renderArr :: (DocNode node, DrawableClass drawWindow) => Handle -> Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
                                          (Point, Size) -> DiffTree -> Arrangement node -> IO ()    
-renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
+renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
 
@@ -126,7 +161,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                        ; let childDiffTrees = case diffTree of
                                                 DiffLeaf c     -> repeat $ DiffLeaf c
                                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-                       ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs 
+                       ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs 
                        }
                in case arrangement of
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
@@ -176,6 +211,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
               ; case pangoItems of 
                   [pangoItem] -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x (y+ascnt) glyphItem
+                                    ; stringHTML fh str x' y' w' h' fnt fColor
                                     }
                   pangoItem:_ -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x y glyphItem
@@ -303,6 +339,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 
                                        , joinStyle = JoinRound }
         ; drawPolygon dw gc False pts
+        ; polyHTML fh x' y' w' h' pts lColor
         ; gcSetClipRegion gc oldClipRegion
         
         }
@@ -327,14 +364,16 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                                                  else tail.init $
                                                       scanl (\n1 n2 -> n1 + (scaleInt scale (pd-1))+n2 ) 0 
                                                             (map (scaleInt scale . widthA) arrs)]
-              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+              ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
              }
           else 
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
-              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+              ; divOpen fh x' y' w' h' bColor
+              ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+              ; divClose fh
               }
         }
 
@@ -358,14 +397,16 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                                                      scanl (\n1 n2 -> n1+(scaleInt scale (pd-1))+n2 ) 0 
                                                            (map (scaleInt scale . heightA) arrs)]
         
-              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+              ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
               }
           else 
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = gtkColor bColor --  if isCleanDT diffTree then gtkColor bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
-              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+              ; divOpen fh x' y' w' h' bColor
+              ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+              ; divClose fh
               }
         }
 
@@ -395,7 +436,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                         HeadAtBack  -> Prelude.id
                               
         ; sequence_ $ order $
-            zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+            zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
         }
 
     (GraphA id x' y' w' h' _ _ bColor _ arrs) ->
@@ -417,7 +458,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }        
               }
-        ; sequence_ $ reverse $ zipWith (renderArr newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
+        ; sequence_ $ reverse $ zipWith (renderArr fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
         ; gcSetClipRegion gc oldClipRegion
         }
 
@@ -435,7 +476,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) vertexColor vertexColor
 
-        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
+        ; renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
@@ -461,7 +502,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) structuralBGColor structuralBGColor
        
-        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
+        ; renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
     
     (ParsingA id arr) ->
@@ -473,7 +514,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) parsingBGColor parsingBGColor
        
-        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
+        ; renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     (LocatorA _ arr) ->
@@ -481,7 +522,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
+        ; renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
