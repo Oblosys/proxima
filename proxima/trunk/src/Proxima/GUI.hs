@@ -11,7 +11,7 @@ Unclear: if edit is skip, update renderingLevel? Maybe it was changed by rendere
 TODO: fix wrong hRef (hSpaces are the problem)
 
 -}
-import Graphics.UI.Gtk hiding (Size)
+import Graphics.UI.Gtk hiding (Size, Socket)
 import Data.IORef
 
 import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO
@@ -27,8 +27,13 @@ import Maybe
 import IO
 import Directory
 import Data.Time.Clock
-
 import Control.Exception
+
+import Network
+import Network.BSD
+import Control.Concurrent
+import Data.List
+
 
 initialWindowSize :: (Int, Int)
 initialWindowSize = (1000, 900)
@@ -36,7 +41,8 @@ initialWindowSize = (1000, 900)
 documentFilename = "Document.xml"
 backupFilename = "BackupDocument.xml"
 
-startGUI :: Settings ->
+startGUI :: (Show doc, Show enr, Show node, Show token) =>
+            Settings ->
             ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
             IORef CommonTypes.Rectangle ->
             (RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO ()
@@ -102,6 +108,8 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     -- about every half minute, save a backup of the document
 
 --    ; timeoutAddFull (withCatch $ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
+    ; server (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas)
+    
     ; mainGUI
     }    
 
@@ -468,3 +476,235 @@ okDialog txt =
     ; widgetDestroy dia
     ; return response
     }
+
+
+
+
+
+-----------------------
+
+server params = withSocketsDo $
+ do { strVar <- newIORef ("",0)
+    ; putStrLn "Serving"
+    ; serverSocket <- listenOn (PortNumber 8080)
+    ; serverLoop params serverSocket
+    }
+
+serverLoop params serverSocket = loop $
+        do { connection <- accept serverSocket
+           ; putStrLn $ "\nNew connection" ++ show connection
+           ; serve params connection 
+           }
+           
+serve params (handle, remoteHostName, portNumber) =
+ do {
+    ; hSetBuffering handle LineBuffering
+    ; putStrLn $ "Connected to "++show remoteHostName ++ " on port " ++ show portNumber
+    
+    ; handleKeys params handle
+    ; putStrLn $ "handled key, closing socket"
+    ; hClose handle
+    }
+
+handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) handle =
+ do { commandLines <- hGetLinez handle
+   -- ; let commands = takeWhile isAlpha commandLine -- strip newlines etc. otherwise cannot use telnet
+    
+    ; putStrLn $ "Handling on socket: " ++ show handle
+    -- ; mapM putStrLn commandLines
+    
+    ; let arg = (takeWhile (/=' ') (drop 5 (head commandLines)))
+    ; putStrLn $ "arg = " ++ arg
+    ; if arg == ""  
+      then
+       do { page <- readFile "Editor.html"
+          ; seq (length page) $ return ()
+          -- ; print page
+          ; hPutStr handle $ toHTTP page
+          ; hFlush handle
+          }
+      else if arg == "favicon.ico" then return ()
+      else
+       do { let event = init arg -- drop the ?
+          ; (event) <-
+                 if "Key" `isPrefixOf` event || "Chr" `isPrefixOf` event 
+                 then handleKey event "" 0
+                 else if "Mouse" `isPrefixOf` event
+                 then handleMouse event "" 0
+                 else if "Special" `isPrefixOf` event
+                 then handleSpecial event "" 0
+                 else do { putStrLn $ "Event not recognized: "++event
+                         ; return $ SkipRen 0
+                         }
+          ; print event               
+          ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas event
+          
+          -- render the focus, so focusRendering.html is updated
+          ; dw <- widgetGetDrawWindow canvas
+          ; maybePM <- readIORef buffer
+          ; case maybePM of
+              Nothing -> return ()
+              Just pm -> do { gc <- gcNew pm
+      
+                            ; drawFocus settings renderingLvlVar window dw gc vp            
+                            }
+          
+          ; renderingHTML <- readFile "rendering.html"
+          ; focusRenderingHTML <- readFile "focusRendering.html"
+          ; hPutStr handle $ toHTTP $ renderingHTML ++ focusRenderingHTML
+          ; putStrLn "closing socket"
+          ; hClose handle
+
+          }
+   -- ; handleKeys handle
+    }
+
+handleKey ('K':'e':'y':event) editStr focus = return $
+ let keyCode = read $ takeWhile (/='?') event
+     key = 
+       case keyCode of
+        46 -> KeySpecialRen CommonTypes.DeleteKey ms
+        8  -> KeySpecialRen CommonTypes.BackspaceKey ms
+        37 -> KeySpecialRen CommonTypes.LeftKey  ms
+        39 -> KeySpecialRen CommonTypes.RightKey  ms
+        38 -> KeySpecialRen CommonTypes.UpKey  ms
+        40 -> KeySpecialRen CommonTypes.DownKey  ms
+        13 -> KeySpecialRen CommonTypes.EnterKey  ms
+        112 -> KeySpecialRen CommonTypes.F1Key  ms
+        113 -> KeySpecialRen CommonTypes.F2Key  ms
+        114 -> KeySpecialRen CommonTypes.F3Key  ms
+        115 -> KeySpecialRen CommonTypes.F4Key  ms
+        116 -> KeySpecialRen CommonTypes.F5Key  ms
+        117 -> KeySpecialRen CommonTypes.F6Key  ms
+        118 -> KeySpecialRen CommonTypes.F7Key  ms
+        119 -> KeySpecialRen CommonTypes.F8Key  ms
+        120 -> KeySpecialRen CommonTypes.F9Key  ms
+        121 -> KeySpecialRen CommonTypes.F10Key  ms
+        122 -> KeySpecialRen CommonTypes.F11Key  ms
+        123 -> KeySpecialRen CommonTypes.F12Key  ms
+        _  -> SkipRen 0
+     ms = CommonTypes.Modifiers False False False
+  in key 
+handleKey ('C':'h':'r':event) editStr focus = return $
+ let keyChar = read $ takeWhile (/='?') event
+  in KeyCharRen (chr keyChar)
+handleKey malEvent editStr focus =
+ do { putStrLn $ "Internal error: malformed key event: " ++ malEvent
+    ; return $ SkipRen 0
+    }
+    
+insertChar c editStr focus = (take focus editStr ++ [c] ++ drop focus editStr, focus +1)
+
+handleMouse ('M':'o':'u':'s':'e':event) editStr focus = 
+ do { putStrLn $ "Mouse event: " ++ event
+    ; let action:coords = event
+    ; let (x:: Int, y :: Int) = read coords
+          (focusX,focusY) = ((x+5) `div` 11, (y) `div` 20  - 3)
+          focus' = posToFocus (focusX, focusY) editStr
+    ; putStrLn $ "Character coordinates: "++show (focusX,focusY)
+          
+    ; return $ case action of
+                     'D' -> MouseDownRen x y (CommonTypes.Modifiers False False False) 1
+                     'U' -> MouseUpRen x y (CommonTypes.Modifiers False False False)
+                     'C' -> SkipRen 0
+                     _   -> SkipRen 0
+    
+    }
+handleMouse malEvent editStr focus =
+ do { putStrLn $ "Internal error: malformed mouse event: " ++ malEvent
+    ; return $ SkipRen 0
+    }
+ 
+handleSpecial ('S':'p':'e':'c':'i':'a':'l':event) editStr focus = 
+ do { putStrLn $ "Special event: " ++ event
+    ; if event == "Refresh" 
+      then return $ SkipRen 0
+      else if event == "Clear" 
+      then return $ SkipRen 0
+      else do { putStrLn $ "Unrecognized special event: "++event
+              ; return $ SkipRen 0
+              } 
+    }            
+handleSpecial malEvent editStr focus =
+ do { putStrLn $ "Internal error: malformed special event: " ++ malEvent
+    ; return $ SkipRen 0
+    }
+    
+toHTTP string = unlines (header (length string)) ++ string
+header len =  
+  [ "HTTP/1.1 200 OK"
+  , "Date: Mon, 28 Jul 2008 11:24:47 GMT"
+  , "Server: Proxima"
+  , "Last-Modified: Wed, 16 Jul 2008 15:56:44 GMT"
+  , "Expires: Mon, 28 Jul 2000 11:24:47 GMT"
+  , "ETag: \"3a387-627-452120dff27aa\""
+  , "Accept-Ranges: bytes"
+  , "Content-Length: " ++ show len
+  , "Keep-Alive: timeout=5, max=100"
+  , "Connection: Keep-Alive"
+  , "Content-Type: text/html"
+  , ""
+  ]
+  
+html (focusX,focusY) status text =  
+  "<div id=\"info\" focusX=\""++show focusX ++"\" focusY=\""++show focusY ++
+                  "\" status=\""++status ++ "\"></div>" ++
+  concatMap htmlChar text ++
+  ""
+ where htmlChar '\n' = "<br/>"
+       --htmlChar ' '  = "&#8194;"
+       htmlChar ' '  = "&nbsp;"
+       htmlChar '<'  = "&lt;"
+       htmlChar '>'  = "&gt;"
+       htmlChar c    = [c]
+    
+hGetLinez :: Handle -> IO [String]
+hGetLinez handle = 
+ do { str <- hGetLine handle
+    -- ; putStrLn $ "Socket "++show handle ++": "++str
+    ; strs <- if str /= "\r"
+              then hGetLinez handle
+              else return []
+    ; return $ str:strs
+    }
+
+-- Utility functions
+
+focusToPos focus buffer = 
+  let x = length . takeWhile (/= '\n') . reverse $ take focus buffer
+      y = length . filter (== '\n') $ take focus buffer
+  in (x,y)
+
+posToFocus (x,y) buffer = let vOffset = countLineLengths y buffer
+                              currentLine = takeWhile (/='\n') (drop vOffset buffer)
+                              hOffset = (0 `max` x) `min` length currentLine
+                          in  vOffset+hOffset
+
+countLineLengths n buffer =
+  if n <= 0 then 0
+  else case break (=='\n') buffer of
+        (lastLine,"") -> length lastLine
+        (line, nl:rest)  -> length line + 1 + countLineLengths (n-1) rest
+        
+navigateUp focus buffer = let (x,y) = focusToPos focus buffer
+                          in  posToFocus (x, y-1) buffer
+navigateDown focus buffer = let (x,y) = focusToPos focus buffer
+                            in  posToFocus (x, y+1) buffer
+
+loop io = loop'
+ where loop' = 
+        do { io
+           ; loop'
+           }
+           
+
+getHostIP :: IO String
+getHostIP = 
+ do { hostName <- getHostName
+    ; hostEntry <- getHostByName hostName
+    ; let addr = hostAddress hostEntry
+          (b1,b2,b3,b4) = ( addr `div` 16777216 `mod` 256, addr `div` 65536 `mod` 256
+                          , addr `div` 256 `mod` 256, addr `mod` 256)
+    ; return $ show b4 ++ "." ++ show b3 ++ "." ++ show b2 ++ "." ++ show b1
+    }
+           
