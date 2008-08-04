@@ -102,7 +102,7 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
 
     ; fh <- openFile "focusRendering.html" WriteMode
     ; let focusArrList = arrangeFocus focus arrangement
---    ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
+    ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
     ; renderArr fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea
                 (DiffLeaf False)
@@ -128,7 +128,7 @@ polyHTML fh x y w h pts (r,g,b) = hPutStr fh $
                 "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
                 "'></div>"
  
-stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) = hPutStr fh $ 
+stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = hPutStr fh $ 
   "<div style='position:absolute;left:"++show x++";top:"++show y++";"++
                 "width:"++show w++"; height:"++show h++";"++
                 "font-family:"++show fFam++";"++
@@ -136,7 +136,8 @@ stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) = 
                 (if fBld then "font-weight: bold;" else "")++
                 (if fItlc then "font-style: italic;" else "")++
                 "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
-                "'>"++
+                (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
+                           else "")++"'>"++
                 concatMap htmlChar str ++ "</div>"
  where htmlChar '\n' = "<br/>"
        --htmlChar ' '  = "&#8194;"
@@ -211,7 +212,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
               ; case pangoItems of 
                   [pangoItem] -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x (y+ascnt) glyphItem
-                                    ; stringHTML fh str x' y' w' h' fnt fColor
+                                    ; stringHTML fh str x' y' w' h' fnt fColor bColor
                                     }
                   pangoItem:_ -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x y glyphItem
@@ -434,9 +435,12 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         ; let order = case direction of
                         HeadInFront -> reverse
                         HeadAtBack  -> Prelude.id
-                              
+              
+        ; divOpen fh x' y' w' h' bColor
         ; sequence_ $ order $
             zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+        ; divClose fh
+        
         }
 
     (GraphA id x' y' w' h' _ _ bColor _ arrs) ->
@@ -458,7 +462,11 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }        
               }
+        
+        ; divOpen fh x' y' w' h' bColor
         ; sequence_ $ reverse $ zipWith (renderArr fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
+        ; divClose fh
+        
         ; gcSetClipRegion gc oldClipRegion
         }
 
@@ -476,7 +484,9 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) vertexColor vertexColor
 
+        ; divOpen fh x' y' w' h' bColor
         ; renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
+        ; divClose fh
         }
 
     (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
