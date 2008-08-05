@@ -554,9 +554,9 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
           ; focusRenderingHTML <- readFile "focusRendering.html"
           ; seq (length focusRenderingHTML) $ return ()
           ; hPutStr handle $ toHTTP $ "<div id='root'>"++
-                                      "B "++ellipseXML++"la"++
+                                      --"B "++ellipseXML++"la"++
                                       --"<div style='position: absolute; left: 100px; top: 100px'>blaaa</div>"++
-                                      renderingHTML ++ -- focusRenderingHTML ++
+                                      renderingHTML ++ focusRenderingHTML ++
                                       "</div>"
           ; putStrLn "closing socket"
           ; hClose handle

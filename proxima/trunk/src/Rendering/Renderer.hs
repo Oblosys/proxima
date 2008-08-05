@@ -115,29 +115,29 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
    }
 
 divOpen fh x y w h (r,g,b) = hPutStr fh $ 
-  "<div style='position: absolute; left:"++show x++"; top:"++show y++";"++
-                "width:"++show w++";height:"++show h++";"++
+  "<div style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
+                "width:"++show w++"px;height:"++show h++"px;"++
                 (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
                            else "")++
                 "'>" 
 divClose fh = hPutStr fh "</div>"
 
-polyHTML fh x y w h pts (r,g,b) = hPutStr fh $ "" {-
-  "<div style='position: absolute; left:"++show x++"; top:"++show y++";"++
-                "width:"++show w++"; height:"++show h++";"++
+polyHTML fh x y w h pts (r,g,b) = hPutStr fh $  
+  "<div style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
+                "width:"++show w++"px; height:"++show h++"px;"++
                 "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
-                "'></div>" -}
+                "'></div>"
  
 stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = hPutStr fh $ 
-  "<div style='position:absolute;left:"++show x++";top:"++show y++";"++
-                "width:"++show w++"; height:"++show h++";"++
-       {-         "font-family:"++show fFam++";"++
-                "font-size:"++show fSiz++"pt;"++
+  "<div style='position:absolute;left:"++show x++"px;top:"++show y++"px;"++
+                "width:"++show w++"px;height:"++show h++"px;"++
+                "font-family:"++show fFam++";"++
+                "font-size:"++show fSiz++"px;"++
                 (if fBld then "font-weight: bold;" else "")++
                 (if fItlc then "font-style: italic;" else "")++
                 "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
                 (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
-                           else "")   ++ -} "'>"++
+                           else "")   ++ "'>"++
                 concatMap htmlChar str ++ "</div>"
  where htmlChar '\n' = "n" --"<br/>"
        --htmlChar ' '  = "&#8194;"
