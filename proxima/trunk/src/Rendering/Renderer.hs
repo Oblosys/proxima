@@ -122,23 +122,21 @@ divOpen fh x y w h (r,g,b) = hPutStr fh $
                 "'>" 
 divClose fh = hPutStr fh "</div>"
 
-polyHTML fh x y w h pts (r,g,b) = hPutStr fh $  
-  "<div style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
-                "width:"++show w++"px; height:"++show h++"px;"++
-                "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
-                "'></div>"
  
 stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = hPutStr fh $ 
-  "<div style='position:absolute;left:"++show x++"px;top:"++show y++"px;"++
+  "<div style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
+                "width:"++show w++"px;height:"++show h++"px;"++
+                 (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
+                           else "")   ++ "'>"++
+                                
+  "<div style='position:absolute;left:0px;top:"++show (h `div` 2)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                 "font-family:"++show fFam++";"++
-                "font-size:"++show fSiz++"px;"++
+                "font-size:"++show fSiz++"pt;"++
                 (if fBld then "font-weight: bold;" else "")++
                 (if fItlc then "font-style: italic;" else "")++
-                "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
-                (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
-                           else "")   ++ "'>"++
-                concatMap htmlChar str ++ "</div>"
+                "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");'>"++
+                concatMap htmlChar str ++ "</div></div>"
  where htmlChar '\n' = "n" --"<br/>"
        --htmlChar ' '  = "&#8194;"
       -- htmlChar ' '  = "&nbsp;"
@@ -146,20 +144,38 @@ stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (b
        htmlChar '>'  = "gt;"
        htmlChar c    = [c]
 
- 
-ellipseHTML fh x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $ "" {-
-  "<svg width='100%' height='100%' version='1.1'>" ++
-  "<ellipse cx='300' cy='150' rx='200' ry='80' "++
-  "style='fill:rgb(200,100,50);"++
-  "stroke:rgb(0,0,100);stroke-width:2'/>" ++
-  "</svg>"-}
-  {-
-  "<div style='position:absolute;left:"++show x++";top:"++show y++";"++
-                "width:"++show w++"; height:"++show h++";"++
-                "background-color:rgb("++show (fr::Int)++","++show (fg::Int)++","++show (fb::Int)++");" ++
-  "'></div>"                
--}
-
+svgStart fh = hPutStr fh $ 
+  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
+svgEnd fh = hPutStr fh $ 
+  "</svg>"
+  
+edgeHTML fh (fromX,fromY) (toX, toY) lw (lr,lg,lb) = hPutStr fh $
+  "<line x1='"++show fromX++"' y1='"++show fromY++"' x2='"++show toX++"' y2='"++show toY++"' "++
+  "style='stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>"
+  
+  
+ellipseHTML fh x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
+  "<div style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
+                "width:"++show (w+2)++"px;height:"++show (h+2)++"px;"++
+                "'>" ++
+  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
+  "<ellipse cx='"++show ((w `div` 2)+1)++"' cy='"++show ((h `div` 2)+1)++"' rx='"++show (w `div` 2)++"' ry='"++show (h `div` 2)++"' "++
+  "style='fill:rgb("++show fr++","++show fg++","++show fb++");"++
+  "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
+  "</svg></div>"
+-- TODO: why this max 4?
+polyHTML fh x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $  
+  "<div style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
+                "width:"++show (w+2)++"px;height:"++show ((h+2)`max` 4)++"px;"++
+                "'>" ++
+  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
+  "<polygon points='"++pointsStr++"' "++
+  "style='fill:"++(if fr == -1 then "transparent; "
+                               else "rgb("++show fr++","++show fg++","++show fb++");")++
+  "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
+  "</svg></div>"
+ where pointsStr = concat $ intersperse " " $ [show (x) ++ "," ++ show (y) | (x,y) <- pts ]
+-- don't correct for x-1 and y-1, since poly's seems to be rendererd +1 already
 
 renderArr :: (DocNode node, DrawableClass drawWindow) => Handle -> Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
                                          (Point, Size) -> DiffTree -> Arrangement node -> IO ()    
@@ -227,7 +243,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
                   [pangoItem] -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x (y+ascnt) glyphItem
                                     ; stringHTML fh str x' y' w' h' fnt fColor bColor
-                                    }
+                                    } 
                   pangoItem:_ -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x y glyphItem
                                     ; debug Err ("Renderer.renderArr: too many pango items for string \""++str++"\"") $ return ()
@@ -355,7 +371,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 
                                        , joinStyle = JoinRound }
         ; drawPolygon dw gc False pts
-        ; polyHTML fh x' y' w' h' pts lColor
+        ; polyHTML fh x' y' w' h' pts' (scaleInt scale lw' `max` 1) lColor fColor
         ; gcSetClipRegion gc oldClipRegion
         
         }
@@ -458,7 +474,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         
         }
 
-    (GraphA id x' y' w' h' _ _ bColor _ arrs) ->
+    (GraphA id x' y' w' h' _ _ bColor nrOfVertices arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
@@ -478,9 +494,18 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
                     }        
               }
         
-        ; divOpen fh x' y' w' h' bColor
-        ; sequence_ $ reverse $ zipWith (renderArr fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
-        ; divClose fh
+        ; let (vertexDiffTrees, edgeDiffTrees) = splitAt nrOfVertices childDiffTrees
+        ; let (vertexArrs, edgeArrs) = splitAt nrOfVertices arrs
+        
+        
+        --; divOpen fh x' y' w' h' bColor
+        ; sequence_ $ reverse $ zipWith (renderArr fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
+        
+        ; svgStart fh
+        ; sequence_ $ reverse $ zipWith (renderArr fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
+        --; sequence_ $ reverse $ zipWith (renderArr fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
+        ; svgEnd fh
+        --; divClose fh
         
         ; gcSetClipRegion gc oldClipRegion
         }
@@ -512,8 +537,15 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
               pt1 = (tox - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
               pt2 = (tox - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
         
+        
+              ptHTML1 = (rlx' - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
+              ptHTML2 = (rlx' - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
+        
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         ; drawLine dw gc (fromx,fromy) (tox,toy) 
+        ; edgeHTML fh (lux',luy') (rlx',rly') (scaleInt scale lw' `max` 1) lColor
+        ; polyHTML fh 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
+
         -- draw arrow head
         ; drawPolygon dw gc True [pt1, pt2, (tox, toy)] 
         }
@@ -665,9 +697,12 @@ layoutFocusColor = CommonTypes.blue
 mkBoxCaret x y w h = 
   [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 Transparent layoutFocusColor white transparent ]
 mkEdgeCaret x1 y1 x2 y2 =
-  [ EdgeA NoIDA x1 y1 x2 y2 0 0 2 layoutFocusColor ]
+  [ GraphA NoIDA 0 0 (x1 `max` x2) (y1 `max` y2) 0 0 transparent 0 
+      [ EdgeA NoIDA x1 y1 x2 y2 0 0 2 layoutFocusColor ] 
+  ] -- dummy graph, since renderer expects edge to be inside graph (only for HTML rendering)
 mkOutlineCaret x y w h outline = 
-  [ PolyA NoIDA x y w h 0 0 (map outline [0, pi/10 ..2*pi]) 2 Transparent layoutFocusColor white transparent ]
+  [ PolyA NoIDA x y w h 0 0 (map outline [0, pi/10 ..2*pi]) 2 Transparent layoutFocusColor transparent transparent ]
+
 
 
 arrangedFocusArea :: Show node => [Arrangement node] -> (Int,Int,Int,Int)
