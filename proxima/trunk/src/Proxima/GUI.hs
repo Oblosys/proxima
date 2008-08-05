@@ -517,7 +517,7 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
     ; putStrLn $ "arg = " ++ arg
     ; if arg == ""  
       then
-       do { page <- readFile "Editor.html"
+       do { page <- readFile "Editor.xhtml"
           ; seq (length page) $ return ()
           -- ; print page
           ; hPutStr handle $ toHTTP page
@@ -550,14 +550,25 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
                             }
           
           ; renderingHTML <- readFile "rendering.html"
+          ; seq (length renderingHTML) $ return ()
           ; focusRenderingHTML <- readFile "focusRendering.html"
-          ; hPutStr handle $ toHTTP $ renderingHTML ++ focusRenderingHTML
+          ; seq (length focusRenderingHTML) $ return ()
+          ; hPutStr handle $ toHTTP $ "<div id='root'>"++
+                                      "B "++ellipseXML++"la"++
+                                      --"<div style='position: absolute; left: 100px; top: 100px'>blaaa</div>"++
+                                      renderingHTML ++ -- focusRenderingHTML ++
+                                      "</div>"
           ; putStrLn "closing socket"
           ; hClose handle
 
           }
    -- ; handleKeys handle
     }
+ellipseXML = "<svg width='10' height='10' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
+  "<ellipse cx='5' cy='5' rx='5' ry='5' "++
+  "style='fill:rgb(200,100,50);"++
+  "stroke:rgb(0,0,100);stroke-width:1'/>" ++
+  "</svg>"
 
 handleKey ('K':'e':'y':event) editStr focus = return $
  let keyCode = read $ takeWhile (/='?') event
@@ -642,7 +653,7 @@ header len =
   , "Content-Length: " ++ show len
   , "Keep-Alive: timeout=5, max=100"
   , "Connection: Keep-Alive"
-  , "Content-Type: text/html"
+  , "Content-Type: text/xml"
   , ""
   ]
   

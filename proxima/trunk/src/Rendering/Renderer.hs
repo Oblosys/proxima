@@ -116,35 +116,49 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
 
 divOpen fh x y w h (r,g,b) = hPutStr fh $ 
   "<div style='position: absolute; left:"++show x++"; top:"++show y++";"++
-                "width:"++show w++"height:"++show h++";"++
+                "width:"++show w++";height:"++show h++";"++
                 (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
                            else "")++
-                "'>"
+                "'>" 
 divClose fh = hPutStr fh "</div>"
 
-polyHTML fh x y w h pts (r,g,b) = hPutStr fh $
+polyHTML fh x y w h pts (r,g,b) = hPutStr fh $ "" {-
   "<div style='position: absolute; left:"++show x++"; top:"++show y++";"++
                 "width:"++show w++"; height:"++show h++";"++
                 "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
-                "'></div>"
+                "'></div>" -}
  
 stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = hPutStr fh $ 
   "<div style='position:absolute;left:"++show x++";top:"++show y++";"++
                 "width:"++show w++"; height:"++show h++";"++
-                "font-family:"++show fFam++";"++
+       {-         "font-family:"++show fFam++";"++
                 "font-size:"++show fSiz++"pt;"++
                 (if fBld then "font-weight: bold;" else "")++
                 (if fItlc then "font-style: italic;" else "")++
                 "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"++
                 (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
-                           else "")++"'>"++
+                           else "")   ++ -} "'>"++
                 concatMap htmlChar str ++ "</div>"
- where htmlChar '\n' = "<br/>"
+ where htmlChar '\n' = "n" --"<br/>"
        --htmlChar ' '  = "&#8194;"
-       htmlChar ' '  = "&nbsp;"
-       htmlChar '<'  = "&lt;"
-       htmlChar '>'  = "&gt;"
+      -- htmlChar ' '  = "&nbsp;"
+       htmlChar '<'  = "lt;"
+       htmlChar '>'  = "gt;"
        htmlChar c    = [c]
+
+ 
+ellipseHTML fh x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $ "" {-
+  "<svg width='100%' height='100%' version='1.1'>" ++
+  "<ellipse cx='300' cy='150' rx='200' ry='80' "++
+  "style='fill:rgb(200,100,50);"++
+  "stroke:rgb(0,0,100);stroke-width:2'/>" ++
+  "</svg>"-}
+  {-
+  "<div style='position:absolute;left:"++show x++";top:"++show y++";"++
+                "width:"++show w++"; height:"++show h++";"++
+                "background-color:rgb("++show (fr::Int)++","++show (fg::Int)++","++show (fb::Int)++");" ++
+  "'></div>"                
+-}
 
 
 renderArr :: (DocNode node, DrawableClass drawWindow) => Handle -> Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
@@ -312,6 +326,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
                }
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         ; drawArc dw gc False x y w h (0*64) (360*64)
+        ; ellipseHTML fh x' y' w h (scaleInt scale lw' `max` 1) lColor fColor
         }
 
     (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
