@@ -6,7 +6,7 @@ license-file: ""
 copyright: (c) 2007 Martijn Schrage
 maintainer: martijn@cs.uu.nl
 build-depends: Cabal -any, base -any, gtk >=0.9.11, haskell98 -any,
-               parsec >=2.0, time >=1.0
+               network ==2.0, parsec >=2.0, time >=1.0
 stability: experimental
 homepage: http://www.cs.uu.nl/research/projects/proxima
 package-url:
@@ -55,12 +55,12 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima Proxima.Wrap
                Rendering.RenLayerTypes Rendering.RenLayerUtils
                Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
-               Rendering.RenUtils Rendering.Renderer Settings
-               UU.Parsing.CharParser UU.Parsing.Derived UU.Parsing.Interface
-               UU.Parsing.Machine UU.Parsing.MachineInterface UU.Parsing
-               DocTypes_Generated DocUtils_Generated DocumentEdit_Generated
-               Evaluator Main PresentationAG ProxParser ProxParser_Generated
-               Reducer ScannerSheet
+               Rendering.RenUtils Rendering.Renderer UU.Parsing.CharParser
+               UU.Parsing.Derived UU.Parsing.Interface UU.Parsing.Machine
+               UU.Parsing.MachineInterface UU.Parsing DocTypes_Generated
+               DocUtils_Generated DocumentEdit_Generated Evaluator Main
+               PresentationAG ProxParser ProxParser_Generated Reducer ScannerSheet
+               Settings
 ghc-prof-options:
 ghc-options: -prof -auto-all -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
