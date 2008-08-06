@@ -684,7 +684,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
     (StringA id x' y' w' h' _ vRef' str fColor bColor fnt _) ->
      do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
         ; when (str /= "") $ 
-           do { stringHTML fh str x' y' w' h' fnt fColor bColor
+           do { stringHTML fh id str x' y' w' h' fnt fColor bColor
               }
         }
 
@@ -699,7 +699,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
     (EllipseA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')       
         ; -- todo: take style into account
-        ; ellipseHTML fh x' y' w h (scaleInt scale lw' `max` 1) lColor fColor
+        ; ellipseHTML fh id x' y' w h (scaleInt scale lw' `max` 1) lColor fColor
         }
 
     (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
@@ -715,7 +715,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
         ; gcSetClipRegion gc newClipRegion
         
         ; -- todo: take style into account & clip
-        ; polyHTML fh x' y' w' h' pts' (scaleInt scale lw' `max` 1) lColor fColor
+        ; polyHTML fh id x' y' w' h' pts' (scaleInt scale lw' `max` 1) lColor fColor
         ; gcSetClipRegion gc oldClipRegion
         
         }
@@ -727,7 +727,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
 
-        ; divOpen fh x' y' w' h' bColor
+        ; divOpen fh id x' y' w' h' bColor
         ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
         ; divClose fh
         }
@@ -738,7 +738,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
 
-        ; divOpen fh x' y' w' h' bColor
+        ; divOpen fh id x' y' w' h' bColor
         ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
         ; divClose fh
         }
@@ -753,7 +753,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
                         HeadInFront -> reverse
                         HeadAtBack  -> Prelude.id
               
-        ; divOpen fh x' y' w' h' bColor
+        ; divOpen fh id x' y' w' h' bColor
         ; sequence_ $ order $
             zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
         ; divClose fh
@@ -776,14 +776,13 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
         ; let (vertexArrs, edgeArrs) = splitAt nrOfVertices arrs
         
         
-        --; divOpen fh x' y' w' h' bColor
+        ; divOpen fh id x' y' w' h' bColor
         ; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
         
         ; svgStart fh
         ; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
-        --; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
         ; svgEnd fh
-        --; divClose fh
+        ; divClose fh
         }
 
     (VertexA id x' y' w' h' _ _ bColor _ arr) ->
@@ -792,7 +791,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
         
-        ; divOpen fh x' y' w' h' bColor
+        ; divOpen fh id x' y' w' h' bColor
         ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderHTML" childDiffTrees) arr
         ; divClose fh
         }
@@ -807,8 +806,8 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
               ptHTML1 = (rlx' - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
               ptHTML2 = (rlx' - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
         
-        ; edgeHTML fh (lux',luy') (rlx',rly') (scaleInt scale lw' `max` 1) lColor
-        ; polyHTML fh 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
+        ; edgeHTML fh id (lux',luy') (rlx',rly') (scaleInt scale lw' `max` 1) lColor
+        ; polyHTML fh id 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
         }
 
     (StructuralA id arr) -> 
@@ -844,10 +843,11 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
   }
 
 
+showIDNr (IDA nr) = show nr
+showIDNr NoIDA    = debug Err "Renderer.showIDNr: NoIDA " $ show (-1)
 
-
-divOpen fh x y w h (r,g,b) = hPutStr fh $ 
-  "<div style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
+divOpen fh id x y w h (r,g,b) = hPutStr fh $ 
+  "<div id='"++showIDNr id++"' style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                 (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
                            else "")++
@@ -855,8 +855,8 @@ divOpen fh x y w h (r,g,b) = hPutStr fh $
 divClose fh = hPutStr fh "</div>"
 
  
-stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = hPutStr fh $ 
-  "<div style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
+stringHTML fh id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = hPutStr fh $ 
+  "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                  (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
                            else "")   ++ "'>"++
@@ -881,13 +881,13 @@ svgStart fh = hPutStr fh $
 svgEnd fh = hPutStr fh $ 
   "</svg>"
   
-edgeHTML fh (fromX,fromY) (toX, toY) lw (lr,lg,lb) = hPutStr fh $
+edgeHTML fh id (fromX,fromY) (toX, toY) lw (lr,lg,lb) = hPutStr fh $
   "<line x1='"++show fromX++"' y1='"++show fromY++"' x2='"++show toX++"' y2='"++show toY++"' "++
   "style='stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>"
   
   
-ellipseHTML fh x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
-  "<div style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
+ellipseHTML fh id x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
+  "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show (h+2)++"px;"++
                 "'>" ++
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
@@ -896,8 +896,8 @@ ellipseHTML fh x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
   "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
   "</svg></div>"
 -- TODO: why this max 4?
-polyHTML fh x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $  
-  "<div style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
+polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $  
+  "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show ((h+2)`max` 4)++"px;"++
                 "'>" ++
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
@@ -908,3 +908,14 @@ polyHTML fh x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
   "</svg></div>"
  where pointsStr = concat $ intersperse " " $ [show (x) ++ "," ++ show (y) | (x,y) <- pts ]
 -- don't correct for x-1 and y-1, since poly's seems to be rendererd +1 already
+
+
+
+
+{-
+Issues
+Structural, Parsing, and Locator have no HTML rendering, so their ids are not in rendering
+Graph, added div open and close
+Edge does not have div
+-}
+
