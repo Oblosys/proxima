@@ -46,27 +46,17 @@ if (xmlhttp.readyState==4)
     var newRendering = document.getElementById('newRendering');
     newRendering.innerHTML=xmlhttp.responseText;
     
-    var command = document.getElementById('op');
+    var updates = document.getElementById('updates');
     // getElementById seems to trigger parsing the responseText
     // after this, firstChild has a value, while it is null before
                 // newRendering.firstChild;
     
-    if (command.getAttribute('op') === 'add')
-    { var parentId = command.getAttribute('parentId');
-      var newChild = command.firstChild;
-      var parent = document.getElementById(parentId);
-      parent.appendChild( newChild );
-    debug('add to '+parentId+':'+parent+' '+newChild);
-    }    
-    else if (command.getAttribute('op') === 'remove')
-    { var parentId = command.getAttribute('parentId');
-      var targetId = command.getAttribute('targetId');
-      var parent = document.getElementById(parentId);
-      var target = document.getElementById(targetId);
-      parent.removeChild( target );
-      debug('remove '+targetId+' from '+parentId);
-    } 
-
+    
+ //   updateTree( updates.firstChild );
+    while (updates.firstChild)
+    { updateTree( updates.firstChild );
+    ; updates.removeChild(updates.firstChild);
+    }
     
     //var renderArea = document.getElementById('renderArea');
     //renderArea.removeChild( document.getElementById('root') ); //old rendering
@@ -97,6 +87,40 @@ if (xmlhttp.readyState==4)
     document.getElementById('renderArea').innerHTML='Server not available.';
     }
   }
+}
+
+function updateTree(update)
+{ var op = update.getAttribute('op');
+ 
+  if (op === 'add')
+  { var parentId = update.getAttribute('parentId');
+    var newChild = update.firstChild;
+    var parent = document.getElementById(parentId);
+    parent.appendChild( newChild );
+    debug('add to '+parentId+' '+newChild.getAttribute('Id'));
+  }    
+  else if (op === 'remove')
+  { var parentId = update.getAttribute('parentId');
+    var targetId = update.getAttribute('targetId');
+    var parent = document.getElementById(parentId);
+    var target = document.getElementById(targetId);
+    parent.removeChild( target );
+    debug('remove '+targetId+' from '+parentId);
+  } 
+  else if (op === 'replace')
+  { var parentId = update.getAttribute('parentId');
+    var targetId = update.getAttribute('targetId');
+    var parent = document.getElementById(parentId);
+    var target = document.getElementById(targetId);
+    parent.removeChild( target );
+     
+    var newChild = update.firstChild;
+    parent.appendChild( newChild );
+      
+      
+    debug('replace '+targetId+' at '+parentId+' by '+newChild.getAttribute('Id'));
+  } 
+
 }
 function debug(message)
 {
