@@ -75,8 +75,8 @@ initPPPresentation =
           ItemList (Bullet) $ toList_Item $
                                 [ StringItem "item_1"
                                 , HeliumItem -- simple trick to use parser: Needs an additional parse (F1) though!
-                                    --(ident "\\ x -> increaze x")
-                                    (ident "\\b -> \\x -> if b then ink x else x")
+                                    (ident "\\x -> increaze x")
+                                    --(ident "\\b -> \\x -> if b then ink x else x")
                                 , StringItem "item_2"
                                 , ListItem listItem
                                 ]
