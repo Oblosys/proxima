@@ -556,14 +556,16 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
           ; focusRenderingHTML <- readFile "focusRendering.html"
           ; seq (length focusRenderingHTML) $ return ()
           
-          ; let treeUpdates = case event of
+          
+          ; let treeUpdates = "<div id='updates'><div op='replace' parentId='renderArea' targetId='root'>"++"<div id='root'>"++renderingHTML ++ focusRenderingHTML++"</div>"++"</div></div>"
+{-          ; let treeUpdates = case event of
                                   KeyCharRen 'i' -> "<div id='updates'><div op='replace' parentId='renderArea' targetId='root'>"++testRenderingHTML++"</div></div>"
                                   KeyCharRen 'x' -> "<div id='updates'><div op='remove' parentId='1' targetId='2'></div></div>"
                                   KeyCharRen 'y' -> "<div id='updates'><div op='remove' parentId='3' targetId='4'></div></div>"
                                   KeyCharRen 'z' -> "<div id='updates'><div op='remove' parentId='3' targetId='4'></div><div op='remove' parentId='1' targetId='2'></div></div>"
                                   KeyCharRen 'a' -> "<div id='updates'><div op='add' parentId='1'><div id='2'>new</div></div></div>"
                                   _              -> "<div id='updates'></div>"
-
+-}
           ; hPutStr handle $ toHTTP $ "<div id='root'>"++
                                       treeUpdates ++
                                       --renderingHTML ++ focusRenderingHTML ++

@@ -86,8 +86,10 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
     --; debugLnIO Ren ("Arrangement is "++show arrangement)
     --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     ; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
+    ; renderArr clipRegion
+                (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
     ; fh <- openFile "rendering.html" WriteMode
-    ; renderArr fh clipRegion
+    ; renderHTML fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
     ; hClose fh
     }
@@ -100,10 +102,19 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
 renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
  do { clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
 
-    ; fh <- openFile "focusRendering.html" WriteMode
     ; let focusArrList = arrangeFocus focus arrangement
     ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
-    ; renderArr fh clipRegion
+    ; renderArr clipRegion
+                (wi,dw,gc) arrDb scale origin viewedArea
+                (DiffLeaf False)
+                (OverlayA NoIDA (xA arrangement) (yA arrangement)  
+                                (widthA arrangement) (heightA arrangement) 
+                                0 0 transparent
+                          HeadInFront
+                          focusArrList) 
+
+   ; fh <- openFile "focusRendering.html" WriteMode
+   ; renderHTML fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea
                 (DiffLeaf False)
                 (OverlayA NoIDA (xA arrangement) (yA arrangement)  
@@ -114,72 +125,10 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
    ; hClose fh
    }
 
-divOpen fh x y w h (r,g,b) = hPutStr fh $ 
-  "<div style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
-                "width:"++show w++"px;height:"++show h++"px;"++
-                (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
-                           else "")++
-                "'>" 
-divClose fh = hPutStr fh "</div>"
 
- 
-stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = hPutStr fh $ 
-  "<div style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
-                "width:"++show w++"px;height:"++show h++"px;"++
-                 (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
-                           else "")   ++ "'>"++
-                                
-  "<div style='position:absolute;left:0px;top:"++show (h `div` 2)++"px;"++
-                "width:"++show w++"px;height:"++show h++"px;"++
-                "font-family:"++show fFam++";"++
-                "font-size:"++show fSiz++"pt;"++
-                (if fBld then "font-weight: bold;" else "")++
-                (if fItlc then "font-style: italic;" else "")++
-                "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");'>"++
-                concatMap htmlChar str ++ "</div></div>"
- where htmlChar '\n' = "n" --"<br/>"
-       --htmlChar ' '  = "&#8194;"
-      -- htmlChar ' '  = "&nbsp;"
-       htmlChar '<'  = "lt;"
-       htmlChar '>'  = "gt;"
-       htmlChar c    = [c]
-
-svgStart fh = hPutStr fh $ 
-  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
-svgEnd fh = hPutStr fh $ 
-  "</svg>"
-  
-edgeHTML fh (fromX,fromY) (toX, toY) lw (lr,lg,lb) = hPutStr fh $
-  "<line x1='"++show fromX++"' y1='"++show fromY++"' x2='"++show toX++"' y2='"++show toY++"' "++
-  "style='stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>"
-  
-  
-ellipseHTML fh x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
-  "<div style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
-                "width:"++show (w+2)++"px;height:"++show (h+2)++"px;"++
-                "'>" ++
-  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
-  "<ellipse cx='"++show ((w `div` 2)+1)++"' cy='"++show ((h `div` 2)+1)++"' rx='"++show (w `div` 2)++"' ry='"++show (h `div` 2)++"' "++
-  "style='fill:rgb("++show fr++","++show fg++","++show fb++");"++
-  "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
-  "</svg></div>"
--- TODO: why this max 4?
-polyHTML fh x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $  
-  "<div style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
-                "width:"++show (w+2)++"px;height:"++show ((h+2)`max` 4)++"px;"++
-                "'>" ++
-  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
-  "<polygon points='"++pointsStr++"' "++
-  "style='fill:"++(if fr == -1 then "transparent; "
-                               else "rgb("++show fr++","++show fg++","++show fb++");")++
-  "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
-  "</svg></div>"
- where pointsStr = concat $ intersperse " " $ [show (x) ++ "," ++ show (y) | (x,y) <- pts ]
--- don't correct for x-1 and y-1, since poly's seems to be rendererd +1 already
-
-renderArr :: (DocNode node, DrawableClass drawWindow) => Handle -> Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
+renderArr :: (DocNode node, DrawableClass drawWindow) => Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
                                          (Point, Size) -> DiffTree -> Arrangement node -> IO ()    
-renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
+renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
 
@@ -192,7 +141,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
                        ; let childDiffTrees = case diffTree of
                                                 DiffLeaf c     -> repeat $ DiffLeaf c
                                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-                       ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs 
+                       ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs 
                        }
                in case arrangement of
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
@@ -242,8 +191,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
               ; case pangoItems of 
                   [pangoItem] -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x (y+ascnt) glyphItem
-                                    ; stringHTML fh str x' y' w' h' fnt fColor bColor
-                                    } 
+                                    }
                   pangoItem:_ -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
                                     ; drawGlyphs dw gc x y glyphItem
                                     ; debug Err ("Renderer.renderArr: too many pango items for string \""++str++"\"") $ return ()
@@ -342,7 +290,6 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
                }
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         ; drawArc dw gc False x y w h (0*64) (360*64)
-        ; ellipseHTML fh x' y' w h (scaleInt scale lw' `max` 1) lColor fColor
         }
 
     (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
@@ -371,7 +318,6 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 
                                        , joinStyle = JoinRound }
         ; drawPolygon dw gc False pts
-        ; polyHTML fh x' y' w' h' pts' (scaleInt scale lw' `max` 1) lColor fColor
         ; gcSetClipRegion gc oldClipRegion
         
         }
@@ -396,16 +342,14 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
                                                  else tail.init $
                                                       scanl (\n1 n2 -> n1 + (scaleInt scale (pd-1))+n2 ) 0 
                                                             (map (scaleInt scale . widthA) arrs)]
-              ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
              }
           else 
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
-              ; divOpen fh x' y' w' h' bColor
-              ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
-              ; divClose fh
+              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
               }
         }
 
@@ -429,16 +373,14 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
                                                      scanl (\n1 n2 -> n1+(scaleInt scale (pd-1))+n2 ) 0 
                                                            (map (scaleInt scale . heightA) arrs)]
         
-              ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
               }
           else 
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = gtkColor bColor --  if isCleanDT diffTree then gtkColor bColor else red
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }
-              ; divOpen fh x' y' w' h' bColor
-              ; sequence_ $ zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
-              ; divClose fh
+              ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
               }
         }
 
@@ -466,15 +408,12 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         ; let order = case direction of
                         HeadInFront -> reverse
                         HeadAtBack  -> Prelude.id
-              
-        ; divOpen fh x' y' w' h' bColor
+                              
         ; sequence_ $ order $
-            zipWith (renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
-        ; divClose fh
-        
+            zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
         }
 
-    (GraphA id x' y' w' h' _ _ bColor nrOfVertices arrs) ->
+    (GraphA id x' y' w' h' _ _ bColor _ arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
@@ -493,20 +432,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
                     }        
               }
-        
-        ; let (vertexDiffTrees, edgeDiffTrees) = splitAt nrOfVertices childDiffTrees
-        ; let (vertexArrs, edgeArrs) = splitAt nrOfVertices arrs
-        
-        
-        --; divOpen fh x' y' w' h' bColor
-        ; sequence_ $ reverse $ zipWith (renderArr fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
-        
-        ; svgStart fh
-        ; sequence_ $ reverse $ zipWith (renderArr fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
-        --; sequence_ $ reverse $ zipWith (renderArr fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
-        ; svgEnd fh
-        --; divClose fh
-        
+        ; sequence_ $ reverse $ zipWith (renderArr newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
         ; gcSetClipRegion gc oldClipRegion
         }
 
@@ -524,9 +450,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) vertexColor vertexColor
 
-        ; divOpen fh x' y' w' h' bColor
-        ; renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
-        ; divClose fh
+        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
@@ -537,15 +461,8 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
               pt1 = (tox - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
               pt2 = (tox - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
         
-        
-              ptHTML1 = (rlx' - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
-              ptHTML2 = (rlx' - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
-        
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         ; drawLine dw gc (fromx,fromy) (tox,toy) 
-        ; edgeHTML fh (lux',luy') (rlx',rly') (scaleInt scale lw' `max` 1) lColor
-        ; polyHTML fh 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
-
         -- draw arrow head
         ; drawPolygon dw gc True [pt1, pt2, (tox, toy)] 
         }
@@ -559,7 +476,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) structuralBGColor structuralBGColor
        
-        ; renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
+        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
     
     (ParsingA id arr) ->
@@ -571,7 +488,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         ; when arrDb $
             drawFilledRectangle dw gc (Rectangle x y w h) parsingBGColor parsingBGColor
        
-        ; renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
+        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     (LocatorA _ arr) ->
@@ -579,7 +496,7 @@ renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderArr fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
+        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
@@ -710,3 +627,284 @@ arrangedFocusArea fArrList = -- compute the region that is covered by the focus
   let (xs, ys, xs', ys') = unzip4 [(xA fLine, yA fLine, xA fLine + widthA fLine, yA fLine + heightA fLine) | fLine <- fArrList ]
   in  (if null xs then 0 else minimum xs, if null ys then 0 else minimum ys, maximum (0:xs'), maximum (0:ys'))
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+renderHTML :: (DocNode node, DrawableClass drawWindow) => Handle -> Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
+                                         (Point, Size) -> DiffTree -> Arrangement node -> IO ()    
+renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
+ do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
+     --if True then return () else    -- uncomment this line to skip rendering
+
+
+     if (isSelfCleanDT diffTree)  -- if self is clean, only render its children (if present)
+     then if (isCleanDT diffTree)
+          then return ()
+          else let renderChildren x' y' arrs =
+                    do { let (x,y)=(lux+scaleInt scale x', luy+scaleInt scale y')
+                       ; let childDiffTrees = case diffTree of
+                                                DiffLeaf c     -> repeat $ DiffLeaf c
+                                                DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+                       ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs 
+                       }
+               in case arrangement of
+                    RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
+                    ColA     _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' arrs
+                    OverlayA _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' arrs
+                    GraphA   _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' arrs
+                    VertexA  _ x' y' _ _ _ _ _ _ arr  -> renderChildren x' y' [arr]
+                    StructuralA _ arr           -> renderChildren 0 0 [arr]
+                    ParsingA _ arr              -> renderChildren 0 0 [arr]
+                    LocatorA _ arr              -> renderChildren 0 0 [arr]
+                    _ -> return ()
+     else --when (overlap ((lux+xA arrangement, luy+yA arrangement),
+          --               (widthA arrangement, heightA arrangement)) viewedArea) $
+          -- only render when the arrangement is in the viewed area   
+  case arrangement of 
+
+    (EmptyA  id x' y' w' h' _ _ bColor) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; when (not (isTransparent bColor)) $
+           do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
+              ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
+              }
+        }
+      
+    (StringA id x' y' w' h' _ vRef' str fColor bColor fnt _) ->
+     do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
+        ; when (str /= "") $ 
+           do { stringHTML fh str x' y' w' h' fnt fColor bColor
+              }
+        }
+
+    (ImageA id x' y' w' h' _ _ src style lColor bColor) ->
+     do { return ()               
+        }
+
+    (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
+     do { return () 
+        }
+
+    (EllipseA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')       
+        ; -- todo: take style into account
+        ; ellipseHTML fh x' y' w h (scaleInt scale lw' `max` 1) lColor fColor
+        }
+
+    (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let pts = map (\(x',y') -> (x+scaleInt scale x', y+scaleInt scale y')) pts'
+  
+        
+        -- the old clip region needs to be passed around, since gtk does not offer a getClip..
+        ; newClipRegion <- regionRectangle $ Rectangle x y w h
+        ; regionIntersect newClipRegion oldClipRegion
+        -- intersect, so we don't draw outside the old clip region
+       
+        ; gcSetClipRegion gc newClipRegion
+        
+        ; -- todo: take style into account & clip
+        ; polyHTML fh x' y' w' h' pts' (scaleInt scale lw' `max` 1) lColor fColor
+        ; gcSetClipRegion gc oldClipRegion
+        
+        }
+
+
+    (RowA id x' y' w' h' _ _ bColor arrs) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
+
+        ; divOpen fh x' y' w' h' bColor
+        ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+        ; divClose fh
+        }
+
+    (ColA id x' y' w' h' _ _ bColor _ arrs) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+
+        ; divOpen fh x' y' w' h' bColor
+        ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+        ; divClose fh
+        }
+
+    (OverlayA id x' y' w' h' _ _ bColor direction arrs) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+
+        ; let order = case direction of
+                        HeadInFront -> reverse
+                        HeadAtBack  -> Prelude.id
+              
+        ; divOpen fh x' y' w' h' bColor
+        ; sequence_ $ order $
+            zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+        ; divClose fh
+        
+        }
+
+    (GraphA id x' y' w' h' _ _ bColor nrOfVertices arrs) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+
+        ; newClipRegion <- regionRectangle $ Rectangle x y w h
+        ; regionIntersect newClipRegion oldClipRegion
+        -- intersect, so we don't draw outside the old clip region
+        ; gcSetClipRegion gc newClipRegion
+        
+        
+        ; let (vertexDiffTrees, edgeDiffTrees) = splitAt nrOfVertices childDiffTrees
+        ; let (vertexArrs, edgeArrs) = splitAt nrOfVertices arrs
+        
+        
+        --; divOpen fh x' y' w' h' bColor
+        ; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
+        
+        ; svgStart fh
+        ; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
+        --; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
+        ; svgEnd fh
+        --; divClose fh
+        }
+
+    (VertexA id x' y' w' h' _ _ bColor _ arr) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+        
+        ; divOpen fh x' y' w' h' bColor
+        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; divClose fh
+        }
+
+    (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
+     do { let (fromx, fromy, tox, toy)=(lux+scaleInt scale lux', luy+scaleInt scale luy', lux+scaleInt scale rlx', luy+scaleInt scale rly')
+        ; let angleFromEnd = atan (fromIntegral (tox-fromx) / fromIntegral (toy-fromy)) -- atan works okay for pos and neg infinity
+                             + if fromy > toy then pi  else 0
+              
+        
+        
+              ptHTML1 = (rlx' - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
+              ptHTML2 = (rlx' - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
+        
+        ; edgeHTML fh (lux',luy') (rlx',rly') (scaleInt scale lw' `max` 1) lColor
+        ; polyHTML fh 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
+        }
+
+    (StructuralA id arr) -> 
+     do { let (x,y,w,h)=( lux+scaleInt scale (xA arr), luy+scaleInt scale (yA arr) 
+                        , scaleInt scale (widthA arr), scaleInt scale (heightA arr) )
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderHTML" childDiffTrees) arr
+        }
+    
+    (ParsingA id arr) ->
+     do { let (x,y,w,h)=( lux+scaleInt scale (xA arr), luy+scaleInt scale (yA arr) 
+                        , scaleInt scale (widthA arr), scaleInt scale (heightA arr) )
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderHTML" childDiffTrees) arr
+        }
+
+    (LocatorA _ arr) ->
+     do { let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderHTML" childDiffTrees) arr
+        }
+
+    _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
+        
+
+  ; when arrDb $
+      renderID (wi,dw,gc) scale (lux+xA arrangement) (luy+yA arrangement) (idA arrangement)      
+  }
+
+
+
+
+divOpen fh x y w h (r,g,b) = hPutStr fh $ 
+  "<div style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
+                "width:"++show w++"px;height:"++show h++"px;"++
+                (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
+                           else "")++
+                "'>" 
+divClose fh = hPutStr fh "</div>"
+
+ 
+stringHTML fh str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = hPutStr fh $ 
+  "<div style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
+                "width:"++show w++"px;height:"++show h++"px;"++
+                 (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
+                           else "")   ++ "'>"++
+                                
+  "<div style='position:absolute;left:0px;top:"++show (h `div` 2)++"px;"++
+                "width:"++show w++"px;height:"++show h++"px;"++
+                "font-family:"++show fFam++";"++
+                "font-size:"++show fSiz++"pt;"++
+                (if fBld then "font-weight: bold;" else "")++
+                (if fItlc then "font-style: italic;" else "")++
+                "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");'>"++
+                concatMap htmlChar str ++ "</div></div>"
+ where htmlChar '\n' = "n" --"<br/>"
+       --htmlChar ' '  = "&#8194;"
+      -- htmlChar ' '  = "&nbsp;"
+       htmlChar '<'  = "lt;"
+       htmlChar '>'  = "gt;"
+       htmlChar c    = [c]
+
+svgStart fh = hPutStr fh $ 
+  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
+svgEnd fh = hPutStr fh $ 
+  "</svg>"
+  
+edgeHTML fh (fromX,fromY) (toX, toY) lw (lr,lg,lb) = hPutStr fh $
+  "<line x1='"++show fromX++"' y1='"++show fromY++"' x2='"++show toX++"' y2='"++show toY++"' "++
+  "style='stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>"
+  
+  
+ellipseHTML fh x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
+  "<div style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
+                "width:"++show (w+2)++"px;height:"++show (h+2)++"px;"++
+                "'>" ++
+  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
+  "<ellipse cx='"++show ((w `div` 2)+1)++"' cy='"++show ((h `div` 2)+1)++"' rx='"++show (w `div` 2)++"' ry='"++show (h `div` 2)++"' "++
+  "style='fill:rgb("++show fr++","++show fg++","++show fb++");"++
+  "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
+  "</svg></div>"
+-- TODO: why this max 4?
+polyHTML fh x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $  
+  "<div style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
+                "width:"++show (w+2)++"px;height:"++show ((h+2)`max` 4)++"px;"++
+                "'>" ++
+  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
+  "<polygon points='"++pointsStr++"' "++
+  "style='fill:"++(if fr == -1 then "transparent; "
+                               else "rgb("++show fr++","++show fg++","++show fb++");")++
+  "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
+  "</svg></div>"
+ where pointsStr = concat $ intersperse " " $ [show (x) ++ "," ++ show (y) | (x,y) <- pts ]
+-- don't correct for x-1 and y-1, since poly's seems to be rendererd +1 already
