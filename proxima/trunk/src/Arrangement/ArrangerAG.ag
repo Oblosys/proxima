@@ -133,9 +133,9 @@ structure of layout tree: no children/one child/list of children
 
   | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
   | VertexP WithP StructuralP ParsingP LocatorP 
-      @child.
+      child.
   | RowP ColP OverlayP GraphP FormatterP
-      @layoutList.
+      layoutList.
 
 all Layout attributes:
 
@@ -232,6 +232,18 @@ ATTR LayoutList [  font : Font textColor, lineColor, fillColor, backgroundColor 
 --                 popupMenuItems : {[ PopupMenuItem @doc @clip ]} 
                 | | ]
 
+
+-- Unique ids
+
+ATTR Root Layout LayoutList [ | idCounter : Int | ]
+
+SEM Layout
+  | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
+      lhs.idCounter = @lhs.idCounter + 1
+  | VertexP WithP StructuralP ParsingP LocatorP 
+      child.idCounter = @lhs.idCounter + 1
+  | RowP ColP OverlayP GraphP FormatterP
+      layoutList.idCounter = @lhs.idCounter + 1
 
 
 -- Font Metrics
@@ -881,29 +893,29 @@ SEM LayoutList
 ATTR Layout [  | | arrangement : {Arrangement @node} ]
 SEM Layout
   | EmptyP
-      lhs.arrangement = arrangeWhenViewed        @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          EmptyA (idAFromP @id)  @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor
+      lhs.arrangement = arrangeWhenViewed        @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          EmptyA (IDA @lhs.idCounter) {- (idAFromP @id) -}  @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor
   | StringP 
-      lhs.arrangement = arrangeWhenViewed        @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          StringA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.backgroundColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
+      lhs.arrangement = arrangeWhenViewed        @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          StringA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.backgroundColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
   | RectangleP
-      lhs.arrangement = arrangeWhenViewed           @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
+      lhs.arrangement = arrangeWhenViewed           @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          RectangleA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
   | EllipseP
-      lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          EllipseA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
+      lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          EllipseA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
   | ImageP
-      lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          ImageA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src @style @lhs.lineColor @lhs.backgroundColor
+      lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          ImageA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src @style @lhs.lineColor @lhs.backgroundColor
   | PolyP      
-      lhs.arrangement = arrangeWhenViewed                  @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
+      lhs.arrangement = arrangeWhenViewed                  @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           let mkPoint (rx, ry) = ( round (rx * fromIntegral ((@finalWidth-1) `max` 0))
 			                         , round (ry * fromIntegral ((@finalHeight-1) `max` 0)) )
-		                  in  PolyA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
+		                  in  PolyA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
 		      
 {-
   | TestPresentation
-      lhs.arrangement =  RectangleA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight 0 Solid @lhs.lineColor @lhs.fillColor
+      lhs.arrangement =  RectangleA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight 0 Solid @lhs.lineColor @lhs.fillColor
 
 
 -}
@@ -924,8 +936,8 @@ SEM Layout
 						  ))$ 
                         -}
 						--debug Err ("Row in view with #children: "++ show @layoutList.nrOfChildren ++" "++ show @finalWidth ++" "++ show @layoutList.finalWidthList) $
-                          arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @layoutList.arrangementList
+                          arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          RowA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @layoutList.arrangementList
   | ColP 
       lhs.arrangement = {-
 						debug Arr ( "colattrs:"++show 
@@ -940,14 +952,14 @@ SEM Layout
                           , @lhs.assignedWidth
                               ))$
 	                    -}
-					    arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          ColA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @formatted @layoutList.arrangementList 
+					    arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          ColA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @formatted @layoutList.arrangementList 
   | OverlayP 
-      lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          OverlayA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @direction @layoutList.arrangementList
+      lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          OverlayA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @direction @layoutList.arrangementList
   | GraphP 
-      lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          GraphA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
+      lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          GraphA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                  (length @layoutList.vertices)
                                  ( @layoutList.arrangementList  ++
                                    mkEdges @edges @layoutList.vertices @lhs.lineColor )
@@ -955,26 +967,26 @@ SEM Layout
                         -- This could be optimized further, but is probably not worth the effort.
     | VertexP
       lhs.arrangement = arrangeWhenViewed @lhs.absx @lhs.absy
-                                         @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (idAFromP @id) $
-                          VertexA (idAFromP @id) @lhs.x @lhs.y 
+                                         @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          VertexA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y 
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                   (\a -> let (x,y) = @outline a in (x+ @child.hRef,y+ @child.vRef)) @child.arrangement
   | FormatterP
       -- unfoldedFormatter.arrangement handled by copy rule
 {-
   | LayedOutRowP 
-      lhs.arrangement = RowA (idAFromP @id) @lhs.x @lhs.y @finalWidth @finalHeight @finalVRef @finalHRef @lhs.backgroundColor @layoutList.arrangementList
+      lhs.arrangement = RowA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalVRef @finalHRef @lhs.backgroundColor @layoutList.arrangementList
   | MatrixPresentation 
       lhs.arrangement = StringA NoID 0 40 0 0 0 0 ("unimplemented AttrPresentation MatrixPresentation") (0,0,0) defaultFont []
-       -- MatrixPresentation (idAFromP @id) @layoutList.arrangementList @lhs.x @lhs.y finalWidth finalHeight @lhs.backgroundColor
+       -- MatrixPresentation (IDA @lhs.idCounter) {- (idAFromP @id) -} @layoutList.arrangementList @lhs.x @lhs.y finalWidth finalHeight @lhs.backgroundColor
   | AlternativePresentation -- remove the alternative layout
       lhs.arrangement = @layoutList.arrangementList !! @firstFit 
    -- with node is removed by copy rule
 -}
   | StructuralP 
-      lhs.arrangement = StructuralA (idAFromP @id) @child.arrangement
+      lhs.arrangement = StructuralA (IDA @lhs.idCounter) {- (idAFromP @id) -} @child.arrangement
   | ParsingP 
-      lhs.arrangement = ParsingA (idAFromP @id) @child.arrangement
+      lhs.arrangement = ParsingA (IDA @lhs.idCounter) {- (idAFromP @id) -} @child.arrangement
   | LocatorP 
       lhs.arrangement = LocatorA @location @child.arrangement
   | ArrangedP

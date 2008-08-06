@@ -45,27 +45,29 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
 --    ; debugLnIO Err ("Pruned Presentation"++show prunedPres)
 --    ; debugLnIO Arr ("Old arrangement "++ show oldArrangement)
     
-    ; (attrTree, maxFDepth) <- fixed fontMetricsRef focus prunedPres pres viewedArea oldViewedArea oldArrangement
+    ; (attrTree, idCounter', maxFDepth) <- fixed fontMetricsRef (getIDACounter state') focus prunedPres pres viewedArea oldViewedArea oldArrangement
+    ; let state'' = state' { getIDACounter = idCounter' }
     ; when (maxFDepth > 1) $
         debugLnIO Err "Nested formatters may be arranged incorrectly"
-    ; return (attrTree, state')
+    ; return (attrTree, state'')
     }
 
-fixed :: (Show node, Show token) => FontMetricsRef -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
-         Arrangement node -> IO (Arrangement node, Int)
-fixed fontMetricsRef focus (pres :: Layout doc node clip token) (unprunedPres :: Layout doc node clip token) viewedArea oldViewedArea oldArrangement = 
- mdo { (fontMetrics,arrangement, maxFDepth) <- f (fontMetrics,arrangement, maxFDepth)
-    ; return (arrangement, maxFDepth)
+fixed :: (Show node, Show token) => FontMetricsRef -> Int -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
+         Arrangement node -> IO (Arrangement node, Int, Int)
+fixed fontMetricsRef idACounter focus (pres :: Layout doc node clip token) (unprunedPres :: Layout doc node clip token) viewedArea oldViewedArea oldArrangement = 
+ mdo { (fontMetrics,arrangement, idACounter', maxFDepth) <- f (fontMetrics,arrangement, idACounter, maxFDepth)
+    ; return (arrangement, idACounter', maxFDepth)
     }
- where f :: (FontMetrics, Arrangement node, Int) ->
-            IO (FontMetrics, Arrangement node, Int) -- doc and node are scoped type variables
-       f (fontMetrics,_, _) = 
-         do { let (allFonts, arrangement, maxFDepth,_) = -- _ is the self attribute
+ where f :: (FontMetrics, Arrangement node, Int, Int) ->
+            IO (FontMetrics, Arrangement node, Int, Int) -- doc and node are scoped type variables
+       f (fontMetrics,_, _, _) = 
+         do { let (allFonts, arrangement, idACounter', maxFDepth,_) = -- _ is the self attribute
                     sem_Root (Root pres) [defaultFont]
                                                defaultBackColor defaultFillColor
                                                focus
                                                defaultFont 
                                                fontMetrics
+                                               idACounter
                                                defaultLineColor
                                                Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
                                                (Just oldArrangement)
@@ -91,6 +93,6 @@ fixed fontMetricsRef focus (pres :: Layout doc node clip token) (unprunedPres ::
             ; newMetrics <- mkFontMetrics newFonts
             ; let updatedMetrics = newMetrics `Map.union` queriedMetrics
             ; writeIORef fontMetricsRef updatedMetrics            
-            ; return (updatedMetrics, arrangement, maxFDepth)
+            ; return (updatedMetrics, arrangement, idACounter', maxFDepth)
             }
             
