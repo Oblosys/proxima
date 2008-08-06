@@ -517,7 +517,7 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
     ; putStrLn $ "arg = " ++ arg
     ; if arg == ""  
       then
-       do { page <- readFile "Editor.xhtml"
+       do { page <- readFile "src/proxima/scripts/Editor.html" -- in Proxima tree, changes location when proxima is not in subdir
           ; seq (length page) $ return ()
           -- ; print page
           ; hPutStr handle $ toHTTP page
@@ -549,14 +549,24 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
                             ; drawFocus settings renderingLvlVar window dw gc vp            
                             }
           
+          ; testRenderingHTML <- readFile "testRendering.html"
+          ; seq (length testRenderingHTML) $ return ()
           ; renderingHTML <- readFile "rendering.html"
           ; seq (length renderingHTML) $ return ()
           ; focusRenderingHTML <- readFile "focusRendering.html"
           ; seq (length focusRenderingHTML) $ return ()
+          
+          ; let treeUpdates = case event of
+                                  KeyCharRen 'i' -> "<div id='updates'><div op='replace' parentId='renderArea' targetId='root'>"++testRenderingHTML++"</div></div>"
+                                  KeyCharRen 'x' -> "<div id='updates'><div op='remove' parentId='1' targetId='2'></div></div>"
+                                  KeyCharRen 'y' -> "<div id='updates'><div op='remove' parentId='3' targetId='4'></div></div>"
+                                  KeyCharRen 'z' -> "<div id='updates'><div op='remove' parentId='3' targetId='4'></div><div op='remove' parentId='1' targetId='2'></div></div>"
+                                  KeyCharRen 'a' -> "<div id='updates'><div op='add' parentId='1'><div id='2'>new</div></div></div>"
+                                  _              -> "<div id='updates'></div>"
+
           ; hPutStr handle $ toHTTP $ "<div id='root'>"++
-                                      --"B "++ellipseXML++"la"++
-                                      --"<div style='position: absolute; left: 100px; top: 100px'>blaaa</div>"++
-                                      renderingHTML ++ focusRenderingHTML ++
+                                      treeUpdates ++
+                                      --renderingHTML ++ focusRenderingHTML ++
                                       "</div>"
           ; putStrLn "closing socket"
           ; hClose handle
@@ -564,12 +574,6 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
           }
    -- ; handleKeys handle
     }
-ellipseXML = "<svg width='10' height='10' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
-  "<ellipse cx='5' cy='5' rx='5' ry='5' "++
-  "style='fill:rgb(200,100,50);"++
-  "stroke:rgb(0,0,100);stroke-width:1'/>" ++
-  "</svg>"
-
 handleKey ('K':'e':'y':event) editStr focus = return $
  let keyCode = read $ takeWhile (/='?') event
      key = 
