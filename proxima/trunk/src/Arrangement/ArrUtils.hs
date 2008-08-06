@@ -123,57 +123,57 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 -- Does not take into account direction of Overlay
 
 --       new arrangement     old arrangement
-diffArr (StructuralA id arr) arr'                   = let childDT = diffArr arr arr'
+diffArr (StructuralA _ arr) arr'                   = let childDT = diffArr arr arr'
                                                       in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
-diffArr arr                  (StructuralA id arr')  = diffArr arr arr'
-diffArr (ParsingA id arr)    arr'                   = let childDT = diffArr arr arr'
+diffArr arr                  (StructuralA _ arr')  = diffArr arr arr'
+diffArr (ParsingA _ arr)    arr'                   = let childDT = diffArr arr arr'
                                                       in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
-diffArr arr                  (ParsingA id arr')     = diffArr arr arr'
+diffArr arr                  (ParsingA _ arr')     = diffArr arr arr'
 diffArr (LocatorA l arr)     arr'                   = let childDT = diffArr arr arr'
                                                       in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
 diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
 -- StructuralA ParsingA and LocatorA elts
 
-diffArr (EmptyA id x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeaf $ x==x' && y==y' && w==w' && h==h' && bc == bc'                                                         
-diffArr (EmptyA id x y w h hr vr bc)     _                       = DiffLeaf False
-diffArr (StringA id x y w h hr vr str lc bc f _) (StringA _ x' y' w' h' hr' vr' str' lc' bc' f' _) = 
+diffArr (EmptyA _ x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeaf $ x==x' && y==y' && w==w' && h==h' && bc == bc'                                                         
+diffArr (EmptyA _ x y w h hr vr bc)     _                       = DiffLeaf False
+diffArr (StringA _ x y w h hr vr str lc bc f _) (StringA _ x' y' w' h' hr' vr' str' lc' bc' f' _) = 
   DiffLeaf $ x==x' && y==y' && w==w' && h==h' && str==str' && lc==lc' && bc==bc' && f==f'
-diffArr (StringA id x y w h hr vr str lc bc f _)  _                                    = DiffLeaf False
-diffArr (ImageA id x y w h hr vr src style fc bc) (ImageA id' x' y' w' h' hr' vr' src' style' fc' bc') =
+diffArr (StringA _ x y w h hr vr str lc bc f _)  _                                    = DiffLeaf False
+diffArr (ImageA _ x y w h hr vr src style fc bc) (ImageA _ x' y' w' h' hr' vr' src' style' fc' bc') =
   DiffLeaf $ x==x' && y==y' && w==w' && h==h' && src == src' && style == style' && fc == fc' && bc == bc'
-diffArr (ImageA id  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
-diffArr (PolyA id x y w h hr vr pts lw style lc fc bc) (PolyA id' x' y' w' h' hr' vr' pts' lw' style' lc' fc' bc') =
+diffArr (ImageA _  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (PolyA _ x y w h hr vr pts lw style lc fc bc) (PolyA _ x' y' w' h' hr' vr' pts' lw' style' lc' fc' bc') =
   DiffLeaf $ x==x' && y==y' && w==w' && h==h' && pts == pts' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc'
-diffArr (PolyA id  _ _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
-diffArr (RectangleA id x y w h hr vr lw style lc fc bc) (RectangleA id' x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
+diffArr (PolyA _  _ _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (RectangleA _ x y w h hr vr lw style lc fc bc) (RectangleA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
   DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc'
-diffArr (RectangleA id  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
-diffArr (EllipseA id x y w h hr vr lw style lc fc bc) (EllipseA id' x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
+diffArr (RectangleA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (EllipseA _ x y w h hr vr lw style lc fc bc) (EllipseA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
   DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw'  && style == style' && lc == lc' && fc == fc' && bc == bc'
-diffArr (EllipseA id  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
-diffArr (EdgeA id x1 y1 x2 y2 hr vr lw lc) (EdgeA id' x1' y1' x2' y2' hr' vr' lw' lc') =
+diffArr (EllipseA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (EdgeA _ x1 y1 x2 y2 hr vr lw lc) (EdgeA _ x1' y1' x2' y2' hr' vr' lw' lc') =
   DiffLeaf $ x1==x1' && y1==y1' && x2==x2' && y2==y2' && lw == lw'  && lc == lc'
-diffArr (EdgeA id  _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (EdgeA _  _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
 
-diffArr (RowA id x y w h hr vr bc arrs) (RowA id' x' y' w' h' hr' vr' bc' arrs') =  
+diffArr (RowA _ x y w h hr vr bc arrs) (RowA _ x' y' w' h' hr' vr' bc' arrs') =  
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
-diffArr (ColA id x y w h hr vr bc _ arrs) (ColA id' x' y' w' h' hr' vr' bc' _ arrs') = 
+diffArr (ColA _ x y w h hr vr bc _ arrs) (ColA _ x' y' w' h' hr' vr' bc' _ arrs') = 
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
-diffArr (OverlayA id x y w h hr vr bc d arrs) (OverlayA id' x' y' w' h' hr' vr' bc' d' arrs') =
+diffArr (OverlayA _ x y w h hr vr bc d arrs) (OverlayA _ x' y' w' h' hr' vr' bc' d' arrs') =
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
-diffArr (GraphA id x y w h hr vr bc nvs arrs) (GraphA id' x' y' w' h' hr' vr' bc' nvs' arrs') =
+diffArr (GraphA _ x y w h hr vr bc nvs arrs) (GraphA _ x' y' w' h' hr' vr' bc' nvs' arrs') =
   case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
     DiffNode childrenClean selfClean _ -> DiffLeaf (selfClean && childrenClean)
     _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeaf False  
     -- a graph is only clean when all children and the graph itself are clean
-diffArr arr@(RowA id x y w h hr vr bc arrs) _                            = DiffLeaf False 
-diffArr arr@(ColA id x y w h hr vr bc _ arrs) _                          = DiffLeaf False 
-diffArr arr@(OverlayA id x y w h hr vr bc _ arrs) _                        = DiffLeaf False 
-diffArr arr@(GraphA id x y w h hr vr bc nvs arrs) _                      = DiffLeaf False 
-diffArr (VertexA id x y w h hr vr bc ol arr) (VertexA id' x' y' w' h' hr' vr' bc' ol' arr') =
+diffArr arr@(RowA _ x y w h hr vr bc arrs) _                            = DiffLeaf False 
+diffArr arr@(ColA _ x y w h hr vr bc _ arrs) _                          = DiffLeaf False 
+diffArr arr@(OverlayA _ x y w h hr vr bc _ arrs) _                        = DiffLeaf False 
+diffArr arr@(GraphA _ x y w h hr vr bc nvs arrs) _                      = DiffLeaf False 
+diffArr (VertexA _ x y w h hr vr bc ol arr) (VertexA _ x' y' w' h' hr' vr' bc' ol' arr') =
  let childDT = diffArr arr arr'
  in  DiffNode (isCleanDT childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
-diffArr (VertexA id _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+diffArr (VertexA _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
 diffArr arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeaf False
 -- At the moment, we ignore outline and nrOfVertices
 
