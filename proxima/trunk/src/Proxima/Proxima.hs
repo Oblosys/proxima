@@ -85,7 +85,7 @@ proxima settings presentationSheet parseSheet scannerSheet
                           ((),     initEnr)
                           (EmptyP NoIDP,   PresentationLevel (EmptyP NoIDP) (initLayout,0))   
                           (LocalStateArr fontMetricsRef Nothing viewedAreaRef ((0,0),(0,0)) 0, LayoutLevel (EmptyP NoIDP) NoFocusP (DiffLeaf False))
-                          ((), ArrangementLevel (EmptyA NoIDA 0 0 0 0 0 0 transparent) NoFocusA (EmptyP NoIDP)) 
+                          ((), ArrangementLevel emptyA NoFocusA (EmptyP NoIDP)) 
                           -- (system (layer)local state,  initial higher level value)
                         
                           -- initial Rendering is given to startGUI.

@@ -33,6 +33,7 @@ data EditArrangement_ wrapped doc enr node clip token =
   | EnlargeRightArr
   | NormalizeArr
   | ParseArr
+  | RedrawArr  -- set arr level to EmptyA, so incremental renderer will redraw
   | Test2Arr
   | KeyCharArr Char
   | KeySpecialArr SpecialKey Modifiers
@@ -66,6 +67,7 @@ unarrangedA x y w h hrf vrf =
   PolyA (IDA (-10)) x y w h hrf vrf [(0,0),(w',0),(w',h'),(0,h'),(0,0),(w',h'),(w',0),(0,h')] 1 Transparent black white transparent
  where (h',w') = ((h-1) `max` 0, (w-1) `max` 0)
 
+emptyA = EmptyA (IDA (-1)) 0 0 0 0 0 0 transparent 
 
 -- empty will have size when it is stretched. But maybe empty should be ignored in the arrangement,
 -- although it might have a background color. Check out what desired focus behaviour is when navigating

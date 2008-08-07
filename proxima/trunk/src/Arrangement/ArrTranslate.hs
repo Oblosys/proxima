@@ -45,6 +45,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _
     EnlargeRightArr       -> (EnlargeRightLay,       state, arrLvl)
     NormalizeArr          -> (NormalizeLay,          state, arrLvl)
     ParseArr              -> (ParseLay,              state, arrLvl)
+    RedrawArr             -> (SkipLay 0,             state, (ArrangementLevel emptyA focus p))
     Test2Arr              -> (Test2Lay,              state, arrLvl)
     KeyCharArr c          -> (InsertLay c,           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
     KeySpecialArr c ms    -> (SkipLay 0,             state, arrLvl) 
