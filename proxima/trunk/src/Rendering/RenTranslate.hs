@@ -67,7 +67,7 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen F1Key ms        -> (ParseArr, state, renLvl)
     KeySpecialRen F2Key ms        -> ( cast (EvaluateDoc' :: EditDocument' doc enr node clip token)
                                      , state, renLvl)
-    KeySpecialRen F5Key ms        -> (NormalizeArr, state, renLvl)
+    KeySpecialRen F5Key ms        -> (RedrawArr, state, renLvl)
 
 
     KeySpecialRen UpKey (Modifiers True False False)   -> -- shift down
