@@ -1,5 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- v1 -->
 <html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
@@ -46,6 +47,9 @@ if (xmlhttp.readyState==4)
     var newRendering = document.getElementById('newRendering');
     newRendering.innerHTML=xmlhttp.responseText;
     
+    var focus = document.getElementById('focus');
+    
+    
     var updates = document.getElementById('updates');
     // getElementById seems to trigger parsing the responseText
     // after this, firstChild has a value, while it is null before
@@ -91,7 +95,7 @@ if (xmlhttp.readyState==4)
 
 function updateTree(update)
 { var op = update.getAttribute('op');
- 
+ /*
   if (op === 'add')
   { var parentId = update.getAttribute('parentId');
     var newChild = update.firstChild;
@@ -103,51 +107,80 @@ function updateTree(update)
   { var parentId = update.getAttribute('parentId');
     var targetId = update.getAttribute('targetId');
     var parent = document.getElementById(parentId);
+    if (parent==null)
+    { debug('parent '+parentId+' is null');
+      return;
+    }
+    
     var target = document.getElementById(targetId);
     parent.removeChild( target );
     debug('remove '+targetId+' from '+parentId);
   } 
-  else if (op === 'replace')
-  { var parentId = update.getAttribute('parentId');
-    var targetId = update.getAttribute('targetId');
-    var parent = document.getElementById(parentId);
-    var target = document.getElementById(targetId);
-    parent.removeChild( target );
-     
-    var newChild = update.firstChild;
-    parent.appendChild( newChild );
+  else 
+  */
+  if (op === 'replace')
+  { var path = update.childNodes[0];
+    var newChild = update.childNodes[1];
+    
+    var oldChild = select(path, document.getElementById('proxima'));
+    
+    var parent = oldChild.parentNode;
+    
+    parent.replaceChild(newChild,oldChild);
       
-      
-    debug('replace '+targetId+' at '+parentId+' by '+newChild.getAttribute('Id'));
+//    debug('replace '+targetId+' at '+parentId+' by '+newChild.getAttribute('Id'));
   } 
 
 }
+
+function select(path, node)
+{ var step = path.firstChild;
+  if (!step)
+    return node;
+  else
+    { path.removeChild(step);
+      var childNr = parseInt( step.getAttribute('childNr') ); 
+      var child = node.childNodes[childNr];
+      return (select (path, child));
+    }
+}
+
 function debug(message)
 {
     document.getElementById('debugMessage').innerHTML=message;
 }
+var shiftDown = false;
+var ctrlDown = false;
+var altDown = false;
 
 function init()
 {
+    
     if (document.addEventListener)
     {
        document.addEventListener("keydown",keydown,false);
+       document.addEventListener("keyup",keyup,false);
        document.addEventListener("keypress",keypress,false);
     }
     else if (document.attachEvent) // IE7
     {
        document.attachEvent("onkeydown", keydown);
+       document.attachEvent("onkeyup", keyup);
        document.attachEvent("onkeypress", keypress);
     }
     else
     {
        document.onkeydown= keydown;
+       document.onkeyup= keyup;
        document.onkeypress= keypress;
     }
 //    setRefreshTimer(10);
+
+    refresh();
+    loadXMLDoc('Key116?'); // put this one in refresh?
 }
 
-
+/*
 function setRefreshTimer(ms)
 {  
     setTimeout('refresh()',ms);
@@ -157,6 +190,19 @@ function refresh()
 {
     loadXMLDoc('SpecialRefresh?');
     setRefreshTimer(200);
+}
+*/
+
+function refresh()
+{ removeChildren('rendering');
+  removeChildren('focus');
+  removeChildren('newRendering');
+}
+
+function removeChildren(parentId)
+{ var parent = document.getElementById(parentId);
+    while (parent.firstChild)
+      parent.removeChild(parent.firstChild);
 }
 
 function keypress(e)
@@ -171,7 +217,7 @@ function keypress(e)
    if (e.which != 0 && keyCode != 8 && keyCode != 13) 
      loadXMLDoc('Chr'+keyCode+'?');
 // ? is to prevent caching by IE 
-
+// maybe also check alt, ctrl and  other keys, they seem to generate press events now
    
    if (e.preventDefault) e.preventDefault();
    if (e.stopPropagation) e.stopPropagation();
@@ -187,9 +233,28 @@ function hasNoKeyPress(keyCode)
 
 }
 
+function recordModifiersDown( keyCode )
+{
+  if (keyCode == 16) shiftDown = true;
+  else if (keyCode == 17) ctrlDown = true;
+  else if (keyCode == 18) altDown = true;
+  debug(shiftDown+' '+ctrlDown+' '+altDown);
+}
+
+function recordModifiersUp( keyCode )
+{
+  if (keyCode == 16) shiftDown = false;
+  else if (keyCode == 17) ctrlDown = false;
+  else if (keyCode == 18) altDown = false;
+  debug(shiftDown+' '+ctrlDown+' '+altDown);
+}
+
 function keydown(e)
 {
    if (!e) e = event;
+   if (e.keyCode==116)
+     refresh();
+   recordModifiersDown(e.keyCode);
    
    if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
@@ -205,6 +270,11 @@ function keydown(e)
      if (e.stopPropagation) e.stopPropagation();
 */
 
+function keyup(e)
+{
+   if (!e) e = event;
+   recordModifiersUp(e.keyCode);
+}
 
 function ignore(e)
 {
@@ -271,7 +341,10 @@ function mouseHandler(str,e)
   //loadXMLDoc('Mouse' + str + '(' + (posx - renderAreaRect.left ) + ',' +
   //                                 (posy - renderAreaRect.top)  + ')?' );
   loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
-                                   (posy)  + ')?' );
+                                   (posy) + ',' +
+                                   (shiftDown?'True':'False') + ',' +
+                                   (ctrlDown?'True':'False') + ',' +
+                                   (altDown?'True':'False') + ')?' );
 }
 
 
@@ -335,12 +408,13 @@ function isElement(node)
 ]]></script>
 </head>
 <body onload="init()">
-<div id="proxima" style="position: relative; border: 1px solid black; height: 1000px; width: 1300px;  font-size : 18px; font-family: monospace; line-height: 0px;"
+<div id="proxima" style="position: relative; border: 1px solid black; height: 200px; width: 1300px;  font-size : 18px; font-family: monospace; line-height: 0px;"
      onmousedown="return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
      onclick="return mouseHandler('C',event)"
- >
-<div id="renderArea"><div id="root">
+ ><div id="rendering"></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 400px; top: 0px;' ></div></div>
+
+
 
 <!-- font positioning goes wrong: text is drawn at half-height ref at top of div box
 <div style='position:absolute;left:20px;top:10px;width:463px;height:29px;font-family:"Times New Roman";font-size:19pt;background-color:rgb(120,120,120);'>B</div>
@@ -390,18 +464,14 @@ function isElement(node)
   </div>
 
 -->
-<!-- Click somewhere. --></div></div>
-<div id="newRendering" style='position: absolute; left: 400px; top: 0px;' ></div>
-<!--
-<div id="focus" style='position: absolute; left: 0px; top: 0px; height: 20px; width: 1px; background-color: blue;'></div>
--->
-</div>
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id="status" style="border: 1px solid black; height: 22px; width: 800px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
 
 <!-- <button onclick="loadXMLDoc('SpecialRefresh?')">Refresh</button>
 <button onclick="loadXMLDoc('SpecialClear?')">Clear</button> -->
 <div id="debugMessage"></div>
+<div id="test"><div id="A"><div id="A.A"></div><div id="A.B"><div id="A.B.A"></div><div id="A.B.B"></div><div id="A.B.C"></div></div></div><div id="B"></div><div id="C"></div></div>
+<div id="path"><div childNr="0"></div><div childNr="1"></div><div childNr="2"></div></div>
 </body></html>
 
 

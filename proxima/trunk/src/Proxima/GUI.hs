@@ -484,31 +484,33 @@ okDialog txt =
 -----------------------
 
 server params = withSocketsDo $
- do { strVar <- newIORef ("",0)
-    ; putStrLn "Serving"
+ do { putStrLn "Serving"
+    ; initR <- newIORef (True)
     ; serverSocket <- listenOn (PortNumber 8080)
-    ; serverLoop params serverSocket
+    ; serverLoop params initR serverSocket
     }
 
-serverLoop params serverSocket = loop $
+serverLoop params initR serverSocket = loop $
         do { connection <- accept serverSocket
            ; putStrLn $ "\nNew connection" ++ show connection
-           ; serve params connection 
+           ; serve params initR connection 
            }
            
-serve params (handle, remoteHostName, portNumber) =
+serve params initR (handle, remoteHostName, portNumber) =
  do {
     ; hSetBuffering handle LineBuffering
     ; putStrLn $ "Connected to "++show remoteHostName ++ " on port " ++ show portNumber
     
-    ; handleKeys params handle
+    ; handleKeys params initR handle
     ; putStrLn $ "handled key, closing socket"
     ; hClose handle
     }
 
-handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) handle =
+handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle =
  do { commandLines <- hGetLinez handle
    -- ; let commands = takeWhile isAlpha commandLine -- strip newlines etc. otherwise cannot use telnet
+    ; fh <- openFile "rendering.html" WriteMode
+    ; hClose fh
     
     ; putStrLn $ "Handling on socket: " ++ show handle
     -- ; mapM putStrLn commandLines
@@ -549,15 +551,28 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
                             ; drawFocus settings renderingLvlVar window dw gc vp            
                             }
           
-          ; testRenderingHTML <- readFile "testRendering.html"
-          ; seq (length testRenderingHTML) $ return ()
+         -- ; testRenderingHTML <- readFile "testRendering.html"
+         -- ; seq (length testRenderingHTML) $ return ()
           ; renderingHTML <- readFile "rendering.html"
           ; seq (length renderingHTML) $ return ()
           ; focusRenderingHTML <- readFile "focusRendering.html"
           ; seq (length focusRenderingHTML) $ return ()
           
-          
-          ; let treeUpdates = "<div id='updates'><div op='replace' parentId='renderArea' targetId='root'>"++"<div id='root'>"++renderingHTML ++ focusRenderingHTML++"</div>"++"</div></div>"
+          ; fh <- openFile "rendering.html" WriteMode
+          ; hClose fh
+
+          ; isInitialRequest <- readIORef initR
+          ; treeUpdates <-
+              if isInitialRequest 
+              then
+               do { putStrLn "Initial request"
+                  ; writeIORef initR False
+                  ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
+                  }
+              else 
+               do { putStrLn "Later request"
+                  ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
+                  }
 {-          ; let treeUpdates = case event of
                                   KeyCharRen 'i' -> "<div id='updates'><div op='replace' parentId='renderArea' targetId='root'>"++testRenderingHTML++"</div></div>"
                                   KeyCharRen 'x' -> "<div id='updates'><div op='remove' parentId='1' targetId='2'></div></div>"
@@ -566,10 +581,7 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
                                   KeyCharRen 'a' -> "<div id='updates'><div op='add' parentId='1'><div id='2'>new</div></div></div>"
                                   _              -> "<div id='updates'></div>"
 -}
-          ; hPutStr handle $ toHTTP $ "<div id='root'>"++
-                                      treeUpdates ++
-                                      --renderingHTML ++ focusRenderingHTML ++
-                                      "</div>"
+          ; hPutStr handle $ toHTTP $ treeUpdates
           ; putStrLn "closing socket"
           ; hClose handle
 
@@ -614,15 +626,15 @@ insertChar c editStr focus = (take focus editStr ++ [c] ++ drop focus editStr, f
 
 handleMouse ('M':'o':'u':'s':'e':event) editStr focus = 
  do { putStrLn $ "Mouse event: " ++ event
-    ; let action:coords = event
-    ; let (x:: Int, y :: Int) = read coords
+    ; let action:args = event
+    ; let (x:: Int, y :: Int,shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool) = read args
           (focusX,focusY) = ((x+5) `div` 11, (y) `div` 20  - 3)
           focus' = posToFocus (focusX, focusY) editStr
     ; putStrLn $ "Character coordinates: "++show (focusX,focusY)
           
     ; return $ case action of
-                     'D' -> MouseDownRen x y (CommonTypes.Modifiers False False False) 1
-                     'U' -> MouseUpRen x y (CommonTypes.Modifiers False False False)
+                     'D' -> MouseDownRen x y (CommonTypes.Modifiers shiftDown ctrlDown altDown) 1
+                     'U' -> MouseUpRen x y (CommonTypes.Modifiers shiftDown ctrlDown altDown)
                      'C' -> SkipRen 0
                      _   -> SkipRen 0
     

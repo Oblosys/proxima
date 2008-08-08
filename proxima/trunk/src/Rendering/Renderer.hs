@@ -88,10 +88,13 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
     ; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
     ; renderArr clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
-    ; fh <- openFile "rendering.html" WriteMode
+    ; putStrLn "\n\n\nStart HTML rendering"
+    ; fh <- openFile "rendering.html" AppendMode
+    ; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
     ; renderHTML fh clipRegion
-                (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
+                (wi,dw,gc) arrDb scale origin viewedArea (Just [0]) diffTree arrangement
     ; hClose fh
+    ; putStrLn "End HTML rendering"
     }
 
 
@@ -114,8 +117,11 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
                           focusArrList) 
 
    ; fh <- openFile "focusRendering.html" WriteMode
+   ; print "rendering focus"
    ; renderHTML fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea
+                
+                (Just [1])
                 (DiffLeaf False)
                 (OverlayA NoIDA (xA arrangement) (yA arrangement)  
                                 (widthA arrangement) (heightA arrangement) 
@@ -123,6 +129,7 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
                           HeadInFront
                           focusArrList) 
    ; hClose fh
+
    }
 
 
@@ -153,7 +160,8 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
                     _ -> return ()
-     else --when (overlap ((lux+xA arrangement, luy+yA arrangement),
+     else -- in this case, all children are also dirty (as enforced by ArrUtils.diffArr)
+          --when (overlap ((lux+xA arrangement, luy+yA arrangement),
           --               (widthA arrangement, heightA arrangement)) viewedArea) $
           -- only render when the arrangement is in the viewed area   
   case arrangement of 
@@ -636,27 +644,69 @@ arrangedFocusArea fArrList = -- compute the region that is covered by the focus
 
 
 
+{-
+When a node is self dirty, all children are also dirty. Hence, once we end up in the last
+case of renderHTML and start generating code, we stay there.
 
+cleanParentId contains Just the parent if it was self clean. On rendering, Nothing is passed on.
 
+Hence, we can emit a replace command if the parent is clean but the child is self dirty
+-}
 
+makeReplaceUdate fh Nothing   mkArrangement = mkArrangement
+makeReplaceUdate fh (Just pth) mkArrangement = 
+ do { hPutStr fh $ "<div id='replace' op='replace'>"++htmlPath pth
+    ; putStrLn $ "*********REPLACE "++show pth
+    ; mkArrangement
+    ; hPutStr fh $ "</div>" 
+    }
 
+htmlPath pth = "<div id='path'>"++stepsHTML++"</div>"
+ where stepsHTML = concat [ "<div id='step' childNr='"++show p++"'></div>" | p <- pth ]
 
+{- inUpdate is True when renderHTML is inside a replace update -}
 renderHTML :: (DocNode node, DrawableClass drawWindow) => Handle -> Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
-                                         (Point, Size) -> DiffTree -> Arrangement node -> IO ()    
-renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
+                                         (Point, Size) -> Maybe Path -> DiffTree -> Arrangement node -> IO ()    
+renderHTML fh o (wi,dw,gc) a s (lux, luy) v m (DiffNode _ _ [dt]) (StructuralA _ arr) =
+           renderHTML fh o (wi,dw,gc) a s (lux, luy) v m dt arr
+renderHTML fh o (wi,dw,gc) a s (lux, luy) v m (DiffLeaf d)        (StructuralA _ arr) =
+           renderHTML fh o (wi,dw,gc) a s (lux, luy) v m (DiffLeaf d) arr
+renderHTML fh o (wi,dw,gc) a s (lux, luy) v m _                   (StructuralA _ arr) =
+           debug Err "renderHTML: difftree does not match arrangement" $ return ()
+renderHTML fh o (wi,dw,gc) a s (lux, luy) v m (DiffNode _ _ [dt]) (ParsingA _ arr) =
+           renderHTML fh o (wi,dw,gc) a s (lux, luy) v m dt arr
+renderHTML fh o (wi,dw,gc) a s (lux, luy) v m (DiffLeaf d)        (ParsingA _ arr) =
+           renderHTML fh o (wi,dw,gc) a s (lux, luy) v m (DiffLeaf d) arr
+renderHTML fh o (wi,dw,gc) a s (lux, luy) v m _                   (ParsingA _ arr) =
+           debug Err "renderHTML: difftree does not match arrangement" $ return ()
+renderHTML fh o (wi,dw,gc) a s (lux, luy) v m (DiffNode _ _ [dt]) (LocatorA _ arr) =
+           renderHTML fh o (wi,dw,gc) a s (lux, luy) v m dt arr
+renderHTML fh o (wi,dw,gc) a s (lux, luy) v m (DiffLeaf d)        (LocatorA _ arr) =
+           renderHTML fh o (wi,dw,gc) a s (lux, luy) v m (DiffLeaf d) arr
+renderHTML fh o (wi,dw,gc) a s (lux, luy) v m _                   (LocatorA _ arr) =
+           debug Err "renderHTML: difftree does not match arrangement" $ return ()
+renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
-
-
-     if (isSelfCleanDT diffTree)  -- if self is clean, only render its children (if present)
+                                       
+    ; if (isSelfCleanDT diffTree)  -- if self is clean, only render its children (if present)
      then if (isCleanDT diffTree)
-          then return ()
+          then do { --putStrLn "renderHTML: self clean, children clean";
+                   return ()
+                  }
           else let renderChildren x' y' arrs =
-                    do { let (x,y)=(lux+scaleInt scale x', luy+scaleInt scale y')
+                    do { putStrLn "renderHTML: self clean, children not clean"
+                       ; let (x,y)=(lux+scaleInt scale x', luy+scaleInt scale y')
                        ; let childDiffTrees = case diffTree of
                                                 DiffLeaf c     -> repeat $ DiffLeaf c
                                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-                       ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs 
+                       ; sequence_ $ zipWith3 (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) 
+                                       (case mPth of
+                                          Nothing -> repeat Nothing
+                                          Just pth -> [ Just $ pth++[i] | i <- [0..] ])
+                                       childDiffTrees 
+                                       -- is safe: self is clean, so oldArr has same nr of children
+                                       arrs 
                        }
                in case arrangement of
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' arrs
@@ -668,9 +718,13 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
                     _ -> return ()
-     else --when (overlap ((lux+xA arrangement, luy+yA arrangement),
+     else -- in this case, all children are also dirty (as enforced by ArrUtils.diffArr)
+          --when (overlap ((lux+xA arrangement, luy+yA arrangement),
           --               (widthA arrangement, heightA arrangement)) viewedArea) $
           -- only render when the arrangement is in the viewed area   
+          makeReplaceUdate fh mPth $
+--          (\mkArr -> do {putStrLn "self dirty"; mkArr}) $
+          
   case arrangement of 
 
     (EmptyA  id x' y' w' h' _ _ bColor) ->
@@ -728,7 +782,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
 
         ; divOpen fh id x' y' w' h' bColor
-        ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+        ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
         ; divClose fh
         }
 
@@ -739,7 +793,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
 
         ; divOpen fh id x' y' w' h' bColor
-        ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+        ; sequence_ $ zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
         ; divClose fh
         }
 
@@ -755,7 +809,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
               
         ; divOpen fh id x' y' w' h' bColor
         ; sequence_ $ order $
-            zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+            zipWith (renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
         ; divClose fh
         
         }
@@ -777,10 +831,10 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
         
         
         ; divOpen fh id x' y' w' h' bColor
-        ; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
+        ; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea Nothing) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
         
         ; svgStart fh
-        ; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
+        ; sequence_ $ reverse $ zipWith (renderHTML fh newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea Nothing) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
         ; svgEnd fh
         ; divClose fh
         }
@@ -792,7 +846,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
         
         ; divOpen fh id x' y' w' h' bColor
-        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
         ; divClose fh
         }
 
@@ -816,7 +870,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
         }
     
     (ParsingA id arr) ->
@@ -825,14 +879,14 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTre
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
         }
 
     (LocatorA _ arr) ->
      do { let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
         }
 
     _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
@@ -917,5 +971,11 @@ Issues
 Structural, Parsing, and Locator have no HTML rendering, so their ids are not in rendering
 Graph, added div open and close
 Edge does not have div
+focus rendering old arrangement not oka
+what oldArr to choose for skipArr 0??
+-- overlay without id is problem
+
+
+sent events may swap, causing incremental replaces to fail. keepalive socket should remedy this.
 -}
 
