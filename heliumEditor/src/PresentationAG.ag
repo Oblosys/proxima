@@ -160,10 +160,11 @@ SEM RootE
                        , vSpace 10
                        , hLine
                        , vSpace 4
-                       , text "Variables in scope:" `withFont'` ("verdana",10)
-                       , col [ typeD NoIDP (var++" :: "++ tpStr) `link` pth
-                             | (var,(pth,tpStr)) <- Map.toList @decls.varsInScopeAtFocus ]
-
+                       , row [ hSpace 3, text "Variables in scope:" `withFont'` ("verdana",10)]
+                       , row [ hSpace 3 
+                             , col [ typeD NoIDP (var++" :: "++ tpStr) `link` pth
+                                   | (var,(pth,tpStr)) <- Map.toList @decls.varsInScopeAtFocus ]
+                             ]
                        ]
                      `withFont'` ("Courier New",14)
       decls.ranges = (\(l1,l2,l3)->(concat l1, concat l2, concat l3)) . unzip3
@@ -241,8 +242,10 @@ SEM Decl
                               [ @ident.pres, key (mkIDP @idP0 @lhs.pIdC 0) "="]
                            ++ (if @expanded then
                                  [ @exp.pres,  sep (mkIDP @idP1 @lhs.pIdC 1) ";"
-                                 ] else [text " ", {- box -} (text "...") `withColor` black `withbgColor` yellow
-                                                                    `withMouseDown` expand @lhs.path @self])
+                                 ] else [ {- boxed $ -} key  (mkIDP @idP1 @lhs.pIdC 1) "..." 
+                                 --         `withColor` black `withbgColor` yellow
+                                 --         `withMouseDown` expand @lhs.path @self
+                                        ])
 
                           ) `addPopupItems`  [ if @expanded
                                                then ( "Collapse: "++strFromIdent @ident.self, toggleExpanded @lhs.path @self)
@@ -583,6 +586,7 @@ SEM ConsList_Decl [ | | isNil : Bool ]
   | Nil_Decl  lhs.isNil = True
   | Cons_Decl lhs.isNil = False
               head.isLast = @tail.isNil
+
   
 SEM Decl -- nested decls do produce auto layout, so top level decl can determine whether to use it.
 
@@ -767,8 +771,11 @@ SEM ConsList_Alt [ totalMaxLHSLength : Int | | maxLHSLength : Int ]
     | Nil_Alt
         lhs.maxLHSLength = 0
 
-
-
+SEM Item 
+    | HeliumItem
+        exp.col = 0
+        lhs.whitespaceMap = @lhs.whitespaceMap -- no auto layout in slides
+                                               -- doesn't work for nested let's anyway
 
 --------------------------------------------------------------
 --
