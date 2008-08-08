@@ -119,7 +119,7 @@ recognizeVertex = pStrVerbose "Vertex" $
       <$> pStructuralTk Node_Vertex
       <*> pSym vertexTk
       <*> pPrs pText
-  <|>     (\str vt -> reuseVertex [str] (Just "<new>") (Just Circle)
+  <|>     (\str vt -> reuseVertex [str] (Just "new") (Just Circle)
                                   (Just $ getVertexTkId vt) (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
       <$> pStructuralTk (\_ _ -> NoNode)
       <*> pSym vertexTk
