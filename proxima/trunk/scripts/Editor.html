@@ -332,6 +332,11 @@ function mouseHandler(str,e)
 			+ document.documentElement.scrollTop;
 	}
 */
+  var proxima = document.getElementById('proxima');
+    
+  posx = posx + proxima.scrollLeft;
+  posy = posy + proxima.scrollTop; 
+
 	
 	debug('Mouse:'+posx+','+posy);
 	// posx and posy contain the mouse position relative to the document
@@ -379,23 +384,15 @@ function getMouseCoordsWithinEventTarget(event)
         return coords;
 }
 
-function getPageCoords(emt)
+
+function scrollHandler(event)
 {
-    var coords = {x: 0, y: 0};
-    while (emt)
-    {
-            coords.x += emt.offsetLeft;
-            coords.y += emt.offsetTop;
-            emt = emt.offsetParent;
-        }
-    return coords;
+    var proxima = document.getElementById('proxima');
+    
+//    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
+    loadXMLDoc('SpecialScroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
+               '),(1000,700))?');
 }
-
-function isElement(node)
-{ return (node.nodeType == 1); }
-
-
-
 
 
 
@@ -408,10 +405,11 @@ function isElement(node)
 ]]></script>
 </head>
 <body onload="init()">
-<div id="proxima" style="position: relative; border: 1px solid black; height: 200px; width: 1300px;  font-size : 18px; font-family: monospace; line-height: 0px;"
+<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 700px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;"
      onmousedown="return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
      onclick="return mouseHandler('C',event)"
+     onscroll="return scrollHandler(event)"
  ><div id="rendering"></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 400px; top: 0px;' ></div></div>
 
 
