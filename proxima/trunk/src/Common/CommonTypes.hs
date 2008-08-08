@@ -326,4 +326,14 @@ data Settings =
                 
                   -- updated parts of the rendering are surrounded by red rectangles
                 , markUpdatedRenderingArea :: Bool
+                , serverMode :: Bool -- run Proxima as a web-server
                 }
+
+defaultSettings = 
+  Settings { applicationName = "Proxima"
+           , rendererIncrementality = False
+           , arrangerIncrementality = False
+           , reducedViewedArea = False            
+           , markUpdatedRenderingArea = False
+           , serverMode = False
+           }
