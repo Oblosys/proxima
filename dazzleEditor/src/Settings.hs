@@ -19,16 +19,16 @@ import Common.CommonTypes
 -- run-time cost of the arranger to pass the record around as an inherited attribute.
 
                 
-settings =
-  Settings { applicationName = "Dazzle documentation editor"
+settings = defaultSettings { applicationName = "Dazzle documentation editor"
 
-           , rendererIncrementality = True
-           , arrangerIncrementality = True
+                           , rendererIncrementality = False
+                           , arrangerIncrementality = True
 
-             -- use a smaller rectangle as viewed area to see what happens outside it
-           , reducedViewedArea = False            
+                               -- use a smaller rectangle as viewed area to see what happens outside it
+                           , reducedViewedArea = False            
 
-             -- updated parts of the rendering are surrounded by red rectangles
-           , markUpdatedRenderingArea = False
-           }
+                               -- updated parts of the rendering are surrounded by red rectangles
+                           , markUpdatedRenderingArea = False
+                           , serverMode = True
+                           }
            
