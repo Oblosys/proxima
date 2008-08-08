@@ -489,7 +489,7 @@ okDialog txt =
 server params = withSocketsDo $
  do { putStrLn "Serving"
     ; initR <- newIORef (True)
-    ; serverSocket <- listenOn (PortNumber 8080)
+    ; serverSocket <- listenOn (PortNumber 80)
     ; serverLoop params initR serverSocket
     }
 
@@ -522,7 +522,7 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
     ; putStrLn $ "arg = " ++ arg
     ; if arg == ""  
       then
-       do { writeIORef viewedAreaRef ((0,0),(800,500)) -- todo: take this from an init event
+       do { writeIORef viewedAreaRef ((0,0),(1000,1000)) -- todo: take this from an init event
           ; page <- readFile "src/proxima/scripts/Editor.html" -- in Proxima tree, changes location when proxima is not in subdir
           ; seq (length page) $ return ()
           -- ; print page

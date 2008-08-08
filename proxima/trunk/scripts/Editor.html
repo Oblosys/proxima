@@ -391,7 +391,7 @@ function scrollHandler(event)
     
 //    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
     loadXMLDoc('SpecialScroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
-               '),(1000,700))?');
+               '),(' + proxima.width + ',' + proxima.height + '))?');
 }
 
 
@@ -405,7 +405,7 @@ function scrollHandler(event)
 ]]></script>
 </head>
 <body onload="init()">
-<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 700px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;"
+<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 1000px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;"
      onmousedown="return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
      onclick="return mouseHandler('C',event)"
