@@ -108,9 +108,9 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     -- about every half minute, save a backup of the document
 
 --    ; timeoutAddFull (withCatch $ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
-    ; server (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas)
-    
-    ; mainGUI
+    ; if serverMode settings 
+      then server (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas)
+      else mainGUI
     }    
 
 -- GTK somehow catches exceptions that occur in event handlers, and terminates the program. To
@@ -268,10 +268,13 @@ genericHandler :: Settings ->
                Window -> Viewport -> DrawingArea -> EditRendering doc enr node clip token -> IO ()
 genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
  do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
-    ; viewedArea <- getViewedArea settings vp
     
-    ; writeIORef viewedAreaRef viewedArea
-   
+    ;  when (not $ serverMode settings) $ 
+        do { viewedArea <- getViewedArea settings vp
+           ; writeIORef viewedAreaRef viewedArea
+           } -- if Proxima runs as a server, viewedAreaRef will contain the right area
+             -- set by events from the client
+          
     ; (renderingLvl', editsRendering) <- handler (renderingLvl,evt)
     ; mapM_ process editsRendering
     }
@@ -519,7 +522,8 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
     ; putStrLn $ "arg = " ++ arg
     ; if arg == ""  
       then
-       do { page <- readFile "src/proxima/scripts/Editor.html" -- in Proxima tree, changes location when proxima is not in subdir
+       do { writeIORef viewedAreaRef ((0,0),(800,500)) -- todo: take this from an init event
+          ; page <- readFile "src/proxima/scripts/Editor.html" -- in Proxima tree, changes location when proxima is not in subdir
           ; seq (length page) $ return ()
           -- ; print page
           ; hPutStr handle $ toHTTP page
@@ -534,7 +538,7 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
                  else if "Mouse" `isPrefixOf` event
                  then handleMouse event "" 0
                  else if "Special" `isPrefixOf` event
-                 then handleSpecial event "" 0
+                 then handleSpecial viewedAreaRef  event "" 0
                  else do { putStrLn $ "Event not recognized: "++event
                          ; return $ SkipRen 0
                          }
@@ -644,17 +648,18 @@ handleMouse malEvent editStr focus =
     ; return $ SkipRen 0
     }
  
-handleSpecial ('S':'p':'e':'c':'i':'a':'l':event) editStr focus = 
+handleSpecial viewedAreaRef ('S':'p':'e':'c':'i':'a':'l':event) editStr focus = 
  do { putStrLn $ "Special event: " ++ event
-    ; if event == "Refresh" 
-      then return $ SkipRen 0
-      else if event == "Clear" 
-      then return $ SkipRen 0
+    ; if "Scroll" `isPrefixOf` event
+      then do { writeIORef viewedAreaRef $ read $ drop 6 event
+              
+              ; return $ SkipRen (-2)
+              }
       else do { putStrLn $ "Unrecognized special event: "++event
               ; return $ SkipRen 0
               } 
     }            
-handleSpecial malEvent editStr focus =
+handleSpecial viewedAreaRef  malEvent editStr focus =
  do { putStrLn $ "Internal error: malformed special event: " ++ malEvent
     ; return $ SkipRen 0
     }

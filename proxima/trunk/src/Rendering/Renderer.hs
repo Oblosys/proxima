@@ -90,7 +90,7 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
                 (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
     ; putStrLn "\n\n\nStart HTML rendering"
     ; fh <- openFile "rendering.html" AppendMode
-    ; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
+    --; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
     ; renderHTML fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea (Just [0]) diffTree arrangement
     ; hClose fh
@@ -977,5 +977,7 @@ what oldArr to choose for skipArr 0??
 
 
 sent events may swap, causing incremental replaces to fail. keepalive socket should remedy this.
+viewedArea should take its initial value from a refresh/init event from the client
+
 -}
 
