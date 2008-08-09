@@ -915,9 +915,8 @@ stringHTML fh id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b)
                            else "")   ++ "'>"++
                                 
   "<div style='position:absolute;left:0px;top:"++show (h `div` 2)++"px;"++
-                "width:"++show w++"px;height:"++show h++"px;"++
                 "font-family:"++show fFam++";"++
-                "font-size:"++show fSiz++"pt;"++
+                "font-size:"++show ((fSiz *1334) `div`1000)++"px;"++
                 (if fBld then "font-weight: bold;" else "")++
                 (if fItlc then "font-style: italic;" else "")++
                 "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");'>"++
@@ -986,5 +985,11 @@ viewedArea should take its initial value from a refresh/init event from the clie
 after f1, reload causes parent=null error
 
 need to handle when socket is dropped after timeout
+
+quick typing causes events to be dropped
+ fix: when waiting for response, collect subsequent events and send after response is received.
+ 
+scrolling sometimes goes wrong, (perhaps because of dropped events)
+
 -}
 

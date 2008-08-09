@@ -43,7 +43,8 @@ if (xmlhttp.readyState==4)
   if (xmlhttp.status==200)
     {// 200 = "OK"
     
-    
+    var dpiCheck = document.getElementById('dpiCheck');
+    alert('offsetTop:'+dpiCheck.offsetTop + ';height:'+ dpiCheck.clientHeight);
     var newRendering = document.getElementById('newRendering');
     newRendering.innerHTML=xmlhttp.responseText;
     
@@ -407,6 +408,7 @@ function scrollHandler(event)
 ]]></script>
 </head>
 <body onload="init()">
+<div id='dpiCheck' style='position:absolute;left:100px;top:100px;'><span style='height:1px;font-size:0px'>blabla</span><span style='font-family:"Times New Roman";font-size:10px;background-color:rgb(120,120,120);'>X</span><div style='position:absolute;left:0px;top:157px;width:100px;height:1px;background-color:rgb(255,0,0)'></div></div>
 <div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 1000px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;"
      onmousedown="return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
