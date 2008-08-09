@@ -90,7 +90,7 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
                 (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
     ; putStrLn "\n\n\nStart HTML rendering"
     ; fh <- openFile "rendering.html" AppendMode
-    --; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
+    ; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
     ; renderHTML fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea (Just [0]) diffTree arrangement
     ; hClose fh
@@ -655,10 +655,11 @@ cleanParentId contains Just the parent if it was self clean. On rendering, Nothi
 Hence, we can emit a replace command if the parent is clean but the child is self dirty
 -}
 
-makeReplaceUdate fh Nothing   mkArrangement = mkArrangement
-makeReplaceUdate fh (Just pth) mkArrangement = 
+makeReplaceUdate fh Nothing    arrangement mkArrangement = mkArrangement
+makeReplaceUdate fh (Just pth) arrangement mkArrangement = 
  do { hPutStr fh $ "<div id='replace' op='replace'>"++htmlPath pth
-    ; putStrLn $ "*********REPLACE "++show pth
+    ; putStrLn $ "\n\n*********REPLACE "++show pth
+    ; putStrLn $ "by:\n" ++ showTreeArr arrangement
     ; mkArrangement
     ; hPutStr fh $ "</div>" 
     }
@@ -723,7 +724,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
           --when (overlap ((lux+xA arrangement, luy+yA arrangement),
           --               (widthA arrangement, heightA arrangement)) viewedArea) $
           -- only render when the arrangement is in the viewed area   
-          makeReplaceUdate fh mPth $
+          makeReplaceUdate fh mPth arrangement $
 --          (\mkArr -> do {putStrLn "self dirty"; mkArr}) $
           
   case arrangement of 
@@ -736,9 +737,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
       
     (StringA id x' y' w' h' _ vRef' str fColor bColor fnt _) ->
      do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
-        ; when (str /= "") $ 
-           do { stringHTML fh id str x' y' w' h' fnt fColor bColor
-              }
+        ; stringHTML fh id str x' y' w' h' fnt fColor bColor
         }
 
     (ImageA id x' y' w' h' _ _ src style lColor bColor) ->
