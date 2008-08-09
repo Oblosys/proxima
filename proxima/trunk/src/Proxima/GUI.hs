@@ -24,14 +24,13 @@ import Proxima.Wrap
 import Evaluation.DocTypes (DocumentLevel, EditDocument'_ (..))
 import Char
 import Maybe
-import IO
+import System.IO
 import Directory
 import Data.Time.Clock
 import Control.Exception
 
 import Network
 import Network.BSD
-import Control.Concurrent
 import Data.List
 
 
@@ -513,12 +512,11 @@ serve params initR (handle, remoteHostName, portNumber) =
 
 handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle =
  do { commandLines <- hGetLinez handle
-   -- ; let commands = takeWhile isAlpha commandLine -- strip newlines etc. otherwise cannot use telnet
     ; fh <- openFile "rendering.html" WriteMode
     ; hClose fh
     
     ; putStrLn $ "Handling on socket: " ++ show handle
-    -- ; mapM putStrLn commandLines
+    ; mapM putStrLn commandLines
     
     ; let arg = (takeWhile (/=' ') (drop 5 (head commandLines)))
     ; putStrLn $ "arg = " ++ arg
@@ -532,6 +530,7 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
           ; hFlush handle
           }
       else if arg == "favicon.ico" then return ()
+      else if "img/" `isPrefixOf` arg then handleImage handle arg
       else
        do { let event = init arg -- drop the ?
           ; (event) <-
@@ -661,11 +660,94 @@ handleSpecial viewedAreaRef ('S':'p':'e':'c':'i':'a':'l':event) editStr focus =
               ; return $ SkipRen 0
               } 
     }            
-handleSpecial viewedAreaRef  malEvent editStr focus =
+handleSpecial viewedAreaRef malEvent editStr focus =
  do { putStrLn $ "Internal error: malformed special event: " ++ malEvent
     ; return $ SkipRen 0
     }
+
+handleImage handle ('i':'m':'g':'/':unsafeImageFilename) = 
+ do { let imageFilename = [c | c <- unsafeImageFilename, c /= '/' && c /='\\' ]
+          extension = reverse . takeWhile (/='.') . reverse $ imageFilename
+    ; putStrLn $ "Image download: " ++ imageFilename
+    ; h <- openBinaryFile ("img/"++imageFilename) ReadMode 
+    ; bytes <- hGetContents h -- httpImage computes length, so whole file is read
+    ; hPutStr handle $ httpImage extension bytes
+    ; hFlush handle
+    ; hClose h
+    } `Control.Exception.catch`
+   \err -> 
+    do { putStrLn $ "Problem while uploading "++unsafeImageFilename++":\n"
+       ; hPutStr handle $ httpNotFound
+       ; hFlush handle
+       }         
+handleImage handle malEvent =
+ do { putStrLn $ "Internal error: malformed image event: " ++ malEvent
+    }
     
+-- todo: figure out whether caching is sufficient
+httpImage extension bytes = httpImageHeader extension (length bytes) ++ bytes
+httpImageHeader extension len = 
+  unlines 
+    [ "HTTP/1.1 200 OK"
+    , "Date: Mon, 28 Jul 2008 11:24:47 GMT"
+    , "Server: Proxima"
+    , "Last-Modified: Tue, 23 Jan 2007 16:10:01 GMT"
+    --ETag: "179010-2d22-427b76900c840\""
+    , "Accept-Ranges: bytes"
+    , "Content-Length: "++show len
+    , "Keep-Alive: timeout=5, max=100"
+    , "Connection: Keep-Alive"
+    , "Content-Type: image/"++extension
+    , ""
+    ]
+-- todo: somehow this does not produce a 404 page on firefox.    
+httpNotFound = unlines $ header ++ page
+ where header =
+         [ "HTTP/1.1 404 Not Found"
+         , "Date: Sat, 09 Aug 2008 15:41:47 GMT"
+         , "Server: Proxima"
+         , "Last-Modified: Fri, 11 Nov 2005 13:52:33 GMT"
+         , "ETag: \"288266-2d8-4054a6ee40a40\""
+         , "Accept-Ranges: bytes"
+         , "Content-Length: "++show (length page)
+         , "Keep-Alive: timeout=5, max=100"
+         , "Connection: Keep-Alive"
+         , "Content-Type: text/html"
+         , ""
+         ]
+       page =
+         [ "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">"
+         , "<HTML>"
+         , "<HEAD>"
+         , "<TITLE>404 Not Found</TITLE>"
+         , "<META HTTP-EQUIV=\"content-type\" CONTENT=\"text/html; charset=ISO-8859-1\">"
+         , "</HEAD>"
+         , "<BODY>"
+         , "<H3>404 Not Found</H3>"
+         , "The document requested was not found on this server."
+         , "</BODY>"
+         , "</HTML>"
+         ]
+{-
+http request created by firefox for url: http://localhost/img/squiggly.png
+
+--
+GET /img/squiggly.png HTTP/1.1
+Host: localhost
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.1) Gecko/2008070208 Firefox/3.0.1
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-us,en;q=0.5
+Accept-Encoding: gzip,deflate
+Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7
+Keep-Alive: 300
+Connection: keep-alive
+If-Modified-Since: Tue, 23 Jan 2007 16:10:01 GMT
+Cache-Control: max-age=0
+
+--
+If-Modified-Since: is only added when image was requested before:) 
+-}
+
 toHTTP string = unlines (header (length string)) ++ string
 header len =  
   [ "HTTP/1.1 200 OK"
@@ -682,6 +764,7 @@ header len =
   , ""
   ]
   
+
 html (focusX,focusY) status text =  
   "<div id=\"info\" focusX=\""++show focusX ++"\" focusY=\""++show focusY ++
                   "\" status=\""++status ++ "\"></div>" ++
