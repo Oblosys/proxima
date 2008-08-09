@@ -505,9 +505,7 @@ serve params initR (handle, remoteHostName, portNumber) =
     ; hSetBuffering handle LineBuffering
     ; putStrLn $ "Connected to "++show remoteHostName ++ " on port " ++ show portNumber
     
-    ; handleKeys params initR handle
-    ; putStrLn $ "handled key, closing socket"
-    ; hClose handle
+    ; loop (handleKeys params initR handle)
     }
 
 handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle =
@@ -529,7 +527,10 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
           ; hPutStr handle $ toHTTP page
           ; hFlush handle
           }
-      else if arg == "favicon.ico" then return ()
+      else if arg == "favicon.ico" then
+       do { hPutStr handle $ httpNotFound
+          ; hFlush handle
+          }
       else if "img/" `isPrefixOf` arg then handleImage handle arg
       else
        do { let event = init arg -- drop the ?
@@ -581,11 +582,9 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
                   ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
                   }
           ; hPutStr handle $ toHTTP $ treeUpdates
-          ; putStrLn "closing socket"
-          ; hClose handle
-
+          ; hFlush handle
           }
-   -- ; handleKeys handle
+    ; return ()
     }
 handleKey ('K':'e':'y':event) editStr focus = return $
  let keyCode = read $ takeWhile (/='?') event
@@ -689,7 +688,7 @@ httpImageHeader extension len =
     --ETag: "179010-2d22-427b76900c840\""
     , "Accept-Ranges: bytes"
     , "Content-Length: "++show len
-    , "Keep-Alive: timeout=5, max=100"
+    , "Keep-Alive: timeout=1000, max=100"
     , "Connection: Keep-Alive"
     , "Content-Type: image/"++extension
     , ""
@@ -704,7 +703,7 @@ httpNotFound = unlines $ header ++ page
          , "ETag: \"288266-2d8-4054a6ee40a40\""
          , "Accept-Ranges: bytes"
          , "Content-Length: "++show (length page)
-         , "Keep-Alive: timeout=5, max=100"
+         , "Keep-Alive: timeout=1000, max=100"
          , "Connection: Keep-Alive"
          , "Content-Type: text/html"
          , ""
@@ -752,7 +751,7 @@ header len =
   , "ETag: \"3a387-627-452120dff27aa\""
   , "Accept-Ranges: bytes"
   , "Content-Length: " ++ show len
-  , "Keep-Alive: timeout=5, max=100"
+  , "Keep-Alive: timeout=1000, max=100"
   , "Connection: Keep-Alive"
   , "Content-Type: text/xml"
   , ""

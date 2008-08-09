@@ -976,16 +976,15 @@ polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
 
 {-
 Issues
-Structural, Parsing, and Locator have no HTML rendering, so their ids are not in rendering
 Graph, added div open and close
 Edge does not have div
-focus rendering old arrangement not oka
-what oldArr to choose for skipArr 0??
--- overlay without id is problem
 
 
 sent events may swap, causing incremental replaces to fail. keepalive socket should remedy this.
 viewedArea should take its initial value from a refresh/init event from the client
 
+after f1, reload causes parent=null error
+
+need to handle when socket is dropped after timeout
 -}
 
