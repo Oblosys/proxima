@@ -333,12 +333,14 @@ function mouseHandler(str,e)
 	}
 */
   var proxima = document.getElementById('proxima');
+
+  if ( posx > proxima.clientWidth || posy > proxima.clientHeight )
+    return;  // we're on a scroll bar, so no event.
     
   posx = posx + proxima.scrollLeft;
   posy = posy + proxima.scrollTop; 
 
 	
-	debug('Mouse:'+posx+','+posy);
 	// posx and posy contain the mouse position relative to the document
 	// Do something with this information
 
