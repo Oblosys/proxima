@@ -274,6 +274,8 @@ genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp c
            ; writeIORef viewedAreaRef viewedArea
            } -- if Proxima runs as a server, viewedAreaRef will contain the right area
              -- set by events from the client
+    ; viewedArea <- readIORef viewedAreaRef
+    ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
           
     ; (renderingLvl', editsRendering) <- handler (renderingLvl,evt)
     ; mapM_ process editsRendering

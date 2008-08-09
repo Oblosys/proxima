@@ -94,6 +94,8 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
     ; renderHTML fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea (Just [0]) diffTree arrangement
     ; hClose fh
+    ; renderingHTML <- readFile "rendering.html"
+    ; putStrLn $ "Rendering:\n"++ renderingHTML
     ; putStrLn "End HTML rendering"
     }
 
@@ -705,7 +707,6 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
                                           Nothing -> repeat Nothing
                                           Just pth -> [ Just $ pth++[i] | i <- [0..] ])
                                        childDiffTrees 
-                                       -- is safe: self is clean, so oldArr has same nr of children
                                        arrs 
                        }
                in case arrangement of
@@ -729,10 +730,8 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
 
     (EmptyA  id x' y' w' h' _ _ bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
-        ; when (not (isTransparent bColor)) $
-           do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
-              ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
-              }
+        ; divOpen fh id x' y' w' h' bColor
+        ; divClose fh
         }
       
     (StringA id x' y' w' h' _ vRef' str fColor bColor fnt _) ->
@@ -743,11 +742,13 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
         }
 
     (ImageA id x' y' w' h' _ _ src style lColor bColor) ->
-     do { return ()               
+     do { divOpen fh id x' y' w' h' bColor
+        ; divClose fh
         }
 
     (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
-     do { return () 
+     do { divOpen fh id x' y' w' h' bColor
+        ; divClose fh
         }
 
     (EllipseA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->

@@ -88,7 +88,7 @@ if (xmlhttp.readyState==4)
   else
     {
     debug("Problem retrieving data:" + xmlhttp.statusText);
-    document.getElementById('renderArea').innerHTML='Server not available.';
+    document.getElementById('status').innerHTML='Server not available.';
     }
   }
 }
@@ -391,7 +391,7 @@ function scrollHandler(event)
     
 //    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
     loadXMLDoc('SpecialScroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
-               '),(' + proxima.width + ',' + proxima.height + '))?');
+               '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '))?');
 }
 
 
@@ -463,7 +463,7 @@ function scrollHandler(event)
 
 -->
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
-<div id="status" style="border: 1px solid black; height: 22px; width: 800px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
+<div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
 
 <!-- <button onclick="loadXMLDoc('SpecialRefresh?')">Refresh</button>
 <button onclick="loadXMLDoc('SpecialClear?')">Clear</button> -->
