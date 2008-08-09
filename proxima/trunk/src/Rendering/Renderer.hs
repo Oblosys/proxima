@@ -90,12 +90,12 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
                 (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
     ; putStrLn "\n\n\nStart HTML rendering"
     ; fh <- openFile "rendering.html" AppendMode
-    ; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
+    --; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
     ; renderHTML fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea (Just [0]) diffTree arrangement
     ; hClose fh
-    ; renderingHTML <- readFile "rendering.html"
-    ; putStrLn $ "Rendering:\n"++ renderingHTML
+    --; renderingHTML <- readFile "rendering.html"
+    --; putStrLn $ "Rendering:\n"++ renderingHTML
     ; putStrLn "End HTML rendering"
     }
 
@@ -659,7 +659,7 @@ makeReplaceUdate fh Nothing    arrangement mkArrangement = mkArrangement
 makeReplaceUdate fh (Just pth) arrangement mkArrangement = 
  do { hPutStr fh $ "<div id='replace' op='replace'>"++htmlPath pth
     ; putStrLn $ "\n\n*********REPLACE "++show pth
-    ; putStrLn $ "by:\n" ++ showTreeArr arrangement
+    --; putStrLn $ "by:\n" ++ showTreeArr arrangement
     ; mkArrangement
     ; hPutStr fh $ "</div>" 
     }
@@ -741,8 +741,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
         }
 
     (ImageA id x' y' w' h' _ _ src style lColor bColor) ->
-     do { divOpen fh id x' y' w' h' bColor
-        ; divClose fh
+     do { imageHTML fh id src x' y' w' h' lColor bColor
         }
 
     (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
@@ -929,6 +928,15 @@ stringHTML fh id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b)
        htmlChar '<'  = "lt;"
        htmlChar '>'  = "gt;"
        htmlChar c    = [c]
+
+imageHTML fh id src x y w h lColor (br,bg,bb) = hPutStr fh $
+  "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
+                "width:"++show w++"px;height:"++show h++"px;"++
+                 (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
+                           else "") ++
+                 "background-image:url(\"/"++src++"\");" ++
+                 "'>"++
+  "</div>"                           
 
 svgStart fh = hPutStr fh $ 
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"

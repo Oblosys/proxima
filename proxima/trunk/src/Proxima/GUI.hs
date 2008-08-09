@@ -516,7 +516,7 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
     ; hClose fh
     
     ; putStrLn $ "Handling on socket: " ++ show handle
-    ; mapM putStrLn commandLines
+--    ; mapM putStrLn commandLines
     
     ; let arg = (takeWhile (/=' ') (drop 5 (head commandLines)))
     ; putStrLn $ "arg = " ++ arg
@@ -556,8 +556,8 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
                             ; drawFocus settings renderingLvlVar window dw gc vp            
                             }
           
-         -- ; testRenderingHTML <- readFile "testRendering.html"
-         -- ; seq (length testRenderingHTML) $ return ()
+--          ; testRenderingHTML <- readFile "testRendering.html"
+--          ; seq (length testRenderingHTML) $ return ()
           ; renderingHTML <- readFile "rendering.html"
           ; seq (length renderingHTML) $ return ()
           ; focusRenderingHTML <- readFile "focusRendering.html"
@@ -572,20 +572,14 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
               then
                do { putStrLn "Initial request"
                   ; writeIORef initR False
+--                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
                   ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
                   }
               else 
                do { putStrLn "Later request"
+--                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
                   ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
                   }
-{-          ; let treeUpdates = case event of
-                                  KeyCharRen 'i' -> "<div id='updates'><div op='replace' parentId='renderArea' targetId='root'>"++testRenderingHTML++"</div></div>"
-                                  KeyCharRen 'x' -> "<div id='updates'><div op='remove' parentId='1' targetId='2'></div></div>"
-                                  KeyCharRen 'y' -> "<div id='updates'><div op='remove' parentId='3' targetId='4'></div></div>"
-                                  KeyCharRen 'z' -> "<div id='updates'><div op='remove' parentId='3' targetId='4'></div><div op='remove' parentId='1' targetId='2'></div></div>"
-                                  KeyCharRen 'a' -> "<div id='updates'><div op='add' parentId='1'><div id='2'>new</div></div></div>"
-                                  _              -> "<div id='updates'></div>"
--}
           ; hPutStr handle $ toHTTP $ treeUpdates
           ; putStrLn "closing socket"
           ; hClose handle
