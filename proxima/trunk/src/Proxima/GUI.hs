@@ -488,11 +488,15 @@ okDialog txt =
 -----------------------
 
 server params = withSocketsDo $
- do { putStrLn "Serving"
+ do { putStrLn "\n\nListining to port"
     ; initR <- newIORef (True)
     ; serverSocket <- listenOn (PortNumber 80)
     ; serverLoop params initR serverSocket
-    }
+    } `Control.Exception.catch`
+   \err -> 
+    do { putStrLn $ "Socket handler terminated:\n"++ show err
+       }         
+
 
 serverLoop params initR serverSocket = loop $
         do { connection <- accept serverSocket
