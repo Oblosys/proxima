@@ -991,5 +991,9 @@ quick typing causes events to be dropped
  
 scrolling sometimes goes wrong, (perhaps because of dropped events)
 
+1 inch = 96 px  96 = dpi 
+1 pt = 1/72 inch
+
+so 1 pt = dpi/72 px
 -}
 
