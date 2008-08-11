@@ -996,6 +996,9 @@ Issues:
 
 - popups require imports of PresTypes in Renderer and GUI, maybe restructure this?
 
+- popups cannot handle page scrolling 
+  (and probably also not scrolling in elements between root and "proxima", but maybe we don't want to allow proxima inside other elements)
+
 Strange: after installing catch in handler loop, there were no more commitandrelease errors..
 
 1 inch = 96 px  96 = dpi 
