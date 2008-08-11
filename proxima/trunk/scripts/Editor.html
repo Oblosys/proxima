@@ -76,7 +76,7 @@ function init()
 //    setRefreshTimer(10);
 
     refresh();
-    loadXMLDoc('Key116;'); // put this one in refresh?
+    loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
 }
 
 
@@ -389,7 +389,7 @@ function keypress(e)
 //   debug('Key is '+keyCode +',' + e.charCode);
 //   loadXMLDoc('Chr'+String.fromCharCode(keyCode)+';');
    if (e.which != 0 && keyCode != 8 && keyCode != 13) 
-     loadXMLDoc('Chr'+keyCode+';');
+     loadXMLDoc('Chr('+keyCode+','+showModifiers()+');');
 // ? is to prevent caching by IE 
 // maybe also check alt, ctrl and  other keys, they seem to generate press events now
    
@@ -432,7 +432,7 @@ function keydown(e)
    
    if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
-     loadXMLDoc('Key'+e.keyCode+';');
+     loadXMLDoc('Key('+e.keyCode+','+showModifiers()+');');
      if (e.preventDefault) e.preventDefault();
      if (e.stopPropagation) e.stopPropagation();
      return false; // false, so no keyPress event is generated
@@ -523,12 +523,14 @@ function mouseHandler(str,e)
   //                                 (posy - renderAreaRect.top)  + ');' );
   loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
                                    (posy) + ',' +
-                                   (shiftDown?'True':'False') + ',' +
-                                   (ctrlDown?'True':'False') + ',' +
-                                   (altDown?'True':'False') + ');' );
+                                   showModifiers() + ');' );
 }
 
-
+function showModifiers()
+{ return '(' + (shiftDown?'True':'False') + ',' +
+               (ctrlDown?'True':'False') + ',' +
+               (altDown?'True':'False') + ')'
+}
 
 function getMouseCoordsWithinTarget(event,id)
 {
@@ -592,7 +594,7 @@ function scrollHandler(event)
      oncontextmenu="return contextHandler(event)"
      onscroll="return scrollHandler(event)"
      xml:space="preserve"
- ><div id="rendering"></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 400px; top: 0px;' ></div></div>
+ ><div id="rendering"></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div></div>
 <!-- xml:space does not seem to work -->
 
 

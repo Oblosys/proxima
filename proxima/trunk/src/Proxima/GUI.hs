@@ -651,7 +651,7 @@ handleContextMenuSelect menuR ('C':'o':'n':'t':'e':'x':'t':'S':'e':'l':'e':'c':'
     }
     
 handleKey ('K':'e':'y':event) editStr focus = return $
- let keyCode = read $ takeWhile (/='?') event
+ let (keyCode,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event
      key = 
        case keyCode of
         46 -> KeySpecialRen CommonTypes.DeleteKey ms
@@ -674,11 +674,14 @@ handleKey ('K':'e':'y':event) editStr focus = return $
         122 -> KeySpecialRen CommonTypes.F11Key  ms
         123 -> KeySpecialRen CommonTypes.F12Key  ms
         _  -> SkipRen 0
-     ms = CommonTypes.Modifiers False False False
+     ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
   in key 
 handleKey ('C':'h':'r':event) editStr focus = return $
- let keyChar = read $ takeWhile (/='?') event
-  in KeyCharRen (chr keyChar)
+ let (keyChar,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event
+     ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
+  in if not ctrlDown && not altDown 
+     then KeyCharRen (chr keyChar)
+     else KeySpecialRen (CommonTypes.CharKey (chr keyChar)) ms
 handleKey malEvent editStr focus =
  do { putStrLn $ "Internal error: malformed key event: " ++ malEvent
     ; return $ SkipRen 0
@@ -689,7 +692,7 @@ insertChar c editStr focus = (take focus editStr ++ [c] ++ drop focus editStr, f
 handleMouse ('M':'o':'u':'s':'e':event) editStr focus = 
  do { putStrLn $ "Mouse event: " ++ event
     ; let action:args = event
-    ; let (x:: Int, y :: Int,shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool) = read args
+    ; let (x:: Int, y :: Int,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read args
           (focusX,focusY) = ((x+5) `div` 11, (y) `div` 20  - 3)
           focus' = posToFocus (focusX, focusY) editStr
     ; putStrLn $ "Character coordinates: "++show (focusX,focusY)
