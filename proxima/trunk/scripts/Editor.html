@@ -91,7 +91,8 @@ function contextHandler(e)
                     : e.clientX;
   var screenY = ie5 ? event.clientY
                     : e.clientY;
-  var coords = getMouseCoordsWithinEventTarget(e); 
+  var coords = getMouseCoordsWithinTarget(e,'proxima'); 
+
   // menu is not on proxima element, so position is absolute to window
   // however, proxima needs the position relative to the proxima element
   
@@ -529,8 +530,12 @@ function mouseHandler(str,e)
 
 
 
-function getMouseCoordsWithinEventTarget(event)
+function getMouseCoordsWithinTarget(event,id)
 {
+  var Element = document.getElementById(id);
+  var scrollLeft = Element.scrollLeft;
+  var scrollTop = Element.scrollTop;
+  
         var coords = { x: 0, y: 0};
 
         if(!event) // then we have a non-DOM (probably IE) browser
@@ -541,7 +546,6 @@ function getMouseCoordsWithinEventTarget(event)
         }
         else       // we assume DOM modeled javascript
         {
-                var Element = event.target ;
                 var CalculatedTotalOffsetLeft = 0;
                 var CalculatedTotalOffsetTop = 0 ;
 
@@ -552,8 +556,8 @@ function getMouseCoordsWithinEventTarget(event)
                         Element = Element.offsetParent ;
                 }
 
-                coords.x = event.pageX - CalculatedTotalOffsetLeft ;
-                coords.y = event.pageY - CalculatedTotalOffsetTop ;
+                coords.x = event.pageX - CalculatedTotalOffsetLeft + scrollLeft;
+                coords.y = event.pageY - CalculatedTotalOffsetTop + scrollTop;
         }
 
         return coords;
