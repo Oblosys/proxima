@@ -41,6 +41,7 @@ var xmlhttp;
 var shiftDown = false;
 var ctrlDown = false;
 var altDown = false;
+var mouseDown = false;
 var commandQueue = '';
 
 function init()
@@ -465,7 +466,6 @@ function mouseHandler(str,e)
 	var posy = 0;
 
 
-
         if(e.offsetX && e.offsetY) // IE
         {
 //                e = window.event;
@@ -474,19 +474,19 @@ function mouseHandler(str,e)
         }
         else       // we assume DOM modeled javascript
         {
-                var Element = e.target ;
+                var Element = e.target;
                 var CalculatedTotalOffsetLeft = 0;
-                var CalculatedTotalOffsetTop = 0 ;
+                var CalculatedTotalOffsetTop = 0;
 
                 while (Element.offsetParent)
                 {
                         CalculatedTotalOffsetLeft += Element.offsetLeft ;     
-                        CalculatedTotalOffsetTop += Element.offsetTop ;
-                        Element = Element.offsetParent ;
+                        CalculatedTotalOffsetTop += Element.offsetTop;
+                        Element = Element.offsetParent;
                 }
 
                 posx = e.pageX - CalculatedTotalOffsetLeft ;
-                posy = e.pageY - CalculatedTotalOffsetTop ;
+                posy = e.pageY - CalculatedTotalOffsetTop;
         }
 
 
@@ -521,9 +521,17 @@ function mouseHandler(str,e)
   //var renderAreaRect = document.getElementById('renderArea').getBoundingClientRect();
   //loadXMLDoc('Mouse' + str + '(' + (posx - renderAreaRect.left ) + ',' +
   //                                 (posy - renderAreaRect.top)  + ');' );
-  loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
-                                   (posy) + ',' +
-                                   showModifiers() + ');' );
+
+  // does not take into account mouse button
+  if (str == 'D') 
+    mouseDown = true;
+  if (str == 'U') 
+    mouseDown = false;
+
+  if (str != 'M' || mouseDown)
+    loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
+                                     (posy) + ',' +
+                                     showModifiers() + ');' );
 }
 
 function showModifiers()
@@ -590,6 +598,7 @@ function scrollHandler(event)
 <div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 800px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
+     onmousemove="return mouseHandler('M',event)"
      onclick="return mouseHandler('C',event)"
      oncontextmenu="return contextHandler(event)"
      onscroll="return scrollHandler(event)"

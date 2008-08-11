@@ -701,8 +701,9 @@ handleMouse ('M':'o':'u':'s':'e':event) editStr focus =
                      'D' -> MouseDownRen x y (CommonTypes.Modifiers shiftDown ctrlDown altDown) 1
                      'U' -> MouseUpRen x y (CommonTypes.Modifiers shiftDown ctrlDown altDown)
                      'C' -> SkipRen 0
+                     'M' ->  MouseDragRen x y  (CommonTypes.Modifiers shiftDown ctrlDown altDown)
                      _   -> SkipRen 0
-    
+    -- move events are only sent when button is down, to prevent flooding    
     }
 handleMouse malEvent editStr focus =
  do { putStrLn $ "Internal error: malformed mouse event: " ++ malEvent
