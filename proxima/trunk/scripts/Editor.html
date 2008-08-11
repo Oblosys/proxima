@@ -50,9 +50,7 @@ function loadXMLDoc(url)
 { commandQueue = commandQueue + url;
 
   if ( xmlhttp && xmlhttp.readyState != 0 && xmlhttp.readyState != 4)
-  { debugAdd('Queued event:' + xmlhttp.readyState); 
     return;
-  }
   
 xmlhttp=null;
 if (window.XMLHttpRequest)
@@ -88,7 +86,7 @@ if (xmlhttp.readyState==4)
     
     
     if (commandQueue != '')
-    { debugAdd('sending queue');
+    { // debugAdd('sending queue');
       loadXMLDoc('');
     }
     
