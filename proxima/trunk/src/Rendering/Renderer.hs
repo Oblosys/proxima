@@ -756,6 +756,8 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
 
     (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { divOpen fh id x' y' w' h' bColor
+        ; let pts = [(0,0),(w',0),(w',h'),(0,h')]
+        ; polyHTML fh id x' y' w' h' pts (scaleInt scale lw' `max` 1) lColor fColor
         ; divClose fh
         }
 
@@ -767,8 +769,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
 
     (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
-        ; let pts = map (\(x',y') -> (x+scaleInt scale x', y+scaleInt scale y')) pts'
-  
+       
         
         -- the old clip region needs to be passed around, since gtk does not offer a getClip..
         ; newClipRegion <- regionRectangle $ Rectangle x y w h
@@ -991,7 +992,7 @@ polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
 Issues:
 
 -F5 gives error.
-
+-multiple spaces are problem
 -will image requests by the browser interfere with command queuing?
 
 - popups require imports of PresTypes in Renderer and GUI, maybe restructure this?
@@ -1000,6 +1001,9 @@ Issues:
   (and probably also not scrolling in elements between root and "proxima", but maybe we don't want to allow proxima inside other elements)
 
 - style and background & fill colors should be implemented a bit more accurately
+- handle scaling?
+- handle clipping (maybe already done by div elts)
+- clean up renderHTML and produce String instead of using files
 
 Strange: after installing catch in handler loop, there were no more commitandrelease errors..
 
