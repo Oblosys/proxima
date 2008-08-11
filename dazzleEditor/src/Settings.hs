@@ -21,7 +21,7 @@ import Common.CommonTypes
                 
 settings = defaultSettings { applicationName = "Dazzle documentation editor"
 
-                           , rendererIncrementality = False
+                           , rendererIncrementality = True
                            , arrangerIncrementality = True
 
                                -- use a smaller rectangle as viewed area to see what happens outside it
