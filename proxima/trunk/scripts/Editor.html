@@ -12,27 +12,67 @@
 <script type="text/javascript">
 <![CDATA[
 var xmlhttp;
-function loadXMLDoc(url)
-{
+var shiftDown = false;
+var ctrlDown = false;
+var altDown = false;
+var commandQueue = '';
 
+function init()
+{
+    
+    if (document.addEventListener)
+    {
+       document.addEventListener("keydown",keydown,false);
+       document.addEventListener("keyup",keyup,false);
+       document.addEventListener("keypress",keypress,false);
+    }
+    else if (document.attachEvent) // IE7
+    {
+       document.attachEvent("onkeydown", keydown);
+       document.attachEvent("onkeyup", keyup);
+       document.attachEvent("onkeypress", keypress);
+    }
+    else
+    {
+       document.onkeydown= keydown;
+       document.onkeyup= keyup;
+       document.onkeypress= keypress;
+    }
+//    setRefreshTimer(10);
+
+    refresh();
+    loadXMLDoc('Key116;'); // put this one in refresh?
+}
+
+
+
+function loadXMLDoc(url)
+{ commandQueue = commandQueue + url;
+
+  if ( xmlhttp && xmlhttp.readyState != 0 && xmlhttp.readyState != 4)
+  { debugAdd('Queued event:' + xmlhttp.readyState); 
+    return;
+  }
+  
 xmlhttp=null;
 if (window.XMLHttpRequest)
-  {// code for Firefox, Opera, IE7, etc.
-  xmlhttp=new XMLHttpRequest();
+  { // code for Firefox, Opera, IE7, etc.
+    xmlhttp=new XMLHttpRequest();
   }
 else if (window.ActiveXObject)
-  {// code for IE6, IE5
-  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  { // code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
   }
 if (xmlhttp!=null)
-  {
-  xmlhttp.onreadystatechange=state_Change;
-  xmlhttp.open("GET",url,true);
-  xmlhttp.send(null);
+  { 
+    { xmlhttp.onreadystatechange=state_Change;
+      xmlhttp.open("GET",commandQueue+'?',true);
+      xmlhttp.send(null);
+      commandQueue = '';
+    }
   }
 else
-  {
-  alert("Your browser does not support XMLHTTP.");
+  { alert("Your browser does not support XMLHTTP.");
   }
 }
 
@@ -43,10 +83,14 @@ if (xmlhttp.readyState==4)
   if (xmlhttp.status==200)
     {// 200 = "OK"
     
-    var dpiCheck = document.getElementById('dpiCheck');
-    alert('offsetTop:'+dpiCheck.offsetTop + ';height:'+ dpiCheck.clientHeight);
     var newRendering = document.getElementById('newRendering');
     newRendering.innerHTML=xmlhttp.responseText;
+    
+    
+    if (commandQueue != '')
+    { debugAdd('sending queue');
+      loadXMLDoc('');
+    }
     
     var focus = document.getElementById('focus');
     
@@ -150,35 +194,10 @@ function debug(message)
 {
     document.getElementById('debugMessage').innerHTML=message;
 }
-var shiftDown = false;
-var ctrlDown = false;
-var altDown = false;
 
-function init()
+function debugAdd(message)
 {
-    
-    if (document.addEventListener)
-    {
-       document.addEventListener("keydown",keydown,false);
-       document.addEventListener("keyup",keyup,false);
-       document.addEventListener("keypress",keypress,false);
-    }
-    else if (document.attachEvent) // IE7
-    {
-       document.attachEvent("onkeydown", keydown);
-       document.attachEvent("onkeyup", keyup);
-       document.attachEvent("onkeypress", keypress);
-    }
-    else
-    {
-       document.onkeydown= keydown;
-       document.onkeyup= keyup;
-       document.onkeypress= keypress;
-    }
-//    setRefreshTimer(10);
-
-    refresh();
-    loadXMLDoc('Key116?'); // put this one in refresh?
+    debug (document.getElementById('debugMessage').innerHTML + message);
 }
 
 /*
@@ -189,7 +208,7 @@ function setRefreshTimer(ms)
 
 function refresh()
 {
-    loadXMLDoc('SpecialRefresh?');
+    loadXMLDoc('SpecialRefresh;');
     setRefreshTimer(200);
 }
 */
@@ -214,9 +233,9 @@ function keypress(e)
    // keyCode is 0 on Firefox
    
 //   debug('Key is '+keyCode +',' + e.charCode);
-//   loadXMLDoc('Chr'+String.fromCharCode(keyCode)+'?');
+//   loadXMLDoc('Chr'+String.fromCharCode(keyCode)+';');
    if (e.which != 0 && keyCode != 8 && keyCode != 13) 
-     loadXMLDoc('Chr'+keyCode+'?');
+     loadXMLDoc('Chr'+keyCode+';');
 // ? is to prevent caching by IE 
 // maybe also check alt, ctrl and  other keys, they seem to generate press events now
    
@@ -239,7 +258,7 @@ function recordModifiersDown( keyCode )
   if (keyCode == 16) shiftDown = true;
   else if (keyCode == 17) ctrlDown = true;
   else if (keyCode == 18) altDown = true;
-  debug(shiftDown+' '+ctrlDown+' '+altDown);
+  //debug(shiftDown+' '+ctrlDown+' '+altDown);
 }
 
 function recordModifiersUp( keyCode )
@@ -247,7 +266,7 @@ function recordModifiersUp( keyCode )
   if (keyCode == 16) shiftDown = false;
   else if (keyCode == 17) ctrlDown = false;
   else if (keyCode == 18) altDown = false;
-  debug(shiftDown+' '+ctrlDown+' '+altDown);
+  //debug(shiftDown+' '+ctrlDown+' '+altDown);
 }
 
 function keydown(e)
@@ -259,7 +278,7 @@ function keydown(e)
    
    if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
-     loadXMLDoc('Key'+e.keyCode+'?');
+     loadXMLDoc('Key'+e.keyCode+';');
      if (e.preventDefault) e.preventDefault();
      if (e.stopPropagation) e.stopPropagation();
      return false; // false, so no keyPress event is generated
@@ -347,12 +366,12 @@ function mouseHandler(str,e)
 
   //var renderAreaRect = document.getElementById('renderArea').getBoundingClientRect();
   //loadXMLDoc('Mouse' + str + '(' + (posx - renderAreaRect.left ) + ',' +
-  //                                 (posy - renderAreaRect.top)  + ')?' );
+  //                                 (posy - renderAreaRect.top)  + ');' );
   loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
                                    (posy) + ',' +
                                    (shiftDown?'True':'False') + ',' +
                                    (ctrlDown?'True':'False') + ',' +
-                                   (altDown?'True':'False') + ')?' );
+                                   (altDown?'True':'False') + ');' );
 }
 
 
@@ -394,7 +413,7 @@ function scrollHandler(event)
     
 //    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
     loadXMLDoc('SpecialScroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
-               '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '))?');
+               '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
 }
 
 
@@ -408,7 +427,6 @@ function scrollHandler(event)
 ]]></script>
 </head>
 <body onload="init()">
-<div id='dpiCheck' style='position:absolute;left:100px;top:100px;'><span style='height:1px;font-size:0px'>blabla</span><span style='font-family:"Times New Roman";font-size:10px;background-color:rgb(120,120,120);'>X</span><div style='position:absolute;left:0px;top:157px;width:100px;height:1px;background-color:rgb(255,0,0)'></div></div>
 <div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 1000px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;"
      onmousedown="return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
@@ -469,11 +487,9 @@ function scrollHandler(event)
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
 
-<!-- <button onclick="loadXMLDoc('SpecialRefresh?')">Refresh</button>
-<button onclick="loadXMLDoc('SpecialClear?')">Clear</button> -->
+<!-- <button onclick="loadXMLDoc('SpecialRefresh;')">Refresh</button>
+<button onclick="loadXMLDoc('SpecialClear;')">Clear</button> -->
 <div id="debugMessage"></div>
-<div id="test"><div id="A"><div id="A.A"></div><div id="A.B"><div id="A.B.A"></div><div id="A.B.B"></div><div id="A.B.C"></div></div></div><div id="B"></div><div id="C"></div></div>
-<div id="path"><div childNr="0"></div><div childNr="1"></div><div childNr="2"></div></div>
 </body></html>
 
 

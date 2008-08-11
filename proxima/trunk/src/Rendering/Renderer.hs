@@ -88,7 +88,7 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
     ; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
     ; renderArr clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
-    ; putStrLn "\n\n\nStart HTML rendering"
+    --; putStrLn "\n\n\nStart HTML rendering"
     ; fh <- openFile "rendering.html" AppendMode
     --; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
     ; renderHTML fh clipRegion
@@ -96,7 +96,7 @@ render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
     ; hClose fh
     --; renderingHTML <- readFile "rendering.html"
     --; putStrLn $ "Rendering:\n"++ renderingHTML
-    ; putStrLn "End HTML rendering"
+    --; putStrLn "End HTML rendering"
     }
 
 
@@ -698,7 +698,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
                    return ()
                   }
           else let renderChildren x' y' arrs =
-                    do { putStrLn "renderHTML: self clean, children not clean"
+                    do { -- putStrLn "renderHTML: self clean, children not clean"
                        ; let (x,y)=(lux+scaleInt scale x', luy+scaleInt scale y')
                        ; let childDiffTrees = case diffTree of
                                                 DiffLeaf c     -> repeat $ DiffLeaf c
@@ -974,26 +974,17 @@ polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
 
 
 {-
-Issues
-Graph, added div open and close
-Edge does not have div
+
+Issues:
 
 
-sent events may swap, causing incremental replaces to fail. keepalive socket should remedy this.
-viewedArea should take its initial value from a refresh/init event from the client
-
-after f1, reload causes parent=null error
-
-need to handle when socket is dropped after timeout
-
-quick typing causes events to be dropped
- fix: when waiting for response, collect subsequent events and send after response is received.
- 
-scrolling sometimes goes wrong, (perhaps because of dropped events)
+Strange: after installing catch in handler loop, there were no more commitandrelease errors..
 
 1 inch = 96 px  96 = dpi 
 1 pt = 1/72 inch
 
 so 1 pt = dpi/72 px
+
+
 -}
 

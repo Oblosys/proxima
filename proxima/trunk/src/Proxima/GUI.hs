@@ -492,27 +492,25 @@ server params = withSocketsDo $
     ; initR <- newIORef (True)
     ; serverSocket <- listenOn (PortNumber 80)
     ; serverLoop params initR serverSocket
-    } `Control.Exception.catch`
-   \err -> 
-    do { putStrLn $ "Socket handler terminated:\n"++ show err
-       }         
-
+    }          
 
 serverLoop params initR serverSocket = loop $
-        do { connection <- accept serverSocket
-           ; putStrLn $ "\nNew connection" ++ show connection
-           ; serve params initR connection 
-           }
+ do { connection <- accept serverSocket
+    ; putStrLn $ "\nNew connection" ++ show connection
+    ; serve params initR connection 
+    } `Control.Exception.catch` \err -> 
+ do { putStrLn $ "Socket handler terminated:\n"++ show err
+    }
            
 serve params initR (handle, remoteHostName, portNumber) =
  do {
     ; hSetBuffering handle LineBuffering
     ; putStrLn $ "Connected to "++show remoteHostName ++ " on port " ++ show portNumber
     
-    ; loop (handleKeys params initR handle)
+    ; loop (handleRequest params initR handle)
     }
 
-handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle =
+handleRequest (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle =
  do { commandLines <- hGetLinez handle
     ; fh <- openFile "rendering.html" WriteMode
     ; hClose fh
@@ -536,60 +534,79 @@ handleKeys (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canv
           ; hFlush handle
           }
       else if "img/" `isPrefixOf` arg then handleImage handle arg
-      else
-       do { let event = init arg -- drop the ?
-          ; (event) <-
-                 if "Key" `isPrefixOf` event || "Chr" `isPrefixOf` event 
-                 then handleKey event "" 0
-                 else if "Mouse" `isPrefixOf` event
-                 then handleMouse event "" 0
-                 else if "Special" `isPrefixOf` event
-                 then handleSpecial viewedAreaRef  event "" 0
-                 else do { putStrLn $ "Event not recognized: "++event
-                         ; return $ SkipRen 0
-                         }
-          ; print event               
-          ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas event
-          
-          -- render the focus, so focusRendering.html is updated
-          ; dw <- widgetGetDrawWindow canvas
-          ; maybePM <- readIORef buffer
-          ; case maybePM of
-              Nothing -> return ()
-              Just pm -> do { gc <- gcNew pm
-      
-                            ; drawFocus settings renderingLvlVar window dw gc vp            
-                            }
-          
+      else handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle 
+                         (init arg) -- drop the ?
+    }
+    
+splitCommands commandStr =
+  case break (==';') commandStr of
+    ([],[])             -> []
+    (_, [])              -> error "Syntax error in commands"
+    (command, (_:commandStr')) -> command : splitCommands commandStr'
+        
+-- handle each command in commands and send the updates back
+handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle commandStr =
+ do { let commands = splitCommands commandStr
+    ; putStrLn $ "Received commands: "++ show commands
+    
+    ; mapM (handleCommand (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle)
+           commands
+    
+    -- render the focus, so focusRendering.html is updated
+    ; dw <- widgetGetDrawWindow canvas
+    ; maybePM <- readIORef buffer
+    ; case maybePM of
+        Nothing -> return ()
+        Just pm -> do { gc <- gcNew pm
+
+                    ; drawFocus settings renderingLvlVar window dw gc vp            
+                    }
+    
 --          ; testRenderingHTML <- readFile "testRendering.html"
 --          ; seq (length testRenderingHTML) $ return ()
-          ; renderingHTML <- readFile "rendering.html"
-          ; seq (length renderingHTML) $ return ()
-          ; focusRenderingHTML <- readFile "focusRendering.html"
-          ; seq (length focusRenderingHTML) $ return ()
-          
-          ; fh <- openFile "rendering.html" WriteMode
-          ; hClose fh
+    ; renderingHTML <- readFile "rendering.html"
+    ; seq (length renderingHTML) $ return ()
+    ; focusRenderingHTML <- readFile "focusRendering.html"
+    ; seq (length focusRenderingHTML) $ return ()
+    
+    ; fh <- openFile "rendering.html" WriteMode
+    ; hClose fh
 
-          ; isInitialRequest <- readIORef initR
-          ; treeUpdates <-
-              if isInitialRequest 
-              then
-               do { putStrLn "Initial request"
-                  ; writeIORef initR False
+    ; isInitialRequest <- readIORef initR
+    ; treeUpdates <-
+        if isInitialRequest 
+        then
+        do { putStrLn "Initial request"
+            ; writeIORef initR False
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
-                  ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
-                  }
-              else 
-               do { putStrLn "Later request"
+            ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
+            }
+        else 
+        do { putStrLn "Later request"
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
-                  ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
-                  }
-          ; hPutStr handle $ toHTTP $ treeUpdates
-          ; hFlush handle
-          }
-    ; return ()
+            ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
+            }
+    ; hPutStr handle $ toHTTP $ treeUpdates
+    ; hFlush handle
     }
+    
+    
+handleCommand (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle event =
+ do { putStrLn $ "Handling: " ++ event
+    ; (event) <-
+            if "Key" `isPrefixOf` event || "Chr" `isPrefixOf` event 
+            then handleKey event "" 0
+            else if "Mouse" `isPrefixOf` event
+            then handleMouse event "" 0
+            else if "Special" `isPrefixOf` event
+            then handleSpecial viewedAreaRef  event "" 0
+            else do { putStrLn $ "Event not recognized: "++event
+                    ; return $ SkipRen 0
+                    }
+    ; print event               
+    ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas event
+    }
+    
 handleKey ('K':'e':'y':event) editStr focus = return $
  let keyCode = read $ takeWhile (/='?') event
      key = 
