@@ -525,7 +525,7 @@ handleRequest (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,c
     ; putStrLn $ "arg = " ++ arg
     ; if arg == ""  
       then
-       do { writeIORef viewedAreaRef ((0,0),(1000,1000)) -- todo: take this from an init event
+       do { writeIORef viewedAreaRef ((0,0),(1000,800)) -- todo: take this from an init event
           ; page <- readFile "src/proxima/scripts/Editor.html" -- in Proxima tree, changes location when proxima is not in subdir
           ; seq (length page) $ return ()
           -- ; print page
