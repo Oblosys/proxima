@@ -119,7 +119,7 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
                           focusArrList) 
 
    ; fh <- openFile "focusRendering.html" WriteMode
-   ; print "rendering focus"
+   ; putStrLn "rendering focus"
    ; renderHTML fh clipRegion
                 (wi,dw,gc) arrDb scale origin viewedArea
                 
@@ -622,7 +622,7 @@ layoutFocusColor = CommonTypes.blue
 -- because of line/box difference (line x y (x+w) y) is wider than (box x y w h) all to points are decreased
 -- just decreasing w and h does not work
 mkBoxCaret x y w h = 
-  [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 Transparent layoutFocusColor white transparent ]
+  [ PolyA NoIDA x y w h 0 0 [(0,0),(0, h-1), (w-1, h-1),(w-1, 0), (0, 0)] 1 Transparent layoutFocusColor transparent transparent ]
 mkEdgeCaret x1 y1 x2 y2 =
   [ GraphA NoIDA 0 0 (x1 `max` x2) (y1 `max` y2) 0 0 transparent 0 
       [ EdgeA NoIDA x1 y1 x2 y2 0 0 2 layoutFocusColor ] 
@@ -976,7 +976,7 @@ polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
                 "'>" ++
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
   "<polygon points='"++pointsStr++"' "++
-  "style='fill:"++(if fr == -1 then "transparent; "
+  "style='fill:"++(if fr == -1 then "none; "
                                else "rgb("++show fr++","++show fg++","++show fb++");")++
   "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
   "</svg></div>"
@@ -998,6 +998,8 @@ Issues:
 
 - popups cannot handle page scrolling 
   (and probably also not scrolling in elements between root and "proxima", but maybe we don't want to allow proxima inside other elements)
+
+- style and background & fill colors should be implemented a bit more accurately
 
 Strange: after installing catch in handler loop, there were no more commitandrelease errors..
 
