@@ -642,6 +642,16 @@ arrangedFocusArea fArrList = -- compute the region that is covered by the focus
 
 
 
+mkPopupMenuXYHTML :: (DocNode node, Show token) => Settings ->
+                 Layout doc node clip token -> Scale -> Arrangement node ->
+                 Int -> Int -> [PopupMenuItem doc clip]
+mkPopupMenuXYHTML settings prs scale arr x' y' =
+  let (x,y) = (descaleInt scale x',descaleInt scale y')
+      ctxtItems = case point x y arr of
+                        Nothing -> []
+                        Just pthA -> popupMenuItemsPres (pathPFromPathA' arr prs pthA) prs
+  in [ (toHTML str,upd) | (str,upd) <- ctxtItems ]
+   
 
 
 
@@ -920,12 +930,15 @@ stringHTML fh id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b)
                 (if fBld then "font-weight: bold;" else "")++
                 (if fItlc then "font-style: italic;" else "")++
                 "color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");'>"++
-                concatMap htmlChar str ++ "</div></div>"
- where htmlChar '\n' = "n" --"<br/>"
+                toHTML str ++ "</div></div>"
+
+toHTML str = concatMap htmlChar str
+ where --htmlChar '\n' = "<br/>"
        --htmlChar ' '  = "&#8194;"
-      -- htmlChar ' '  = "&nbsp;"
-       htmlChar '<'  = "lt;"
-       htmlChar '>'  = "gt;"
+       --htmlChar ' '  = "&nbsp;"
+       htmlChar '&'  = "&amp;"
+       htmlChar '<'  = "&lt;"
+       htmlChar '>'  = "&gt;"
        htmlChar c    = [c]
 
 imageHTML fh id src x y w h lColor (br,bg,bb) = hPutStr fh $
@@ -977,6 +990,11 @@ polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
 
 Issues:
 
+-F5 gives error.
+
+-will image requests by the browser interfere with command queuing?
+
+- popups require imports of PresTypes in Renderer and GUI, maybe restructure this?
 
 Strange: after installing catch in handler loop, there were no more commitandrelease errors..
 

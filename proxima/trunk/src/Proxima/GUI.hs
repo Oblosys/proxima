@@ -33,6 +33,7 @@ import Network
 import Network.BSD
 import Data.List
 
+import Presentation.PresTypes (UpdateDoc)
 
 initialWindowSize :: (Int, Int)
 initialWindowSize = (1000, 900)
@@ -151,7 +152,7 @@ onMouse :: Settings ->
            IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
            Event -> IO Bool
 onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas evt@(Button _ ReleaseClick tm x y _ RightButton _ _) =
- do { (RenderingLevel _ makePopupMenu _ _ _ _ _ _)  <- readIORef renderingLvlVar
+ do { (RenderingLevel _ makePopupMenu _ _ _ _ _ _ _)  <- readIORef renderingLvlVar
     ; mContextMenu <- makePopupMenu handler renderingLvlVar buffer viewedAreaRef window vp canvas (round x) (round y)
     ; case mContextMenu of
        Just contextMenu ->
@@ -162,7 +163,7 @@ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas e
        Nothing -> return False
     }
 onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas mouseEvt =
- do { (RenderingLevel _ _ _ _ _ _ _ leftMouseDown) <- readIORef renderingLvlVar
+ do { (RenderingLevel _ _ _ _ _ _ _ _ leftMouseDown) <- readIORef renderingLvlVar
     ; let editRendering = 
             case mouseEvt of 
               Button _ SingleClick _ x y mods LeftButton _ _   -> MouseDownRen (round x) (round y) (translateModifiers mods) 1
@@ -266,7 +267,7 @@ genericHandler :: Settings ->
                IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> 
                Window -> Viewport -> DrawingArea -> EditRendering doc enr node clip token -> IO ()
 genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
- do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
+ do { renderingLvl@(RenderingLevel _ _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
     
     ;  when (not $ serverMode settings) $ 
         do { viewedArea <- getViewedArea settings vp
@@ -280,8 +281,8 @@ genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp c
     ; mapM_ process editsRendering
     }
  where process (SkipRen' _) = return () -- set the renderingLvlVar ??
-       process (SetRen' renderingLvl''@(RenderingLevel scale _ _ _ (newW,newH) _ updRegions _)) =
-         do { (RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
+       process (SetRen' renderingLvl''@(RenderingLevel scale _ _ _ _ (newW,newH) _ updRegions _)) =
+         do { (RenderingLevel _ _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
             ; writeIORef renderingLvlVar renderingLvl''
             ; widgetSetSizeRequest canvas newW newH
   --          ; putStrLn $ "Drawing " ++ show (w,h) ++ show (newW,newH)
@@ -311,7 +312,7 @@ drawRendering :: DrawableClass d =>
                  Settings ->
                  IORef (RenderingLevel doc enr node clip token) -> Window -> Viewport -> d -> IO ()
 drawRendering settings renderingLvlVar wi vp pm = 
- do { RenderingLevel scale mkPopupMenu rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
+ do { RenderingLevel scale mkPopupMenu _ rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
 --    ; putStrLn "Drawing rendering"
     ; let drawFilledRectangle drw grc ((x,y),(w,h)) = drawRectangle drw grc True x y w h
     ; gc <- gcNew pm
@@ -331,7 +332,7 @@ drawRendering settings renderingLvlVar wi vp pm =
           
 drawFocus :: Settings -> IORef (RenderingLevel doc enr node clip token) -> Window -> DrawWindow -> GC -> Viewport -> IO ()
 drawFocus settings renderingLvlVar wi dw gc vp = 
- do { RenderingLevel scale mkPopupMenu rendering focusRendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
+ do { RenderingLevel scale _ _ rendering focusRendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
     ; viewedArea <- getViewedArea settings vp 
     ; focusRendering (wi, dw ,gc) viewedArea
     }
@@ -365,7 +366,7 @@ onPaint settings handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expo
               -- If several edit events have taken place without paint events, only the last is shown
             ; when (markUpdatedRenderingArea settings) $
                do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
-                  ; RenderingLevel scale mkPopupMenu rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
+                  ; RenderingLevel scale _ _ rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
                   ; debugLnIO GUI $ "updated regions:" ++ show updRegions 
                   
                   ; mapM_ (\((x,y),(w,h)) -> 
@@ -490,27 +491,29 @@ okDialog txt =
 server params = withSocketsDo $
  do { putStrLn "\n\nListining to port"
     ; initR <- newIORef (True)
+    ; menuR <- newIORef []
+    
     ; serverSocket <- listenOn (PortNumber 80)
-    ; serverLoop params initR serverSocket
+    ; serverLoop params initR menuR serverSocket
     }          
 
-serverLoop params initR serverSocket = loop $
+serverLoop params initR menuR serverSocket = loop $
  do { connection <- accept serverSocket
     ; putStrLn $ "\nNew connection" ++ show connection
-    ; serve params initR connection 
+    ; serve params initR menuR connection 
     } `Control.Exception.catch` \err -> 
  do { putStrLn $ "Socket handler terminated:\n"++ show err
     }
            
-serve params initR (handle, remoteHostName, portNumber) =
+serve params initR menuR (handle, remoteHostName, portNumber) =
  do {
     ; hSetBuffering handle LineBuffering
     ; putStrLn $ "Connected to "++show remoteHostName ++ " on port " ++ show portNumber
     
-    ; loop (handleRequest params initR handle)
+    ; loop (handleRequest params initR menuR handle)
     }
 
-handleRequest (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle =
+handleRequest (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR menuR handle =
  do { commandLines <- hGetLinez handle
     ; fh <- openFile "rendering.html" WriteMode
     ; hClose fh
@@ -534,7 +537,7 @@ handleRequest (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,c
           ; hFlush handle
           }
       else if "img/" `isPrefixOf` arg then handleImage handle arg
-      else handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle 
+      else handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR menuR handle 
                          (init arg) -- drop the ?
     }
     
@@ -545,11 +548,11 @@ splitCommands commandStr =
     (command, (_:commandStr')) -> command : splitCommands commandStr'
         
 -- handle each command in commands and send the updates back
-handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle commandStr =
+handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR menuR handle commandStr =
  do { let commands = splitCommands commandStr
     ; putStrLn $ "Received commands: "++ show commands
     
-    ; mapM (handleCommand (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle)
+    ; mapM (handleCommand (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR menuR handle)
            commands
     
     -- render the focus, so focusRendering.html is updated
@@ -564,7 +567,7 @@ handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,
     
 --          ; testRenderingHTML <- readFile "testRendering.html"
 --          ; seq (length testRenderingHTML) $ return ()
-    ; renderingHTML <- readFile "rendering.html"
+    ; renderingHTML <- readFile "rendering.html" -- todo rename rendering to updates
     ; seq (length renderingHTML) $ return ()
     ; focusRenderingHTML <- readFile "focusRendering.html"
     ; seq (length focusRenderingHTML) $ return ()
@@ -587,24 +590,64 @@ handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,
             ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
             }
     ; hPutStr handle $ toHTTP $ treeUpdates
+    ; putStrLn $ "Updates sent to client:\n"++ renderingHTML
     ; hFlush handle
     }
     
     
-handleCommand (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR handle event =
+handleCommand (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR menuR handle event =
  do { putStrLn $ "Handling: " ++ event
-    ; (event) <-
-            if "Key" `isPrefixOf` event || "Chr" `isPrefixOf` event 
-            then handleKey event "" 0
-            else if "Mouse" `isPrefixOf` event
-            then handleMouse event "" 0
-            else if "Special" `isPrefixOf` event
-            then handleSpecial viewedAreaRef  event "" 0
-            else do { putStrLn $ "Event not recognized: "++event
-                    ; return $ SkipRen 0
-                    }
-    ; print event               
-    ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas event
+    ; if "ContextRequest" `isPrefixOf` event  -- is not handled by genericHandler
+      then handleContextMenuRequest renderingLvlVar menuR event
+      else do { (event) <-
+                  if "Key" `isPrefixOf` event || "Chr" `isPrefixOf` event 
+                    then handleKey event "" 0
+                    else if "Mouse" `isPrefixOf` event
+                    then handleMouse event "" 0
+                    else if "ContextSelect" `isPrefixOf` event
+                    then handleContextMenuSelect menuR event
+                    else if "Special" `isPrefixOf` event
+                    then handleSpecial viewedAreaRef event "" 0
+                    else do { putStrLn $ "Event not recognized: "++event
+                            ; return $ SkipRen 0
+                            }
+              ; print event               
+              ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas event
+              }
+    }
+
+-- Current structure of handlers causes focus to be repainted after context request
+-- this is not really a problem though
+handleContextMenuRequest renderingLvlVar menuR ('C':'o':'n':'t':'e':'x':'t':'R':'e':'q':'u':'e':'s':'t':event) =
+ do { let ((proxX,proxY),(screenX,screenY)) :: ((Int,Int),(Int,Int)) = read event
+
+    ; (RenderingLevel _ _ makePopupMenuHTML _ _ _ _ _ _)  <- readIORef renderingLvlVar
+    ; let (itemStrs,upds) = unzip $ makePopupMenuHTML proxX proxY
+          itemsHTML = concat 
+                        [ "<div class='menuItem' item='"++show i++"'>"++item++"</div>"
+                        | (i,item) <- zip [0..] itemStrs
+                        ]
+      -- for separator lines: "<hr></hr>"
+    
+    ; writeIORef menuR $ upds
+                            
+    ; fh <- openFile "rendering.html" WriteMode
+    ; hPutStr fh $ "<div op='contextMenu' screenX='"++show screenX++"' screenY='"++show screenY++"'>"++
+                   itemsHTML++"</div>"
+    ; hClose fh
+    }
+ 
+{-
+ 
+                           
+-}
+handleContextMenuSelect :: forall doc enr clip node token .
+                           IORef [UpdateDoc doc clip] -> String -> IO (EditRendering doc enr node clip token)
+handleContextMenuSelect menuR ('C':'o':'n':'t':'e':'x':'t':'S':'e':'l':'e':'c':'t':event) =
+ do { menuItems <- readIORef menuR
+    ; let selectedItemNr :: Int = read event
+          editDoc = index "GUI.handleContextMenuSelect" menuItems selectedItemNr
+    ; return $ cast (UpdateDoc' editDoc :: EditDocument' doc enr node clip token)
     }
     
 handleKey ('K':'e':'y':event) editStr focus = return $

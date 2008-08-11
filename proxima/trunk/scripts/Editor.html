@@ -7,10 +7,36 @@
 <title>Proxima 2.0</title>
 
 
-<!-- <meta http-equiv="content-type" content="text/xhtml; charset=ISO-8859-1"/> -->
+<style>
+<![CDATA[
+
+/* Context menu Script- © Dynamic Drive (www.dynamicdrive.com) Last updated: 01/08/22
+For full source code and Terms Of Use, visit http://www.dynamicdrive.com */
+.skin0{
+position:absolute;
+border:2px solid black;
+background-color:menu;
+font-family:Verdana;
+line-height:20px;
+cursor:default;
+font-size:14px;
+z-index:100;
+visibility:hidden;
+}
+
+.menuItem{
+padding-left:10px;
+padding-right:10px;
+}
+]]>
+</style>
+
+
 
 <script type="text/javascript">
 <![CDATA[
+
+
 var xmlhttp;
 var shiftDown = false;
 var ctrlDown = false;
@@ -38,11 +64,123 @@ function init()
        document.onkeyup= keyup;
        document.onkeypress= keypress;
     }
+
+  // context menus
+  ie5=document.all&&document.getElementById;
+  ns6=document.getElementById&&!document.all;
+  menuobj=document.getElementById("contextMenu");
+  menuobj.style.display='';
+  //
+
+
 //    setRefreshTimer(10);
 
     refresh();
     loadXMLDoc('Key116;'); // put this one in refresh?
 }
+
+
+// Context menu's
+
+var ie5;
+var ns6;
+var menuobj;
+
+function contextHandler(e)
+{ var screenX = ie5 ? event.clientX
+                    : e.clientX;
+  var screenY = ie5 ? event.clientY
+                    : e.clientY;
+  var coords = getMouseCoordsWithinEventTarget(e); 
+  // menu is not on proxima element, so position is absolute to window
+  // however, proxima needs the position relative to the proxima element
+  
+  loadXMLDoc('ContextRequest(('+coords.x+','+coords.y+'),('+screenX+','+screenY+'));');
+  return false; // disable normal context menu
+}
+
+
+function highlightie5(e)
+{ var firingobj=ie5? event.srcElement : e.target;
+  if ( firingobj.className=="menuItem" ||
+       ns6 && firingobj.parentNode.className=="menuItem")
+  { if (ns6 && firingobj.parentNode.className=="menuItem") 
+      firingobj=firingobj.parentNode; //up one node
+    firingobj.style.backgroundColor="highlight";
+    firingobj.style.color="white";
+  }
+}
+
+function lowlightie5(e)
+{ var firingobj=ie5? event.srcElement : e.target;
+  if ( firingobj.className=="menuItem" ||
+       ns6 && firingobj.parentNode.className=="menuItem")
+  { if (ns6 && firingobj.parentNode.className=="menuItem") 
+      firingobj=firingobj.parentNode; //up one node
+    firingobj.style.backgroundColor="";
+    firingobj.style.color="black";
+  }
+}
+
+function jumptoie5(e)
+{ var firingobj=ie5? event.srcElement : e.target;
+  if( firingobj.className=="menuItem" ||
+      ns6 && firingobj.parentNode.className=="menuItem" )
+  { if (ns6&&firingobj.parentNode.className=="menuItem") 
+      firingobj=firingobj.parentNode;
+    else
+    { var selectedItemNr = firingobj.getAttribute("item");
+      loadXMLDoc('ContextSelect('+selectedItemNr+');');     
+      menuobj.style.visibility="hidden";
+    }
+  }
+}
+
+function showMenuXY(x,y)
+{ // Find out how close the mouse is to the corner of the window
+  var rightedge=ie5 ? document.body.clientWidth-x
+                    : window.innerWidth-x;
+  var bottomedge = ie5 ? document.body.clientHeight-y
+                       : window.innerHeight-y;
+  
+  // if the horizontal distance isn't enough to accomodate the width of the context menu
+  var left, top;
+  
+  if (rightedge<menuobj.offsetWidth)
+    // move the horizontal position of the menu to the left by it's width
+    left= ie5 ? document.body.scrollLeft+x-menuobj.offsetWidth 
+                            : window.pageXOffset+x-menuobj.offsetWidth;
+  else
+    //position the horizontal position of the menu where the mouse was clicked
+    left = ie5 ? document.body.scrollLeft+x 
+                             : window.pageXOffset+x;
+
+  // same concept with the vertical position
+  if (bottomedge<menuobj.offsetHeight)
+    top=ie5 ? document.body.scrollTop+y-menuobj.offsetHeight 
+                          : window.pageYOffset+y-menuobj.offsetHeight
+  else
+    top=ie5 ? document.body.scrollTop+y 
+                          : window.pageYOffset+y
+
+  menuobj.style.left = left + 'px';
+  menuobj.style.top = top + 'px';
+  
+  menuobj.style.visibility="visible";
+}
+
+
+function hidemenuie5(e)
+{ menuobj.style.visibility="hidden";
+}
+
+
+
+
+// end Context menu's
+
+
+
 
 
 
@@ -173,7 +311,23 @@ function updateTree(update)
       
 //    debug('replace '+targetId+' at '+parentId+' by '+newChild.getAttribute('Id'));
   } 
-
+  else if (op == 'contextMenu')
+  { var screenX = update.getAttribute('screenX');
+    var screenY = update.getAttribute('screenY');
+    
+    removeChildren('contextMenu');
+    
+    while (update.firstChild)
+    { var item = update.firstChild;
+      update.removeChild(update.firstChild);
+      menuobj.appendChild( item );
+    } // using appendChild directly also seems to remove the child from update
+      // but maybe this is not the same for all browsers
+    
+    showMenuXY(screenX,screenY);
+    
+  }
+  else alert ('Unknown command: '+op); 
 }
 
 function select(path, node)
@@ -215,6 +369,7 @@ function refresh()
 { removeChildren('rendering');
   removeChildren('focus');
   removeChildren('newRendering');
+  removeChildren('contextMenu');
 }
 
 function removeChildren(parentId)
@@ -425,13 +580,16 @@ function scrollHandler(event)
 ]]></script>
 </head>
 <body onload="init()">
-<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 1000px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;"
-     onmousedown="return mouseHandler('D',event)"
+<!-- size of Proxima window is currently hard coded in server; it should be passed with init event -->
+<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 400px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;"
+     onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
      onclick="return mouseHandler('C',event)"
+     oncontextmenu="return contextHandler(event)"
      onscroll="return scrollHandler(event)"
+     xml:space="preserve"
  ><div id="rendering"></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 400px; top: 0px;' ></div></div>
-
+<!-- xml:space does not seem to work -->
 
 
 <!-- font positioning goes wrong: text is drawn at half-height ref at top of div box
@@ -484,10 +642,11 @@ function scrollHandler(event)
 -->
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
+<div id="debugMessage"></div>
+<div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 
 <!-- <button onclick="loadXMLDoc('SpecialRefresh;')">Refresh</button>
 <button onclick="loadXMLDoc('SpecialClear;')">Clear</button> -->
-<div id="debugMessage"></div>
 </body></html>
 
 

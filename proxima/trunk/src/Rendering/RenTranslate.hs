@@ -33,7 +33,7 @@ interpret :: (Show doc, Show enr, Show token, Show node) =>
              LocalStateRen -> RenderingLevel doc enr node clip token ->
              ArrangementLevel doc node clip token -> EditRendering doc enr node clip token ->
              (EditArrangement doc enr node clip token, LocalStateRen, RenderingLevel doc enr node clip token)
-interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
+interpret state renLvl@(RenderingLevel scale c hp r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
   case editRen of
     InitRen             -> (InitArr,       state, renLvl) 
@@ -48,9 +48,9 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen (CharKey 's') (Modifiers False True False) -> (cast (CutDoc' :: EditDocument' doc enr node clip token),     state, renLvl) -- Ctrl-d
     KeySpecialRen (CharKey 'z') (Modifiers False True False) -> (cast (UndoDoc' :: EditDocument' doc enr node clip token),     state, renLvl) -- Ctrl-d
     KeySpecialRen (CharKey 'y') (Modifiers False True False) -> (cast (RedoDoc' :: EditDocument' doc enr node clip token),     state, renLvl) -- Ctrl-d
-    KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c r fr sz debugging ur lmd)
-    KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c r fr sz debugging ur lmd)
-    KeySpecialRen F9Key ms                             -> (SkipArr 0, state, RenderingLevel scale c r fr sz (not debugging) ur lmd)
+    KeySpecialRen UpKey   (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale*2) c hp r fr sz debugging ur lmd)
+    KeySpecialRen DownKey (Modifiers False False True) -> (SkipArr 0, state, RenderingLevel (scale/2) c hp r fr sz debugging ur lmd)
+    KeySpecialRen F9Key ms                             -> (SkipArr 0, state, RenderingLevel scale c hp r fr sz (not debugging) ur lmd)
 
     KeySpecialRen UpKey (Modifiers False True False)    -> (cast (NavUpDoc' :: EditDocument' doc enr node clip token), state, renLvl) -- Ctrl
     KeySpecialRen DownKey (Modifiers False True False)  -> (cast (NavDownDoc' :: EditDocument' doc enr node clip token), state, renLvl) -- Ctrl
@@ -85,9 +85,9 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
 
     KeyCharRen c          -> (KeyCharArr c, state, renLvl)
     KeySpecialRen c ms    -> (KeySpecialArr c ms, state, renLvl)
-    MouseDownRen x y ms i -> (MouseDownArr (descaleInt scale x) (descaleInt scale y) ms i, state, RenderingLevel scale c r fr sz debugging ur True)
+    MouseDownRen x y ms i -> (MouseDownArr (descaleInt scale x) (descaleInt scale y) ms i, state, RenderingLevel scale c hp r fr sz debugging ur True)
     MouseDragRen x y ms   -> (MouseDragArr (descaleInt scale x) (descaleInt scale y) ms, state, renLvl)
-    MouseUpRen x y ms     -> (MouseUpArr (descaleInt scale x) (descaleInt scale y) ms, state, RenderingLevel scale c r fr sz debugging ur False)
+    MouseUpRen x y ms     -> (MouseUpArr (descaleInt scale x) (descaleInt scale y) ms, state, RenderingLevel scale c hp r fr sz debugging ur False)
     
     OpenFileRen filePath  -> (OpenFileArr filePath,  state, renLvl) 
     SaveFileRen filePath  -> (SaveFileArr filePath,  state, renLvl) 
