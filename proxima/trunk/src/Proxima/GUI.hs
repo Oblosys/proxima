@@ -590,7 +590,7 @@ handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,
             ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
             }
     ; hPutStr handle $ toHTTP $ treeUpdates
-    ; putStrLn $ "Updates sent to client:\n"++ renderingHTML
+    --; putStrLn $ "Updates sent to client:\n"++ renderingHTML
     ; hFlush handle
     }
     
