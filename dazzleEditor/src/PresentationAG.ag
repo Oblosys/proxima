@@ -552,19 +552,19 @@ newProbtablePara = Clip_Paragraph $
                        
 newSection = Clip_Section $
                Section
-                 " "
+                 " new"
                  (List_Paragraph Nil_Paragraph) 
                  (List_Subsection Nil_Subsection)
 
 newSubsection = Clip_Subsection $
                     Subsection
-                      " "
+                      " new"
                       (List_Paragraph Nil_Paragraph) 
                       (List_Subsubsection Nil_Subsubsection) 
 
 newSubsubsection = Clip_Subsubsection $
                     Subsubsection
-                      " "
+                      " new"
                       (List_Paragraph Nil_Paragraph) 
 
 newValue = Clip_Value $ Value "new"
