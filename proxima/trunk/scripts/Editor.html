@@ -10,7 +10,7 @@
 <style>
 <![CDATA[
 
-/* Context menu Script- © Dynamic Drive (www.dynamicdrive.com) Last updated: 01/08/22
+/* Context menu Script- (c) Dynamic Drive (www.dynamicdrive.com) Last updated: 01/08/22
 For full source code and Terms Of Use, visit http://www.dynamicdrive.com */
 .skin0{
 position:absolute;
@@ -75,9 +75,64 @@ function init()
 
 
 //    setRefreshTimer(10);
-
     refresh();
+//    alert('before');
+//    debugAdd('Metrics: '+queryFont("Times New Roman", 12));
+//    alert('after');
     loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
+}
+
+// Font queries
+ 
+var beginRange = 32;
+var endRange = 255;
+  
+function initFont()
+{ var fontElt = document.getElementById('font');
+  fontElt.innerHTML='';
+  var lines = '<div id=\'lines\' style=\'position:absolute;"\'>';
+  for (var c=beginRange; c<=endRange; c++)
+  { var ch = c == 38 ? '&amp;' 
+           : c == 60 ? '&amp;' 
+           : c == 62 ? '&lt;' : String.fromCharCode(c);
+    lines = lines + '<div style=\'position:absolute\'>'+replicate(10,ch)+'</div>';
+  }
+  lines += '</div><div id="enclosing" style="position:absolute"><span id="text">X</span><span id="baseline" style="height:0px;font-size:0px">baseline</span></div>';
+  fontElt.innerHTML=lines;
+}
+
+function queryFont(fontFamily, fontSize)
+{
+  initFont() // firefox does not update bounding divs on style update, so we need to init every time :-(
+  
+  var fontElt = document.getElementById('font');
+  fontElt.style.fontFamily = fontFamily;
+  fontElt.style.fontSize = fontSize+'pt';
+
+
+  var enclosing = document.getElementById('enclosing');
+  var baselineElt = document.getElementById('baseline');
+  var font = document.getElementById('text');
+  var height = font.offsetHeight;
+  var baseline = baselineElt.offsetTop - font.offsetTop;
+
+  var metrics = '(("'+fontFamily+'",'+fontSize+'),('+height + ',' + baseline + ',';
+  var linesElt = fontElt.childNodes[0];
+  var widths = '[';
+  for (var childNr = 0; childNr <= endRange - beginRange; childNr++)
+  { var line = linesElt.childNodes[childNr];
+    widths += (childNr == 0 ? '' : ',') + (line.clientWidth);
+  }
+  widths += ']';
+  metrics += widths + '))';
+  return metrics;
+}
+
+function replicate(i,c)
+{ var str = '';
+  while (i-- > 0)
+    str = str + c;
+  return str;
 }
 
 
@@ -328,6 +383,17 @@ function updateTree(update)
     
     showMenuXY(screenX,screenY);
     
+  }
+  else if (op == 'metricsQuery')
+  { var family = update.getAttribute('family');
+    var size = update.getAttribute('size');
+    var metrics = queryFont(family,size);
+    //debugAdd('query is Metrics'+metrics+';');
+    loadXMLDoc('Metrics'+metrics+';');
+  }
+  else if (op == 'refresh')
+  { refresh();
+    loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
   }
   else alert ('Unknown command: '+op); 
 }
@@ -657,6 +723,7 @@ function scrollHandler(event)
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
 <div id="debugMessage"></div>
+<div id='font' style='white-space: pre'></div>
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 
 <!-- <button onclick="loadXMLDoc('SpecialRefresh;')">Refresh</button>

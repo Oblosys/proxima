@@ -908,7 +908,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
 
 
 showIDNr (IDA nr) = show nr
-showIDNr NoIDA    = debug Err "Renderer.showIDNr: NoIDA " $ show (-1)
+showIDNr NoIDA    = {- debug Err "Renderer.showIDNr: NoIDA " $ -} show (-1)
 
 divOpen fh id x y w h (r,g,b) = hPutStr fh $ 
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
@@ -926,6 +926,7 @@ stringHTML fh id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b)
                            else "")   ++ "'>"++
                                 
   "<div style='position:absolute;left:0px;top:"++show (h `div` 2)++"px;"++
+                "width:"++show (w*2)++"px;"++
                 "font-family:"++show fFam++";"++
                 "font-size:"++show ((fSiz *1334) `div`1000)++"px;"++
                 (if fBld then "font-weight: bold;" else "")++

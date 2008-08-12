@@ -48,6 +48,15 @@ startGUI :: (Show doc, Show enr, Show node, Show token) =>
             (RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO ()
 startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) = 
  do { initGUI
+    
+    ; fh <- openFile "queriedMetrics.txt" WriteMode
+    ; hPutStr fh ""
+    ; hClose fh
+
+    ; fh' <- openFile "metricsQueries.txt" WriteMode
+    ; hPutStr fh' ""
+    ; hClose fh'
+
     ; window <- windowNew
     ; onDestroy window mainQuit
     ; set window [ windowTitle := (applicationName settings) ]
@@ -492,7 +501,7 @@ server params = withSocketsDo $
  do { putStrLn "\n\nListining to port"
     ; initR <- newIORef (True)
     ; menuR <- newIORef []
-    
+
     ; serverSocket <- listenOn (PortNumber 80)
     ; serverLoop params initR menuR serverSocket
     }          
@@ -522,7 +531,7 @@ handleRequest (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,c
 --    ; mapM putStrLn commandLines
     
     ; let arg = (takeWhile (/=' ') (drop 5 (head commandLines)))
-    ; putStrLn $ "arg = " ++ arg
+    ; putStrLn $ "arg (len="++show (length arg) ++"):\n" ++ arg
     ; if arg == ""  
       then
        do { writeIORef viewedAreaRef ((0,0),(1000,800)) -- todo: take this from an init event
@@ -550,7 +559,7 @@ splitCommands commandStr =
 -- handle each command in commands and send the updates back
 handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR menuR handle commandStr =
  do { let commands = splitCommands commandStr
-    ; putStrLn $ "Received commands: "++ show commands
+    ; putStrLn $ "Received commands:"++ show commands
     
     ; mapM (handleCommand (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR menuR handle)
            commands
@@ -575,6 +584,18 @@ handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,
     ; fh <- openFile "rendering.html" WriteMode
     ; hClose fh
 
+    
+    ; pendingQueriesTxt <-  readFile "metricsQueries.txt"
+    ; seq (length pendingQueriesTxt) $ return ()
+    ; let pendingQueries = map read $ lines pendingQueriesTxt :: [(String, Int)]
+          queryHTML = concat [ "<div id='metricsQuery' op='metricsQuery' family='"++fam++"' size='"++show sz++"'></div>" 
+                             | (fam,sz) <- pendingQueries]
+                      ++ if null pendingQueries then "" else "<div id='refresh' op='refresh'></div>"
+
+    
+    ; fh <- openFile "metricsQueries.txt" WriteMode
+    ; hClose fh
+    
     ; isInitialRequest <- readIORef initR
     ; treeUpdates <-
         if isInitialRequest 
@@ -582,12 +603,18 @@ handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,
         do { putStrLn "Initial request"
             ; writeIORef initR False
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
-            ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
+            ; return $ "<div id='updates'>"++(if null pendingQueries 
+                                             then renderingHTML++focusRenderingHTML
+                                             else "")
+                                           ++queryHTML++"</div>"
             }
         else 
         do { putStrLn "Later request"
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
-            ; return $ "<div id='updates'>"++renderingHTML++focusRenderingHTML++"</div>"
+            ; return $ "<div id='updates'>"++ (if null pendingQueries 
+                                             then renderingHTML++focusRenderingHTML
+                                             else "")
+                                           ++queryHTML++"</div>"
             }
     ; hPutStr handle $ toHTTP $ treeUpdates
     --; putStrLn $ "Updates sent to client:\n"++ renderingHTML
@@ -597,7 +624,9 @@ handleCommands (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,
     
 handleCommand (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,canvas) initR menuR handle event =
  do { putStrLn $ "Handling: " ++ event
-    ; if "ContextRequest" `isPrefixOf` event  -- is not handled by genericHandler
+    ; if "Metrics" `isPrefixOf` event  -- is not handled by genericHandler
+      then handleMetrics event
+      else if "ContextRequest" `isPrefixOf` event  -- is not handled by genericHandler
       then handleContextMenuRequest renderingLvlVar menuR event
       else do { (event) <-
                   if "Key" `isPrefixOf` event || "Chr" `isPrefixOf` event 
@@ -616,6 +645,21 @@ handleCommand (settings,handler,renderingLvlVar,buffer,viewedAreaRef,window,vp,c
               }
     }
 
+
+handleMetrics ('M':'e':'t':'r':'i':'c':'s':event) =
+ do { let receivedMetrics :: ((String,Int),(Int,Int,[Int])) = read $ fromHTML event
+    ; putStrLn $ "Received metrics:"++show receivedMetrics
+    ; fh' <- openFile "queriedMetrics.txt" AppendMode
+    ; hPutStrLn fh' $ show receivedMetrics
+    ; hClose fh'
+    }
+    
+fromHTML [] = []
+fromHTML ('%':'2':'0':cs) = ' ': fromHTML cs
+fromHTML ('%':'2':'2':cs) = '"': fromHTML cs
+fromHTML ('%':'5':'B':cs) = '[': fromHTML cs
+fromHTML ('%':'5':'D':cs) = ']': fromHTML cs
+fromHTML (c:cs) = c:fromHTML cs
 -- Current structure of handlers causes focus to be repainted after context request
 -- this is not really a problem though
 handleContextMenuRequest renderingLvlVar menuR ('C':'o':'n':'t':'e':'x':'t':'R':'e':'q':'u':'e':'s':'t':event) =
