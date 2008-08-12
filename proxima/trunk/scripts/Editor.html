@@ -595,14 +595,13 @@ function scrollHandler(event)
 </head>
 <body onload="init()">
 <!-- size of Proxima window is currently hard coded in server; it should be passed with init event -->
-<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 800px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;"
+<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 800px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
      onmousemove="return mouseHandler('M',event)"
      onclick="return mouseHandler('C',event)"
      oncontextmenu="return contextHandler(event)"
      onscroll="return scrollHandler(event)"
-     xml:space="preserve"
  ><div id="rendering"></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div></div>
 <!-- xml:space does not seem to work -->
 
