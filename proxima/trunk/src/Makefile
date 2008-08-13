@@ -84,6 +84,7 @@ $(LAYOUTDIR)/ScannerAG.hs : $(AGC) $(LAYOUTDIR)/ScannerAG.ag \
 	
 	@echo uuagc: compiling ScannerAG.ag
 	@$(AGC) -scfp --Wmax=12 --genlinepragmas --self --Werrors \
+	--cycle --visit --case --strictdata --strictwrap --strictsem --seq --strictercase --optimize --unbox \
 	$(LAYOUTDIR)/ScannerAG.ag --module=Layout.ScannerAG -P $(LAYOUTDIR)
        
 # --bangpats only in GHC > 6.8.1

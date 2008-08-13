@@ -18,7 +18,7 @@ import Evaluation.DocUtils -- for redirect
 import Presentation.PresPresent
 import Evaluation.EnrTypes
 --import Graphics.UI.WX.Types hiding (Size)
---import Graphics.UI.Gtk hiding (Editable)
+import Graphics.UI.Gtk hiding (Editable)
 
 import Presentation.PresTypes -- temporarily
 import Presentation.PresUtils -- temporarily
@@ -44,11 +44,7 @@ import Evaluation.EvalLayerTypes (LayerStateEval (..))
 
 import qualified Data.Map as Map
 import Data.Map (Map)
-import DocTypes_Generated
-import DocUtils_Generated
-import DocumentEdit_Generated
-import Evaluator
-import Reducer
+
 
 --tok str = let (toks,layoutmap,counter) = tokenize 0 Nothing . ParsingP NoIDP . StringP NoIDP $ str
 --          in  ParsePres toks
@@ -70,10 +66,13 @@ import Reducer
 -- initial system local state in Main is not nice
 
 
-proxima :: Settings ->
-           PresentationSheet Document EnrichedDoc Node ClipDoc UserToken -> ParseSheet  Document  EnrichedDoc Node ClipDoc UserToken ->
-           ScannerSheet Document Node ClipDoc UserToken ->
-           DocumentLevel Document ClipDoc -> EnrichedDocLevel EnrichedDoc Document ->
+proxima :: ( DocNode node, Show token, Ord token, Show enr, Doc doc, Clip clip
+           , EvaluationSheet doc enr clip, ReductionSheet doc enr clip
+           , Editable doc doc node clip token) =>
+           Settings ->
+           PresentationSheet doc enr node clip token -> ParseSheet doc enr node clip token ->
+           ScannerSheet doc node clip token ->
+           DocumentLevel doc clip -> EnrichedDocLevel enr doc ->
            IO ()
 proxima settings presentationSheet parseSheet scannerSheet
         initDoc initEnr =

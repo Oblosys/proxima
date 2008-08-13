@@ -18,6 +18,7 @@ import Evaluation.DocTypes (DocumentLevel)
 import Proxima.GUI
 import Arrangement.FontLib
 
+import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout)
 import System.IO.Unsafe
 import Data.IORef
 import System.IO
@@ -59,11 +60,6 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
   in if oldW>newW || oldH > newH     -- if arr got smaller, repaint whole thing for now
      then [((0, 0),(max oldW newW, max oldH newH))]
      else updatedRectArr diffTree arrangement  
-mkPopupMenuXY = error "mkPopupMenuXY disabled"
-render' = error "render' disabled"
-renderFocus = error "renderFocus disabled"
-
-{-
 
 mkPopupMenuXY :: (DocNode node, Show token) => Settings ->
                  Layout doc node clip token -> Scale -> Arrangement node ->
@@ -77,8 +73,8 @@ mkPopupMenuXY settings prs scale arr handler renderingLvlVar buffer viewedAreaRe
                         Nothing -> []
                         Just pthA -> popupMenuItemsPres (pathPFromPathA' arr prs pthA) prs
               
- //   ; contextMenu <- mkMenu [ (str, popupMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
- //                           | (str, upd) <- ctxtItems]
+    ; contextMenu <- mkMenu [ (str, popupMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
+                            | (str, upd) <- ctxtItems]
     ; return $ Just contextMenu                                          
     }
 
@@ -542,7 +538,7 @@ graphColor        = gtkColor (255, 255, 0)
 vertexColor       = gtkColor (255, 0, 255)
 structuralBGColor = gtkColor (230, 230, 255)
 parsingBGColor    = gtkColor (255, 230, 230)
--}
+
 
 -- focus is not perfect, but this has to do with the selection algorithm as well.
 -- for now, it is a working solution
@@ -633,12 +629,13 @@ renderHTML' scale arrDb diffTree arrangement viewedArea =
     --; putStrLn $ "DiffTree is " ++ show diffTree
     --; debugLnIO Ren ("Arrangement is "++show arrangement)
     --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
- 
-    --; putStrLn "\n\n\nStart HTML rendering"
+    ; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
+
+    ; putStrLn "\n\n\nStart HTML rendering"
     ; fh <- openFile "rendering.html" AppendMode
     --; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
     ; renderHTML fh 
-                 arrDb scale origin () (Just [0]) diffTree arrangement
+                 arrDb scale origin viewedArea (Just [0]) diffTree arrangement
     ; hClose fh
     --; renderingHTML <- readFile "rendering.html"
     --; putStrLn $ "Rendering:\n"++ renderingHTML
@@ -651,14 +648,15 @@ renderHTML' scale arrDb diffTree arrangement viewedArea =
 -- however, we don't want to debug the focus
     
 renderFocusHTML scale arrDb focus arrangement viewedArea =
- do { 
+ do { clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
+
     ; let focusArrList = arrangeFocus focus arrangement
     ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
 
    ; fh <- openFile "focusRendering.html" WriteMode
-   ; putStrLn "rendering focus"
+   ; putStrLn "rendering focus HTML"
    ; renderHTML fh 
-                arrDb scale origin ()
+                arrDb scale origin viewedArea
                 
                 (Just [1])
                 (DiffLeaf False)
@@ -711,7 +709,7 @@ htmlPath pth = "<div id='path'>"++stepsHTML++"</div>"
 
 {- inUpdate is True when renderHTML is inside a replace update -}
 renderHTML :: Show node => Handle -> Bool -> Scale -> (Int,Int) ->
-                                         () -> Maybe Path -> DiffTree -> Arrangement node -> IO ()    
+                                         (Point, Size) -> Maybe Path -> DiffTree -> Arrangement node -> IO ()    
 renderHTML fh o s (lux, luy) v m (DiffNode _ _ [dt]) (StructuralA _ arr) =
            renderHTML fh o s (lux, luy) v m dt arr
 renderHTML fh o s (lux, luy) v m (DiffLeaf d)        (StructuralA _ arr) =

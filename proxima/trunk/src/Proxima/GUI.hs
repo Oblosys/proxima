@@ -11,7 +11,7 @@ Unclear: if edit is skip, update renderingLevel? Maybe it was changed by rendere
 TODO: fix wrong hRef (hSpaces are the problem)
 
 -}
--- import Graphics.UI.Gtk hiding (Size, Socket)
+import Graphics.UI.Gtk hiding (Size, Socket)
 import Data.IORef
 
 import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO
@@ -26,7 +26,7 @@ import Char
 import Maybe
 import System.IO
 import Directory
---import Data.Time.Clock
+import Data.Time.Clock
 import Control.Exception
 
 import Network
@@ -47,7 +47,7 @@ startGUI :: (Show doc, Show enr, Show node, Show token) =>
             IORef CommonTypes.Rectangle ->
             (RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO ()
 startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) = 
- do { -- initGUI
+ do { initGUI
     
     ; fh <- openFile "queriedMetrics.txt" WriteMode
     ; hPutStr fh ""
@@ -57,7 +57,6 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; hPutStr fh' ""
     ; hClose fh'
 
-{-
     ; window <- windowNew
     ; onDestroy window mainQuit
     ; set window [ windowTitle := (applicationName settings) ]
@@ -76,9 +75,8 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; scrolledWindowSetShadowType sw ShadowNone
 
     ; buffer <- newIORef Nothing
-    -}
     ; renderingLvlVar <- newIORef initRenderingLvl
-{-
+
     ; onExpose canvas $ catchHandler $ onPaint settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onKeyPress canvas $ catchHandler $ onKeyboard settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onMotionNotify canvas False $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
@@ -119,25 +117,11 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     -- about every half minute, save a backup of the document
 
 --    ; timeoutAddFull (withCatch $ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
-
     ; if serverMode settings 
-      then -}
-    ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef initEvent
-    
---    ; putStrLn "Open document"
-    ; initializeDocumentServer settings handler renderingLvlVar viewedAreaRef
-    ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
-
-      ; server (settings,handler,renderingLvlVar,viewedAreaRef)
-   --   else mainGUI
+      then server (settings,handler,renderingLvlVar,viewedAreaRef)
+      else mainGUI
     }    
-    
-initializeDocumentServer settings handler renderingLvlVar viewedAreaRef =
- do { backupExists <- doesFileExist backupFilename
-    ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef  (OpenFileRen documentFilename)
-    }
-    
-{-
+
 -- GTK somehow catches exceptions that occur in event handlers, and terminates the program. To
 -- prevent this, we catch the exception in the event handler itself.
 withCatch io = io
@@ -507,7 +491,7 @@ okDialog txt =
     ; return response
     }
 
--}
+
 
 
 
@@ -518,7 +502,7 @@ server params = withSocketsDo $
     ; initR <- newIORef (True)
     ; menuR <- newIORef []
 
-    ; serverSocket <- listenOn (PortNumber 8080)
+    ; serverSocket <- listenOn (PortNumber 80)
     ; serverLoop params initR menuR serverSocket
     }          
 
@@ -656,7 +640,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handl
 
 
 handleMetrics ('M':'e':'t':'r':'i':'c':'s':event) =
- do { let receivedMetrics = read $ fromHTML event :: ((String,Int),(Int,Int,[Int]))
+ do { let receivedMetrics :: ((String,Int),(Int,Int,[Int])) = read $ fromHTML event
     ; putStrLn $ "Received metrics:"++show receivedMetrics
     ; fh' <- openFile "queriedMetrics.txt" AppendMode
     ; hPutStrLn fh' $ show receivedMetrics
@@ -672,7 +656,7 @@ fromHTML (c:cs) = c:fromHTML cs
 -- Current structure of handlers causes focus to be repainted after context request
 -- this is not really a problem though
 handleContextMenuRequest renderingLvlVar menuR ('C':'o':'n':'t':'e':'x':'t':'R':'e':'q':'u':'e':'s':'t':event) =
- do { let ((proxX,proxY),(screenX,screenY))= read event  :: ((Int,Int),(Int,Int)) 
+ do { let ((proxX,proxY),(screenX,screenY)) :: ((Int,Int),(Int,Int)) = read event
 
     ; (RenderingLevel _ _ makePopupMenuHTML _ _ _ _ _ _ _ _)  <- readIORef renderingLvlVar
     ; let (itemStrs,upds) = unzip $ makePopupMenuHTML proxX proxY
@@ -698,13 +682,13 @@ handleContextMenuSelect :: forall doc enr clip node token .
                            IORef [UpdateDoc doc clip] -> String -> IO (EditRendering doc enr node clip token)
 handleContextMenuSelect menuR ('C':'o':'n':'t':'e':'x':'t':'S':'e':'l':'e':'c':'t':event) =
  do { menuItems <- readIORef menuR
-    ; let selectedItemNr = read event :: Int 
+    ; let selectedItemNr :: Int = read event
           editDoc = index "GUI.handleContextMenuSelect" menuItems selectedItemNr
     ; return $ cast (UpdateDoc' editDoc :: EditDocument' doc enr node clip token)
     }
     
 handleKey ('K':'e':'y':event) editStr focus = return $
- let (keyCode,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event :: (Int,(Bool,Bool,Bool))
+ let (keyCode,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event
      key = 
        case keyCode of
         46 -> KeySpecialRen CommonTypes.DeleteKey ms
@@ -730,7 +714,7 @@ handleKey ('K':'e':'y':event) editStr focus = return $
      ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
   in key 
 handleKey ('C':'h':'r':event) editStr focus = return $
- let (keyChar,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event :: (Int,(Bool,Bool,Bool))
+ let (keyChar,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event
      ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
   in if not ctrlDown && not altDown 
      then KeyCharRen (chr keyChar)
