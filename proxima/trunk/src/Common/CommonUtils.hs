@@ -2,7 +2,7 @@ module Common.CommonUtils where
 
 import Common.CommonTypes
 import qualified Common.CommonTypes as CommonTypes
-import Graphics.UI.Gtk hiding (Rectangle)
+--import Graphics.UI.Gtk hiding (Rectangle)
 import Data.Time.Clock
 import Data.IORef
 -- is exported (and imported) by all ...Utils modules
@@ -65,9 +65,6 @@ contains :: Rectangle -> Rectangle -> Bool
 contains ((x, y), (w, h)) ((x', y'),(w',h')) =
   (x' >= x && x'+w' <= x+w &&  y' >= y && y'+h' <= y+h)
   
--- | Convert an rgb 3-tuple to a GTK color
-gtkColor :: CommonTypes.Color -> Graphics.UI.Gtk.Color
-gtkColor (r, g, b) = Color (256*fromIntegral r) (256*fromIntegral g) (256*fromIntegral b)
 
 -- | Compute the difference (rectangle - rectangle). The result is a list of a maximum of
 --   4 rectangles.

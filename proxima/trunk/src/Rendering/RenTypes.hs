@@ -1,6 +1,6 @@
 module Rendering.RenTypes where
 
-import Graphics.UI.Gtk hiding (Scale, Size, Rectangle)
+--import Graphics.UI.Gtk hiding (Scale, Size, Rectangle)
 import Data.IORef
 
 import Common.CommonTypes
@@ -47,7 +47,6 @@ instance Show (RenderingLevel_ wrapped doc enr node clip token) where
        "RenderingLevel {Scale: "++show scale++"} {GUICommand} {Rendering} "++show size++" {debug:" ++ show debugging ++ "}\n"
     ++ "               {updated regions:"++show updRegions++"}{leftButtonDown:"++show leftButtonDown++"}\n"
 
-
 type Scale = Double
 type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc enr node clip token, EditRendering_ wrapped doc enr node clip token) -> IO (RenderingLevel_ wrapped doc enr node clip token, [EditRendering'_ wrapped doc enr node clip token])) ->
                   IORef (RenderingLevel_ wrapped doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> 
@@ -56,8 +55,15 @@ type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc 
 
 type Rendering = DrawableClass drawWindow => (Window, drawWindow, GC) -> (Point,Size) -> IO ()
                                                                       -- viewd area ((x,y),(w,h))
-
-type RenderingHTML = (Point,Size) -> IO ()
+class DrawableClass d
+data Window
+data GC
+data DrawingArea
+data Point
+data Menu
+data Pixmap
+data Viewport
+type RenderingHTML = ((Int,Int),Size) -> IO ()
                      -- viewed area ((x,y),(w,h))
 type Debugging = Bool
 type Size = (Int, Int)

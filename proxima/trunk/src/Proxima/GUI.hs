@@ -11,7 +11,7 @@ Unclear: if edit is skip, update renderingLevel? Maybe it was changed by rendere
 TODO: fix wrong hRef (hSpaces are the problem)
 
 -}
-import Graphics.UI.Gtk hiding (Size, Socket)
+-- import Graphics.UI.Gtk hiding (Size, Socket)
 import Data.IORef
 
 import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO
@@ -47,7 +47,7 @@ startGUI :: (Show doc, Show enr, Show node, Show token) =>
             IORef CommonTypes.Rectangle ->
             (RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO ()
 startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) = 
- do { initGUI
+ do { -- initGUI
     
     ; fh <- openFile "queriedMetrics.txt" WriteMode
     ; hPutStr fh ""
@@ -57,6 +57,7 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; hPutStr fh' ""
     ; hClose fh'
 
+{-
     ; window <- windowNew
     ; onDestroy window mainQuit
     ; set window [ windowTitle := (applicationName settings) ]
@@ -75,8 +76,9 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; scrolledWindowSetShadowType sw ShadowNone
 
     ; buffer <- newIORef Nothing
+    -}
     ; renderingLvlVar <- newIORef initRenderingLvl
-
+{-
     ; onExpose canvas $ catchHandler $ onPaint settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onKeyPress canvas $ catchHandler $ onKeyboard settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onMotionNotify canvas False $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
@@ -117,11 +119,19 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     -- about every half minute, save a backup of the document
 
 --    ; timeoutAddFull (withCatch $ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
-    ; if serverMode settings 
-      then server (settings,handler,renderingLvlVar,viewedAreaRef)
-      else mainGUI
-    }    
 
+    ; if serverMode settings 
+      then -}
+    ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef initEvent
+    
+--    ; putStrLn "Open document"
+--    ; initializeDocument settings handler renderingLvlVar viewedAreaRef
+    ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
+
+      ; server (settings,handler,renderingLvlVar,viewedAreaRef)
+   --   else mainGUI
+    }    
+{-
 -- GTK somehow catches exceptions that occur in event handlers, and terminates the program. To
 -- prevent this, we catch the exception in the event handler itself.
 withCatch io = io
@@ -491,7 +501,7 @@ okDialog txt =
     ; return response
     }
 
-
+-}
 
 
 

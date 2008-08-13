@@ -2,7 +2,7 @@ module Arrangement.FontLib where
 
 import Common.CommonTypes
 import Common.CommonUtils
-import Graphics.UI.Gtk hiding (FontMetrics)
+--import Graphics.UI.Gtk hiding (FontMetrics)
 
 import qualified Data.Map as Map
 import Data.Map (Map)
@@ -46,7 +46,7 @@ metricsLookup font fontMetrics =
   case Map.lookup (font {fUnderline = False, fStrikeOut = False}) fontMetrics  of
             Just metrics -> metrics
             Nothing      -> {- debug Err "metrics for font not queried" $ -} (20,15, listArray (0,223) (repeat 10))
-
+{-
 --- query the metrics for font. 
 queryFont :: Font -> IO (Font,(Int, Int, [Int]))
 queryFont font =
@@ -95,7 +95,7 @@ fontDescriptionFromProximaFont (Font fFam fSiz fBld fUnderln fItlc fStrkt) =
 
 forceEval :: Show a => a -> IO ()
 forceEval a = seq (last (show a)) (return ())
-
+-}
 
 textWidth :: FontMetrics -> Font -> String -> Int
 textWidth fms f str = let (h,b,ws) = metricsLookup f fms

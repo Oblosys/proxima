@@ -4,10 +4,10 @@ import Common.CommonTypes
 --import RenTypesGTK
 import Rendering.RenTypes
 
-import Graphics.UI.Gtk
+--import Graphics.UI.Gtk
 
 mkMenu :: [(String, IO ())] -> IO Menu
-mkMenu items =
+mkMenu items = error "mkMenu disabled" {-
  do { menu <- menuNew
     ; menuItems <- mapM mkMenuItem items 
     ; mapM (menuShellAppend menu) menuItems
@@ -18,3 +18,4 @@ mkMenu items =
            ; onActivateLeaf menuItem action
            ; return menuItem
            }
+-}
