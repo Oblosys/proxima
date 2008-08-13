@@ -755,8 +755,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
         }
 
     (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
-     do { divOpen fh id x' y' w' h' bColor
-        ; let pts = [(0,0),(w',0),(w',h'),(0,h')]
+     do { let pts = [(0,0),(w',0),(w',h'),(0,h')]
         ; polyHTML fh id x' y' w' h' pts (scaleInt scale lw' `max` 1) lColor fColor
         ; divClose fh
         }
@@ -871,7 +870,7 @@ renderHTML fh oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea mPth di
               ptHTML2 = (rlx' - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
         
         ; edgeHTML fh id (lux',luy') (rlx',rly') (scaleInt scale lw' `max` 1) lColor
-        ; polyHTML fh id 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
+        ; polyHTML' fh id 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
         }
 
     (StructuralA id arr) -> 
@@ -972,6 +971,7 @@ ellipseHTML fh id x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
   "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
   "</svg></div>"
 -- TODO: why this max 4?
+
 polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $  
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show ((h+2)`max` 4)++"px;"++
@@ -983,7 +983,19 @@ polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
   "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
   "</svg></div>"
  where pointsStr = concat $ intersperse " " $ [show (x) ++ "," ++ show (y) | (x,y) <- pts ]
--- don't correct for x-1 and y-1, since poly's seems to be rendererd +1 already
+-- don't correct for x-1 and y-1, since poly's seems to be renderered +1 already
+
+
+-- TODO: somehow the above does not work for arrowheads in Safari, this is just a quick fix
+polyHTML' fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $  
+  "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
+  "<polygon points='"++pointsStr++"' "++
+  "style='fill:"++(if fr == -1 then "none; "
+                               else "rgb("++show fr++","++show fg++","++show fb++");")++
+  "stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>" ++
+  "</svg>"
+ where pointsStr = concat $ intersperse " " $ [show (x) ++ "," ++ show (y) | (x,y) <- pts ]
+-- don't correct for x-1 and y-1, since poly's seems to be renderered +1 already
 
 
 
