@@ -26,7 +26,7 @@ import Char
 import Maybe
 import System.IO
 import Directory
-import Data.Time.Clock
+--import Data.Time.Clock
 import Control.Exception
 
 import Network
@@ -125,12 +125,18 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef initEvent
     
 --    ; putStrLn "Open document"
---    ; initializeDocument settings handler renderingLvlVar viewedAreaRef
+    ; initializeDocumentServer settings handler renderingLvlVar viewedAreaRef
     ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
 
       ; server (settings,handler,renderingLvlVar,viewedAreaRef)
    --   else mainGUI
     }    
+    
+initializeDocumentServer settings handler renderingLvlVar viewedAreaRef =
+ do { backupExists <- doesFileExist backupFilename
+    ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef  (OpenFileRen documentFilename)
+    }
+    
 {-
 -- GTK somehow catches exceptions that occur in event handlers, and terminates the program. To
 -- prevent this, we catch the exception in the event handler itself.
@@ -512,7 +518,7 @@ server params = withSocketsDo $
     ; initR <- newIORef (True)
     ; menuR <- newIORef []
 
-    ; serverSocket <- listenOn (PortNumber 80)
+    ; serverSocket <- listenOn (PortNumber 8080)
     ; serverLoop params initR menuR serverSocket
     }          
 
@@ -650,7 +656,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handl
 
 
 handleMetrics ('M':'e':'t':'r':'i':'c':'s':event) =
- do { let receivedMetrics :: ((String,Int),(Int,Int,[Int])) = read $ fromHTML event
+ do { let receivedMetrics = read $ fromHTML event :: ((String,Int),(Int,Int,[Int]))
     ; putStrLn $ "Received metrics:"++show receivedMetrics
     ; fh' <- openFile "queriedMetrics.txt" AppendMode
     ; hPutStrLn fh' $ show receivedMetrics
@@ -666,7 +672,7 @@ fromHTML (c:cs) = c:fromHTML cs
 -- Current structure of handlers causes focus to be repainted after context request
 -- this is not really a problem though
 handleContextMenuRequest renderingLvlVar menuR ('C':'o':'n':'t':'e':'x':'t':'R':'e':'q':'u':'e':'s':'t':event) =
- do { let ((proxX,proxY),(screenX,screenY)) :: ((Int,Int),(Int,Int)) = read event
+ do { let ((proxX,proxY),(screenX,screenY))= read event  :: ((Int,Int),(Int,Int)) 
 
     ; (RenderingLevel _ _ makePopupMenuHTML _ _ _ _ _ _ _ _)  <- readIORef renderingLvlVar
     ; let (itemStrs,upds) = unzip $ makePopupMenuHTML proxX proxY
@@ -692,13 +698,13 @@ handleContextMenuSelect :: forall doc enr clip node token .
                            IORef [UpdateDoc doc clip] -> String -> IO (EditRendering doc enr node clip token)
 handleContextMenuSelect menuR ('C':'o':'n':'t':'e':'x':'t':'S':'e':'l':'e':'c':'t':event) =
  do { menuItems <- readIORef menuR
-    ; let selectedItemNr :: Int = read event
+    ; let selectedItemNr = read event :: Int 
           editDoc = index "GUI.handleContextMenuSelect" menuItems selectedItemNr
     ; return $ cast (UpdateDoc' editDoc :: EditDocument' doc enr node clip token)
     }
     
 handleKey ('K':'e':'y':event) editStr focus = return $
- let (keyCode,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event
+ let (keyCode,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event :: (Int,(Bool,Bool,Bool))
      key = 
        case keyCode of
         46 -> KeySpecialRen CommonTypes.DeleteKey ms
@@ -724,7 +730,7 @@ handleKey ('K':'e':'y':event) editStr focus = return $
      ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
   in key 
 handleKey ('C':'h':'r':event) editStr focus = return $
- let (keyChar,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event
+ let (keyChar,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event :: (Int,(Bool,Bool,Bool))
      ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
   in if not ctrlDown && not altDown 
      then KeyCharRen (chr keyChar)
