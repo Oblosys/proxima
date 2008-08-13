@@ -16,6 +16,8 @@ data RenderingLevel_ wrapped doc enr node clip token =
                       (Int -> Int -> [PopupMenuItem doc clip])  -- html popup
                       Rendering -- rendering
                       Rendering -- focus rendering
+                      RenderingHTML
+                      RenderingHTML -- focus
                       Size Debugging UpdatedRegions LeftButtonDown
                   
 type LocalStateRen = ()
@@ -41,7 +43,7 @@ data EditRendering_ wrapped doc enr node clip token =
 
 
 instance Show (RenderingLevel_ wrapped doc enr node clip token) where
-  show (RenderingLevel scale _ _ _ _ size debugging updRegions leftButtonDown) =
+  show (RenderingLevel scale _ _ _ _ _ _ size debugging updRegions leftButtonDown) =
        "RenderingLevel {Scale: "++show scale++"} {GUICommand} {Rendering} "++show size++" {debug:" ++ show debugging ++ "}\n"
     ++ "               {updated regions:"++show updRegions++"}{leftButtonDown:"++show leftButtonDown++"}\n"
 
@@ -54,6 +56,9 @@ type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc 
 
 type Rendering = DrawableClass drawWindow => (Window, drawWindow, GC) -> (Point,Size) -> IO ()
                                                                       -- viewd area ((x,y),(w,h))
+
+type RenderingHTML = (Point,Size) -> IO ()
+                     -- viewed area ((x,y),(w,h))
 type Debugging = Bool
 type Size = (Int, Int)
 
