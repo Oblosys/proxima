@@ -17,9 +17,9 @@ position:absolute;
 border:2px solid black;
 background-color:menu;
 font-family:Verdana;
-line-height:20px;
+line-height:14px;
 cursor:default;
-font-size:14px;
+font-size:10px;
 z-index:100;
 visibility:hidden;
 }
@@ -417,7 +417,7 @@ function debug(message)
 
 function debugAdd(message)
 {
-    debug (document.getElementById('debugMessage').innerHTML + message);
+    debug (message + '<br></br>' + document.getElementById('debugMessage').innerHTML);
 }
 
 /*
@@ -528,76 +528,30 @@ function ignore(e)
 
 function mouseHandler(str,e) 
 {
-	var posx = 0;
-	var posy = 0;
-
-
-        if(e.offsetX && e.offsetY) // IE
-        {
-//                e = window.event;
-                posx = e.offsetX;
-                posy = e.offsetY;
-        }
-        else       // we assume DOM modeled javascript
-        {
-                var Element = e.target;
-                var CalculatedTotalOffsetLeft = 0;
-                var CalculatedTotalOffsetTop = 0;
-
-                while (Element.offsetParent)
-                {
-                        CalculatedTotalOffsetLeft += Element.offsetLeft ;     
-                        CalculatedTotalOffsetTop += Element.offsetTop;
-                        Element = Element.offsetParent;
-                }
-
-                posx = e.pageX - CalculatedTotalOffsetLeft ;
-                posy = e.pageY - CalculatedTotalOffsetTop;
-        }
-
-
-
-/*
-	if (!e) var e = window.event;
-	
-	//debug('Target: '+e.target.id);
-	if (e.pageX || e.pageY) 	{
-		posx = e.pageX;
-		posy = e.pageY;
-	}
-	else if (e.clientX || e.clientY) 	{
-		posx = e.clientX + document.body.scrollLeft
-			+ document.documentElement.scrollLeft;
-		posy = e.clientY + document.body.scrollTop
-			+ document.documentElement.scrollTop;
-	}
-*/
+	var coords = getMouseCoordsWithinTarget(e,'proxima');
+  var posx = coords.x;
+	var posy = coords.y;
+  
   var proxima = document.getElementById('proxima');
 
-  if ( posx > proxima.clientWidth || posy > proxima.clientHeight )
+  if ( (posx - proxima.scrollLeft) > proxima.clientWidth || (posy - proxima.scrollTop) > proxima.clientHeight )
     return;  // we're on a scroll bar, so no event.
-    
-  posx = posx + proxima.scrollLeft;
-  posy = posy + proxima.scrollTop; 
-
-	
-	// posx and posy contain the mouse position relative to the document
-	// Do something with this information
-
-  //var renderAreaRect = document.getElementById('renderArea').getBoundingClientRect();
-  //loadXMLDoc('Mouse' + str + '(' + (posx - renderAreaRect.left ) + ',' +
-  //                                 (posy - renderAreaRect.top)  + ');' );
-
+    	
   // does not take into account mouse button
   if (str == 'D') 
     mouseDown = true;
   if (str == 'U') 
     mouseDown = false;
 
-  if (str != 'M' || mouseDown)
-    loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
-                                     (posy) + ',' +
-                                     showModifiers() + ');' );
+  // only handle mouse move if the mouse button is down and the queue is empty
+  if (str == 'M' && (!mouseDown || commandQueue != ''))
+    return;
+    
+  debugAdd('('+posx +','+posy+')');
+
+  loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
+                                   (posy) + ',' +
+                                   showModifiers() + ');' );
 }
 
 function showModifiers()
@@ -645,6 +599,7 @@ function scrollHandler(event)
     var proxima = document.getElementById('proxima');
     
 //    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
+  if (commandQueue == '')
     loadXMLDoc('SpecialScroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
                '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
 }
@@ -664,12 +619,13 @@ function scrollHandler(event)
 <div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 800px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
-     onmousemove="return mouseHandler('M',event)"
      onclick="return mouseHandler('C',event)"
+     onmousemove="return mouseHandler('M',event)"
      oncontextmenu="return contextHandler(event)"
      onscroll="return scrollHandler(event)"
- ><div id="rendering"></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div></div>
-<!-- xml:space does not seem to work -->
+ ><div id="rendering" 
+     ></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div></div>
+<!-- onmousemove="return mouseHandler('M',event)" -->
 
 
 <!-- font positioning goes wrong: text is drawn at half-height ref at top of div box
@@ -723,7 +679,7 @@ function scrollHandler(event)
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
 <div id="debugMessage"></div>
-<div id='font' style='white-space: pre'></div>
+<div id='font' style='visibility:hidden;white-space: pre'></div>
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 
 <!-- <button onclick="loadXMLDoc('SpecialRefresh;')">Refresh</button>
