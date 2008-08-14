@@ -129,7 +129,10 @@ baseLine fms f = let (h,b,ws) = metricsLookup f fms
 mkFontMetricsHTML :: [Font] -> IO FontMetrics
 mkFontMetricsHTML fonts =
  do { putStrLn "Before reading queriedMetrics.txt"
-    ; queriedFontsTxt <- readFile "queriedMetrics.txt"
+    ; fh <- openFile "queriedMetrics.txt" ReadMode -- readFile and seq gives problems when clearing it in GUI.hs
+    ; queriedFontsTxt <- hGetContents fh 
+    ; seq (length queriedFontsTxt) $ return ()
+    ; hClose fh
     ; let queriedFonts :: [((String, Int),(Int,Int,[Int]))]
             = map read $ lines queriedFontsTxt
     ; let alreadyQueried = catMaybes $ map (lookupFont queriedFonts) fonts

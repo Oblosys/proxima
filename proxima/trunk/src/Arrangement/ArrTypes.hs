@@ -34,6 +34,7 @@ data EditArrangement_ wrapped doc enr node clip token =
   | NormalizeArr
   | ParseArr
   | RedrawArr  -- set arr level to EmptyA, so incremental renderer will redraw
+  | ClearMetricsArr  -- empty font metrics cache, so fonts are reloaded. Also empties arrangement to do a redraw.
   | Test2Arr
   | KeyCharArr Char
   | KeySpecialArr SpecialKey Modifiers

@@ -11,18 +11,30 @@ import Evaluation.DocTypes
 import Evaluation.DocUtils
 import qualified Layout.TreeEditPres as TreeEditPres -- for mouse handling stuff
 
+import Data.IORef
+import qualified Data.Map as Map
+import Data.Map (Map)
 
 translateIO state low high =  castRemainingEditOps $ \editLow ->
- do { let (editHigh, state', low') = unArrange state low high editLow
+ do { (editHigh, state', low') <- unArrangeIO state low high editLow
     ; return ([editHigh], state', low')
     }
 
 
-
+    
+unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) ClearMetricsArr = 
+ do { writeIORef (getFontMetricsRef state) Map.empty -- TODO: put Map.empty as a function in FontLib
+    ; return (SkipLay 0,             state, (ArrangementLevel emptyA focus p))
+    }
+unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) editArr = 
+ do { let (editHigh, state', low') = unArrange state arrLvl layLvl editArr
+    ; return (editHigh, state', low')
+    }
+    
 unArrange :: (Show doc, Show enr, Show token, Show node, DocNode node) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
              EditArrangement doc enr node clip token ->
              (EditLayout doc enr node clip token, LocalStateArr, ArrangementLevel doc node clip token)
-unArrange state arrLvl@(ArrangementLevel arr focus p) laylvl@(LayoutLevel pres _ _) editArr = 
+unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) editArr = 
   debug Arr ("Edit arr is "++show editArr) $
   case editArr of
     SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 

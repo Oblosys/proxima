@@ -32,7 +32,7 @@ import Control.Exception
 import Network
 import Network.BSD
 import Data.List
-
+import Arrangement.ArrTypes
 import Presentation.PresTypes (UpdateDoc)
 
 initialWindowSize :: (Int, Int)
@@ -743,13 +743,21 @@ handleMouse malEvent editStr focus =
  do { putStrLn $ "Internal error: malformed mouse event: " ++ malEvent
     ; return $ SkipRen 0
     }
- 
+
+-- sig is necessary to scope type vars in cast
+handleSpecial ::forall a doc enr node clip token .
+                Read a => IORef a -> String -> String -> Int -> IO (EditRendering doc enr node clip token)
 handleSpecial viewedAreaRef ('S':'p':'e':'c':'i':'a':'l':event) editStr focus = 
  do { putStrLn $ "Special event: " ++ event
     ; if "Scroll" `isPrefixOf` event
       then do { writeIORef viewedAreaRef $ read $ drop 6 event
               
               ; return $ SkipRen (-2)
+              }
+      else if "ClearMetrics" `isPrefixOf` event
+      then do { fh <- openFile "queriedMetrics.txt" WriteMode -- TODO: clearing this file should be done after Metrics are read in FontLib.hs
+              ; hClose fh
+              ; return $ cast (ClearMetricsArr :: EditArrangement doc enr node clip token)
               }
       else do { putStrLn $ "Unrecognized special event: "++event
               ; return $ SkipRen 0

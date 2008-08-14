@@ -326,7 +326,7 @@ if (xmlhttp.readyState==4)
   else
     {
     debug("Problem retrieving data:" + xmlhttp.statusText);
-    document.getElementById('status').innerHTML='Server not available.';
+//    document.getElementById('status').innerHTML='Server not available.';
     }
   }
 }
@@ -547,7 +547,7 @@ function mouseHandler(str,e)
   if (str == 'M' && (!mouseDown || commandQueue != ''))
     return;
     
-  debugAdd('('+posx +','+posy+')');
+  //debugAdd('('+posx +','+posy+')');
 
   loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
                                    (posy) + ',' +
@@ -677,13 +677,12 @@ function scrollHandler(event)
 
 -->
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
-<div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
-<div id="debugMessage"></div>
 <div id='font' style='visibility:hidden;white-space: pre'></div>
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
-
-<!-- <button onclick="loadXMLDoc('SpecialRefresh;')">Refresh</button>
-<button onclick="loadXMLDoc('SpecialClear;')">Clear</button> -->
+<button onclick="loadXMLDoc('SpecialClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
+<div id="debugMessage"></div>
+<!-- <div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
+-->
 </body></html>
 
 
