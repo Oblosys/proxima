@@ -3,6 +3,7 @@ module Arrangement.FontLib where
 import Common.CommonTypes
 import Common.CommonUtils
 import Graphics.UI.Gtk hiding (FontMetrics)
+import Settings
 
 import qualified Data.Map as Map
 import Data.Map (Map)
@@ -13,6 +14,7 @@ import Char
 import Data.IORef
 import System.IO
 import Data.Maybe
+
 
 --import Graphics.UI.WX
 --import Graphics.UI.WXCore hiding (Font)
@@ -30,14 +32,16 @@ initFontMetrics = newFontMetricsRef
    
 -- Because Underline and strikeOut have no influence on the metrics, all
 -- fonts are stored in the Map with these attributes set to False.
-mkFontMetrics :: [Font] -> IO FontMetrics
-mkFontMetrics fonts = mkFontMetricsHTML fonts {-
-  fmap Map.fromList $ mapM mkFontMetric fonts
+mkFontMetrics :: Settings -> [Font] -> IO FontMetrics
+mkFontMetrics settings fonts =
+  if serverMode settings 
+  then mkFontMetricsHTML fonts
+  else fmap Map.fromList $ mapM mkFontMetric fonts
  where mkFontMetric font = 
         do { (f,(h, b, ws)) <- queryFont font
            ; return $ (f {fUnderline = False, fStrikeOut = False}, (h, b, listArray (0,223) ws)) 
            }
-           -}
+           
 -- | Lookup the metrics for font. Because Underline and strikeOut have no influence on the metrics, all 
 -- fonts are stored in the Map with these attributes set to False.
 metricsLookup :: Font -> FontMetrics -> (Int, Int, Array Int Int)

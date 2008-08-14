@@ -45,16 +45,16 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
 --    ; debugLnIO Err ("Pruned Presentation"++show prunedPres)
 --    ; debugLnIO Arr ("Old arrangement "++ show oldArrangement)
     
-    ; (attrTree, idCounter', maxFDepth) <- fixed fontMetricsRef (getIDACounter state') focus prunedPres pres viewedArea oldViewedArea oldArrangement
+    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef (getIDACounter state') focus prunedPres pres viewedArea oldViewedArea oldArrangement
     ; let state'' = state' { getIDACounter = idCounter' }
     ; when (maxFDepth > 1) $
         debugLnIO Err "Nested formatters may be arranged incorrectly"
     ; return (attrTree, state'')
     }
 
-fixed :: (Show node, Show token) => FontMetricsRef -> Int -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
+fixed :: (Show node, Show token) => Settings -> FontMetricsRef -> Int -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
          Arrangement node -> IO (Arrangement node, Int, Int)
-fixed fontMetricsRef idACounter focus (pres :: Layout doc node clip token) (unprunedPres :: Layout doc node clip token) viewedArea oldViewedArea oldArrangement = 
+fixed settings fontMetricsRef idACounter focus (pres :: Layout doc node clip token) (unprunedPres :: Layout doc node clip token) viewedArea oldViewedArea oldArrangement = 
  mdo { (fontMetrics,arrangement, idACounter', maxFDepth) <- f (fontMetrics,arrangement, idACounter, maxFDepth)
     ; return (arrangement, idACounter', maxFDepth)
     }
@@ -90,7 +90,7 @@ fixed fontMetricsRef idACounter focus (pres :: Layout doc node clip token) (unpr
             ; debugLnIO Arr $ "already queried: "++ show queriedFonts
             ; debugLnIO Arr $ "new:             "++ show newFonts
 -}
-            ; newMetrics <- mkFontMetrics newFonts
+            ; newMetrics <- mkFontMetrics settings newFonts
             ; let updatedMetrics = newMetrics `Map.union` queriedMetrics
             ; writeIORef fontMetricsRef updatedMetrics            
             ; return (updatedMetrics, arrangement, idACounter', maxFDepth)
