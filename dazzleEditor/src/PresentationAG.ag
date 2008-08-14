@@ -50,7 +50,7 @@ SEM Root
                                        `withFontSize_` (percent 160) 
                                        `addPopupItems`
                                        [ ("Add Section", insertAtHeadSection @sections.path) ]  
-                               
+                                       `withWidth` 800
                                -- , structural $ col @sections.tocPress
                                , col [ @graph.pres
                                      , hAlignCenter $
