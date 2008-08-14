@@ -787,7 +787,6 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
     (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { let pts = [(0,0),(w',0),(w',h'),(0,h')]
         ; polyHTML fh id x' y' w' h' pts (scaleInt scale lw' `max` 1) lColor fColor
-        ; divClose fh
         }
 
     (EllipseA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
