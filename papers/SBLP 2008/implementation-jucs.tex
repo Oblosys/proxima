@@ -9,10 +9,15 @@
 
 \title{Beyond ASCII -- Parsing Programs with Graphical Presentations}
 
-\author{{\bfseries Martijn M. Schrage S. Doaitse Swierstra}\\
+\author{{\bfseries Martijn M. Schrage}\\
    (Utrecht University, The Netherlands\\
-   \{martijn,doaitse\}@cs.uu.nl)\\
+   martijn@cs.uu.nl)
+   \and
+   {\bfseries S. Doaitse Swierstra}\\
+   (Utrecht University, The Netherlands\\
+   doaitse@cs.uu.nl)
 }
+
 
 \begin{document} 
 
@@ -27,6 +32,13 @@ Presentation-oriented edit operations require that an edited presentation can be
 This paper explains the scanning and parsing process for presentations that are a possibly nested combination of text and graphical elements. For textual parts of the presentation a Haskell combinator parser needs to be provided. The parser for graphical parts, on the other hand, is constructed by Proxima, based on information in the presentation. White space in the presentation can be handled automatically, if desired. 
 \end{abstract}
 
+\begin{keywords}
+presentation-oriented editing, parsing, Haskell
+\end{keywords}
+
+\begin{category}
+D.1.1., D.2.6.
+\end{category}
 
 \section{Introduction}\label{sect:introduction}
 
@@ -56,12 +68,13 @@ In order to support editing on both the document structure and the presentation,
 
 To illustrate the scanning and parsing process, we focus on a small example. Figure~\ref{fig:graphicalDecl} shows a declaration that has a mixed textual and graphical presentation. The fraction and the exponentiation both have a graphical presentation, which we will refer to as a {\em structural} presentation. A textual presentation, on the other hand, is denoted by the term {\em sequential} presentation. 
 
+\enlargethispage{\baselineskip}
 The figure shows that a sequential presentation may contain structural presentations (e.g.\ the sequential presentation of the declaration contains a structural fraction), and vice versa. The fraction, for example, has sequential presentations for the numerator and the denominator (the latter containing a structural presentation again for $3^2$).
 
 
 \begin{figure}
 \begin{center}
-\includegraphics[width=1in]{images/scanFrac}\
+\includegraphics[width=1in]{images/scanFrac}
 \end{center}
 \caption{A graphically presented declaration.} \label{fig:graphicalDecl} 
 \end{figure}
@@ -82,6 +95,8 @@ Summarizing, we have two kinds of presentations:
 
 
 After the presentation of a document has been edited, the modified presentation needs to be mapped back onto the document. However, due to the mix of structural and sequential presentations, conventional parsing methods cannot readily be used. In this paper, we show how the Proxima scanner and parser co-operate in this reverse mapping. 
+
+\enlargethispage{\baselineskip}
 
 Figure~\ref{fig:scanResult} shows the result of the Proxima scanner when it is applied to the presentation in Figure~\ref{fig:graphicalDecl}. It consists of a nested structure of \p{SequentialTk} tokens and \p{StructuralTk} tokens that matches the structure of the presentation. Textual tokens are represented by \p{UserTk} tokens. Each token has a unique number, which is denoted by a subscript, and is referred to as its {\em presentation identity}. Presentation identities have type \p{IDP} and are used to associate a token with its white space. In addition to a sequence of tokens that represent its children, a structural token also contains a reference to the structured-document fragment it represents (denoted by the parameter \p{loc}). The document fragment is necessary, because a structural presentation does not always contain enough information to reconstruct the document tree. In the \p{scannedDecl} value, we represent the location reference by the document subtree. (A \p{SequentialTk} token also contains a \p{loc} parameter, as well as a parser, but for brevity, these are not shown in the value.) Together with the tokens, the scanner produces a {\em white-space map}: a mapping between a token's presentation identity and its trailing white space.
 
@@ -137,7 +152,6 @@ The paper is organized as follows. We start by providing a brief overview of Pro
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 The core architecture of Proxima consists of a number of layers, each communicating with its direct neighbors. The layered structure is based on the staged nature of the {\em presentation} process and its inverse, the {\em interpretation} process. The positions at which the document, the rendering, and the intermediate data structures reside are called {\em levels}. Between each pair of levels we have a {\em layer} that maintains the mappings between its adjacent levels. Each layer consists of a presentation component and an interpretation component and may be parameterized by a {\em sheet}. Figure~\ref{fig:levelsAndLayers} schematically shows the levels and layers of Proxima. From a document type definition, a code generator generates a number of Haskell modules, which are compiled together with the sheets and the Proxima base modules to yield an editor. 
-\enlargethispage{\baselineskip}
 
 \begin{figure}[ht]
 \centering
@@ -155,7 +169,7 @@ A data level in Proxima is not simply an intermediate value in the presentation 
 \o {\bf Enriched Document:} The document attributed with derived values and structures, such as the type of a function or a table of contents, typically computed by an attribute grammar~\cite{reps84synGen}.
 
 \o{\bf Presentation:} A logical description of the presentation of the document, consisting of rows and columns of presentation elements with attributes. The presentation also supports formatting based on available space (e.g.\ line breaking).
-
+\pagebreak
 \o{\bf Layout:} A presentation with explicit white space, which does not contain tokens.
 
 \o{\bf Arrangement:} A formatted layout with absolute size and position information.
