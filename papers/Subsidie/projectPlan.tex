@@ -2,9 +2,13 @@
 
 \addtolength{\textwidth}{1in}    
 \addtolength{\hoffset}{-0.5in}
-\addtolength{\textheight}{1in}
+\addtolength{\textheight}{1.5in}
 \addtolength{\voffset}{-1in}
 
+\setlength{\parskip}{\baselineskip}
+\addtolength{\topsep}{-\baselineskip}
+\setlength{\parindent}{0em}
+\renewcommand{\familydefault}{\sfdefault}
 
 \usepackage{../Utils}
 \usepackage{eurosym}
@@ -47,10 +51,6 @@ Need to encode rendering?
 
 \ec
 
-\setlength{\parskip}{\baselineskip}
-\addtolength{\topsep}{-\baselineskip}
-\setlength{\parindent}{0em}
-\renewcommand{\familydefault}{\sfdefault}
 
 \title{Proxima 2.0: WYSIWYG generic editing for Web 2.0\\
 \bigskip
@@ -64,8 +64,6 @@ Need to encode rendering?
 
 \maketitle
 
-\todo{Mention compact syntax Relax NG and XML Schema}
-\todo{mention that server can be anywhere by using iframe}
 
 \head{Abstract}\\
 In line with the Web 2.0 trend, an increasing number of web sites offer visitors the possibility to modify and add content through some form of editing. However, the editors provided are either basic text editors that are awkward for editing complex presentations, or custom-made editors for a specific type of content. A generic editor could be used to create powerful editors with little effort, but has the problem that it needs to be installed on each machine it is used on.
@@ -81,7 +79,7 @@ The NLnet contribution will be used to realize the web-based client-server versi
 \head{Comparison with other projects}\\
 The project can be compared with two kinds of existing projects: web-based editors and generic editors.
 
-A multitude of web-based editors exist. Examples are Wiki's, the Yahoo!\ Pipes editor, and Google Docs suite. However, these editors are either mainly textual or WYSIWYG but targeted at a single type of document. No existing project offers generic web-based editing. \todo{mention Morphle?}
+A multitude of web-based editors exist. Examples are Wiki's, the Yahoo!\ Pipes editor, and Google Docs suite. However, these editors are either mainly textual or WYSIWYG but targeted at a single type of document. No existing project offers generic web-based editing.
 
 There are not many generic editing projects that are still being maintained. One example is Citrus (http://www.cs.cmu.edu/~NatProg/citrus.html). On the other hand, also XML editors can be regarded as generic editors, but the existing XML editors that are powerful enough to create interesting WYSIWYG editors, such as XMetaL and XMLSpy, have no support for creating web-based versions of these editors, and neither does Citrus.
 
@@ -126,7 +124,7 @@ The migration from desktop applications to server based applications is already 
 
 \subsection{Project goals}
 
-The primary goal of this project is to create the web-based client-server version of Proxima. This consists of modifying the rendering part of Proxima to act as a server and communicate with an external rendering client. The client itself will be a light-weight Ajax script that draws the rendering and captures edit events.  
+The primary goal of this project is to create the web-based client-server version of Proxima. This consists of modifying the rendering part of Proxima to act as a server and communicate with an external rendering client. The client itself will be a light-weight Ajax script that draws the rendering and captures edit events. The client will run in any major browser on any major platform, without the need to install any plug-ins.  
 
 A secondary goal is to showcase the potential of the Proxima technology in order to attract the attention of possible contributors. Proxima is an open-ended system: new object types and presentations can be added to enable the creation of increasingly powerful document types. The hope is that eventually a vibrant community will contribute to a shared repository of resources and push the development of Proxima beyond what a small academia-based group can hope to achieve by itself. 
 %\todo{mention that implemented web-page editors will provide good showcase?}
@@ -159,12 +157,12 @@ Because of its architecture, it is straightforward to provide Proxima with a web
 \subsection{The problem} 
 
 %web 2.0 meer editing, basic
-In line with the Web 2.0 trend, more and more web pages allow visitors to add or modify the content on the page. Among the many examples are Wikipedia, social network sites such as Myspace, or auction sites such as eBay. The facilities for editing, however, are often rather basic. 
+Web 2.0 sites, such as wiki sites (e.g.\ Wikipedia), social network sites (e.g.\ Myspace), or auction sites (e.g.\ eBay) allow visitors to add or modify the content on the page. The facilities for editing, however, are often rather basic. 
 
 % beter kan, maar is duur.
-Of course, it is possible to provide custom-made editors, for example, by using Javascript or Flash, or through plug-ins. Examples are the advanced graphical editor for Yahoo!\ pipes, and the editors that are part of Google docs suite. Regarding functionality, these systems approach desktop applications. However, the effort required to build such a custom editor is considerable.
+It is possible to provide custom-made WYSIWYG editors, for example, by using Javascript or Flash, or through plug-ins. Examples are the advanced graphical editor for Yahoo!\ pipes, and the editors that are part of Google docs suite. Regarding functionality, these systems approach desktop applications. However, the effort required to build such a custom editor is considerable.
 
-It would be desirable to be able to quickly built advanced editors for specific content, which can be included on any web page, without the need to install any plug-ins on the cient machine.
+It would be desirable to be able to quickly build advanced WYSIWYG editors for specific content that can be included on any web page, without the need to install any plug-ins on the cient machine.
 
 
 \bc
@@ -206,7 +204,7 @@ An important aspect of Proxima is the fact that a presentation may contain compu
 \label{fig:heliumEditor}
 \end{figure}
 
-Besides these two editors a multitude of editors can be implemented with Proxima. One can think of equation editors, spreadsheets, or text editors for an abbreviated syntax for XML standards such as XML Schema and XSLT, but also more exotic applications, such as a chess board, a family-tree editor, or an on-line multiple choice quiz that keeps track of the score.
+Besides these two editors a multitude of editors can be implemented with Proxima. One can think of equation editors, spreadsheets, or text editors for the compact syntax of XML standards such as XML Schema\footnote{Compact syntax for XML Schema: http://www.xml.com/pub/a/2003/08/27/xscs.html} and Relax NG\footnote{Compact syntax for Relax NG: http://www.xml.com/pub/a/2002/06/19/rng-compact.html}, but also more exotic applications, such as a chess board, a family-tree editor, or an on-line multiple choice quiz that keeps track of the score.
 
 
 \subsection{The Proxima architecture}
@@ -303,7 +301,7 @@ The reduction sheet specifies how updates on derived structures are mapped back 
 
 \subsection{Proxima 2.0}
 
-Turning Proxima into a web-based editor will not have a large impact on the overall implementation. Because of the strict separation between layers, which is enforced by the architecture, only four relatively small modules contain GUI-specific code. When the system needed to be ported to a new GUI library, this only took a couple of days. Hence, implementing support for an external renderer will be a relatively straightforward operation. In fact, an early version of Proxima actually used a stand-alone renderer client that it communicated with through a socket connection.
+Turning Proxima into a web-based editor will have little impact on the overall implementation. Because of the strict separation between layers, enforced by the architecture, only four relatively small modules contain GUI-specific code. When the system needed to be ported to a new GUI library, this only took a couple of days. Hence, implementing support for an external renderer will be a relatively straightforward operation. In fact, an early version of Proxima actually used a stand-alone renderer client that it communicated with through a socket connection.
 
 In order to realize the web-based functionality, three components need to be developed:
 
@@ -346,35 +344,33 @@ However, experiments with a simple web-based text editor have shown response tim
 
 \subsection{Relative advantage of proposed innovation}
 
-Easy to build advanced editors for web pages. Clients have no installation, don't need much power. Servers easily installable.
+The advantage of Proxima 2.0 is that it will make it easy to build advanced WYSIWYG editors for specific content. At the same time, these editors will not require any plug-ins installed on the client machine. Furthermore, Proxima editor servers can be easily hosted on any server.
 
 
 \subsection{Usability}
 
 One must distinguish between two levels of users of the web-based Proxima technology. One level are the people who generate specific Proxima instantiations by supplying the required sheets (in particular document type definition and presentation sheet). Except for very simple instantiations, creating these wholly anew requires considerable skills. However, as the repository of sheets grows, it will become increasingly possible to cobble new instantiations together by combining pre-existing elements.  Dedicated sheet editors (themselves instantiations of Proxima) can be created to assist in this task. In any case, even with the very limited current repository, generating an instantiation is definitely much less effort than creating an equivalent editor de novo.
 
-The other level of users consists of the visitors of websites who use a site-specific instantiation of Proxima to edit content on web pages. Here the usability will depend on the specifics of the instantiation and the complexity of the application. Proxima offers powerful possibilities for support of the edit task, as explained above. (Of course, there is no guarantee that an instantiation will actually make use of these.)
+The other level of users consists of the visitors of websites who use a site-specific instantiation of Proxima to edit content on web pages. Here the usability will depend on the specifics of the instantiation and the complexity of the application. Proxima offers powerful possibilities for support of the edit task, as explained above.
 
-
-
-
+% (Of course, there is no guarantee that an instantiation will actually make use of these.)
 
 
 \subsection{Further development}
 %          o perspectives for further development of this innovation and/or other technologies. 
 
 
-When the web-based functionality has been added to Proxima, an obvious extension will be the connection of Proxima to a database. Documents are now internal data structures, but it will be interesting to obtain values or even subtrees of the document from a database.
+When the web-based functionality has been added to Proxima, an obvious extension will be the connection of Proxima to a database. Documents are now internal data structures, but it will be interesting to obtain values or even subtrees of the document from a database. With this functionality, Proxima can be used as a front-end for web-based database applications.
 
-Furthermore, the underlying edit model of Proxima can be extended. Currently presentation-oriented editing is supported on graphs and on textual presentations. The graph presentation can be extended to provide a more general framework in which objects can be positioned and connected at certain points. With such a generalization, it will be possible to implement an editor similar to the Yahoo Pipes.
+A second area of further development is the underlying edit model of Proxima. Currently, presentation-oriented editing is supported on graphs and on textual presentations. The graph presentation can be extended to provide a more general framework in which objects can be positioned and connected at certain points. With such a generalization, it will be possible to implement editors similar to the Yahoo! Pipes editor.
 
-Finally, as documents will get larger, the load on the server will increase. Proxima has several hooks for implementing incremental behavior: meaning that a change in the presentation only causes a small change in the document. More support for incrementality will mean that larger or more documents can be edited simultaneously.
+Finally, as documents will get larger, the load on the server will increase. Proxima has several hooks for implementing incremental behavior: meaning that a change in the presentation only causes a small change in the document. Incrementality is already supported on the rendering level. Support for incrementality on other levels will mean that larger or more documents can be edited simultaneously.
 
 
 \section{Project setup}
 %    * Project setup --organizational, technical, eventual partners, dependencies on other projects, licenses, and such;
 
-The work will be done at the Software technology group of Utrecht University, lead by Prof. Dr. S.D. Swierstra. It will build upon the Proxima research project that was conducted at this group. The software technology has valuable expertise on both the language Haskell, as well as on the technologies used in Proxima. Moreover, there is experties on Javascript and Ajax technology. The group will facilitate a laptop on which the development can take place, and provide a server on which the system can be tested.
+The work will be performed at the Software technology group of Utrecht University, lead by Prof.\,Dr.~S.\,D.~Swierstra. It will build upon the Proxima research project that was conducted at this group. The software technology has valuable expertise on the language Haskell, as well as on the technologies used in Proxima. Moreover, there is experties on Javascript and Ajax technology. The group will facilitate a laptop on which development can take place, and provide a server machine to host Proxima servers.
 
 \bc
 The group has expertise in many of the fields that are relevant for
@@ -398,14 +394,9 @@ efficient incremental attribute evaluators, and is used to generate
 language based editors and other advanced interactive environments.
 \ec
 
-The work will be done by the requestor, Martijn Schrage, who has designed and implemented the Proxima system. He has over 10 years of  experience in writing large and complex software systems in Haskell. After obtaining his Master's thesis, he worked on a project that involved, before doing his PhD thesis on Proxima. After graduation, he has worked 
-Besides Haskell and Java, he is also proficient in the languages C\# and Javascript.
+The main implementation effort will be conducted by the requestor, Martijn Schrage, who has designed and implemented the Proxima system. He has over 10 years of experience writing large and complex software systems in Haskell. Before starting his PhD research on Proxima, he worked on a Java project for two years. After his PhD, he continued to work on Proxima and has also worked on the Haskell project Dazzle\footnote{http://www.cs.uu.nl/dazzle/}. Besides Haskell and Java, he is also proficient in the languages C\# and Javascript.
 
-Other people involved with the project are Lambert Meertens and Doaitse Swierstra.
-
-Lambert Meertens was one of the main researchers on the Views project, and has an extensive knowledge of presentation-oriented editor systems.
-Doaitse Swierstra has designed the parser library and attribute grammar system that form an integral part of the Proxima system.
-
+Other people involved with the project are Lambert Meertens and Doaitse Swierstra. Lambert Meertens was one of the main researchers on the Views\footnote{http://www.cwi.nl/~steven/views/} and Acela\footnote{http://www.cwi.nl/~steven/acela/} projects, and has an extensive knowledge of presentation-oriented editing systems. Doaitse Swierstra has designed the parser library and attribute grammar system that form an integral part of the Proxima system.
 
 \subsection{Planning}
 
@@ -413,13 +404,14 @@ Doaitse Swierstra has designed the parser library and attribute grammar system t
 The available time will be around 25 weeks. In this time, we plan to:
 
 \bl
-\o Realize Proxima 2.0 web server and client (8 weeks)
-\o Upgrade underlying Proxima engine (4 weeks)
+\o Realize the Proxima 2.0 web server and client (10 weeks)
+\o Upgrade the underlying Proxima engine (6 weeks)
 % rich text editing, drag and drop
-\o Implement sample editors (6 weeks)
-\o Speed it up (4 weeks)
+\o Implement several sample editors (6 weeks)
 \o Handle loose ends (3 weeks)
 \el
+
+After 10 weeks, the two editors that have already been implemented (shown in Figures~\ref{fig:bayesDocEditor} and~\ref{fig:heliumEditor}) will become available as web-based editors.
 
 % following is probably to detailed
 %\bl
@@ -457,27 +449,28 @@ The requested 30.000 \euro will be used to employ one postDoc for a duration of 
 %    * Project risks --which risks can be overseen from the start of the project;
 
 
-An obvious risk in a web-based system with such an amount of client-server communication is network speed will make editing uncomfortable or even impossible. Either the band-width might be to low, or the latency (delay in the response from the server) might be too high. However, we do not expect this cause any problems.
+An obvious risk in a web-based system with such an amount of client-server communication is that network speed will make editing uncomfortable or even impossible. Either the band-width might be to low, or the latency (delay in the response from the server) might be too high. However, we do not expect this cause any problems.
 
-Because Proxima has support for incrementality, only updates on the rendering (rather than the entire rendering itself) are sent over the socket. Moreover, updates are generated only for those parts of the rendering that are visible on screen. Therefore, most edit operations require only a very small amount of communication. Furthermore, a small delay that only occurs every now and then after a larger edit operation is not immediately that inconvenient for an editing user. Nevertheless, experiments with a simple web-based prototype have shown response times to be more than adequate over a wireless ADSL connection, even when several kilobytes of data were transmitted. 
+Since Proxima already has support for incrementality on the rendering level, only updates on the rendering (rather than the entire rendering itself) are sent over the socket. Moreover, updates are generated only for those parts of the rendering that are visible on screen. Therefore, most edit operations require only a very small amount of communication. Furthermore, a small delay that only occurs every now and then after a larger edit operation is not immediately inconvenient for an editing user. Also, experiments with a simple web-based prototype have shown response times to be more than adequate over a wireless ADSL connection, even when several tens of kilobytes of data were transmitted. 
 
-In order to handle a high latency, the client can create a predictive rendering in response to an edit event, which is updated when the actual result of the server is received. A simple solution to this is to insert typed characters at the location of the focus in the current rendering, copying the style from surrounding characters, until the rendering update is received. By using similar techniques also for drag and drop editing, a slight delay in response will not pose any serious problems. Moreover in the experiments with the prototype latency was not an issue.
+In order to handle latency, the client can create a temoporary rendering in response to an edit event, which is updated when the actual rendering from the server is received. An example of this is to insert typed characters at the location of the focus in the current rendering, copying the style from surrounding characters, until the rendering update is received. By using similar techniques also for drag and drop editing, a slight delay in response will not pose any serious problems. Moreover, in the experiments with the prototype, latency proved not to be an issue.
 
 The biggest challenge will thus be to create a community of people using and working on Proxima. We elaborate on this in the next section.
 
 \subsection{Dissemination of results}
 %   * Project results dissemination --how the project team is going to disseminate results and to whom, publicity, diffusion of the produced innovation;
 
-Over the years, many editing systems have been built. Many of these stopped after running out of initial funding. We considered this a risk of Proxima, since the system is hard to build, high threshold. However, with Proxima 2.0. The server is easy to build (no GUI dependencies) and can be hosted on almost any machine with an internet connection. Moreover, the editors that are built will be accessible to anyone with a browser.
+Over the years, many ambitious editing systems have been built, many of which stopped after running out of initial funding. We considered this a risk of Proxima, since because of the GUI library dependency, the system is not easy to install. This on the GUI library makes it rather difficult to build, which high threshold. However, with Proxima 2.0, the server is easy to build (it has no GUI dependency) and can be hosted on almost any machine with an internet connection. Moreover, the editors that are instantiated will be accessible to anyone with a browser.
 
-In order to increase the chances, we will build several example editors that can be showcased on the Proxima web site. Currently we are thinking of a wiki like editor, in which users can create contents. A page for
-Implement several editors: Wiki like editor, a registration page for handling the registration of holidays. And a system for creating on-line quizes that keep track of the scores. We can also have students implement editors as part of course projects.
+In order to increase the chances even further, we will build several example editors that can be showcased on the Proxima web site. Among these will be a wiki-like editor, a page for handling the registration of holidays,  and a system for creating on-line quizes that keep track of the scores. We can also have students implement editors as part of course projects.
 
 
-%\subsection{Follow-ups}
+\subsection{Follow-ups}
 %
 %%    * Possibly, follow-ups on the project. 
 % 
+No follow-ups are planned, as there is still plenty to do on the Proxima 2.0 project itself.
+
 % No follow-ups are planned. Proxima is its own follow-up.
 
 
