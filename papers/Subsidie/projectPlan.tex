@@ -12,26 +12,6 @@
 
 \usepackage{../Utils}
 \usepackage{eurosym}
-\bc
-
-Mention open source
-
-
-Open questions:
-
-Where is the source located?
-What happens to images? 
-Efficiency of client when many strings are present?
-Need to encode rendering? 
-
-
-\ec
-
-
-\bc
-
-\ec
-
 
 
 \bc
@@ -54,7 +34,7 @@ Need to encode rendering?
 
 \title{Proxima 2.0: WYSIWYG generic editing for Web 2.0\\
 \bigskip
-        \large NLnet Project plan}
+        \large NLnet project plan}
 \author{dr Martijn M. Schrage\\
         \small Dept. of Computing Sciences, Utrecht University\\
         \small {\tt martijn@cs.uu.nl}
@@ -105,7 +85,7 @@ Some sites provide more advanced editors that exhibit WYSIWYG behavior. An examp
 
 Another problem with custom-made editors is that it is difficult to combine them. If a Wiki site makes use of plug-ins, each coming with its own specific editor, it is not always possible to combine the plug-in editors into a single editor. Instead, a page will be a collection of editors, each with its own specific edit model, undo buffer, etc.
 
-The problem of building  editors can be tackled by using a generic editor. When provided with the type of the edited content together with a description of its presentation and the edit behavior, a generic editor produces an editor for that specific type of document. However, this solution would require the installation of the generic editor on each device that is used to edit content, which is a serious disadvantage. 
+The problem of building  editors can be tackled by using a generic editing framework. When provided with the type of the edited content together with a description of its presentation and the edit behavior, a generic editor functions as an editor for that specific type of document. However, this solution would require the installation of this generic editor on each device that is used to edit content.
 
 
 \bc
@@ -114,19 +94,19 @@ Furthermore, a complex editor requires a considerable amount of processing power
 \ec
 
 
-Because Internet connections are getting faster and more available quickly, a better solution to this problem is to use a web-based generic editor. The editor runs on a server and communicates with a lightweight client-script that draws a rendering of the edited content on the browser page while sending back edit events. 
+Because Internet connections nowadays are fast and widely available, a better solution to this problem is to use a web-based generic editor. The editor runs on a server and communicates with a light-weight Ajax client that runs in a browser and draws a rendering of the edited content while sending back edit events. 
 
-The Proxima editor\footnote{Proxima homepage: \url|http://www.cs.uu.nl/research/projects/proxima|} is a generic editor with an architecture that is very well suited to support a client-server model of editing. The resulting web-based editor can provide WYSIWYG editing functionality for web pages with only a fraction of the effort required to build a custom-made editor. Moreover, editors for different kinds of content can easily be mixed. Hence, we can provide edit functionality similar to a textual Wiki, but with a much richer underlying document type. Text can have visual markup, such as different fonts and colors, and editable graphical entities such as formulas can be mixed with the textual content. The client only runs a light-weight script, so no plug-in needs to be installed. Lastly, the editors will have little processing impact on the device that is used to edit the page.
+The Proxima editor\footnote{Proxima homepage: \url|http://www.cs.uu.nl/research/projects/proxima|} is a generic editor with an architecture that is very well suited to support such a client-server model of editing. The resulting web-based editor can provide WYSIWYG editing functionality for web pages with only a fraction of the effort required to build a custom-made editor. Proxima is an open-ended system: new object types and presentations can be added to enable the creation of increasingly powerful document types. Moreover, editors for different kinds of content can easily be combined. Hence, we can provide edit functionality similar to a textual Wiki, but with a much richer underlying document type. Text can have visual markup, such as different fonts and colors, and editable graphical entities such as formulas can be combined with the textual content. The client consists of a light-weight Ajax script, so no plug-in needs to be installed. Lastly, the editors will have little processing impact on the device that is used to edit the page. 
 
 %\todo{mention pipes and more editors here? (and mention we can't do pipes yet?)}
 
-The migration from desktop applications to server-based applications is already taking place in other areas. E-mail clients are a good example. The first web interfaces were rather static, but more recent Ajax interfaces such as GMail and Yahoo!\ allow access to e-mail and folders comparable to stand-alone mail clients. Although a mail client requires less communication than an editor, applications of Virtual Network Computing show that server-based applications that let all processing be done by the server are feasible. Moreover, since a generic editor need not simply send a bitmap but can send a much more efficient incremental update, the speed will be much higher than when the VNC protocol is used for editing. 
+The migration from desktop applications to server-based applications is already taking place in other areas. E-mail clients are a good example. The first web interfaces were rather static, but more recent Ajax interfaces such as GMail and Yahoo!\ allow access to e-mail and folders comparable to stand-alone mail clients. Although a mail client requires less communication than an editor, applications of Virtual Network Computing show that server-based applications that let all processing be done by the server are feasible. Moreover, since a generic editor need not simply send a bitmap but can send a much more efficient incremental update, the experienced responsiveness will be much higher than with an editor running over a VNC-based protocol.
 
 \subsection{Project goals}
 
 The primary goal of this project is to create the web-based client-server version of Proxima. This consists of modifying the rendering part of Proxima to act as a server and communicate with an external rendering client. The client itself will be a light-weight Ajax script that draws the rendering and captures edit events. The client will run in any major browser on any major platform, without the need to install any plug-ins.  
 
-A secondary goal is to showcase the potential of the Proxima technology in order to attract the attention of possible contributors. Proxima is an open-ended system: new object types and presentations can be added to enable the creation of increasingly powerful document types. The hope is that eventually a vibrant community will contribute to a shared repository of resources and push the development of Proxima beyond what a small academia-based group can hope to achieve by itself. 
+A secondary goal is to showcase the potential of the Proxima technology in order to attract the attention of possible contributors. The hope is that eventually a vibrant community will contribute to a shared repository of resources and push the development of Proxima beyond what a small academia-based group can hope to achieve by itself. 
 %\todo{mention that implemented web-page editors will provide good showcase?}
 
 
@@ -177,7 +157,7 @@ The migration from desktop applications to server-based applications is already 
 \subsection{Proxima 1.0}
 %Proxima. What is proxima and generic editing
 
-Proxima is a generic editor system developed at Utrecht University. A generic editor is a system that can be used to create editors. To create, or {\em instantiate}, an editor, Proxima needs to be provided with a document type and a number of sheets that describe the presentation of the document and the edit behavior. The content of a Proxima document can be mixed text, images and diagrams. A key feature of Proxima is that the instantiated editors are presentation-oriented. This means that the user performs the edit operations on the WYSIWYG screen presentation of the document. At the same time, edit operations on the document structure (such as changing a section to a subsection) are also possible. The system is written in the functional language Haskell and consists of about 15000 lines of code.
+Proxima is a generic editor system developed at Utrecht University. A generic editor is a system that can be used to create editors. In order to create, or {\em instantiate}, an editor, Proxima is specialized with a document type and a number of sheets describing the presentation of the document and its edit behavior. The content of a Proxima document can be mixed text, images and diagrams. A key feature of Proxima is that the instantiated editors are presentation-oriented, meaning that the user performs the edit operations on the fully formatted (WYSIWYG) presentation of the document. At the same time, edit operations on the document structure (such as changing a section to a subsection) are also possible. The system is written in the functional language Haskell and consists of about 15000 lines of code.
 
 An example of an editor for a sophisticated document type created this way is the Dazzle documentation editor, an editor for the documentation of Bayesian networks. This editor combines graph editing with word-processor functionality. A document contains a Bayesian network (which is essentially a graph) and a list of sections, which contain a view on small part of the graph together with the documentation of that part. 
 
