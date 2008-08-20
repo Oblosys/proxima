@@ -120,7 +120,7 @@ The Proxima editor\footnote{Proxima homepage: \url|http://www.cs.uu.nl/research/
 
 %\todo{mention pipes and more editors here? (and mention we can't do pipes yet?)}
 
-The migration from desktop applications to server based applications is already taking place in other areas. E-mail clients are a good example. The first web interfaces were rather static, but more recent Ajax interfaces such as GMail and Yahoo!\ allow access to e-mail and folders comparable to stand-alone mail clients. Although a mail client requires less communication than an editor, applications of Virtual Network Computing show that server based applications that let all processing be done by the server are feasible. Moreover, since a generic editor need not simply send a bitmap but can send a much more efficient incremental update, the speed will be much higher than when the VNC protocol is used for editing. 
+The migration from desktop applications to server-based applications is already taking place in other areas. E-mail clients are a good example. The first web interfaces were rather static, but more recent Ajax interfaces such as GMail and Yahoo!\ allow access to e-mail and folders comparable to stand-alone mail clients. Although a mail client requires less communication than an editor, applications of Virtual Network Computing show that server-based applications that let all processing be done by the server are feasible. Moreover, since a generic editor need not simply send a bitmap but can send a much more efficient incremental update, the speed will be much higher than when the VNC protocol is used for editing. 
 
 \subsection{Project goals}
 
@@ -171,7 +171,7 @@ It would be desirable to be able to quickly build advanced WYSIWYG editors for s
 Another trend is that the availability and speed of Internet connections is increasing, while the costs are dropping. A logical step therefore is to state of affairs suggests that the time is ripe for web-based editors. Rather than running a local editor application, the local machine only runs a light-weight client, which is also suitable for devices with little processing power. A server computes a rendering of the document, which is sent to the local client. The client draws the rendering on the screen and catches mouse and keyboard events, which are sent back to the server. Subsequently, the server computes the corresponding update on the rendering and sends it to the client.
 
 % in e-mail we see it already
-The migration from desktop applications to server based applications is already taking place in other areas. E-mail clients are a good example. The first web interfaces were rather static, but more recent Ajax interfaces such as GMail and Yahoo!\ allow access to e-mail and folders comparable to stand-alone mail clients. Although a mail client requires less communication than an editor, applications of Virtual Network Computing show that server based applications that let all processing be done by the server are feasible. Moreover, since a generic editor does not simply send a bitmap but a much more efficient incremental update, the speed will be much higher than when a VNC protocol is used for editing. 
+The migration from desktop applications to server-based applications is already taking place in other areas. E-mail clients are a good example. The first web interfaces were rather static, but more recent Ajax interfaces such as GMail and Yahoo!\ allow access to e-mail and folders comparable to stand-alone mail clients. Although a mail client requires less communication than an editor, applications of Virtual Network Computing show that server-based applications that let all processing be done by the server are feasible. Moreover, since a generic editor does not simply send a bitmap but a much more efficient incremental update, the speed will be much higher than when a VNC protocol is used for editing. 
 \ec
 
 \subsection{Proxima 1.0}
@@ -204,7 +204,7 @@ An important aspect of Proxima is the fact that a presentation may contain compu
 \label{fig:heliumEditor}
 \end{figure}
 
-Besides these two editors a multitude of editors can be implemented with Proxima. One can think of equation editors, spreadsheets, or text editors for the compact syntax of XML standards such as XML Schema\footnote{Compact syntax for XML Schema: http://www.xml.com/pub/a/2003/08/27/xscs.html} and Relax NG\footnote{Compact syntax for Relax NG: http://www.xml.com/pub/a/2002/06/19/rng-compact.html}, but also more exotic applications, such as a chess board, a family-tree editor, or an on-line multiple choice quiz that keeps track of the score.
+Besides these two editors a multitude of editors can be implemented with Proxima. One can think of equation editors, spreadsheets, or text editors for the compact syntax of XML standards such as XML Schema\footnote{Compact syntax for XML Schema: \url|http://www.xml.com/pub/a/2003/08/27/xscs.html|} and Relax NG\footnote{Compact syntax for Relax NG: \url|http://www.xml.com/pub/a/2002/06/19/rng-compact.html|}, but also more exotic applications, such as a chess board, a family-tree editor, or an on-line multiple choice quiz that keeps track of the score.
 
 
 \subsection{The Proxima architecture}
@@ -362,7 +362,7 @@ The other level of users consists of the visitors of websites who use a site-spe
 
 When the web-based functionality has been added to Proxima, an obvious extension will be the connection of Proxima to a database. Documents are now internal data structures, but it will be interesting to obtain values or even subtrees of the document from a database. With this functionality, Proxima can be used as a front-end for web-based database applications.
 
-A second area of further development is the underlying edit model of Proxima. Currently, presentation-oriented editing is supported on graphs and on textual presentations. The graph presentation can be extended to provide a more general framework in which objects can be positioned and connected at certain points. With such a generalization, it will be possible to implement editors similar to the Yahoo! Pipes editor.
+A second area of further development is the underlying edit model of Proxima. Currently, presentation-oriented editing is supported on graphs and on textual presentations. The graph presentation can be extended to provide a more general framework in which objects can be positioned and connected at certain points. With such a generalization, it will be possible to implement editors similar to the Yahoo!\ Pipes editor.
 
 Finally, as documents will get larger, the load on the server will increase. Proxima has several hooks for implementing incremental behavior: meaning that a change in the presentation only causes a small change in the document. Incrementality is already supported on the rendering level. Support for incrementality on other levels will mean that larger or more documents can be edited simultaneously.
 
@@ -394,9 +394,9 @@ efficient incremental attribute evaluators, and is used to generate
 language based editors and other advanced interactive environments.
 \ec
 
-The main implementation effort will be conducted by the requestor, Martijn Schrage, who has designed and implemented the Proxima system. He has over 10 years of experience writing large and complex software systems in Haskell. Before starting his PhD research on Proxima, he worked on a Java project for two years. After his PhD, he continued to work on Proxima and has also worked on the Haskell project Dazzle\footnote{http://www.cs.uu.nl/dazzle/}. Besides Haskell and Java, he is also proficient in the languages C\# and Javascript.
+The main implementation effort will be conducted by the requestor, Martijn Schrage, who has designed and implemented the Proxima system. He has over 10 years of experience writing large and complex software systems in Haskell. Before starting his PhD research on Proxima, he worked on a Java project for two years. After his PhD, he continued to work on Proxima and has also worked on the Haskell project Dazzle\footnote{Dazzle: \url|http://www.cs.uu.nl/dazzle/|}. Besides Haskell and Java, he is also proficient in the languages C\# and Javascript.
 
-Other people involved with the project are Lambert Meertens and Doaitse Swierstra. Lambert Meertens was one of the main researchers on the Views\footnote{http://www.cwi.nl/~steven/views/} and Acela\footnote{http://www.cwi.nl/~steven/acela/} projects, and has an extensive knowledge of presentation-oriented editing systems. Doaitse Swierstra has designed the parser library and attribute grammar system that form an integral part of the Proxima system.
+Other people involved with the project are Lambert Meertens and Doaitse Swierstra. Lambert Meertens was one of the main researchers on the Views\footnote{Views: \url|http://www.cwi.nl/~steven/views/|} and Acela\footnote{Acela: \url|http://www.cwi.nl/~steven/acela/|} projects, and has an extensive knowledge of presentation-oriented editing systems. Doaitse Swierstra has designed the parser library and attribute grammar system that form an integral part of the Proxima system.
 
 \subsection{Planning}
 
@@ -408,7 +408,7 @@ The available time will be around 25 weeks. In this time, we plan to:
 \o Upgrade the underlying Proxima engine (6 weeks)
 % rich text editing, drag and drop
 \o Implement several sample editors (6 weeks)
-\o Handle loose ends (3 weeks)
+\o Handle loose ends (3 weeks) \todo{andere term gebruiken hier?}
 \el
 
 After 10 weeks, the two editors that have already been implemented (shown in Figures~\ref{fig:bayesDocEditor} and~\ref{fig:heliumEditor}) will become available as web-based editors.
@@ -451,7 +451,7 @@ The requested 30.000 \euro will be used to employ one postDoc for a duration of 
 
 An obvious risk in a web-based system with such an amount of client-server communication is that network speed will make editing uncomfortable or even impossible. Either the band-width might be to low, or the latency (delay in the response from the server) might be too high. However, we do not expect this cause any problems.
 
-Since Proxima already has support for incrementality on the rendering level, only updates on the rendering (rather than the entire rendering itself) are sent over the socket. Moreover, updates are generated only for those parts of the rendering that are visible on screen. Therefore, most edit operations require only a very small amount of communication. Furthermore, a small delay that only occurs every now and then after a larger edit operation is not immediately inconvenient for an editing user. Also, experiments with a simple web-based prototype have shown response times to be more than adequate over a wireless ADSL connection, even when several tens of kilobytes of data were transmitted. 
+Since Proxima already has support for incrementality on the rendering level, only updates on the rendering (rather than the entire rendering itself) are sent over the socket. Moreover, updates are generated only for those parts of the rendering that are visible on screen. Therefore, most edit operations require only a very small amount of communication. Furthermore, a small delay that only occurs every now and then upon a larger change is not a serious hindrance during editing. Also, experiments with a simple web-based prototype have shown response times to be more than adequate over a wireless ADSL connection, even when several tens of kilobytes of data were transmitted. 
 
 In order to handle latency, the client can create a temoporary rendering in response to an edit event, which is updated when the actual rendering from the server is received. An example of this is to insert typed characters at the location of the focus in the current rendering, copying the style from surrounding characters, until the rendering update is received. By using similar techniques also for drag and drop editing, a slight delay in response will not pose any serious problems. Moreover, in the experiments with the prototype, latency proved not to be an issue.
 
