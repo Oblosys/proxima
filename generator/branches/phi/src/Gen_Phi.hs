@@ -73,6 +73,8 @@ genShowTpe tpe =
  else
    ["instance Show %1 where"
    ,"  show _ = \"*external: %1*\""
+   ,"instance Data %1"
+   ,"instance Typeable %1"
    ] <~ [typeName tpe]
 
 
