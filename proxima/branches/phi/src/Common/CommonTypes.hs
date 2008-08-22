@@ -312,3 +312,28 @@ data XML = Elt String [Property] [XML]
 
 type Property = (String, String)
 
+
+
+-- Constants for switching on incrementality, background coloring, etc.
+
+data Settings = 
+       Settings { applicationName :: String
+                , rendererIncrementality :: Bool
+                , arrangerIncrementality :: Bool
+                
+                  -- use a smaller rectangle as viewed area to see what happens outside it
+                , reducedViewedArea :: Bool
+                
+                  -- updated parts of the rendering are surrounded by red rectangles
+                , markUpdatedRenderingArea :: Bool
+                , serverMode :: Bool -- run Proxima as a web-server
+                }
+
+defaultSettings = 
+  Settings { applicationName = "Proxima"
+           , rendererIncrementality = False
+           , arrangerIncrementality = False
+           , reducedViewedArea = False            
+           , markUpdatedRenderingArea = False
+           , serverMode = False
+           }

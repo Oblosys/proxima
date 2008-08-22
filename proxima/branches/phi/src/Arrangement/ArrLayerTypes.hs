@@ -15,4 +15,5 @@ data LocalStateArr = LocalStateArr { getFontMetricsRef :: FontMetricsRef
                                    , getLastMousePress :: Maybe (Int,Int)
                                    , getViewedAreaRef :: IORef Rectangle
                                    , getLastViewedArea :: Rectangle
+                                   , getIDACounter :: Int
                                    }

@@ -16,7 +16,8 @@ import Debug.Trace
 reuse = Nothing
 set = Just
 
-
+parsePres :: (DocNode node, Ord token, Show token) => 
+             ListParser doc node clip token a -> PresentationBase doc node clip token level -> Maybe a
 parsePres recognizeEnrichedDoc (TokenP _ (StructuralTk _ _ _ tokens _)) = 
   let (enr,errs) = runParser recognizeEnrichedDoc tokens
   in --debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens) ) $ 
@@ -91,6 +92,39 @@ pStrAlt ndf p = unfoldStructure
 -- maybe we do want the old value for that one? Right now the parse error presentation is presented
 -- so a tree can contain source text (which fails on parsing)
 
+f <@> p = undefined
+
+-- is this right?
+pInc :: (DocNode node, Ord token, Show token) => 
+        ListParser doc node clip token a  -> ListParser doc node clip token a
+pInc p = pWrap f f' p
+ where f'     state@(tk:_) steps k = (state, steps, k)
+       f  brr state@(tk:_) steps k = 
+         case getValIfUnchanged tk of
+           Nothing -> (state, val (uncurry brr) steps, k)
+           Just (v,nrOfToks) ->  (state, val (uncurry brr) (NoMoreSteps v), (\_ -> k (drop nrOfToks state)))
+           
+getValIfUnchanged :: token -> Maybe (a, Int)
+getValIfUnchanged = undefined
+           
+pSkip :: (DocNode node, Ord token, Show token) => Int -> ListParser doc node clip token ()
+pSkip n = pMap f f' (pSucceed ())
+ where f  brr state steps = (drop n state, val (uncurry brr) steps)
+       f' state steps     = (drop n state, steps)
+
+{-
+           => (forall r  r'' .   (b -> r -> r'') 
+                                    -> state
+                                    -> Steps (a, r) s p 
+                                    -> (state -> Steps r s p) 
+                                    -> (state, Steps r'' s p, state -> Steps r s p))
+           -> (forall r        .   state  
+                                -> Steps r s p 
+                                -> (state -> Steps r s p) 
+                                -> (state, Steps r s p, state -> Steps r s p)) 
+           -> AnaParser state result s p a -> AnaParser state result s p b
+
+-}
 
 pStrDirty ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token (a, Dirty) -> ListParser doc node clip token (a, Dirty)
 pStrDirty p = pStrExtra Dirty p

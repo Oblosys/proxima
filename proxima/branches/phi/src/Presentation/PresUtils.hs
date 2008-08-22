@@ -551,6 +551,7 @@ stripCol p rf prs (pres : press )          = stripCol (p+1) rf (pres:prs) press
 -- give result "", but in a col, the first one should not produce a newline and the second one should
 stringFromPres pres = concatMap (++"\n") (stringFromPres' pres)
 
+stringFromPres' :: (Show node, Show token) => PresentationBase doc node clip token level -> [String]
 stringFromPres' (StringP _ str)           = [str]
 stringFromPres' (TokenP _ t)              = [tokenString t]
 stringFromPres' (ImageP _ _ _)            = ["#"]

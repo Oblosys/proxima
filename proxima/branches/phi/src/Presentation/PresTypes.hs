@@ -11,7 +11,7 @@ import Data.Generics
 
 import UU.Parsing
 
-data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord)
+data IDP = NoIDP | IDP Int deriving (Show, Read, Eq, Ord, Data, Typeable)
 
 data PresentationLevel doc node clip token = PresentationLevel (Presentation doc node clip token) (PresentationLS doc node clip token) deriving Show
 
@@ -107,7 +107,7 @@ instance (Show node, Show token) => Show (Token doc node clip token) where
         nodeStr = if "Node_" `isPrefixOf` showNode
                   then drop (length "Node_") showNode
                   else showNode
-    in  "<"++show nr ++":StructuralTk:"++nodeStr++":"++show id++">" 
+    in  "<"++show nr ++":StructuralTk:"++nodeStr++":"++show id++":"++concatMap show tks++">" 
   show (ParsingTk _ _ tks _)       = "<ParsingTk>" 
   show (GraphTk _ edges _ _)     = "<GraphTk:"++show edges++">"
   show (VertexTk id pos _ _)     = "<VertexTk: "++show id++">"
@@ -403,7 +403,7 @@ data Synthesized = Syn { vRef, hRef, minWidth, minHeight :: Int
 
 type AttrRule doc clip = (Inherited doc clip, Synthesized) -> (Inherited doc clip, Synthesized)
 
-
+idP :: (Show node, Show token) => PresentationBase doc node clip token level -> IDP
 idP (EmptyP id)           = id
 idP (StringP id _)        = id
 idP (TokenP id _)        = id

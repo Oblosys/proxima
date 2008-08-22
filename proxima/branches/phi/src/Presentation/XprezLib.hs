@@ -313,6 +313,11 @@ squiggly c xp = overlayReverse [xp, img imgFile `withHeight` 3 `withColor` c]
  where imgFile | c == red    = "img/redSquiggly.png" -- HACK. setting colors for images
                | c == green  = "img/greenSquiggly.png"  -- is a problem in gtk2HS
                | otherwise   = "img/squiggly.bmp" 
+
+-- | add squiggly when condition holds
+squiggle :: Color -> Bool -> Xprez doc node clip token -> Xprez doc node clip token
+squiggle color condition pres = if condition then squiggly color pres else pres
+
                
 presentElementXML :: FocusDoc -> node -> [Int] -> String -> [Presentation doc node clip token] -> Presentation doc node clip token
 presentElementXML focusD node path tag children =

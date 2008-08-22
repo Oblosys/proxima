@@ -3,6 +3,7 @@ module Arrangement.FontLib where
 import Common.CommonTypes
 import Common.CommonUtils
 import Graphics.UI.Gtk hiding (FontMetrics)
+import Settings
 
 import qualified Data.Map as Map
 import Data.Map (Map)
@@ -11,6 +12,9 @@ import Data.Array
 
 import Char
 import Data.IORef
+import System.IO
+import Data.Maybe
+
 
 --import Graphics.UI.WX
 --import Graphics.UI.WXCore hiding (Font)
@@ -28,8 +32,11 @@ initFontMetrics = newFontMetricsRef
    
 -- Because Underline and strikeOut have no influence on the metrics, all
 -- fonts are stored in the Map with these attributes set to False.
-mkFontMetrics :: [Font] -> IO FontMetrics
-mkFontMetrics fonts = fmap Map.fromList $ mapM mkFontMetric fonts
+mkFontMetrics :: Settings -> [Font] -> IO FontMetrics
+mkFontMetrics settings fonts =
+  if serverMode settings 
+  then mkFontMetricsHTML fonts
+  else fmap Map.fromList $ mapM mkFontMetric fonts
  where mkFontMetric font = 
         do { (f,(h, b, ws)) <- queryFont font
            ; return $ (f {fUnderline = False, fStrikeOut = False}, (h, b, listArray (0,223) ws)) 
@@ -42,7 +49,7 @@ metricsLookup font fontMetrics =
   -- debug Err ("looking up: " ++ show (fSize font) ++ " " ++ (fFamily font)) $
   case Map.lookup (font {fUnderline = False, fStrikeOut = False}) fontMetrics  of
             Just metrics -> metrics
-            Nothing      -> debug Err "metrics for font not queried" $ (20,15, listArray (0,223) (repeat 10))
+            Nothing      -> {- debug Err "metrics for font not queried" $ -} (20,15, listArray (0,223) (repeat 10))
 
 --- query the metrics for font. 
 queryFont :: Font -> IO (Font,(Int, Int, [Int]))
@@ -66,12 +73,14 @@ queryFont font =
     ; let ascnt = round $ ascent metrics    
           dscnt = round $ descent metrics
           hght = ascnt + dscnt
-{-    
-    ; debugLnIO Arr $    "ascent:   " ++ show ascnt
+    
+
+    ; debugLnIO Arr $      "Metrics for: "++show font 
+                        ++ "\nascent:   " ++ show ascnt
                         ++ "\ndescent:  " ++ show dscnt
                         ++ "\nheight: " ++ show hght
     ; debugLnIO Arr $    "\nwidths:   " ++ show widths  
--}   
+   
 
     ; return (font, (hght,ascnt,widths))
     }
@@ -115,3 +124,39 @@ charHeight fms f  = let (h,b,ws) = metricsLookup f fms
 baseLine :: FontMetrics -> Font -> Int
 baseLine fms f = let (h,b,ws) = metricsLookup f fms
                  in  (b)
+
+
+
+
+-- first time, fonts are not present and are put in request.txt
+-- second time, fonts will be absent again, and
+mkFontMetricsHTML :: [Font] -> IO FontMetrics
+mkFontMetricsHTML fonts =
+ do { putStrLn "Before reading queriedMetrics.txt"
+    ; fh <- openFile "queriedMetrics.txt" ReadMode -- readFile and seq gives problems when clearing it in GUI.hs
+    ; queriedFontsTxt <- hGetContents fh 
+    ; seq (length queriedFontsTxt) $ return ()
+    ; hClose fh
+    ; let queriedFonts :: [((String, Int),(Int,Int,[Int]))]
+            = map read $ lines queriedFontsTxt
+    ; let alreadyQueried = catMaybes $ map (lookupFont queriedFonts) fonts
+    
+    ; pendingQueriesTxt <-  readFile "metricsQueries.txt"
+    ; seq (length pendingQueriesTxt) $ return ()
+    ; let pendingQueries = map read $ lines pendingQueriesTxt 
+          newQueries  = fonts \\ (map fst alreadyQueried)
+          queryTuples = [ (fFamily font, fSize font) | font <- newQueries ]
+          newQueryTuples = queryTuples \\ pendingQueries
+          
+    ; fh' <- openFile "metricsQueries.txt" AppendMode
+    ; hPutStr fh' $ unlines (map show newQueryTuples)
+    ; hClose fh'
+
+    ; return $ Map.fromList $ map mkFontMetric alreadyQueried
+    }
+ where mkFontMetric (f,(h,b,ws)) = 
+         (f {fUnderline = False, fStrikeOut = False}, (h, b, listArray (0,223) [ w `div` 10 | w <- ws])) 
+       lookupFont queries font = case lookup (fFamily font, fSize font)  queries of
+                                   Nothing -> Nothing
+                                   Just metrics -> Just (font, metrics)
+       

@@ -1,0 +1,699 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- v1 -->
+<html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>Proxima 2.0</title>
+
+
+<style>
+<![CDATA[
+
+/* Context menu Script- (c) Dynamic Drive (www.dynamicdrive.com) Last updated: 01/08/22
+For full source code and Terms Of Use, visit http://www.dynamicdrive.com */
+.skin0{
+position:absolute;
+border:2px solid black;
+background-color:menu;
+font-family:Verdana;
+line-height:14px;
+cursor:default;
+font-size:10px;
+z-index:100;
+visibility:hidden;
+}
+
+.menuItem{
+padding-left:10px;
+padding-right:10px;
+}
+]]>
+</style>
+
+
+
+<script type="text/javascript">
+<![CDATA[
+
+
+var xmlhttp;
+var shiftDown = false;
+var ctrlDown = false;
+var altDown = false;
+var mouseDown = false;
+var commandQueue = '';
+
+function init()
+{
+    
+    if (document.addEventListener)
+    {
+       document.addEventListener("keydown",keydown,false);
+       document.addEventListener("keyup",keyup,false);
+       document.addEventListener("keypress",keypress,false);
+    }
+    else if (document.attachEvent) // IE7
+    {
+       document.attachEvent("onkeydown", keydown);
+       document.attachEvent("onkeyup", keyup);
+       document.attachEvent("onkeypress", keypress);
+    }
+    else
+    {
+       document.onkeydown= keydown;
+       document.onkeyup= keyup;
+       document.onkeypress= keypress;
+    }
+
+  // context menus
+  ie5=document.all&&document.getElementById;
+  ns6=document.getElementById&&!document.all;
+  menuobj=document.getElementById("contextMenu");
+  menuobj.style.display='';
+  //
+
+
+//    setRefreshTimer(10);
+    refresh();
+//    alert('before');
+//    debugAdd('Metrics: '+queryFont("Times New Roman", 12));
+//    alert('after');
+    loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
+}
+
+// Font queries
+ 
+var beginRange = 32;
+var endRange = 255;
+  
+function initFont()
+{ var fontElt = document.getElementById('font');
+  fontElt.innerHTML='';
+  var lines = '<div id=\'lines\' style=\'position:absolute;"\'>';
+  for (var c=beginRange; c<=endRange; c++)
+  { var ch = c == 38 ? '&amp;' 
+           : c == 60 ? '&amp;' 
+           : c == 62 ? '&lt;' : String.fromCharCode(c);
+    lines = lines + '<div style=\'position:absolute\'>'+replicate(10,ch)+'</div>';
+  }
+  lines += '</div><div id="enclosing" style="position:absolute"><span id="text">X</span><span id="baseline" style="height:0px;font-size:0px">baseline</span></div>';
+  fontElt.innerHTML=lines;
+}
+
+function queryFont(fontFamily, fontSize)
+{
+  initFont() // firefox does not update bounding divs on style update, so we need to init every time :-(
+  
+  var fontElt = document.getElementById('font');
+  fontElt.style.fontFamily = fontFamily;
+  fontElt.style.fontSize = fontSize+'pt';
+
+
+  var enclosing = document.getElementById('enclosing');
+  var baselineElt = document.getElementById('baseline');
+  var font = document.getElementById('text');
+  var height = font.offsetHeight;
+  var baseline = baselineElt.offsetTop - font.offsetTop;
+
+  var metrics = '(("'+fontFamily+'",'+fontSize+'),('+height + ',' + baseline + ',';
+  var linesElt = fontElt.childNodes[0];
+  var widths = '[';
+  for (var childNr = 0; childNr <= endRange - beginRange; childNr++)
+  { var line = linesElt.childNodes[childNr];
+    widths += (childNr == 0 ? '' : ',') + (line.clientWidth);
+  }
+  widths += ']';
+  metrics += widths + '))';
+  return metrics;
+}
+
+function replicate(i,c)
+{ var str = '';
+  while (i-- > 0)
+    str = str + c;
+  return str;
+}
+
+
+// Context menu's
+
+var ie5;
+var ns6;
+var menuobj;
+
+function contextHandler(e)
+{ var screenX = ie5 ? event.clientX
+                    : e.clientX;
+  var screenY = ie5 ? event.clientY
+                    : e.clientY;
+  var coords = getMouseCoordsWithinTarget(e,'proxima'); 
+
+  // menu is not on proxima element, so position is absolute to window
+  // however, proxima needs the position relative to the proxima element
+  
+  loadXMLDoc('ContextRequest(('+coords.x+','+coords.y+'),('+screenX+','+screenY+'));');
+  return false; // disable normal context menu
+}
+
+
+function highlightie5(e)
+{ var firingobj=ie5? event.srcElement : e.target;
+  if ( firingobj.className=="menuItem" ||
+       ns6 && firingobj.parentNode.className=="menuItem")
+  { if (ns6 && firingobj.parentNode.className=="menuItem") 
+      firingobj=firingobj.parentNode; //up one node
+    firingobj.style.backgroundColor="highlight";
+    firingobj.style.color="white";
+  }
+}
+
+function lowlightie5(e)
+{ var firingobj=ie5? event.srcElement : e.target;
+  if ( firingobj.className=="menuItem" ||
+       ns6 && firingobj.parentNode.className=="menuItem")
+  { if (ns6 && firingobj.parentNode.className=="menuItem") 
+      firingobj=firingobj.parentNode; //up one node
+    firingobj.style.backgroundColor="";
+    firingobj.style.color="black";
+  }
+}
+
+function jumptoie5(e)
+{ var firingobj=ie5? event.srcElement : e.target;
+  if( firingobj.className=="menuItem" ||
+      ns6 && firingobj.parentNode.className=="menuItem" )
+  { if (ns6&&firingobj.parentNode.className=="menuItem") 
+      firingobj=firingobj.parentNode;
+    else
+    { var selectedItemNr = firingobj.getAttribute("item");
+      loadXMLDoc('ContextSelect('+selectedItemNr+');');     
+      menuobj.style.visibility="hidden";
+    }
+  }
+}
+
+function showMenuXY(x,y)
+{ // Find out how close the mouse is to the corner of the window
+  var rightedge=ie5 ? document.body.clientWidth-x
+                    : window.innerWidth-x;
+  var bottomedge = ie5 ? document.body.clientHeight-y
+                       : window.innerHeight-y;
+  
+  // if the horizontal distance isn't enough to accomodate the width of the context menu
+  var left, top;
+  
+  if (rightedge<menuobj.offsetWidth)
+    // move the horizontal position of the menu to the left by it's width
+    left= ie5 ? document.body.scrollLeft+x-menuobj.offsetWidth 
+                            : window.pageXOffset+x-menuobj.offsetWidth;
+  else
+    //position the horizontal position of the menu where the mouse was clicked
+    left = ie5 ? document.body.scrollLeft+x 
+                             : window.pageXOffset+x;
+
+  // same concept with the vertical position
+  if (bottomedge<menuobj.offsetHeight)
+    top=ie5 ? document.body.scrollTop+y-menuobj.offsetHeight 
+                          : window.pageYOffset+y-menuobj.offsetHeight
+  else
+    top=ie5 ? document.body.scrollTop+y 
+                          : window.pageYOffset+y
+
+  menuobj.style.left = left + 'px';
+  menuobj.style.top = top + 'px';
+  
+  menuobj.style.visibility="visible";
+}
+
+
+function hidemenuie5(e)
+{ menuobj.style.visibility="hidden";
+}
+
+
+
+
+// end Context menu's
+
+
+
+
+
+
+function loadXMLDoc(url)
+{ commandQueue = commandQueue + url;
+
+  if ( xmlhttp && xmlhttp.readyState != 0 && xmlhttp.readyState != 4)
+    return;
+  
+xmlhttp=null;
+if (window.XMLHttpRequest)
+  { // code for Firefox, Opera, IE7, etc.
+    xmlhttp=new XMLHttpRequest();
+  }
+else if (window.ActiveXObject)
+  { // code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+if (xmlhttp!=null)
+  { 
+    { xmlhttp.onreadystatechange=state_Change;
+      xmlhttp.open("GET",commandQueue+'?',true);
+      xmlhttp.send(null);
+      commandQueue = '';
+    }
+  }
+else
+  { alert("Your browser does not support XMLHTTP.");
+  }
+}
+
+function state_Change()
+{
+if (xmlhttp.readyState==4)
+  {// 4 = "loaded"
+  if (xmlhttp.status==200)
+    {// 200 = "OK"
+    
+    var newRendering = document.getElementById('newRendering');
+    newRendering.innerHTML=xmlhttp.responseText;
+    
+    
+    if (commandQueue != '')
+    { // debugAdd('sending queue');
+      loadXMLDoc('');
+    }
+    
+    var focus = document.getElementById('focus');
+    
+    
+    var updates = document.getElementById('updates');
+    // getElementById seems to trigger parsing the responseText
+    // after this, firstChild has a value, while it is null before
+                // newRendering.firstChild;
+    
+    
+ //   updateTree( updates.firstChild );
+    while (updates.firstChild)
+    { updateTree( updates.firstChild );
+    ; updates.removeChild(updates.firstChild);
+    }
+    
+    //var renderArea = document.getElementById('renderArea');
+    //renderArea.removeChild( document.getElementById('root') ); //old rendering
+
+    //var xmlRoot = xmlhttp.responseXML.firstChild;
+    
+    
+    //renderingRoot = document.getElementById('root');
+    //newRendering.removeChild( renderingRoot );
+    
+    //renderArea.appendChild( renderingRoot );
+    
+    //while (renderArea.firstChild) {
+    //  renderArea.removeChild(renderArea.firstChild);
+    //}
+    //
+    // getElementById does not seem to work for dynamically added XML nodes.
+    
+
+    
+    //var status = xmlRoot.getAttribute("status");
+    //if (status !='')
+    //  document.getElementById('status').innerHTML = status;
+    }
+  else
+    {
+    debug("Problem retrieving data:" + xmlhttp.statusText);
+//    document.getElementById('status').innerHTML='Server not available.';
+    }
+  }
+}
+
+function updateTree(update)
+{ var op = update.getAttribute('op');
+ /*
+  if (op === 'add')
+  { var parentId = update.getAttribute('parentId');
+    var newChild = update.firstChild;
+    var parent = document.getElementById(parentId);
+    parent.appendChild( newChild );
+    debug('add to '+parentId+' '+newChild.getAttribute('Id'));
+  }    
+  else if (op === 'remove')
+  { var parentId = update.getAttribute('parentId');
+    var targetId = update.getAttribute('targetId');
+    var parent = document.getElementById(parentId);
+    if (parent==null)
+    { debug('parent '+parentId+' is null');
+      return;
+    }
+    
+    var target = document.getElementById(targetId);
+    parent.removeChild( target );
+    debug('remove '+targetId+' from '+parentId);
+  } 
+  else 
+  */
+  if (op === 'replace')
+  { var path = update.childNodes[0];
+    var newChild = update.childNodes[1];
+    
+    var oldChild = select(path, document.getElementById('proxima'));
+    
+    var parent = oldChild.parentNode;
+    
+    parent.replaceChild(newChild,oldChild);
+      
+//    debug('replace '+targetId+' at '+parentId+' by '+newChild.getAttribute('Id'));
+  } 
+  else if (op == 'contextMenu')
+  { var screenX = update.getAttribute('screenX');
+    var screenY = update.getAttribute('screenY');
+    
+    removeChildren('contextMenu');
+    
+    while (update.firstChild)
+    { var item = update.firstChild;
+      update.removeChild(update.firstChild);
+      menuobj.appendChild( item );
+    } // using appendChild directly also seems to remove the child from update
+      // but maybe this is not the same for all browsers
+    
+    showMenuXY(screenX,screenY);
+    
+  }
+  else if (op == 'metricsQuery')
+  { var family = update.getAttribute('family');
+    var size = update.getAttribute('size');
+    var metrics = queryFont(family,size);
+    //debugAdd('query is Metrics'+metrics+';');
+    loadXMLDoc('Metrics'+metrics+';');
+  }
+  else if (op == 'refresh')
+  { refresh();
+    loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
+  }
+  else alert ('Unknown command: '+op); 
+}
+
+function select(path, node)
+{ var step = path.firstChild;
+  if (!step)
+    return node;
+  else
+    { path.removeChild(step);
+      var childNr = parseInt( step.getAttribute('childNr') ); 
+      var child = node.childNodes[childNr];
+      return (select (path, child));
+    }
+}
+
+function debug(message)
+{
+    document.getElementById('debugMessage').innerHTML=message;
+}
+
+function debugAdd(message)
+{
+    debug (message + '<br></br>' + document.getElementById('debugMessage').innerHTML);
+}
+
+/*
+function setRefreshTimer(ms)
+{  
+    setTimeout('refresh()',ms);
+}
+
+function refresh()
+{
+    loadXMLDoc('SpecialRefresh;');
+    setRefreshTimer(200);
+}
+*/
+
+function refresh()
+{ removeChildren('rendering');
+  removeChildren('focus');
+  removeChildren('newRendering');
+  removeChildren('contextMenu');
+}
+
+function removeChildren(parentId)
+{ var parent = document.getElementById(parentId);
+    while (parent.firstChild)
+      parent.removeChild(parent.firstChild);
+}
+
+function keypress(e)
+{
+   if (!e) e= event;
+
+   var keyCode =  (e.keyCode != 0) ? e.keyCode : e.charCode
+   // keyCode is 0 on Firefox
+   
+//   debug('Key is '+keyCode +',' + e.charCode);
+//   loadXMLDoc('Chr'+String.fromCharCode(keyCode)+';');
+   if (e.which != 0 && keyCode != 8 && keyCode != 13) 
+     loadXMLDoc('Chr('+keyCode+','+showModifiers()+');');
+// ? is to prevent caching by IE 
+// maybe also check alt, ctrl and  other keys, they seem to generate press events now
+   
+   if (e.preventDefault) e.preventDefault();
+   if (e.stopPropagation) e.stopPropagation();
+
+   return false;
+}
+
+function hasNoKeyPress(keyCode)
+{
+   return keyCode == 13 || keyCode == 8 || keyCode == 46 ||
+          keyCode >= 37 && keyCode <= 40||
+          keyCode >= 112 && keyCode <= 123;
+
+}
+
+function recordModifiersDown( keyCode )
+{
+  if (keyCode == 16) shiftDown = true;
+  else if (keyCode == 17) ctrlDown = true;
+  else if (keyCode == 18) altDown = true;
+  //debug(shiftDown+' '+ctrlDown+' '+altDown);
+}
+
+function recordModifiersUp( keyCode )
+{
+  if (keyCode == 16) shiftDown = false;
+  else if (keyCode == 17) ctrlDown = false;
+  else if (keyCode == 18) altDown = false;
+  //debug(shiftDown+' '+ctrlDown+' '+altDown);
+}
+
+function keydown(e)
+{
+   if (!e) e = event;
+   if (e.keyCode==116)
+     refresh();
+   recordModifiersDown(e.keyCode);
+   
+   if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
+   {
+     loadXMLDoc('Key('+e.keyCode+','+showModifiers()+');');
+     if (e.preventDefault) e.preventDefault();
+     if (e.stopPropagation) e.stopPropagation();
+     return false; // false, so no keyPress event is generated
+   }
+   return true;
+}
+/* for preventing default behavior: (unclear whether or how this works)     
+     if (e.preventDefault) e.preventDefault();
+     if (e.stopPropagation) e.stopPropagation();
+*/
+
+function keyup(e)
+{
+   if (!e) e = event;
+   recordModifiersUp(e.keyCode);
+}
+
+function ignore(e)
+{
+   if (e.preventDefault) e.preventDefault();
+   if (e.stopPropagation) e.stopPropagation();
+
+   return false;
+}
+
+
+function mouseHandler(str,e) 
+{
+	var coords = getMouseCoordsWithinTarget(e,'proxima');
+  var posx = coords.x;
+	var posy = coords.y;
+  
+  var proxima = document.getElementById('proxima');
+
+  if ( (posx - proxima.scrollLeft) > proxima.clientWidth || (posy - proxima.scrollTop) > proxima.clientHeight )
+    return;  // we're on a scroll bar, so no event.
+    	
+  // does not take into account mouse button
+  if (str == 'D') 
+    mouseDown = true;
+  if (str == 'U') 
+    mouseDown = false;
+
+  // only handle mouse move if the mouse button is down and the queue is empty
+  if (str == 'M' && (!mouseDown || commandQueue != ''))
+    return;
+    
+  //debugAdd('('+posx +','+posy+')');
+
+  loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
+                                   (posy) + ',' +
+                                   showModifiers() + ');' );
+}
+
+function showModifiers()
+{ return '(' + (shiftDown?'True':'False') + ',' +
+               (ctrlDown?'True':'False') + ',' +
+               (altDown?'True':'False') + ')'
+}
+
+function getMouseCoordsWithinTarget(event,id)
+{
+  var Element = document.getElementById(id);
+  var scrollLeft = Element.scrollLeft;
+  var scrollTop = Element.scrollTop;
+  
+        var coords = { x: 0, y: 0};
+
+        if(!event) // then we have a non-DOM (probably IE) browser
+        {
+                event = window.event;
+                coords.x = event.offsetX;
+                coords.y = event.offsetY;
+        }
+        else       // we assume DOM modeled javascript
+        {
+                var CalculatedTotalOffsetLeft = 0;
+                var CalculatedTotalOffsetTop = 0 ;
+
+                while (Element.offsetParent)
+                {
+                        CalculatedTotalOffsetLeft += Element.offsetLeft ;     
+                        CalculatedTotalOffsetTop += Element.offsetTop ;
+                        Element = Element.offsetParent ;
+                }
+
+                coords.x = event.pageX - CalculatedTotalOffsetLeft + scrollLeft;
+                coords.y = event.pageY - CalculatedTotalOffsetTop + scrollTop;
+        }
+
+        return coords;
+}
+
+
+function scrollHandler(event)
+{
+    var proxima = document.getElementById('proxima');
+    
+//    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
+  if (commandQueue == '')
+    loadXMLDoc('SpecialScroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
+               '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
+}
+
+
+
+
+
+
+
+
+
+]]></script>
+</head>
+<body onload="init()">
+<!-- size of Proxima window is currently hard coded in server; it should be passed with init event -->
+<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 800px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
+     onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
+     onmouseup="return mouseHandler('U',event)"
+     onclick="return mouseHandler('C',event)"
+     onmousemove="return mouseHandler('M',event)"
+     oncontextmenu="return contextHandler(event)"
+     onscroll="return scrollHandler(event)"
+ ><div id="rendering" 
+     ></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div></div>
+<!-- onmousemove="return mouseHandler('M',event)" -->
+
+
+<!-- font positioning goes wrong: text is drawn at half-height ref at top of div box
+<div style='position:absolute;left:20px;top:10px;width:463px;height:29px;font-family:"Times New Roman";font-size:19pt;background-color:rgb(120,120,120);'>B</div>
+-->
+<!-- weird rendering when line-height /= 0px
+<div style='position: absolute; left:0px; top:0px;width:40px;height:40px;'>
+<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+<polygon points='1,1 40,1' style='fill:transparent; stroke:rgb(255,0,0);stroke-width:1'/>
+<line x1='1' y1='1' x2='40' y2='' style='stroke:rgb(0,0,0);stroke-width:1'/>
+</svg></div>
+-->
+
+<!--
+<div style='position: absolute; left:0px; top:0px;width:17px;height:4px;'>
+      <svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+       <polygon points='0,0 14,0' style='fill:transparent; stroke:rgb(255,0,0);stroke-width:1'/>
+      </svg>
+</div>
+-->
+<!-- strange rendering of poly's when height is less than 4
+  <div style='position: absolute; left:0px; top:0px;width:15px;height:21px;'>
+     <div style='position: absolute; left:-1px; top:-1px;width:17px;height:4px;'>
+      <svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+       <polygon points='0,0 14,0' style='fill:transparent; stroke:rgb(255,0,0);stroke-width:1'/>
+      </svg>
+     </div>
+   <div style='position: absolute; left:0px; top:1px;width:15px;height:19px;'>
+     <div style='position: absolute; left:-1px; top:-1px;width:5px;height:21px;'>
+      <svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+       <polygon points='0,0 0,18' style='fill:transparent; stroke:rgb(0,0,0);stroke-width:1'/>
+      </svg>
+     </div>
+    <div style='position:absolute;left:1px;top:0px;width:13px;height:19px;'>
+      <div style='position:absolute;left:0px;top:9px;width:13px;height:19px;font-family:"Times New Roman";font-size:12pt;color:rgb(0,0,0);'>zu</div>
+    </div>
+     <div style='position: absolute; left:13px; top:-1px;width:5px;height:21px;'>
+      <svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+       <polygon points='0,0 0,18' style='fill:transparent; stroke:rgb(0,0,0);stroke-width:1'/>
+      </svg>
+     </div>
+   </div>
+    <div style='position: absolute; left:-1px; top:19px;width:17px;height:4px;'>
+     <svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>
+      <polygon points='0,0 14,0' style='fill:transparent; stroke:rgb(0,0,0);stroke-width:1'/>
+     </svg>
+    </div>
+  </div>
+
+-->
+ <!-- relative to parent. Important: parent needs style = 'position: relative' -->
+<div id='font' style='visibility:hidden;white-space: pre'></div>
+<div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
+<button onclick="loadXMLDoc('SpecialClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
+<div id="debugMessage"></div>
+<!-- <div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
+-->
+</body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+

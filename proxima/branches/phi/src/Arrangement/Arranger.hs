@@ -25,16 +25,17 @@ defaultLineColor = black
 defaultTextColor = black
 defaultFont = CommonTypes.defaultFont
 
-arrangePresentation :: (Show node, Show token) => LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
+arrangePresentation :: (Show node, Show token) => Settings ->
+                       LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
                        DiffTree -> Layout doc node clip token -> IO (Arrangement node, LocalStateArr)
-arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
+arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
 
  do { viewedArea <- readIORef $ getViewedAreaRef state
     ; let oldViewedArea = getLastViewedArea state
           state' = state { getLastViewedArea = viewedArea }
 --          prunedPres = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres -- old prune
 
-          prunedPres = if arrangerIncrementality 
+          prunedPres = if arrangerIncrementality settings 
                        then prunePresentation viewedArea oldViewedArea dt pres  -- uncomment this line for incremental arrangement
                        else prunePresentation viewedArea oldViewedArea (DiffLeaf False) pres -- and this one for non-incremental
           
@@ -44,27 +45,29 @@ arrangePresentation state fontMetricsRef focus oldArrangement dt pres =
 --    ; debugLnIO Err ("Pruned Presentation"++show prunedPres)
 --    ; debugLnIO Arr ("Old arrangement "++ show oldArrangement)
     
-    ; (attrTree, maxFDepth) <- fixed fontMetricsRef focus prunedPres pres viewedArea oldViewedArea oldArrangement
+    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef (getIDACounter state') focus prunedPres pres viewedArea oldViewedArea oldArrangement
+    ; let state'' = state' { getIDACounter = idCounter' }
     ; when (maxFDepth > 1) $
         debugLnIO Err "Nested formatters may be arranged incorrectly"
-    ; return (attrTree, state')
+    ; return (attrTree, state'')
     }
 
-fixed :: (Show node, Show token) => FontMetricsRef -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
-         Arrangement node -> IO (Arrangement node, Int)
-fixed fontMetricsRef focus (pres :: Layout doc node clip token) (unprunedPres :: Layout doc node clip token) viewedArea oldViewedArea oldArrangement = 
- mdo { (fontMetrics,arrangement, maxFDepth) <- f (fontMetrics,arrangement, maxFDepth)
-    ; return (arrangement, maxFDepth)
+fixed :: (Show node, Show token) => Settings -> FontMetricsRef -> Int -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
+         Arrangement node -> IO (Arrangement node, Int, Int)
+fixed settings fontMetricsRef idACounter focus (pres :: Layout doc node clip token) (unprunedPres :: Layout doc node clip token) viewedArea oldViewedArea oldArrangement = 
+ mdo { (fontMetrics,arrangement, idACounter', maxFDepth) <- f (fontMetrics,arrangement, idACounter, maxFDepth)
+    ; return (arrangement, idACounter', maxFDepth)
     }
- where f :: (FontMetrics, Arrangement node, Int) ->
-            IO (FontMetrics, Arrangement node, Int) -- doc and node are scoped type variables
-       f (fontMetrics,_, _) = 
-         do { let (allFonts, arrangement, maxFDepth,_) = -- _ is the self attribute
+ where f :: (FontMetrics, Arrangement node, Int, Int) ->
+            IO (FontMetrics, Arrangement node, Int, Int) -- doc and node are scoped type variables
+       f (fontMetrics,_, _, _) = 
+         do { let (allFonts, arrangement, idACounter', maxFDepth,_) = -- _ is the self attribute
                     sem_Root (Root pres) [defaultFont]
                                                defaultBackColor defaultFillColor
                                                focus
                                                defaultFont 
                                                fontMetrics
+                                               idACounter
                                                defaultLineColor
                                                Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
                                                (Just oldArrangement)
@@ -87,9 +90,9 @@ fixed fontMetricsRef focus (pres :: Layout doc node clip token) (unprunedPres ::
             ; debugLnIO Arr $ "already queried: "++ show queriedFonts
             ; debugLnIO Arr $ "new:             "++ show newFonts
 -}
-            ; newMetrics <- mkFontMetrics newFonts
+            ; newMetrics <- mkFontMetrics settings newFonts
             ; let updatedMetrics = newMetrics `Map.union` queriedMetrics
             ; writeIORef fontMetricsRef updatedMetrics            
-            ; return (updatedMetrics, arrangement, maxFDepth)
+            ; return (updatedMetrics, arrangement, idACounter', maxFDepth)
             }
             
