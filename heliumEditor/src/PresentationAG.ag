@@ -1347,6 +1347,7 @@ SEM Slide
   | Slide lhs.pres2 = loc (Node_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                          slide (text @title)
                                @itemList.pres2
+                         `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
 
 -- Tricky: need to put an invisible structural presentation of listTypeNode, because
 -- makeStructuralListType expects it
@@ -1363,13 +1364,17 @@ SEM ItemList
 SEM ListType [ || pres2 : Presentation_Doc_Node_Clip_Token typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token}]
   | Bullet         lhs.pres2 = loc (Node_Bullet @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
-                   lhs.typeLoc = loc (Node_Bullet @self @lhs.path)
+                   lhs.typeLoc = \pres -> loc (Node_Bullet @self @lhs.path) $
+                                            pres `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | Number         lhs.pres2 = loc (Node_Number @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
-                   lhs.typeLoc = loc (Node_Number @self @lhs.path)
+                   lhs.typeLoc = \pres -> loc (Node_Number @self @lhs.path) $
+                                            pres `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | Alpha          lhs.pres2 = loc (Node_Alpha @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
-                   lhs.typeLoc = loc (Node_Alpha @self @lhs.path)
+                   lhs.typeLoc = \pres -> loc (Node_Alpha @self @lhs.path) $
+                                            pres `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+
   | ParseErrListType lhs.typeLoc = id
   | HoleListType lhs.typeLoc = id
 
