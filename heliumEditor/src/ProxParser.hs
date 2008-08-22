@@ -293,7 +293,7 @@ pElse   = pKey "else"
 
 pLambda = pKey "\\" -- <|> pKey "l"
 
-pArrow  = pKey "->" <|> pKey "\174"
+pArrow  = pKey "->" -- <|> pKey "\174"
 
 pCase   = pKey "case"
 
