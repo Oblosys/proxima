@@ -152,6 +152,7 @@ SEM RootE
                        
                        , row [ hSpace 3, text "module " `withColor` keyCol, bold $ text "Main" , text " where" `withColor` keyCol]
                        , row [ hSpace 3, @decls.pres ]
+                       , empty `withStretch` True
                        , vSpace 10
                        , hLine
                        , vSpace 4                       -- empty col's are buggy in Xprez
@@ -167,6 +168,7 @@ SEM RootE
                              ]
                        ]
                      `withFont'` ("Courier New",14)
+                     `withStretch` True
       decls.ranges = (\(l1,l2,l3)->(concat l1, concat l2, concat l3)) . unzip3
                      $ map pthFrmMsg @lhs.errs
 {
@@ -700,19 +702,19 @@ SEM Exp
           exp.spaces = @lhs.spaces
  -- | IdentExp                    has no tokens, so attrs are chained
 --
-  | IfExp  exp1.whitespaceMap = updateLayoutList [ (@idP0, (@lhs.newlines,@lhs.spaces))
-                                          , (@idP1, (1,@lhs.col))
-                                          , (@idP2, (1,@lhs.col)) ]
+  | IfExp  exp1.whitespaceMap = updateLayoutList [ (@idP0, (0,1))
+                                          , (@idP1, (0, 1))
+                                          , (@idP2, (0, 1)) ]
                                           @lhs.whitespaceMap
           exp1.col = @lhs.col + 2+1 -- "if "
           exp2.col = @lhs.col + 4+1 -- "then "
           exp3.col = @lhs.col + 4+1 -- "else "
-          exp1.newlines = 0
-          exp1.spaces = 1
-          exp2.newlines = 0
-          exp2.spaces = 1
-          exp3.newlines = 0
-          exp3.spaces = 1
+          exp1.newlines = 1
+          exp1.spaces = @lhs.col
+          exp2.newlines = 1
+          exp2.spaces = @lhs.col
+          exp3.newlines = @lhs.newlines
+          exp3.spaces = @lhs.spaces
   | ParenExp exp.whitespaceMap = updateLayoutList [ (@idP0, (0,0))
                                            , (@idP1, (@lhs.newlines,@lhs.spaces)) ]
                                            @lhs.whitespaceMap
