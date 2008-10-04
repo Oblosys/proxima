@@ -42,7 +42,7 @@ generateFiles srcPath fileName genPhi =
     ; generateFile srcPath "DocumentEdit_Generated.hs"   $ Gen_DocumentEdit.generate docType
     ; if genPhi
       then do generateFile srcPath "Phi_Generated.hs" $ Gen_Phi.generate docType 
-              generateFile srcPath "DefaultPresentationAG_Generated-empty.ag" $ Gen_Phi.generateDefaultPres docType
+              generateFile srcPath "PhiPresentationAG-template.ag" $ Gen_Phi.generateDefaultPres docType
               generateFile srcPath "Phi_Editables.hs" $ Gen_Phi.generateEditables docType
       else return ()
     }

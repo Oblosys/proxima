@@ -57,6 +57,7 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "                           , whitespaceMapCreated_Inh_EnrichedDoc = initLayout"
   , "                           , commentMap_Inh_EnrichedDoc = commentMap"
   , "                           , commentMapCreated_Inh_EnrichedDoc = Map.empty"
+  , "                           , isInterp_Inh_EnrichedDoc = False"
   , "                           })"
   , "  in  (whitespaceMap', pIdC', pres, self)"
   , ""
@@ -71,11 +72,12 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "-}"
   , ""
   , "-- Phi"
-  , "modifiedTree :: EnrichedDoc -> (EnrichedDoc, WhitespaceMap, CommentMap')"
+  , "modifiedTree :: EnrichedDoc -> (EnrichedDoc, WhitespaceMap, CommentMap', IDPCounter)"
   , "modifiedTree enrichedDoc = "
   , "  let (Syn_EnrichedDoc { self_Syn_EnrichedDoc = self"
   , "                       , whitespaceMapCreated_Syn_EnrichedDoc = whitespaceMap2'"
   , "                       , commentMapCreated_Syn_EnrichedDoc = commentMap'"
+  , "                       , pIdC_Syn_EnrichedDoc = pIdC'"
   , "                       }) ="
   , "        wrap_EnrichedDoc (sem_EnrichedDoc enrichedDoc)"
   , "          (Inh_EnrichedDoc { checkedModule_Inh_EnrichedDoc = undefined"
@@ -89,8 +91,9 @@ genPresentationSheet = genBanner "presentationSheet" $
   , "                           , whitespaceMapCreated_Inh_EnrichedDoc = initLayout"
   , "                           , commentMap_Inh_EnrichedDoc = Map.empty"
   , "                           , commentMapCreated_Inh_EnrichedDoc = Map.empty"
+  , "                           , isInterp_Inh_EnrichedDoc = True"
   , "                           })"
-  , "   in (self, whitespaceMap2', commentMap')"
+  , "   in (self, whitespaceMap2', commentMap', pIdC')"
   , ""
   , "}" 
   ]
@@ -124,7 +127,7 @@ genAttr decls = genBanner "Attr declarations" $
   , "SET AllTypes = %8"
   , ""
   , "ATTR AllTypes Lists ConsLists" -- all types including EnrichedDoc, lists and conslists
-  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs checkedModule : CheckedModule |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : TokenStreamT commentMapCreated : CommentMap' commentMap : CommentMap' | ]"
+  , "     [ doc : Document focusD : FocusDoc path : Path errLocs : ErrLocs checkedModule : CheckedModule isInterp : Bool |  pIdC : Int whitespaceMap : WhitespaceMap whitespaceMapCreated : WhitespaceMap tokStr : TokenStreamT commentMapCreated : CommentMap' commentMap : CommentMap' | ]"
   , ""  -- Document is for popups, will be removed in the future
   , "ATTR AllTypes Lists" -- all types including EnrichedDoc except lists and conslists
   , "     [ | | pres : Presentation_Doc_Node_Clip_Token noIdps : Int pres' : {(Presentation_Doc_Node_Clip_Token, [IDP], WsMap, TokenStreamT)} ]"
