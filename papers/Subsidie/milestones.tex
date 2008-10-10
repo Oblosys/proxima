@@ -1,0 +1,117 @@
+\documentclass[10pt]{article}
+
+\addtolength{\textwidth}{1in}    
+\addtolength{\hoffset}{-0.5in}
+\addtolength{\textheight}{1.5in}
+\addtolength{\voffset}{-1in}
+
+\setlength{\parskip}{\baselineskip}
+\addtolength{\topsep}{-\baselineskip}
+\setlength{\parindent}{0em}
+\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage{../Utils}
+\usepackage{eurosym}
+
+
+\bc
+
+    * Introduction --short description of the project and goals;
+    * Description of innovation:
+          o the problem solved by this project;
+          o the relative advantage of the proposed innovation;
+          o usability: for whom and to what purpose;
+          o perspectives for further development of this innovation and/or other technologies. 
+    * Project setup --organizational, technical, eventual partners, dependencies on other projects, licenses, and such;
+    * Project planning --milestones and related results;
+    * Project budgeting;
+    * Project risks --which risks can be overseen from the start of the project;
+    * Project results dissemination --how the project team is going to disseminate results and to whom, publicity, diffusion of the produced innovation;
+    * Possibly, follow-ups on the project. 
+
+\ec
+
+
+\title{Proxima 2.0: WYSIWYG generic editing for Web 2.0\\
+\bigskip
+        \large project planning - milestones and deliverables}
+\author{dr Martijn M. Schrage\\
+        \small Dept. of Computing Sciences, Utrecht University\\
+        \small {\tt martijn@cs.uu.nl}
+        }
+\date{}
+\begin{document}
+
+\maketitle
+
+%    * Project planning --milestones and related results;
+This planning assumes a project running time (?) of 10 months, which is about 44 weeks.
+
+(holidays?)
+
+\head{Realize the Proxima 2.0 web server and client (14 weeks)}
+14 weeks
+\bl
+\o Investigate Ajax an DHTML technologies
+\o Setup Web server on simple web server and implement simple Ajax client for rendering text
+\o Determine format of rendering
+\o Add web server functionality to Proxima
+\o Create a build configuration that has no GUI dependencies
+\o Add graphical symbolds and images to renderer
+\o Add font-metrics computation and communication
+\o Handle popup menus
+\o Handle menu bar
+\o Add server-side file handling
+\o Add edit session handling
+\el
+
+Deliverable: editors for bayes and helium can be demonstrated
+
+\head{Upgrade the underlying Proxima engine and Implement several sample editors (16 weeks)}
+
+In order to build the demonstration editors, the underlying Proxima engine needs several upgrades. (8 weeks)
+
+demo editors for testing, for showcasing, but also for determining focus of the next task
+\bl
+\o Add drag \& drop documennt editing
+\o Implement search/replace functionality
+\o Improve focus navigation
+\o Improve rich-text editing
+\el
+
+8 weeks
+\bl
+build sample editors:
+\o sudoku editor
+\o hierarchical todo-list editor
+\o chess board editor
+\o editor for administration of leave days
+\o editor for taking on-line quizzes
+\o wiki editor
+\el
+
+Deliverable: demonstration of sample editors
+
+\head{Increasing efficiency (10 weeks)}
+
+\bl
+\o add incremental handling of block moves
+\o design and implement predictive rendering for drag and drop
+\o design and implement predictive rendering for text input
+\o add data compression
+\el
+%perhaps make more efficient encoding of rendering.
+
+deliverable: ?
+\head{Write documentation (4 weeks)}
+4 weeks
+write documentation
+
+
+\bc
+unclear what this meant:
+
+%\o page blocking
+
+\ec
+\end{document}
