@@ -2,7 +2,7 @@
 
 \addtolength{\textwidth}{1in}    
 \addtolength{\hoffset}{-0.5in}
-\addtolength{\textheight}{1.5in}
+\addtolength{\textheight}{2in}
 \addtolength{\voffset}{-1in}
 
 \setlength{\parskip}{\baselineskip}
@@ -16,20 +16,13 @@
 
 \bc
 
-    * Introduction --short description of the project and goals;
-    * Description of innovation:
-          o the problem solved by this project;
-          o the relative advantage of the proposed innovation;
-          o usability: for whom and to what purpose;
-          o perspectives for further development of this innovation and/or other technologies. 
-    * Project setup --organizational, technical, eventual partners, dependencies on other projects, licenses, and such;
-    * Project planning --milestones and related results;
     * Project budgeting;
     * Project risks --which risks can be overseen from the start of the project;
     * Project results dissemination --how the project team is going to disseminate results and to whom, publicity, diffusion of the produced innovation;
     * Possibly, follow-ups on the project. 
 
 \ec
+
 
 
 \title{Proxima 2.0: WYSIWYG generic editing for Web 2.0\\
@@ -45,73 +38,161 @@
 \maketitle
 
 %    * Project planning --milestones and related results;
-This planning assumes a project running time (?) of 10 months, which is about 44 weeks.
+This planning assumes a project running time of 10 months (about 43.5 weeks). Also when not mentioned explicitly below, for all tasks the code produced can be considered a deliverable.
 
-(holidays?)
 
-\head{Realize the Proxima 2.0 web server and client (14 weeks)}
-14 weeks
-\bl
-\o Investigate Ajax an DHTML technologies
-\o Setup Web server on simple web server and implement simple Ajax client for rendering text
-\o Determine format of rendering
-\o Add web server functionality to Proxima
-\o Create a build configuration that has no GUI dependencies
-\o Add graphical symbolds and images to renderer
-\o Add font-metrics computation and communication
-\o Handle popup menus
-\o Handle menu bar
-\o Add server-side file handling
-\o Add edit session handling
-\el
+\section*{Task 1 -- Proxima 2.0 web server and client (12 weeks)}
 
-Deliverable: editors for bayes and helium can be demonstrated
+The first task is to implement a first rough version of the Ajax client and add basic web server functionality to Proxima.
 
-\head{Upgrade the underlying Proxima engine and Implement several sample editors (16 weeks)}
+\begin{description}
+\item[Setup Web server on simple web server and implement simple Ajax client for rendering text]
+Implement a first version of the Ajax client for rendering only text, and implement a simple web server that can be used to test the Ajax client without connecting it to Proxima.
 
-In order to build the demonstration editors, the underlying Proxima engine needs several upgrades. (8 weeks)
+\item[Handle mouse and keyboard events]~\\
+Mouse and keyboard events must be caught by the Ajax client and sent as events to the server. Different browsers and different platforms use different standards for these events, which must be taken into account.
 
-demo editors for testing, for showcasing, but also for determining focus of the next task
-\bl
-\o Add drag \& drop documennt editing
-\o Implement search/replace functionality
-\o Improve focus navigation
-\o Improve rich-text editing
-\el
+\item[Add web-server functionality to Proxima] ~\\
+The web-server functionality will allow the Ajax client to connect to the actual Proxima engine.
 
-8 weeks
-\bl
-build sample editors:
-\o sudoku editor
-\o hierarchical todo-list editor
-\o chess board editor
-\o editor for administration of leave days
-\o editor for taking on-line quizzes
-\o wiki editor
-\el
 
-Deliverable: demonstration of sample editors
+\item[Add support for incrementality]~\\
+Rather than sending the entire rendering, the Proxima server can send updates on the existing rendering. The Ajax client needs to apply the received update to its local copy of the rendering.
 
-\head{Increasing efficiency (10 weeks)}
+\item[Add graphical symbols and images to renderer]~\\
+Add support for graphical symbols using SVG. Images are plain HTML but require that the Proxima web server can handle image requests.
 
-\bl
-\o add incremental handling of block moves
-\o design and implement predictive rendering for drag and drop
-\o design and implement predictive rendering for text input
-\o add data compression
-\el
+\item[Add font-metrics computation and communication] ~\\
+In order to render correctly on different browsers and client architectures, font-metrics should not be computed by the server, but queried by the client and communicated to the server.
+
+\item[Create a build configuration for Proxima that has no GUI dependencies] ~\\
+Proxima will get two build options, a normal build with the GUI, and a web-server build without any GUI dependencies. 
+
+\item[Handle context menus]~\\
+Ajax does not have default support for context menus, so either a library must be used, or a simple implementation must be provided.
+\end{description}
+
+{\sc Milestone:} A first web-based version of Proxima.\\
+{\sc Deliverable:} The Helium editor and the editor for documenting Bayesian networks can be run as web-based applications.
+
+\section*{Task 2 -- Upgrade Proxima engine and implement sample editors (14 weeks)}
+
+The second task consists of implementing a set of sample editors. Before the editors can be implemented, the underlying Proxima engine needs several upgrades. The purpose of the sample editors is twofold: they will be used to showcase the possibilities of Proxima, as well as direct optimizations and further development.
+
+\subsection*{2.1~~Upgrade the Proxima engine}
+
+\begin{description}
+
+\item[Improve focus navigation] ~\\
+Currently, focus navigation sometimes leads to unexpected results, and moving the focus out of the view does not cause the view to scroll.
+
+\item[Implement search/replace functionality] ~\\
+A search/replace facility is required, wich works on the document level as well as on the presentation level.
+
+\item[Improve rich-text editing] ~\\
+Develop a parsing model for rich-text.
+
+\item[Add drag \& drop document editing]~\\
+Drag and drop editing is currently only supported for graphs and needs to be extended to general document editing.
+
+\end{description}
+
+\subsection*{2.2~~Implement several editors}
+
+The list below contains a number of ideas for possible sample editors. The actual editors that will be implemented may be a different selection, but in any case the choice will include a diversity that demonstrates the range of capabilties of Proxima and allows for experimentation and testing.
+
+\begin{description}
+
+\item[Editor for administration of vacation days]~\\
+An editor that allows employees to mark vacation days on a calender. The editor takes into account the available amount of leave as well as public holidays.
+
+\item[Sudoku editor]~\\
+The Sudoku editor only allows legal numbers to be entered. It can be connected to a sudoku solver to provide hints.
+
+\item[Folding outline task-list editor]~\\
+A folding outline editor for hierarchical todo task lists, in which tasks can have subtasks. The completion status of a task that contains subtasks is computed from the completion status of the subtasks.
+
+%\item[Chess board editor]~\\
+%
+%A chess board editor that 
+
+\item[Editor for taking on-line quizzes]~\\
+The editor is provided with a set of questions and corresponding answers. It shows the questions in succession, lets the user specify an answer, and keeps track of the score.
+
+\item[Wiki editor]~\\
+The Wiki editor allows the creation of wiki-like content pages which can reference each other.
+
+\end{description}
+
+
+{\sc Milestone:} A set of usable sample editors.\\
+{\sc Deliverable:} Demonstrable sample editors.
+
+\section*{Task 3 -- Optimization and further development (12 weeks)}
+
+Tests with the sample editors will determine which subtasks have priority, and may suggest different subtasks altogether.
+
+\begin{description}
+\item[Add server-side file handling]~\\
+Develop functionality for storing files on the server and uploading edited documents to the client machine.
+
+\item[Add edit session handling]~\\
+Develop a model for editing sessions, which allows a document to be edited by at most one user, while providing other authorized users with a non-editable view of the document.
+
+\item[Add incremental handling of block moves]~\\
+Currently, Proxima's incrementality algorithms do not recognize when part of the rendering is moved but not otherwise changed. For example, if a line is inserted in a paragraph, the rest of the paragraph, as well as the paragraphs below it on the screen are sent to the rendering client. By adding recognition of block moves to the incrementality algorithms, a much more efficient move command can be sent to the client in this case.
+ 
+\item[Design and implement predictive rendering for drag and drop]~\\
+Because dragging an object causes a large number of drag events, communication may be too slow to adequately show the drag operation on the client. Instead of letting the server handle all drag events, it is possible to handle the dragging at client side, by showing an outline of the dragged object. Only the drop event will need to be handled by the server.
+
+\item[Design and implement predictive rendering for text input]~\\
+When latency in the network is too high to show entered text within an acceptable time limit, a predictive form of text rendering can be used to show the entered text until the server update is received. The exact form of this predictive rendering has not yet been determined.
+%\item[Add data compression]~\\
+
+\end{description}
 %perhaps make more efficient encoding of rendering.
 
-deliverable: ?
-\head{Write documentation (4 weeks)}
-4 weeks
-write documentation
+{\sc Milestone} Proxima 2.0, ready for launch.\\
+{\sc Deliverable:} A more efficient version of all sample editors.
+
+\section*{Task 4 -- Documentation (5.5 weeks)}
+
+\begin{description}
+\item[Write documentation]~\\
+The documentation mentioned here is intended for editor developers. Proxima editors will be straightforward to use, so editing users do not require much documentation.
+
+\item[Build website]~\\
+The Proxima website will host sample editors and documentation.
+
+\item[Give presentations on Proxima 2.0]~\\
+Possible presentations are at ICT conferences and other ICT events, and at university colloquia.
+\end{description}
+
+{\sc Milestone: } Launch of Proxima 2.0.\\
+{\sc Deliverable: } The Proxima 2.0 website.
+
+\pagebreak
+\section*{Schedule}
+
+The project starts on 1 January 2009. The estimated completion dates for the tasks are:
+
+\begin{tabbing}
+{\bf Task 1:} \= 26 March \\
+{\bf Task 2:} \> 2 July \\
+{\bf Task 3:} \> 24 September \\
+{\bf Task 4:} \> 31 October \\
+\end{tabbing}
 
 
-\bc
-unclear what this meant:
 
-%\o page blocking
+Figure~\ref{fig:timeline} shows a timeline for the project.
+~\\
 
-\ec
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{images/timeline}
+\caption{Proxima 2.0 timeline}
+\label{fig:timeline}
+\end{figure}
+
 \end{document}
