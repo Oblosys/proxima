@@ -50,7 +50,7 @@ internalTypeSynonyms :: HsModule -> [(String,String)]
 internalTypeSynonyms (HsModule _ _ _ _ decls) = [ (n, t) | HsTypeDecl _ (HsIdent n) _ (HsTyCon (UnQual (HsIdent t))) <- decls ]
 
 
-externalTypeSynonyms = ["Kind","PostTcType"] -- ["CLabelString","DeprecTxt","RuleName","TyVar","Char","Integer","Rational"] 
+externalTypeSynonyms = ["Kind","PostTcType","Located_RdrOrId"] -- ["CLabelString","DeprecTxt","RuleName","TyVar","Char","Integer","Rational"] 
 
 
 
@@ -62,7 +62,7 @@ externalTypeSynonyms = ["Kind","PostTcType"] -- ["CLabelString","DeprecTxt","Rul
 --------------- SHOWS -----------------------
 
 -- for GHC
-definedShows = ["Id","HsDoc_RdrName","Char","Integer","Rational","DeprecTxt","ExtraState","RdrName","HsWrapper","Type","Name", "Range","Names", "Fixity"]
+definedShows = ["Id","HsDoc_RdrName","Char","Integer","Rational","DeprecTxt","ExtraState","RdrName","HsWrapper","Type","Name", "Range","Names", "Fixity","RdrOrId"]
 
 genShows tpes = genBanner "Show instances" $
   concatMap genShowTpe tpes
