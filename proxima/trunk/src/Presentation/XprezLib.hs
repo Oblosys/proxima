@@ -82,8 +82,13 @@ structuralToken idp pres = TokenP idp (StructuralTk 0 Nothing (StructuralP idp p
 
 -- TODO: add presentFocus
 presHole focus typeStr nd pth = loc nd $ 
-  structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow `withFontFam` ("Courier New")
-
+--  structural $ row [text $ "{"++typeStr++"}"] `withColor` black `withbgColor` yellow -- `withFontFam` ("Courier New")
+  structural $ overlay [text " ", poly [(l,u),(r,u),(r,d),(l,d),(l,u)] Transparent]
+ where l = 0.2
+       r = 0.8
+       u = 0.2
+       d = 0.8
+       
 presParseErr node (StructuralParseErr pres) =
   loc node $ structural $ pres `withbgColor` whiteSmoke
 presParseErr node (ParsingParseErr idP parseErrs tokens parser) =
