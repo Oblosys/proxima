@@ -36,7 +36,7 @@ import Arrangement.ArrTypes
 import Presentation.PresTypes (UpdateDoc)
 
 initialWindowSize :: (Int, Int)
-initialWindowSize = (1000, 900)
+initialWindowSize = (900, 760)
 
 documentFilename = "Document.xml"
 backupFilename = "BackupDocument.xml"
