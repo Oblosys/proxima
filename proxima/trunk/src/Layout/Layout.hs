@@ -93,7 +93,9 @@ detokenize' wm (StructuralP idp pres)      = let (pres', f) = detokenize wm pres
                                             in  [[(StructuralP idp pres', prependToFocus 0 f)]]
 detokenize' wm (EmptyP idp)                = [[(EmptyP idp, noFocus)]]
             
-detokenize' wm (StringP idp str)           = [[(StringP idp str, noFocus)]]
+detokenize' wm (StringP idp str)           = --debug Err (show str ++ show idp) $ 
+                                             addWhitespace False wm Nothing idp (StringP idp str)
+                                            -- [[(StringP idp str, noFocus)]]
 detokenize' wm (TokenP idp token)          = let res = addWhitespaceToken wm idp token
                                                in  -- debug Lay ("Token:"++show res ) $
                                                    res
@@ -111,10 +113,27 @@ detokenize' wm (OverlayP idp d (pres:press)) = let (rowss) = detokenize' wm pres
 detokenize' wm (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm pres)
 detokenize' wm (ParsingP idp pr l pres)   = map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm pres)
 detokenize' wm (LocatorP l pres)          = map (map (\(pres',f) -> (LocatorP l pres', prependToFocus 0 f))) (detokenize' wm pres)
---detokenize' wm (FormatterP idp press)      = let (press', f) = detokenizeList' wm p 0 press
---                                              in  ([FormatterP idp press'], f)
+detokenize' wm (FormatterP idp press)      = case detokenizeList' wm 0 press of
+                                               (press, f) -> [[(FormatterP idp press,f)]] 
+--                                               _            -> [[(castPresToLay press, noFocus)]]
 -- graph and vertex are not assumed to be in parsing presentations
 detokenize' wm pr                         = debug Err ("\n\n\nLayout.detokenize': can't handle "++ shallowShowPres pr) [[(castPresToLay pr, noFocus)]]
+
+
+detokenizeList' :: (DocNode node, Show token) => WhitespaceMap -> Int -> [Presentation doc node clip token] -> 
+                   ([Layout doc node clip token], FocusPres)
+detokenizeList' wm i []           = ([], noFocus)
+detokenizeList' wm i (pres:press) = let [laysFs] = case detokenize' wm pres of
+                                                             [press] -> [press]
+                                                             bla  -> error ("it is "++show bla) 
+                                        
+                                        (lays,fs) = unzip laysFs
+                                        fs' = zipWith prependToFocus [i..] fs
+                                        f1 = foldl combineFocus  noFocus fs'
+
+                                        (lays', f2) = detokenizeList' wm (i+(length laysFs)) press
+                                    in  --debug Err ("\nlaysFs"++show laysFs++ "\nf1:"++show f1++"\nf2:"++show f2)
+                                        (lays ++ lays', combineFocus f1 f2)
 
 
 detokenizeRow' :: (DocNode node, Show token) => WhitespaceMap -> [Presentation doc node clip token] -> 
