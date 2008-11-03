@@ -60,7 +60,7 @@ data Paragraph = Paragraph List_Word
                | ParseErrParagraph (ParseError Document Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
-data Word = Word String
+data Word = Word IDP String
           | NodeRef NodeName
           | Label String
           | LabelRef String

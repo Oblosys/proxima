@@ -504,7 +504,7 @@ instance Editable Paragraph Document Node ClipDoc UserToken where
 
 instance Editable Word Document Node ClipDoc UserToken where
   select [] x = Clip_Word x
-  select (0:p) (Word x0) = select p x0
+  select (0:p) (Word _ x0) = select p x0
   select (0:p) (NodeRef x0) = select p x0
   select (0:p) (Label x0) = select p x0
   select (0:p) (LabelRef x0) = select p x0
@@ -512,20 +512,20 @@ instance Editable Word Document Node ClipDoc UserToken where
 
   paste [] (Clip_Word c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Word") x
-  paste (0:p) c (Word x0) = Word (paste p c x0)
+  paste (0:p) c (Word i0 x0) = Word i0 (paste p c x0)
   paste (0:p) c (NodeRef x0) = NodeRef (paste p c x0)
   paste (0:p) c (Label x0) = Label (paste p c x0)
   paste (0:p) c (LabelRef x0) = LabelRef (paste p c x0)
   paste _ _ x = x
 
-  alternatives _ = [ ("Word {String} "  , Clip_Word $ Word hole)
+  alternatives _ = [ ("Word {String} "  , Clip_Word $ Word NoIDP hole)
                    , ("NodeRef {NodeName} "  , Clip_Word $ NodeRef hole)
                    , ("Label {String} "  , Clip_Word $ Label hole)
                    , ("LabelRef {String} "  , Clip_Word $ LabelRef hole)
                    ,("{Word}", Clip_Word hole)
                    ]
 
-  arity (Word x0) = 1
+  arity (Word _ x0) = 1
   arity (NodeRef x0) = 1
   arity (Label x0) = 1
   arity (LabelRef x0) = 1

@@ -141,7 +141,7 @@ construct_SubgraphPara tk ~[mClip0,mClip1,mClip2] = Clip_Paragraph $ reuseSubgra
 construct_ProbtablePara tk ~[mClip0] = Clip_Paragraph $ reuseProbtablePara [tk]  (retrieveArg "ProbtablePara" "probtable::Probtable" mClip0)
 construct_HoleParagraph tk ~[] = Clip_Paragraph $ hole
 construct_ParseErrParagraph (StructuralTk _ _ pres _ _) ~[] = Clip_Paragraph $ parseErr (StructuralParseErr pres)
-construct_Word tk ~[mClip0] = Clip_Word $ reuseWord [tk]  (retrieveArg "Word" "word::String" mClip0)
+construct_Word tk ~[mClip0] = Clip_Word $ reuseWord [tk]  Nothing (retrieveArg "Word" "word::String" mClip0)
 construct_NodeRef tk ~[mClip0] = Clip_Word $ reuseNodeRef [tk]  (retrieveArg "NodeRef" "nodeName::NodeName" mClip0)
 construct_Label tk ~[mClip0] = Clip_Word $ reuseLabel [tk]  (retrieveArg "Label" "label::String" mClip0)
 construct_LabelRef tk ~[mClip0] = Clip_Word $ reuseLabelRef [tk]  (retrieveArg "LabelRef" "label::String" mClip0)
@@ -279,10 +279,10 @@ reuseProbtablePara nodes ma0
            (ProbtablePara a0) -> genericReuse1 ProbtablePara a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseProbtablePara"
 
-reuseWord :: [Token doc Node clip token] -> Maybe String -> Word
-reuseWord nodes ma0
+reuseWord :: [Token doc Node clip token] -> Maybe IDP -> Maybe String -> Word
+reuseWord nodes ma0 ma1
   = case extractFromTokens extractWord defaultWord nodes of
-           (Word a0) -> genericReuse1 Word a0 ma0
+           (Word a0 a1) -> genericReuse2 Word a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseWord"
 
 reuseNodeRef :: [Token doc Node clip token] -> Maybe NodeName -> Word
@@ -497,7 +497,7 @@ extractProbtablePara (Just (Node_ProbtablePara x@(ProbtablePara _) _)) = Just x
 extractProbtablePara _ = Nothing
 
 extractWord :: Maybe Node -> Maybe Word
-extractWord (Just (Node_Word x@(Word _) _)) = Just x
+extractWord (Just (Node_Word x@(Word _ _) _)) = Just x
 extractWord _ = Nothing
 
 extractNodeRef :: Maybe Node -> Maybe Word
@@ -647,7 +647,7 @@ defaultProbtablePara :: Paragraph
 defaultProbtablePara = ProbtablePara hole
 
 defaultWord :: Word
-defaultWord = Word hole
+defaultWord = Word NoIDP hole
 
 defaultNodeRef :: Word
 defaultNodeRef = NodeRef hole

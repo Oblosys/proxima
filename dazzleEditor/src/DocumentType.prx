@@ -12,7 +12,7 @@ data Paragraph = Paragraph words:[Word]
                | SubgraphPara subgraph:Subgraph caption:String label:String
                | ProbtablePara probtable:Probtable
                
-data Word = Word word:String
+data Word = Word word:String { idp : IDP }
           | NodeRef nodeName:NodeName
           | Label label:String
           | LabelRef label:String

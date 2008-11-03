@@ -67,7 +67,7 @@ DATA Paragraph
   | ParseErrParagraph error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Word
-  | Word word:String
+  | Word idp:IDP word:String
   | NodeRef nodeName:NodeName
   | Label label:String
   | LabelRef label:String
@@ -406,7 +406,7 @@ SEM Paragraph
 
 SEM Word
   | Word 
-      lhs.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @lhs.pIdC + 1
   | NodeRef 
       nodeName.pIdC = @lhs.pIdC + 0
       lhs.pIdC = @nodeName.pIdC

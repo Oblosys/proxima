@@ -198,10 +198,14 @@ SEM List_Word
 SEM Word [ || ]
   | Word
       loc.pres = parsing $
-                   row [ text @word, text " " ]
+                   row [ StringP @idp @word, text " " ]
   | NodeRef
-      loc.pres = structural $ boxed $
-                   @nodeName.pres `withbgColor` labelYellow
+      loc.pres = parsing $
+                   row [ structural $ boxed $
+                           @nodeName.pres `withbgColor` labelYellow
+                       , text " "
+                       ]
+
 {-
                  parsing $
                    row [ text "\\node{" `withColor` blue
@@ -320,7 +324,7 @@ SEM Probtable [ | | ]
                                       , @table.pres
                                       , text ""
                                       ]
-                              `addPopupItems`
+                              `addLocalPopupItems`
                                   [ ( "Show probtable for "++show name
                                     , setProbtableID @lhs.path id @self)
                                   | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
@@ -552,19 +556,19 @@ newProbtablePara = Clip_Paragraph $
                        
 newSection = Clip_Section $
                Section
-                 " new"
+                 "new"
                  (List_Paragraph Nil_Paragraph) 
                  (List_Subsection Nil_Subsection)
 
 newSubsection = Clip_Subsection $
                     Subsection
-                      " new"
+                      "new"
                       (List_Paragraph Nil_Paragraph) 
                       (List_Subsubsection Nil_Subsubsection) 
 
 newSubsubsection = Clip_Subsubsection $
                     Subsubsection
-                      " new"
+                      "new"
                       (List_Paragraph Nil_Paragraph) 
 
 newValue = Clip_Value $ Value "new"

@@ -190,8 +190,8 @@ parseParagraph =
 
 
 parseWord = 
-          (\word -> reuseWord [] (Just word))
-      <$> pText
+          (\word -> reuseWord [] (Just $ getTokenIDP word) (Just $ tokenString word))
+      <$> pWord
       <*  pList (pKey " ")  
   <|>
           (\ref -> reuseNodeRef [] (Just $ NodeName  (tokenString ref)))
