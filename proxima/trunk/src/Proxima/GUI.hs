@@ -376,7 +376,7 @@ onPaint settings handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expo
             ; when (markUpdatedRenderingArea settings) $
                do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
                   ; RenderingLevel scale _ _ rendering _ _ _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
-                  ; debugLnIO GUI $ "updated regions:" ++ show updRegions 
+                  --; debugLnIO GUI $ "updated regions:" ++ show updRegions 
                   
                   ; mapM_ (\((x,y),(w,h)) -> 
                              if w > 0 && h > 0 -- outline rectangles are 1 px too large  
