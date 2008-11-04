@@ -1,10 +1,5 @@
-#HC = ghc
-#PROXIMADIR = ../proxima
-
-HC   = /c/Progra~1/Visual~1/bin/ghc
-PROXIMADIR = src/proxima
-
-# use the latter one for a Visual Studio configuration (which cannot access dirs outside project dir)
+HC = ghc
+PROXIMADIR = ../proxima
 
 FIND = /usr/bin/find
 

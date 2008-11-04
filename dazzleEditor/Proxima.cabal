@@ -16,9 +16,9 @@ category:
 author: Martijn Schrage
 tested-with: GHC -any
 data-files:
-extra-source-files: src/proxima/src/Arrangement/ArrangerAG.ag
-                    src/proxima/src/Layout/AlexTemplate-ghc
-                    src/proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
+extra-source-files: ../proxima/src/Arrangement/ArrangerAG.ag
+                    ../proxima/src/Layout/AlexTemplate-ghc
+                    ../proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
                     src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:
  
@@ -35,7 +35,7 @@ extra-lib-dirs: .
 includes:
 install-includes:
 include-dirs:
-hs-source-dirs: src/uuagc/src/ src/proxima/src src
+hs-source-dirs: ../uuagc/src/ ../proxima/src src
 other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Arrangement.ArrPresent Arrangement.ArrTranslate
                Arrangement.ArrTypes Arrangement.ArrUtils Arrangement.Arranger
