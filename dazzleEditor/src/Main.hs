@@ -7,7 +7,7 @@ import Evaluator
 import Reducer
 import PresentationAG
 import ProxParser
-import ScannerSheet
+import ScannerSheetHS
 
 import Evaluation.DocTypes
 import DocTypes_Generated
@@ -22,7 +22,7 @@ gain = main -- when typing during compilation GHCI replaces the first command li
 main = proxima Settings.settings
                PresentationAG.presentationSheet
                ProxParser.recognizeEnrichedDoc
-               ScannerSheet.scanner 
+               ScannerSheetHS.scanner 
                -- sheet parameters (evaluation and reduction sheets are passed implicitly through
                -- instances of Evaluation/ReductionSheet classes)
                --

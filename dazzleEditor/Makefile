@@ -53,12 +53,15 @@ src/PresentationAG.hs: $(AGC) \
 	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=12 --genlinepragmas --module=PresentationAG src/PresentationAG.ag -P src
 
 
-lexer: src/ScannerSheet.hs
+lexer: src/ScannerSheetHS.hs
 
 # the -t causes Alex to look for a template file. 
-src/ScannerSheet.hs: src/ScannerSheetAlex.x $(LAYOUTDIR)/AlexTemplate-ghc
-	alex -t $(LAYOUTDIR) --o src/ScannerSheet.hs --ghc src/ScannerSheetAlex.x 
+src/ScannerSheetHS.hs: src/ScannerSheet.x $(LAYOUTDIR)/AlexTemplate-ghc
+	alex -t $(LAYOUTDIR) --o src/ScannerSheetHS.hs --ghc src/ScannerSheet.x 
 
+# the generated file is ScannerSheetHS, because if ScannerSheet is listed as a source in the
+# cabal file, setup automatically runs Alex on it, and in cabal it's not possible to specify
+# the extra Alex options we need.
 
 clean:
 	$(FIND) src -maxdepth 1 -name "*.hi" -delete

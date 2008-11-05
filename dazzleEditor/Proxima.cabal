@@ -60,7 +60,7 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                UU.Parsing.Derived UU.Parsing.Interface UU.Parsing.Machine
                UU.Parsing.MachineInterface UU.Parsing DocTypes_Generated
                DocUtils_Generated DocumentEdit_Generated Evaluator Main
-               PresentationAG ProxParser ProxParser_Generated Reducer ScannerSheet
+               PresentationAG ProxParser ProxParser_Generated Reducer ScannerSheetHS
                Settings
 ghc-prof-options:
 ghc-options: -prof -auto-all -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction

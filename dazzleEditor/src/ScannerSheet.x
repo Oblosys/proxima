@@ -1,5 +1,5 @@
 {
-module ScannerSheet where
+module ScannerSheetHS where
 
 import DocTypes_Generated
 import Layout.ScanLib
