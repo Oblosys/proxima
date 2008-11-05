@@ -18,7 +18,8 @@ import Evaluation.DocTypes (DocumentLevel)
 import Proxima.GUI
 import Arrangement.FontLib
 
-import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout)
+import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout, fill, setSourceColor)
+import Graphics.Rendering.Cairo hiding (Path)
 import System.IO.Unsafe
 import Data.IORef
 import System.IO
@@ -78,29 +79,15 @@ mkPopupMenuXY settings prs scale arr handler renderingLvlVar buffer viewedAreaRe
     ; return $ Just contextMenu                                          
     }
 
---render' :: (LocalStateRen, MappingRen) -> Arrangement -> (Rendering, (LocalStateRen, MappingRen))
+
+
 render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
- do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
-    --; putStrLn $ "Rendering on viewedArea " ++ show viewedArea
-    --; putStrLn $ "DiffTree is " ++ show diffTree
-    --; debugLnIO Ren ("Arrangement is "++show arrangement)
-    --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
-    ; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
-    ; renderArr clipRegion
-                (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
-    }
+  renderArr undefined (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
 
-
--- old comment: debugged rendering also displays overlay for focus adding, but this has not been processed by debugArrangement
--- this makes it tricky to move the debuggedArrangement, since the Gest.Int. will not know about it
--- however, we don't want to debug the focus
     
 renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
- do { clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
-
-    ; let focusArrList = arrangeFocus focus arrangement
-    ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
-    ; renderArr clipRegion
+  let focusArrList = arrangeFocus focus arrangement
+  in  renderArr undefined
                 (wi,dw,gc) arrDb scale origin viewedArea
                 (DiffLeaf False)
                 (OverlayA NoIDA (xA arrangement) (yA arrangement)  
@@ -110,11 +97,8 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
                           focusArrList) 
 
 
-   }
-
-
 renderArr :: (DocNode node, DrawableClass drawWindow) => Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
-                                         (Point, Size) -> DiffTree -> Arrangement node -> IO ()    
+                                         (Point, Size) -> DiffTree -> Arrangement node -> Render ()    
 renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
@@ -147,15 +131,38 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
   case arrangement of 
 
     (EmptyA  id x' y' w' h' _ _ bColor) ->
-     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+     return ()
+     {- do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; when (not (isTransparent bColor)) $
            do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
               ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
               }
-        }
+        } -}
+        
       
     (StringA id x' y' w' h' _ vRef' str fColor bColor fnt _) ->
-     do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
+      if str == "" then return () else       
+        do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
+           
+           ; when (not (isTransparent bColor)) $
+               drawFilledRectangle (Rectangle x y w h) bColor bColor
+                   
+           
+           -- TODO background (factorize this out)
+           ; selectFontFace (fFamily fnt) 
+                            (if fItalic fnt then FontSlantItalic else FontSlantNormal) 
+                            (if fBold fnt   then FontWeightBold  else FontWeightNormal)
+           ; setFontSize ((fromIntegral $ fSize fnt)*1.25)
+           -- TODO fontsize seems to be in pixels
+           
+           ; setSourceRGB (cairoR fColor) (cairoG fColor) (cairoB fColor)
+           
+           ; fExts <- fontExtents     
+           ; moveTo (fromIntegral x) (fromIntegral y + fontExtentsAscent fExts)
+           
+           ; showText str
+           } 
+        {-
         ; when (str /= "") $ 
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = gtkColor bColor
@@ -185,15 +192,63 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                                     ; debug Err ("Renderer.renderArr: too many pango items for string \""++str++"\"") $ return ()
                                     }
                   []          -> debug Err ("Renderer.renderArr: no pango items for string \""++str++"\"") $ return ()
-              }
+
+
+           ; putStrLn $ "Ascent:" ++ show ascnt ++ show str 
  
-          
+            ; context <- widgetCreatePangoContext wi
+            ; fontDescription <- fontDescriptionNew
+            ; fontDescriptionSetFamily fontDescription "Courier New"
+            ; fontDescriptionSetSize fontDescription 26
+    
+            ; gcSetValues gc $ newGCValues { foreground = gtkColor (0,0,0) }
+            ; pangoItems <- pangoItemize context str [ AttrFontDescription 0 (length str) fontDescription ] 
+            ; case pangoItems of 
+                [pangoItem] ->
+                       do { glyphItem <- pangoShape (head' "GUI.onPaint" pangoItems)
+                          ; drawGlyphs dw gc x y glyphItem
+                          }
+
+
+              } -}
+
+{-
+
+              ; context <- widgetCreatePangoContext wi
+              ; fontDescription <-  fontDescriptionFromProximaFont fnt
+
+              ; language <- contextGetLanguage context
+              ; metrics <- contextGetMetrics context fontDescription language
+              ; let ascnt = round $ ascent metrics    
+              -- ; putStrLn $ "Ascent:" ++ show ascnt 
+              ; gcSetValues gc $ newGCValues { foreground = gtkColor (0,0,0) }
+              ; pangoItems <- pangoItemize context str
+                                [ AttrFontDescription 0 (length str) fontDescription
+                                , AttrUnderline 0 (length str) (if fUnderline fnt then UnderlineSingle else UnderlineNone)
+                                , AttrStrikethrough 0 (length str) (fStrikeOut fnt)
+                                ] -- underline and strikeout don't seem to work
+
+            ; case pangoItems of 
+                [pangoItem] ->
+                       do { glyphItem <- pangoShape (head' "GUI.onPaint" pangoItems)
+                          ; drawGlyphs dw gc x y glyphItem
+                          }
+                pangoItem:_ -> do { glyphItem <- pangoShape (head' "Renderer.renderArr" pangoItems)
+                                    ; drawGlyphs dw gc x y glyphItem
+                                    ; debug Err ("Renderer.renderArr: too many pango items for string \""++str++"\"") $ return ()
+                                    }
+                []          -> debug Err ("Renderer.renderArr: no pango items for string \""++str++"\""++show (length str)) $ return ()
+
+
+ 
         ; when arrDb $
            do { gcSetValues gc $ newGCValues { foreground = stringColor }
               ; when (w>0 && h>0) $ drawRectangle dw gc False x y (w-1) (h-1)
               -- outlined gtk rectangles are 1 pixel larger than filled ones
               }
         }
+-}
+{-          
 
     (ImageA id x' y' w' h' _ _ src style lColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
@@ -309,10 +364,16 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; gcSetClipRegion gc oldClipRegion
         
         }
-
+-}
 
     (RowA id x' y' w' h' _ _ bColor arrs) ->
-     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+         ; let childDiffTrees = case diffTree of
+                                  DiffLeaf c     -> repeat $ DiffLeaf c
+                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
+         ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+         }      
+{-     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
@@ -340,13 +401,15 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
               ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
               }
         }
-
+-}
     (ColA id x' y' w' h' _ _ bColor _ arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-
+        ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+        }
+{-
         ; if arrDb
           then
            do { let childCnt = length arrs 
@@ -371,8 +434,23 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
               ; sequence_ $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
               }
         }
-
+-}
     (OverlayA id x' y' w' h' _ _ bColor direction arrs) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+
+        ; let order = case direction of
+                        HeadInFront -> reverse
+                        HeadAtBack  -> Prelude.id
+                              
+        ; sequence_ $ order $
+            zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
+        }
+
+
+{-
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
@@ -454,15 +532,15 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         -- draw arrow head
         ; drawPolygon dw gc True [pt1, pt2, (tox, toy)] 
         }
-
+-}
     (StructuralA id arr) -> 
      do { let (x,y,w,h)=( lux+scaleInt scale (xA arr), luy+scaleInt scale (yA arr) 
                         , scaleInt scale (widthA arr), scaleInt scale (heightA arr) )
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; when arrDb $
-            drawFilledRectangle dw gc (Rectangle x y w h) structuralBGColor structuralBGColor
+--        ; when arrDb $
+--            drawFilledRectangle dw gc (Rectangle x y w h) structuralBGColor structuralBGColor
        
         ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
@@ -473,8 +551,8 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; when arrDb $
-            drawFilledRectangle dw gc (Rectangle x y w h) parsingBGColor parsingBGColor
+--        ; when arrDb $
+--            drawFilledRectangle dw gc (Rectangle x y w h) parsingBGColor parsingBGColor
        
         ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
@@ -490,19 +568,30 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
     _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
         
 
-  ; when arrDb $
-      renderID (wi,dw,gc) scale (lux+xA arrangement) (luy+yA arrangement) (idA arrangement)      
+--  ; when arrDb $
+--      renderID (wi,dw,gc) scale (lux+xA arrangement) (luy+yA arrangement) (idA arrangement)      
   }
 
-drawFilledRectangle :: DrawableClass drawWindow => drawWindow -> GC -> Rectangle -> Graphics.UI.Gtk.Color -> Graphics.UI.Gtk.Color -> IO ()
-drawFilledRectangle dw gc (Rectangle x y w h) lineColor fillColor =
+cairoR (r,g,b) = fromIntegral r / 255
+cairoG (r,g,b) = fromIntegral g / 255
+cairoB (r,g,b) = fromIntegral b / 255
+
+setSourceColor (r,g,b) = setSourceRGB (fromIntegral r / 255) (fromIntegral g / 255) (fromIntegral b / 255)
+
+drawFilledRectangle :: Rectangle -> CommonTypes.Color -> CommonTypes.Color -> Render ()
+drawFilledRectangle (Rectangle x y w h) lineColor fillColor =
+ do setSourceColor fillColor
+    rectangle (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h)
+    fill
+
+{-
  do { gcSetValues gc $ newGCValues { foreground = fillColor }
     ; drawRectangle dw gc True x y w h 
     ; gcSetValues gc $ newGCValues { foreground = lineColor }
     ; when (w>0 && h>0) $ drawRectangle dw gc False x y (w-1) (h-1)
     -- outlined gtk rectangles are 1 pixel larger than filled ones
     } 
-                          
+-}
 
 -- usage: for basic Arrangements, render after image so id is visible
 --        for composites,         render before, so stacking order of arrangement is represented correctly
@@ -521,7 +610,7 @@ renderID (wi,dw,gc) scale x y id  =
     ; case pangoItems of 
         [pangoItem] -> do { glyphItem <- pangoShape (head' "Renderer.renderID" pangoItems)
                           ; (_, PangoRectangle x' y' w' h') <-glyphItemExtents glyphItem
-                          ; drawFilledRectangle dw gc (Rectangle (x+round x') y (round w'+2) (round h'+1)) (gtkColor black) (gtkColor yellow)
+                          --; drawFilledRectangle dw gc (Rectangle (x+round x') y (round w'+2) (round h'+1)) (gtkColor black) (gtkColor yellow)
                           ; drawGlyphs dw gc (x+1) (y+1 - round y') glyphItem
                           }
         _ -> return ()

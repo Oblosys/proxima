@@ -1,6 +1,7 @@
 module Rendering.RenTypes where
 
 import Graphics.UI.Gtk hiding (Scale, Size, Rectangle)
+import Graphics.Rendering.Cairo
 import Data.IORef
 
 import Common.CommonTypes
@@ -54,7 +55,7 @@ type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc 
                                 Int -> Int -> IO (Maybe Menu)
 -- GUICommand is currently only used for popup menus
 
-type Rendering = DrawableClass drawWindow => (Window, drawWindow, GC) -> (Point,Size) -> IO ()
+type Rendering = DrawableClass drawWindow => (Window, drawWindow, GC) -> (Point,Size) -> Render ()
                                                                       -- viewd area ((x,y),(w,h))
 
 type RenderingHTML = (Point,Size) -> IO ()

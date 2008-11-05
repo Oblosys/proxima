@@ -34,6 +34,7 @@ import Network.BSD
 import Data.List
 import Arrangement.ArrTypes
 import Presentation.PresTypes (UpdateDoc)
+import Graphics.Rendering.Cairo
 
 initialWindowSize :: (Int, Int)
 initialWindowSize = (900, 760)
@@ -334,16 +335,55 @@ drawRendering settings renderingLvlVar wi vp pm =
 
     ; viewedArea <- getViewedArea settings vp 
     -- ; putStrLn $ "The viewed area is" ++ show viewedArea
-    ; rendering (wi, pm, gc) viewedArea -- rendering only viewedArea is not extremely useful,
+    ; let theRendering = rendering (wi, pm, gc) viewedArea -- rendering only viewedArea is not extremely useful,
                                         -- since arranger already only arranges elements in view
                                         -- currently, it only prevents rendering edges out of view
+ 
+      
+    ; renderWithDrawable pm theRendering  
+{-    ; let (width, height) = (200,200)
+    ; renderWithDrawable pm $ do
+                setSourceRGB 1 0 0
+                setLineWidth 20
+                setLineCap LineCapRound
+                setLineJoin LineJoinRound
+            
+                moveTo 30 30
+                lineTo (width-30) (height-30)
+                lineTo (width-30) 30
+                lineTo 30 (height-30)
+                stroke
+            
+                
+                moveTo 500 500
+                selectFontFace"Lucida Console" FontSlantNormal FontWeightNormal
+                setFontSize 20
+                showText "hallo"
+                --stroke
+                
+                setSourceRGB 1 1 0
+                setLineWidth 4
+              
+                save
+                translate (width / 2) (height / 2)
+                scale (width / 2) (height / 2)
+                arc 0 0 1 (135 * pi/180) (225 * pi/180)
+                restore
+                stroke
+                
+                setSourceRGB 0 0 0
+                moveTo 30 (realToFrac height / 4)
+                rotate (pi/4)
+ -}               
+            
+   
     }
           
-drawFocus :: Settings -> IORef (RenderingLevel doc enr node clip token) -> Window -> DrawWindow -> GC -> Viewport -> IO ()
+drawFocus :: Settings -> IORef (RenderingLevel doc enr node clip token) -> Window -> DrawWindow -> GC -> Viewport -> IO (Render ())
 drawFocus settings renderingLvlVar wi dw gc vp = 
  do { RenderingLevel scale _ _ rendering focusRendering _ _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
     ; viewedArea <- getViewedArea settings vp 
-    ; focusRendering (wi, dw ,gc) viewedArea
+    ; return $ focusRendering (wi, dw ,gc) viewedArea
     }
 
 onPaint :: Settings ->
@@ -369,8 +409,8 @@ onPaint settings handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expo
             
             ; gc <- gcNew dw
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) -- draw the Pixmap on the canvas
-            ; drawFocus settings renderingLvlVar wi dw gc vp            
-            
+--            ; focusRendering = drawFocus settings renderingLvlVar wi dw gc vp            
+--TODO: render focus            
               -- Mark the updated rectangles with red rectangles
               -- If several edit events have taken place without paint events, only the last is shown
             ; when (markUpdatedRenderingArea settings) $
@@ -390,7 +430,7 @@ onPaint settings handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expo
                   ; let ((x,y),(w,h)) = viewedArea
                   ; drawRectangle dw gc False x y w h 
                   }
-                  
+               
             ; return True
             }
     }
