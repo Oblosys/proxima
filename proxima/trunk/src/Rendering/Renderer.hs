@@ -145,17 +145,16 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
            
            ; when (not (isTransparent bColor)) $
-               drawFilledRectangle (Rectangle x y w h) bColor bColor
-                   
-           
+               drawFilledRectangle (Rectangle x y w h) bColor bColor                              
            -- TODO background (factorize this out)
+           
            ; selectFontFace (fFamily fnt) 
                             (if fItalic fnt then FontSlantItalic else FontSlantNormal) 
                             (if fBold fnt   then FontWeightBold  else FontWeightNormal)
            ; setFontSize ((fromIntegral $ fSize fnt)*1.25)
            -- TODO fontsize seems to be in pixels
            
-           ; setSourceRGB (cairoR fColor) (cairoG fColor) (cairoB fColor)
+           ; setSourceColor fColor
            
            ; fExts <- fontExtents     
            ; moveTo (fromIntegral x) (fromIntegral y + fontExtentsAscent fExts)
@@ -317,10 +316,44 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; when (w>0 && h>0) $ drawRectangle dw gc False x y (w-1) (h-1)
         -- outlined gtk rectangles are 1 pixel larger than filled ones
         }
-
+-}
     (EllipseA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
+     do { let (x,y,w,h)= (lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')       
+
+        ; when (not (isTransparent bColor)) $
+            drawFilledRectangle (Rectangle x y w h) bColor bColor
+
+        ; when (style == Solid) $
+            do { return ()
+               }
+      {-  
+        ; setSourceColor fColor
+        ; rectangle (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h)
+        ; fill
+        ; setSourceColor lColor
+        ; rectangle (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h)
+        ; stroke
+      -}
+        ; setSourceColor lColor
+        ; save
+        ; translate (fromIntegral x + fromIntegral w / 2) (fromIntegral y + fromIntegral h / 2)
+        ; Graphics.Rendering.Cairo.scale (fromIntegral h / 2) (fromIntegral w / 2)
+        ; arc 0 0 1 0 (2 * pi)
+        ; restore
+        ; stroke
+        ; setSourceColor fColor
+        ; save
+        ; translate (fromIntegral x + fromIntegral w / 2) (fromIntegral y + fromIntegral h / 2)
+        ; Graphics.Rendering.Cairo.scale (fromIntegral h / 2) (fromIntegral w / 2)
+        ; arc 0 0 1 0 (2 * pi)
+        ; restore
+        ; fill
+        }
+
+{-
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')       
         ; when (not arrDb) $
+               drawFilledRectangle (Rectangle x y w h) bColor bColor
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = gtkColor bColor
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
@@ -334,7 +367,8 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 }
         ; drawArc dw gc False x y w h (0*64) (360*64)
         }
-
+-}
+{-
     (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let pts = map (\(x',y') -> (x+scaleInt scale x', y+scaleInt scale y')) pts'
@@ -478,9 +512,22 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; sequence_ $ order $
             zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs
         }
-
+-}
     (GraphA id x' y' w' h' _ _ bColor _ arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+
+        {- 
+           do { when (not (isTransparent bColor)) $
+                 do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
+                    ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
+                    }        
+              } -}
+        ; sequence_ $ reverse $ zipWith (renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
+        }
+ {-   do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
@@ -501,9 +548,20 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; sequence_ $ reverse $ zipWith (renderArr newClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea) childDiffTrees arrs -- reverse so first is drawn in front
         ; gcSetClipRegion gc oldClipRegion
         }
-
+-}
     (VertexA id x' y' w' h' _ _ bColor _ arr) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        
+        
+        ; let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+--        ; when arrDb $
+--            drawFilledRectangle dw gc (Rectangle x y w h) vertexColor vertexColor
+
+        ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
+        }
+{-     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         
         ; when (not (isTransparent bColor)) $
            do { let bgColor = gtkColor bColor
@@ -518,7 +576,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
 
         ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
-
+-}{-
     (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
      do { let (fromx, fromy, tox, toy)=(lux+scaleInt scale lux', luy+scaleInt scale luy', lux+scaleInt scale rlx', luy+scaleInt scale rly')
         ; let angleFromEnd = atan (fromIntegral (tox-fromx) / fromIntegral (toy-fromy)) -- atan works okay for pos and neg infinity
