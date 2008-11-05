@@ -6,7 +6,8 @@ license-file: ""
 copyright: (c) 2007 Martijn Schrage
 maintainer: martijn@cs.uu.nl
 build-depends: Cabal -any, base -any, gtk >=0.9.11, haskell98 -any,
-               network ==2.0, parsec ==2.0, time ==1.0
+               network >=2.0, parsec >=2.0, time >=1.0, containers >=0.1,
+               array >=0.1, directory -any
 stability: experimental
 homepage: http://www.cs.uu.nl/research/projects/proxima
 package-url:
@@ -16,9 +17,9 @@ category:
 author: Martijn Schrage
 tested-with: GHC -any
 data-files:
-extra-source-files: src/proxima/src/Arrangement/ArrangerAG.ag
-                    src/proxima/src/Layout/AlexTemplate-ghc
-                    src/proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
+extra-source-files: ../proxima/src/Arrangement/ArrangerAG.ag
+                    ../proxima/src/Layout/AlexTemplate-ghc
+                    ../proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
                     src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:
  
@@ -35,7 +36,7 @@ extra-lib-dirs: .
 includes:
 install-includes:
 include-dirs:
-hs-source-dirs: src/uuagc/src/ src/proxima/src src
+hs-source-dirs: ../uuagc/src/ ../proxima/src src
 other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Arrangement.ArrPresent Arrangement.ArrTranslate
                Arrangement.ArrTypes Arrangement.ArrUtils Arrangement.Arranger
@@ -60,7 +61,7 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                UU.Parsing.MachineInterface UU.Parsing Chess DocTypes_Generated
                DocUtils_Generated DocumentEdit_Generated EvaluateTypesStubs
                Evaluator Main PresentationAG ProxParser ProxParser_Generated
-               Reducer ScannerSheet Settings
+               Reducer ScannerSheetHS Settings
 ghc-prof-options:
 ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:

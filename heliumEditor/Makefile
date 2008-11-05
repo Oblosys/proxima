@@ -11,9 +11,7 @@
 HC   = ghc
 FIND = /usr/bin/find
 
-#PROXIMADIR = ../proxima
-PROXIMADIR = src/proxima
-# use the latter one for a Visual Studio configuration (which cannot access dirs outside project dir)
+PROXIMADIR = ../proxima
 
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
@@ -67,11 +65,16 @@ src/PresentationAG.hs: $(AGC) \
 	@echo "Compiling presentationAG.ag"
 	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=10 --genlinepragmas --module=PresentationAG src/PresentationAG.ag -P src
 
-lexer: src/ScannerSheet.hs
+
+lexer: src/ScannerSheetHS.hs
 
 # the -t causes Alex to look for a template file. 
-src/ScannerSheet.hs: src/ScannerSheet.x $(LAYOUTDIR)/AlexTemplate-ghc
-	alex -t $(LAYOUTDIR) --ghc src/ScannerSheet.x
+src/ScannerSheetHS.hs: src/ScannerSheet.x $(LAYOUTDIR)/AlexTemplate-ghc
+	alex -t $(LAYOUTDIR) --o src/ScannerSheetHS.hs --ghc src/ScannerSheet.x 
+
+# the generated file is ScannerSheetHS, because if ScannerSheet is listed as a source in the
+# cabal file, setup automatically runs Alex on it, and in cabal it's not possible to specify
+# the extra Alex options we need.
 
 
 clean:
