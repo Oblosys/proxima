@@ -2,11 +2,12 @@ name: DazzleEditor
 version: 0.1
 cabal-version: -any
 license: AllRightsReserved
-license-file: ""
 copyright: (c) 2007 Martijn Schrage
 maintainer: martijn@cs.uu.nl
 build-depends: Cabal -any, base -any, gtk >=0.9.11, haskell98 -any,
-               network ==2.0, parsec >=2.0, time >=1.0
+               network >=2.0, parsec >=2.0, time >=1.0, containers >=0.1,
+               array >=0.1
+               
 stability: experimental
 homepage: http://www.cs.uu.nl/research/projects/proxima
 package-url:
@@ -64,5 +65,4 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
 ghc-prof-options:
 ghc-options: -prof -auto-all -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
-nhc-options:
 jhc-options:
