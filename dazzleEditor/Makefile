@@ -63,6 +63,7 @@ src/ScannerSheetHS.hs: src/ScannerSheet.x $(LAYOUTDIR)/AlexTemplate-ghc
 # cabal file, setup automatically runs Alex on it, and in cabal it's not possible to specify
 # the extra Alex options we need.
 
+
 clean:
 	$(FIND) src -maxdepth 1 -name "*.hi" -delete
 	$(FIND) src -maxdepth 1 -name "*.o" -delete
