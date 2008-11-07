@@ -82,12 +82,16 @@ mkPopupMenuXY settings prs scale arr handler renderingLvlVar buffer viewedAreaRe
 
 
 render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
-  renderArr undefined (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
-
+ do { setLineCap LineCapRound
+    ; setLineJoin LineJoinRound
+    ; renderArr undefined (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
+    }
     
 renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
   let focusArrList = arrangeFocus focus arrangement
-  in  renderArr undefined
+  in  do { setLineCap LineCapRound
+         ; setLineJoin LineJoinRound
+         ; renderArr undefined
                 (wi,dw,gc) arrDb scale origin viewedArea
                 (DiffLeaf False)
                 (OverlayA NoIDA (xA arrangement) (yA arrangement)  
@@ -95,8 +99,10 @@ renderFocus scale arrDb focus arrangement (wi, dw, gc) viewedArea =
                                 0 0 transparent
                           HeadInFront
                           focusArrList) 
+         }
 
-
+{- make renderArrangement that does background setting (later do this only when needed)
+-}
 renderArr :: (DocNode node, DrawableClass drawWindow) => Region -> (Window, drawWindow, GC) -> Bool -> Scale -> (Int,Int) ->
                                          (Point, Size) -> DiffTree -> Arrangement node -> Render ()    
 renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree arrangement =
@@ -300,6 +306,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         }
 
     (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
+        ; setLineWidth (scale * fromIntegral lw')
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; when (not arrDb) $
            do { when (not (isTransparent bColor)) $
@@ -319,21 +326,20 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
 -}
     (EllipseA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { let (x,y,w,h)= (lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')       
-
         ; when (not (isTransparent bColor)) $
             drawFilledRectangle (Rectangle x y w h) bColor bColor
 
         ; when (style == Solid) $
-            do { return ()
+            do { setSourceColor fColor
+               ; save
+               ; translate (fromIntegral x + fromIntegral w / 2) (fromIntegral y + fromIntegral h / 2)
+               ; Graphics.Rendering.Cairo.scale (fromIntegral h / 2) (fromIntegral w / 2)
+               ; arc 0 0 1 0 (2 * pi)
+               ; restore
+               ; fill
                }
-      {-  
-        ; setSourceColor fColor
-        ; rectangle (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h)
-        ; fill
-        ; setSourceColor lColor
-        ; rectangle (fromIntegral x) (fromIntegral y) (fromIntegral w) (fromIntegral h)
-        ; stroke
-      -}
+        ; setLineWidth (scale * fromIntegral lw')
+        
         ; setSourceColor lColor
         ; save
         ; translate (fromIntegral x + fromIntegral w / 2) (fromIntegral y + fromIntegral h / 2)
@@ -341,13 +347,6 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; arc 0 0 1 0 (2 * pi)
         ; restore
         ; stroke
-        ; setSourceColor fColor
-        ; save
-        ; translate (fromIntegral x + fromIntegral w / 2) (fromIntegral y + fromIntegral h / 2)
-        ; Graphics.Rendering.Cairo.scale (fromIntegral h / 2) (fromIntegral w / 2)
-        ; arc 0 0 1 0 (2 * pi)
-        ; restore
-        ; fill
         }
 
 {-
@@ -368,8 +367,39 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
         ; drawArc dw gc False x y w h (0*64) (360*64)
         }
 -}
-{-
+
     (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
+     do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+        ; let pts = map (\(x',y') -> (fromIntegral $ x+scaleInt scale x', fromIntegral $ y+scaleInt scale y')) pts'
+        ; setAntialias AntialiasNone
+
+        ; setLineWidth (scale * fromIntegral lw')
+        ; setSourceColor lColor
+        
+        ; case pts of
+           []             -> return ()
+           ((startX,startY):points) -> do { moveTo startX startY
+                                          ; mapM_ (uncurry lineTo) points
+                                          }
+           
+        ; stroke
+        {-
+        
+       
+        ; when (style == Solid) $
+            do { gcSetValues gc $ newGCValues { foreground = gtkColor fColor }
+               ; drawPolygon dw gc True pts
+               }
+        ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 
+                                       , joinStyle = JoinRound }
+        --; drawPolygon dw gc False pts
+        -}
+        
+        ; setAntialias AntialiasDefault
+
+        ; return ()
+        }
+{-
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let pts = map (\(x',y') -> (x+scaleInt scale x', y+scaleInt scale y')) pts'
   
@@ -402,6 +432,10 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
 
     (RowA id x' y' w' h' _ _ bColor arrs) ->
       do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+         ; when (not (isTransparent bColor)) $
+            drawFilledRectangle (Rectangle x y w h) bColor bColor
+
+         
          ; let childDiffTrees = case diffTree of
                                   DiffLeaf c     -> repeat $ DiffLeaf c
                                   DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
@@ -438,6 +472,9 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
 -}
     (ColA id x' y' w' h' _ _ bColor _ arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+         ; when (not (isTransparent bColor)) $
+            drawFilledRectangle (Rectangle x y w h) bColor bColor
+
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
@@ -576,9 +613,64 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
 
         ; renderArr oldClipRegion (wi,dw,gc) arrDb scale (x, y) viewedArea (head' "Renderer.renderArr" childDiffTrees) arr
         }
--}{-
+-}
     (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
-     do { let (fromx, fromy, tox, toy)=(lux+scaleInt scale lux', luy+scaleInt scale luy', lux+scaleInt scale rlx', luy+scaleInt scale rly')
+     do { let (fromx, fromy, tox, toy)=(fromIntegral $ lux+scaleInt scale lux', fromIntegral $ luy+scaleInt scale luy', fromIntegral $ lux+scaleInt scale rlx', fromIntegral $ luy+scaleInt scale rly')
+              angleFromEnd = atan ((tox-fromx) / (toy-fromy)) -- atan works okay for pos and neg infinity
+                             + if fromy > toy then pi  else 0
+              
+              (head1x,head1y) = (tox - (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), toy - (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
+              (head2x,head2y) = (tox - (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), toy - (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
+
+        ; setLineWidth (scale * fromIntegral lw')
+
+        ; setSourceColor lColor
+        
+        ; moveTo fromx fromy
+        ; lineTo tox toy
+        ; stroke
+        ; moveTo tox toy -- this one is necessary
+        ; lineTo head1x head1y
+        ; lineTo head2x head2y
+        ; fill
+{-
+          let (fromx, fromy, tox, toy)=(lux+scaleInt scale lux', luy+scaleInt scale luy', lux+scaleInt scale rlx', luy+scaleInt scale rly')
+        ; let angleFromEnd = atan (fromIntegral (tox-fromx) / fromIntegral (toy-fromy)) -- atan works okay for pos and neg infinity
+                             + if fromy > toy then pi  else 0
+              
+              pt1 = (tox - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
+              pt2 = (tox - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), toy - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
+        
+        
+        ; moveTo (fromIntegral fromx) (fromIntegral fromy)
+        ; lineTo (fromIntegral tox)   (fromIntegral toy)
+        -- draw arrow head
+        ; lineTo (fromIntegral $ fst pt1) (fromIntegral $ snd pt1)
+        ; lineTo (fromIntegral $ fst pt2) (fromIntegral $ snd pt2)
+        
+--        ; drawPolygon dw gc True [pt1, pt2, (tox, toy)] 
+        ; stroke
+--        ; fill
+-}
+        {-
+        
+       
+        ; when (style == Solid) $
+            do { gcSetValues gc $ newGCValues { foreground = gtkColor fColor }
+               ; drawPolygon dw gc True pts
+               }
+        ; gcSetValues gc $ newGCValues { foreground = gtkColor lColor, lineWidth = scaleInt scale lw' `max` 1 
+                                       , joinStyle = JoinRound }
+        --; drawPolygon dw gc False pts
+        -}
+        
+        ; setAntialias AntialiasDefault
+
+        ; return ()
+        }
+
+
+{-     do { let (fromx, fromy, tox, toy)=(lux+scaleInt scale lux', luy+scaleInt scale luy', lux+scaleInt scale rlx', luy+scaleInt scale rly')
         ; let angleFromEnd = atan (fromIntegral (tox-fromx) / fromIntegral (toy-fromy)) -- atan works okay for pos and neg infinity
                              + if fromy > toy then pi  else 0
               

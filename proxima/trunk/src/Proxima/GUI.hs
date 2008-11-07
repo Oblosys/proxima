@@ -339,7 +339,7 @@ drawRendering settings renderingLvlVar wi vp pm =
                                         -- since arranger already only arranges elements in view
                                         -- currently, it only prevents rendering edges out of view
  
-      
+     
     ; renderWithDrawable pm theRendering  
 {-    ; let (width, height) = (200,200)
     ; renderWithDrawable pm $ do
@@ -379,11 +379,12 @@ drawRendering settings renderingLvlVar wi vp pm =
    
     }
           
-drawFocus :: Settings -> IORef (RenderingLevel doc enr node clip token) -> Window -> DrawWindow -> GC -> Viewport -> IO (Render ())
-drawFocus settings renderingLvlVar wi dw gc vp = 
+paintFocus :: Settings -> IORef (RenderingLevel doc enr node clip token) -> Window -> DrawWindow -> GC -> Viewport -> IO ()
+paintFocus settings renderingLvlVar wi dw gc vp = 
  do { RenderingLevel scale _ _ rendering focusRendering _ _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
     ; viewedArea <- getViewedArea settings vp 
-    ; return $ focusRendering (wi, dw ,gc) viewedArea
+    ; let theRendering' = focusRendering (wi, dw {-was pm-},gc) viewedArea
+    ; renderWithDrawable dw theRendering'
     }
 
 onPaint :: Settings ->
@@ -409,8 +410,9 @@ onPaint settings handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expo
             
             ; gc <- gcNew dw
             ; drawDrawable dw gc pm 0 0 0 0 (-1) (-1) -- draw the Pixmap on the canvas
---            ; focusRendering = drawFocus settings renderingLvlVar wi dw gc vp            
---TODO: render focus            
+            ; paintFocus settings renderingLvlVar wi dw gc vp            
+ 
+ 
               -- Mark the updated rectangles with red rectangles
               -- If several edit events have taken place without paint events, only the last is shown
             ; when (markUpdatedRenderingArea settings) $
