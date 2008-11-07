@@ -44,8 +44,10 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
 --    ; debugLnIO Err ("Presentation"++show pres)
 --    ; debugLnIO Err ("Pruned Presentation"++show prunedPres)
 --    ; debugLnIO Arr ("Old arrangement "++ show oldArrangement)
-    
-    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef (getIDACounter state') focus prunedPres pres viewedArea oldViewedArea oldArrangement
+    ; let idaCounter = getIDACounter state'
+--    ; seq idaCounter $ return ()
+    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef idaCounter focus prunedPres pres viewedArea oldViewedArea oldArrangement
+    ; print idCounter' -- TODO: why does memory usage increase when this one is used instead of the seq above??
     ; let state'' = state' { getIDACounter = idCounter' }
     ; when (maxFDepth > 1) $
         debugLnIO Err "Nested formatters may be arranged incorrectly"
