@@ -84,6 +84,7 @@ mkPopupMenuXY settings prs scale arr handler renderingLvlVar buffer viewedAreaRe
 render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
  do { setLineCap LineCapRound
     ; setLineJoin LineJoinRound
+    ; seq (length (show arrangement)) $ return ()
     ; renderArr undefined (wi,dw,gc) arrDb scale origin viewedArea diffTree arrangement
     }
     
