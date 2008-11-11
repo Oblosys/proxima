@@ -5,7 +5,7 @@ import Evaluation.DocTypes (DocumentLevel) -- for Locations
 
 import Layout.LayTypes
                   
-data IDA = NoIDA | IDA Int deriving (Show, Read, Eq, Ord)
+data IDA = NoIDA | IDA !Int deriving (Show, Read, Eq, Ord)
                
                                                               -- ugly hack for popups, need pres to get items
 data ArrangementLevel doc node clip token = ArrangementLevel (Arrangement node) FocusArr (Layout doc node clip token) deriving Show
