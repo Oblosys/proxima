@@ -4,9 +4,9 @@ cabal-version: -any
 license: AllRightsReserved
 copyright: (c) 2007 Martijn Schrage
 maintainer: martijn@cs.uu.nl
-build-depends: Cabal -any, base -any, gtk >=0.9.11, haskell98 -any,
+build-depends: base -any, gtk >=0.9.11, haskell98 -any,
                network >=2.0, parsec >=2.0, time >=1.0, containers >=0.1,
-               array >=0.1
+               array >=0.1, cairo >= 0.9
                
 stability: experimental
 homepage: http://www.cs.uu.nl/research/projects/proxima
@@ -63,6 +63,6 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                PresentationAG ProxParser ProxParser_Generated Reducer ScannerSheetHS
                Settings
 ghc-prof-options:
-ghc-options: -prof -auto-all -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
+ghc-options: -prof -auto-all -O -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
 jhc-options:
