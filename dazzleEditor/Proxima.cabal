@@ -63,6 +63,6 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                PresentationAG ProxParser ProxParser_Generated Reducer ScannerSheetHS
                Settings
 ghc-prof-options:
-ghc-options: -prof -auto-all -O -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
+ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
 hugs-options:
 jhc-options:
