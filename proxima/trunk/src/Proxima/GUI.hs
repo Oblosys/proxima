@@ -49,7 +49,7 @@ startGUI :: (Show doc, Show enr, Show node, Show token) =>
             (RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO ()
 startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) = 
  do { initGUI
-    
+
     ; fh <- openFile "queriedMetrics.txt" WriteMode
     ; hPutStr fh ""
     ; hClose fh
@@ -79,12 +79,14 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; renderingLvlVar <- newIORef initRenderingLvl
 
     ; onExpose canvas $ catchHandler $ onPaint settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+{-
     ; onKeyPress canvas $ catchHandler $ onKeyboard settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onMotionNotify canvas False $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onButtonPress canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onButtonRelease canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onDelete window $ catchHandler $ closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onCheckResize window $ withCatch $ resizeHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+-}
     ; fileMenu <- mkMenu
         [ ("_Open", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
         , ("_Save", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
@@ -118,9 +120,13 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     -- about every half minute, save a backup of the document
 
 --    ; timeoutAddFull (withCatch $ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
-    ; if serverMode settings 
+
+-- uncomment line below when using forkIO for server
+--    ; timeoutAddFull (yield >> return True) priorityDefaultIdle 50
+   ; if serverMode settings 
       then server (settings,handler,renderingLvlVar,viewedAreaRef)
-      else mainGUI
+      else return ()
+    ; mainGUI
     }    
 
 -- GTK somehow catches exceptions that occur in event handlers, and terminates the program. To
@@ -544,7 +550,7 @@ server params = withSocketsDo $
     ; initR <- newIORef (True)
     ; menuR <- newIORef []
 
-    ; serverSocket <- listenOn (PortNumber 80)
+    ; serverSocket <- listenOn (PortNumber 8080)
     ; serverLoop params initR menuR serverSocket
     }          
 
@@ -577,7 +583,7 @@ handleRequest (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handl
     ; if arg == ""  
       then
        do { writeIORef viewedAreaRef ((0,0),(1000,800)) -- todo: take this from an init event
-          ; page <- readFile "src/proxima/scripts/Editor.html" -- in Proxima tree, changes location when proxima is not in subdir
+          ; page <- readFile "../proxima/scripts/Editor.html" -- in Proxima tree, changes location when proxima is not in subdir
           ; seq (length page) $ return ()
           -- ; print page
           ; hPutStr handle $ toHTTP page
@@ -691,7 +697,7 @@ handleMetrics ('M':'e':'t':'r':'i':'c':'s':event) =
     
 fromHTML [] = []
 fromHTML ('%':'2':'0':cs) = ' ': fromHTML cs
-fromHTML ('%':'2':'2':cs) = '"': fromHTML cs
+fromHTML ('%':'2':'2':cs) = '"': fromHTML cs -- "
 fromHTML ('%':'5':'B':cs) = '[': fromHTML cs
 fromHTML ('%':'5':'D':cs) = ']': fromHTML cs
 fromHTML (c:cs) = c:fromHTML cs
