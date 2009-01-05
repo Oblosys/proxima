@@ -3,15 +3,15 @@
 \usepackage{amsmath}
 \usepackage{../Utils}
 
-%\usepackage{TRtitlepage}
+\usepackage{TRtitlepage}
 
 \begin{document}
 
-%\TRtitlepage
-%{Haskell as an Architecture Description Language}  % argument 1 <= the title
-%{Martijn M. Schrage \\[1em] S.Doaitse Swierstra}                  % argument 2 <= authors
-%{UU-CS-2008-054}                                         % argument 3 <= report number
-%{June 2008}                                             % argument 4 <= the month and year
+\TRtitlepage
+{Haskell as an Architecture Description Language}  % argument 1 <= the title
+{Martijn M. Schrage \\[1em] S. Doaitse Swierstra}                  % argument 2 <= authors
+{UU-CS-2008-045}                                         % argument 3 <= report number
+{December 2008}                                             % argument 4 <= the month and year
 
 \title{Haskell as an Architecture Description Language}
 
@@ -65,6 +65,7 @@ In this paper we give three implementation models for layered architectures. Fir
 			
 \section{A simple editor}\label{sect:simpleEditor}
 
+\finalshortpage
 The architecture description combinators in this paper have been designed for the generic presentation-oriented structure editor Proxima. Proxima supports editing on the document structure as well as on its presentation, which has given rise to its layered architecture. A typical feature of the architecture is that each layer maintains its own local state, which is used to store information that does not have a logical place on the other layers. An example of this is white space, which is part of the presentation of a program source, but does not fit well in the abstract syntax tree. 
 
 Because of the complexity of the actual Proxima architecture, we introduce a simple layered architecture for a presentation-oriented editor to explain the architecture description methods in the next sections. Although the architecture is simple, it contains the essential features of the Proxima architecture. 
@@ -103,7 +104,7 @@ Figure~\ref{simplesinglelayer} shows the data flow for a single layer with two e
 %																
 \section{A layer in Haskell} \label{sect:layerInHaskell}
 
-In the coming sections, we explore the possibilities of describing the layered architecture from the previous section in Haskell. There are two aspects to modeling a layered architecture in Haskell: the building blocks, which are the layer functions, and the connections between the building blocks. Before discussing how to model the connections between the layers, we focus of the functions within a layer.
+In the next sections, we explore the possibilities of describing the layered architecture from the previous section in Haskell. There are two aspects to modeling a layered architecture in Haskell: the building blocks, which are the layer functions, and the connections between the building blocks. Before discussing how to model the connections between the layers, we focus on the functions within a layer.
 
 A layer function takes  horizontal as well as vertical arguments and returns both  horizontal and vertical results. To make the difference between horizontal and vertical data explicit, we introduce a type synonym for layer functions.
 
@@ -121,6 +122,7 @@ type LayerFn horArgs vertArg horRess vertRes =
 
 Each layer is represented by a record containing all the layer functions: in our case \p{present} and \p{interpret}. The types of the layer functions follow directly from Figure~\ref{simplesinglelayer}.  If we  put these functions directly in a record, we  get:
 
+\newpage
 %code Layers.hs
 \begin{small}
 \begin{verbatim}
@@ -133,7 +135,7 @@ data Simple state map doc pres gest upd =
 \end{verbatim}
 \end{small}
 
-
+\finalshortpage
 However, this is not entirely what we want. To simplify the horizontal connection between layer functions, we prefer a normalized data type in which the horizontal result type (\p{horRes}) of a layer function matches the horizontal argument type (\p{horArg}) of the next layer function. For our example, this implies that the horizontal result of \p{present} has the same type as the horizontal argument of \p{interpret} and vice versa (since the result of \p{interpret} is the argument of \p{present} in the next edit cycle). Figure~\ref{wrapped} shows the data flow for the layer functions in the normalized type \p{Simple}. Because the conversion to a normalized type is straightforward, we do not show it here. The definition of the normalized \p{Simple} is:
 
 \begin{small}
@@ -197,7 +199,6 @@ editLoop (layer1, layer2, layer3) states doc =
 \end{small}
 
 The following function \p{main} calls \p{editLoop} with the correct parameters.
-\newpage
 
 %code from Explicit.hs
 \begin{small}
@@ -1071,11 +1072,12 @@ Figure~\ref{fig:metacombinators} contains the final monadic library. In order to
 
 \head{General use} 
 
-
+\finalshortpage
 The general case that we consider is a layer with $n$ layer functions. The record type \p{TheLayer m h$_1$ \dots ~h$_m$ a$_1$ r$_1$ a$_2$ r$_2$ \dots ~a$_n$ r$_n$} contains the layer functions. The variable \p{m} is the monad, variables \p{h$_i$} are the types that appear in the horizontal parameters of the layer, and the \p{a$_i$} and \p{r$_i$} are the types of the vertical arguments and results. 
 
 Because the types of the horizontal parameters are not necessarily single \p{h$_i$} variables, but tuples of these variables, we denote the horizontal parameters by $horArgs_i$ and $horRess_i$. As an example, consider the type \p{Simple}. Its horizontal  type variables are \p{map} and \p{state}, but the types of the horizontal parameters are \p{state} and \p{(map, state)}. 
 
+\newpage
 In general, the definition of \p{TheLayer} has this form:
 
 \begin{small}
