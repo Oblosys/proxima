@@ -1,23 +1,24 @@
-\documentclass[preprint,natbib]{sigplanconf}
+\documentclass[natbib,nocopyrightspace]{sigplanconf}
 
 \usepackage{amsmath}
 \usepackage{../Utils}
 
+%\usepackage{TRtitlepage}
+
 \begin{document}
 
-\conferenceinfo{Haskell Symposium '08}{September 25, 2008, Victoria, British Columbia, Canada.} 
-\copyrightyear{2008} 
-\copyrightdata{[to be supplied]} 
-
-\titlebanner{Draft, to be submitted to Haskell Symposium '08}        % These are ignored unless
-\preprintfooter{}   % 'preprint' option specified.
+%\TRtitlepage
+%{Haskell as an Architecture Description Language}  % argument 1 <= the title
+%{Martijn M. Schrage \\[1em] S.Doaitse Swierstra}                  % argument 2 <= authors
+%{UU-CS-2008-054}                                         % argument 3 <= report number
+%{June 2008}                                             % argument 4 <= the month and year
 
 \title{Haskell as an Architecture Description Language}
-%\subtitle{}
 
 \authorinfo{Martijn M. Schrage \and S. Doaitse Swierstra}
            {Utrecht University}
            {\{martijn,doaitse\}@cs.uu.nl}
+
 
 \maketitle
 
@@ -30,6 +31,7 @@ description is part of the implementation of the
 system, the implementation is guaranteed to comply with the architecture, and the architecture is guaranteed to comply with the implementation.
 \end{abstract}
 
+\bc
 \category{D.2.11} {Software Engineering}
                   {Software Architectures}
                   [Languages (e.g., description, interconnection, definition)]
@@ -39,7 +41,7 @@ Domain-specific languages, Architecture
 
 \keywords
 Haskell, Layered architectures, Architecture descriptions, Type-level programming
-
+\ec
 
 \bc
 f hor vert = (vert, hor) is most logical, but looks strange
