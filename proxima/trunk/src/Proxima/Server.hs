@@ -10,6 +10,9 @@ import System.Environment
 import Control.Concurrent
 import System.Time
 import Data.Typeable
+import Control.Monad.Trans
+import Control.Monad
+import Data.List
 
 import Text.XHtml.Strict hiding (method)
 
@@ -19,14 +22,18 @@ no cookie fixing
 
 
 
-
-run = withProgName "Proxima Server" $
+main = withProgName "Proxima Server" $
  do   tid <- forkIO $ simpleHTTP (Conf 8080 Nothing) handlers
-      --putStrLn . ( ( "simpleHttp started on port " ++ (show . port $ conf) ++ "\n" ++
-      --           "shut down with ctrl-c" ) ++) =<< time
+      putStrLn . ( ( "simpleHttp started on port 8080 " ++ "\n" ++
+                 "shut down with ctrl-c" ) ++) =<< time
 
-      waitForTermination
+      -- waitForTermination
+      putStrLn "getting char"
+      c <- getChar 
+      putStrLn "killing thread"
       killThread tid
+      
+      
       putStrLn . ( "creating checkpoint: " ++ ) =<< time
       --createCheckpoint control
 
@@ -35,24 +42,92 @@ run = withProgName "Proxima Server" $
       putStrLn .  ( "exiting: " ++ ) =<< time
          where time = return . ("\ntime: " ++ ) . show  =<< getClockTime
 
+{-
+GET /create HTTP/1.1
 
-pageTitle = "Proxima 2.8"
+-}
+pageTitle = "Proxima 2.0"
 
 handlers :: [ServerPartT IO Response]
-handlers =
-  [dir "create"
-    [ dir "bloe"
-        [anyRequest $ okHtml "testing bloe"]
-    ]
+handlers = -- debugFilter $
+  [ -- method GET $ okHtml ("editor")
+    dir "img"
+        [ fileServe [] "img" ]  
+  , dir "favicon.ico"
+        [ methodSP GET $ fileServe ["favicon.ico"] "."]
+  , methodSP GET $ fileServe [] "editor.html" -- serverurl/  returns editor.html
+                                              -- serverurl/something fails because of methodSP get
+
+  , withData (\d -> [method GET $ okHtml ("data"++showCommand d)])
   ]
+
+showCommand (Command c) = c
+
+data Command = Command String
+
+instance FromData Command where
+  fromData = liftM Command (look "cmd")
+
+dirServe dirName = dir dirName $
+ [ ServerPartT $ \rq ->
+   do { let requestedFilePath = intercalate "/" $ rqPaths rq -- "/" also works on Windows
+      ; liftIO $ putStr $ "name is " ++ requestedFilePath
+      ; noHandle
+      }
+ ]
+{-
+browsedir' :: (ToMessage a, ToMessage b) => (String -> [FilePath] -> a)
+              -> (String -> String -> b)
+              -> FilePath
+              -> FilePath
+              -> ServerPartT IO Response
+browsedir' paintdir paintfile diralias syspath = multi [
+  ServerPartT $ \rq -> do
+    let aliaspath = ( mypathstring . rqPaths $ rq )
+    if (not $ isPrefixOf (addTrailingPathSeparator diralias) $ (addTrailingPathSeparator aliaspath) )
+       then noHandle
+       else do
+         -- to do: s/rqp/realpath/
+         let realpath = mypathstring $ syspath : (tail  $ rqPaths rq)
+         isDir <- liftIO $ doesDirectoryExist realpath
+         if isDir
+           then do
+             fs <- liftIO $ getDirectoryContents realpath             
+             return . toResponse  $ paintdir aliaspath fs              
+           else do
+             isfile <- liftIO $ doesFileExist realpath     
+             f <- liftIO $ readFile realpath
+             return . toResponse $ paintfile realpath f 
+  ]            
+  where 
+    -- Windows/Unix/Mac compatible 
+    mypathstring pathparts =
+      let sep :: String
+          sep = [pathSeparator] 
+      in intercalate sep pathparts
+-}
+simpleHandlers :: [ServerPartT IO Response]
+simpleHandlers = [
+
+  ServerPartT $ \rq -> do
+    if rqURL rq == "/helloworld"
+       then do { liftIO $ putStrLn "okidoki"
+               ; return $ toResponse  "hello world, this is HAppzzz" 
+               }
+       else noHandle
+    ]
+
+
+
 htmlPage :: (HTML a) => a -> Html
 htmlPage content =
   (header (thetitle $ toHtml pageTitle) +++
     (body (toHtml content)))
 
 okHtml :: (HTML a) => a -> Web Response
-okHtml content = ok  $ toResponse $ htmlPage content
-
+okHtml content = do { liftIO (putStr "fuck") 
+                    ; ok $ addHeader "Expires" "Mon, 28 Jul 2000 11:24:47 GMT" $ toResponse $ htmlPage content
+                    }
 
 {-
 stateProxy :: Proxy State
@@ -122,16 +197,6 @@ controller tDirGroups dynamicTemplateReload allowStressTests =
    
    -}
    
-simpleHandlers :: [ServerPartT IO Response]
-simpleHandlers = [
-
-  ServerPartT $ \rq -> do
-    ru  <- (return . rqURL) rq
-    if ru == "/helloworld"
-       then ( return . toResponse ) "hello world, this is HAppS" 
-       else noHandle
-      :: WebT IO Response
-    ]
     
     
     
