@@ -11,7 +11,7 @@ Unclear: if edit is skip, update renderingLevel? Maybe it was changed by rendere
 TODO: fix wrong hRef (hSpaces are the problem)
 
 -}
-import Graphics.UI.Gtk hiding (Size, Socket)
+import Graphics.UI.Gtk hiding (Size) --, Socket)
 import Data.IORef
 
 import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO
@@ -79,14 +79,14 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; renderingLvlVar <- newIORef initRenderingLvl
 
     ; onExpose canvas $ catchHandler $ onPaint settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
-{-
+
     ; onKeyPress canvas $ catchHandler $ onKeyboard settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onMotionNotify canvas False $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onButtonPress canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onButtonRelease canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onDelete window $ catchHandler $ closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
     ; onCheckResize window $ withCatch $ resizeHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
--}
+
     ; fileMenu <- mkMenu
         [ ("_Open", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
         , ("_Save", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
@@ -594,8 +594,10 @@ handleRequest (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handl
           ; hFlush handle
           }
       else if "img/" `isPrefixOf` arg then handleImage handle arg
-      else handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle 
-                         (init arg) -- drop the ?
+      else if "handle?commands="  `isPrefixOf` arg
+           then handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle 
+                               (drop 16 arg) -- drop the "handle?command="
+      else  error "Unhandled request"
     }
     
 splitCommands commandStr =

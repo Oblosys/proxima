@@ -259,8 +259,8 @@ else if (window.ActiveXObject)
 if (xmlhttp!=null)
   { 
     { xmlhttp.onreadystatechange=state_Change;
-      xmlhttp.open("GET",commandQueue+'?',true);
-      xmlhttp.send(null);
+      xmlhttp.open("GET",'handle?commands='+commandQueue,true);
+      xmlhttp.send(null);     // commands are terminated by semicolons
       commandQueue = '';
     }
   }
