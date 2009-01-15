@@ -87,20 +87,20 @@ menuD NoPathD _              = []
 menuD path@(PathD p) d =
   let alts = alternativesD p d
       mkItem (s,c) = (s, \(DocumentLevel _ pth clip) -> DocumentLevel (pasteD p c d) pth clip)
-  in  [ ("<cut>", \(DocumentLevel d _ clip) -> let (d',p') = deleteD p d 
+  in  [ ("Cut", \(DocumentLevel d _ clip) -> let (d',p') = deleteD p d 
                                                in  DocumentLevel d' p' (selectD p d) ) 
-      , ("<copy>", \(DocumentLevel d _ clip) -> DocumentLevel d path (selectD p d) ) 
-      , ("<paste>", \(DocumentLevel d _ clip) -> DocumentLevel (pasteD p clip d) path clip )
-      , ("<select>", \(DocumentLevel d _ clip) -> DocumentLevel d path clip ) ]
+      , ("Copy", \(DocumentLevel d _ clip) -> DocumentLevel d path (selectD p d) ) 
+      , ("Paste", \(DocumentLevel d _ clip) -> DocumentLevel (pasteD p clip d) path clip )
+      , ("Select", \(DocumentLevel d _ clip) -> DocumentLevel d path clip ) ]
       ++ map mkItem alts   -- use this one or the one in the argument? They should be the same
       ++ if null p then [] else
            let parent = (selectD (init p) d)
            in if not (isListClip parent) then [] else
-                let alts2 = [ ("add "++s, insertListClip (last p+1) c parent) | (s,c) <- alts]
+                let alts2 = [ ("Add "++s, insertListClip (last p+1) c parent) | (s,c) <- alts]
                     mkItem2 (s,c) = (s, \(DocumentLevel _ pth clip) -> DocumentLevel (pasteD (init p) c d) pth clip)
-                    pasteBefore = ("<paste before>", \(DocumentLevel _ pth clip) -> 
+                    pasteBefore = ("Paste before", \(DocumentLevel _ pth clip) -> 
                                                      DocumentLevel (pasteD (init p) (insertListClip (last p) clip parent) d) pth clip )
-                    pasteAfter = ("<paste after>", \(DocumentLevel _ pth clip) -> 
+                    pasteAfter = ("Paste after", \(DocumentLevel _ pth clip) -> 
                                                      DocumentLevel (pasteD (init p) (insertListClip (last p+1) clip parent) d) pth clip )
                 in  map mkItem2 alts2 ++ [pasteBefore,pasteAfter]
 
