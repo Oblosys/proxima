@@ -36,6 +36,24 @@ import Arrangement.ArrTypes
 import Presentation.PresTypes (UpdateDoc)
 import Graphics.Rendering.Cairo
 
+
+
+-- new server
+import HAppS.Server
+import HAppS.State
+import System.Environment
+import Control.Concurrent
+import System.Time
+import Data.Typeable hiding (cast)
+import Control.Monad.Trans
+import Control.Monad hiding (when)
+import Data.List
+
+import Text.XHtml.Strict hiding (method, header)
+
+
+
+
 initialWindowSize :: (Int, Int)
 initialWindowSize = (900, 760)
 
@@ -595,11 +613,15 @@ handleRequest (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handl
           }
       else if "img/" `isPrefixOf` arg then handleImage handle arg
       else if "handle?commands="  `isPrefixOf` arg
-           then handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle 
-                               (drop 16 arg) -- drop the "handle?command="
+           then do { result <- handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
+                                              (drop 16 arg) -- drop the "handle?command="
+                   ; hPutStr handle $ toHTTP $ result
+                   ; hFlush handle
+                   }
       else  error "Unhandled request"
     }
-    
+
+
 splitCommands commandStr =
   case break (==';') commandStr of
     ([],[])             -> []
@@ -607,7 +629,7 @@ splitCommands commandStr =
     (command, (_:commandStr')) -> command : splitCommands commandStr'
         
 -- handle each command in commands and send the updates back
-handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle commandStr =
+handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR commandStr =
  do { let commands = splitCommands commandStr
     --; putStrLn $ "Received commands:"++ show commands
     
@@ -659,9 +681,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR hand
                                              else "")
                                            ++queryHTML++"</div>"
             }
-    ; hPutStr handle $ toHTTP $ treeUpdates
-    --; putStrLn $ "Updates sent to client:\n"++ renderingHTML
-    ; hFlush handle
+    ; return treeUpdates
     }
     
     
