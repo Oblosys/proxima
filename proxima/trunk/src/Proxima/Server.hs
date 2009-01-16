@@ -5,6 +5,7 @@ module Server where
 
 
 import HAppS.Server
+import HAppS.Server.SimpleHTTP
 import HAppS.State
 import System.Environment
 import Control.Concurrent
@@ -13,6 +14,7 @@ import Data.Typeable
 import Control.Monad.Trans
 import Control.Monad
 import Data.List
+import HAppS.Data.Xml.HaXml
 
 import Text.XHtml.Strict hiding (method)
 
@@ -34,47 +36,44 @@ main = withProgName "Proxima Server" $
       killThread tid
       
       
-      putStrLn . ( "creating checkpoint: " ++ ) =<< time
       --createCheckpoint control
-
-      putStrLn .  ( "shutting down system: " ++ ) =<< time
       -- shutdownSystem control 
       putStrLn .  ( "exiting: " ++ ) =<< time
          where time = return . ("\ntime: " ++ ) . show  =<< getClockTime
 
-{-
-GET /create HTTP/1.1
-
--}
-pageTitle = "Proxima 2.0"
-
 handlers :: [ServerPartT IO Response]
 handlers = -- debugFilter $
-  [ -- method GET $ okHtml ("editor")
-    dir "img"
+  [ method GET $ okHtml ("edi<t>or")
+
+  , dir "x" [ method GET $ ok $ addHeader "Content-Type:" "text/xml" $
+                                toResponse ("edit<o>r") ]
+  , dir "img"
         [ fileServe [] "img" ]  
   , dir "favicon.ico"
         [ methodSP GET $ fileServe ["favicon.ico"] "."]
-  , methodSP GET $ fileServe [] "editor.html" -- serverurl/  returns editor.html
-                                              -- serverurl/something fails because of methodSP get
 
-  , withData (\d -> [method GET $ okHtml ("data"++showCommand d)])
+  , dir "handle" 
+   [ withData (\d -> [ method GET $ 
+                       do { responseHTML <- liftIO $ handleCommands d
+                          ; ok $ toResponse $ primHtml $ responseHTML
+                          }
+                    ])
+   ]
+{-
+  , methodSP GET $ fileServe [] "editor.xml" -- serverurl/  returns editor.html
+                                              -- serverurl/something fails because of methodSP get
+    -- does not work as planned, this one must be last
+-}
   ]
 
-showCommand (Command c) = c
 
-data Command = Command String
+data Commands = Commands String deriving Show
 
-instance FromData Command where
-  fromData = liftM Command (look "cmd")
+instance FromData Commands where
+  fromData = liftM Commands (look "commands")
 
-dirServe dirName = dir dirName $
- [ ServerPartT $ \rq ->
-   do { let requestedFilePath = intercalate "/" $ rqPaths rq -- "/" also works on Windows
-      ; liftIO $ putStr $ "name is " ++ requestedFilePath
-      ; noHandle
-      }
- ]
+handleCommands :: Commands -> IO String
+handleCommands (Commands cmds) = return ("data<div></div>"++show cmds)
 {-
 browsedir' :: (ToMessage a, ToMessage b) => (String -> [FilePath] -> a)
               -> (String -> String -> b)
@@ -121,11 +120,11 @@ simpleHandlers = [
 
 htmlPage :: (HTML a) => a -> Html
 htmlPage content =
-  (header (thetitle $ toHtml pageTitle) +++
+  (header (thetitle $ toHtml "bla") +++
     (body (toHtml content)))
 
 okHtml :: (HTML a) => a -> Web Response
-okHtml content = do { liftIO (putStr "fuck") 
+okHtml content = do { liftIO (putStrLn "responding") 
                     ; ok $ addHeader "Expires" "Mon, 28 Jul 2000 11:24:47 GMT" $ toResponse $ htmlPage content
                     }
 

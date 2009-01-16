@@ -562,8 +562,15 @@ okDialog txt =
 
 
 -----------------------
+{-
+GET http://localhost:8080/handle?commands=Key(116,(False,False,False));
+GET /handle?commands=Key(116,(False,False,False));
+-}
 
-server params = withSocketsDo $
+server = serverHAppS
+--server = serverOrg
+
+serverOrg params = withSocketsDo $
  do { putStrLn "\n\nListining to port"
     ; initR <- newIORef (True)
     ; menuR <- newIORef []
@@ -571,6 +578,78 @@ server params = withSocketsDo $
     ; serverSocket <- listenOn (PortNumber 8080)
     ; serverLoop params initR menuR serverSocket
     }          
+
+
+
+serverHAppS params = withProgName "proxima" $
+ do { initR <- newIORef (True)
+    ; menuR <- newIORef []
+
+    ; tid <- forkIO $ simpleHTTP (Conf 8080 Nothing) (handlers params initR menuR)
+    ; putStrLn . ( ( "Proxima 2.0 server started on port 8080\n" ++
+                 "shut down with ctrl-c" ) ++) =<< time
+
+
+    ; waitForTermination
+    ; killThread tid
+      
+      
+      -- createCheckpoint control
+      -- shutdownSystem control 
+    ; putStrLn .  ( "exiting: " ++ ) =<< time
+    }
+ where time = return . ("\ntime: " ++ ) . show  =<< getClockTime
+
+-- handlers :: [ServerPartT IO Response]
+handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR = -- debugFilter $
+  [ dir "img"
+        [ fileServe [] "img" ]  
+  , dir "favicon.ico"
+        [ methodSP GET $ fileServe ["favicon.ico"] "."]
+
+
+
+  , dir "handle" 
+   [ withData (\cmds -> [ method GET $ 
+                          do { responseHTML <- 
+                                 liftIO $ handleCommands params initR menuR
+                                                         cmds
+                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
+                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
+                             ; ok $ addHeader "Content-Type:" "text/xml" $
+                                    addHeader "Expires:" "Mon, 28 Jul 2000 11:24:47 GMT" $
+                                    toResponse $ responseHTML
+                             }
+
+--                       do { responseHTML <- liftIO $ handleCommands d
+--                          ; ok $ toResponse $ primHtml $ responseHTML
+--                          }
+                    ])
+   ]
+
+{-
+  , withData (\cmds -> [ method GET $ 
+                          do { liftIO $ putStrLn $ "cmds = "++show cmds
+                             ; responseHTML <- 
+                                 liftIO $ handleCommands params initR menuR
+                                                         cmds
+                             ; ok $ toResponse $ primHtml $ responseHTML
+                             }
+                        ])
+-}
+
+  , methodSP GET $ do { liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) -- todo: take this from an init event
+                      ; fileServe [] "../proxima/scripts/Editor.xml" -- serverurl/  returns editor.html
+                      }                        -- serverurl/something fails because of methodSP get
+    -- does not work as planned, this one must be last
+  ]
+
+
+instance FromData Commands where
+  fromData = liftM Commands (look "commands")
+  
+
+data Commands = Commands String deriving Show
 
 serverLoop params initR menuR serverSocket = loop $
  do { connection <- accept serverSocket
@@ -614,9 +693,12 @@ handleRequest (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handl
       else if "img/" `isPrefixOf` arg then handleImage handle arg
       else if "handle?commands="  `isPrefixOf` arg
            then do { result <- handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
-                                              (drop 16 arg) -- drop the "handle?command="
+                                              (Commands $ drop 16 arg) -- drop the "handle?command="
                    ; hPutStr handle $ toHTTP $ result
                    ; hFlush handle
+                   ; putStrLn $ "\n\n\n\ncmds = "++show (drop 16 arg)
+                   ; putStrLn $ "\n\n\nresponse = \n" ++ show result
+                             
                    }
       else  error "Unhandled request"
     }
@@ -629,9 +711,9 @@ splitCommands commandStr =
     (command, (_:commandStr')) -> command : splitCommands commandStr'
         
 -- handle each command in commands and send the updates back
-handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR commandStr =
+handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Commands commandStr) =
  do { let commands = splitCommands commandStr
-    --; putStrLn $ "Received commands:"++ show commands
+   -- ; putStrLn $ "Received commands:"++ show commands
     
     ; mapM (handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle)
            commands
@@ -686,8 +768,8 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR comm
     
     
 handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle event =
- do { putStrLn $ "Handling: " ++ take 70 event
-    ; if "Metrics" `isPrefixOf` event  -- is not handled by genericHandler
+ do { -- putStrLn $ "Handling: " ++ take 70 event
+     if "Metrics" `isPrefixOf` event  -- is not handled by genericHandler
       then handleMetrics event
       else if "ContextRequest" `isPrefixOf` event  -- is not handled by genericHandler
       then handleContextMenuRequest renderingLvlVar menuR event
