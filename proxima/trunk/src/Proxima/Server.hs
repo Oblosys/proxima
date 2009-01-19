@@ -37,18 +37,6 @@ import Control.Monad.Trans
 import Control.Monad hiding (when)
 import Data.List
 
-import Text.XHtml.Strict hiding (method, header)
-
-
-
-
-
------------------------
-{-
-GET http://localhost:8080/handle?commands=Key(116,(False,False,False));
-GET /handle?commands=Key(116,(False,False,False));
--}
-
 
 server params = withProgName "proxima" $
  do { initR <- newIORef (True)
