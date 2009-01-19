@@ -62,7 +62,11 @@ http://<server url>/favicon.ico         response: <proxima executable dir>/img/f
 http://<server url>/img/<filename>      response: <proxima executable dir>/img/<filename>
 http://<server url>/handle?commands=<commands separated by ;>                    
                                         response: from handleCommands
+
+TODO: The proxima server requires that the proxima directory is present for favicon and 
+      Editor.xml, these files should be part of a binary distribution.
 -}
+
 -- handlers :: [ServerPartT IO Response]
 handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR = 
   -- debugFilter $
@@ -77,7 +81,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
   , dir "img"
         [ fileServe [] "img" ]  
   , dir "favicon.ico"
-        [ methodSP GET $ fileServe ["favicon.ico"] "img"]
+        [ methodSP GET $ fileServe ["favicon.ico"] "../proxima/etc"]
 
   , dir "handle" 
    [ withData (\cmds -> [ method GET $ 
