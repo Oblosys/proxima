@@ -6,7 +6,8 @@ copyright: (c) 2007 Martijn Schrage
 maintainer: martijn@cs.uu.nl
 build-depends: base -any, gtk >=0.9.11, haskell98 -any,
                network >=2.0, parsec >=2.0, time >=1.0, containers >=0.1,
-               array >=0.1, cairo >= 0.9
+               array >=0.1, cairo >= 0.9, xhtml >=2.0, mtl >=1.1,
+               old-time -any, HAppS-State >= 0.9.3, HAppS-Server >= 0.9.3
                
 stability: experimental
 homepage: http://www.cs.uu.nl/research/projects/proxima
@@ -54,6 +55,7 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Presentation.PresUtils Presentation.PresentationParsing
                Presentation.XLatex Presentation.XprezLib Proxima.Architecture
                Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima Proxima.Wrap
+               Proxima.Server
                Rendering.RenLayerTypes Rendering.RenLayerUtils
                Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
                Rendering.RenUtils Rendering.Renderer UU.Parsing.CharParser
