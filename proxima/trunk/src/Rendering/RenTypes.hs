@@ -7,7 +7,7 @@ import Data.IORef
 import Common.CommonTypes
 import qualified Common.CommonTypes as CommonTypes
 import Common.CommonUtils
-
+import Control.Monad.Writer
 import Evaluation.DocTypes
 
 import Presentation.PresTypes (PopupMenuItem)
@@ -55,11 +55,20 @@ type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc 
                                 Int -> Int -> IO (Maybe Menu)
 -- GUICommand is currently only used for popup menus
 
+-- to be put in RenTypesGUI
 type Rendering = DrawableClass drawWindow => (Window, drawWindow, GC) -> (Point,Size) -> Render ()
                                                                       -- viewd area ((x,y),(w,h))
 
-type RenderingHTML = (Point,Size) -> IO ()
+
+-- to be put in RenTypesServer
+-- also move import Writer
+
+type RenderingHTML = (Point,Size) -> Writer String ()
                      -- viewed area ((x,y),(w,h))
+
+--
+
+
 type Debugging = Bool
 type Size = (Int, Int)
 
