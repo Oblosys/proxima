@@ -594,62 +594,58 @@ serverHAppS params = withProgName "proxima" $
     ; killThread tid
       
       
-      -- createCheckpoint control
-      -- shutdownSystem control 
     ; putStrLn .  ( "exiting: " ++ ) =<< time
     }
  where time = return . ("\ntime: " ++ ) . show  =<< getClockTime
 
+{-
+handle:
+http://<server url>/                    response: <proxima executable dir>/../proxima/scripts/Editor.xml
+http://<server url>/favicon.ico         response: <proxima executable dir>/img/favicon.ico
+http://<server url>/img/<filename>      response: <proxima executable dir>/img/<filename>
+http://<server url>/handle?commands=<commands separated by ;>                    
+                                        response: from handleCommands
+-}
 -- handlers :: [ServerPartT IO Response]
-handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR = -- debugFilter $
-  [ dir "img"
+handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR = 
+  -- debugFilter $
+  [ 
+    methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
+                        liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
+                        -- todo: take this from an init event
+                      ; fmap noCache $
+                          fileServe [] "../proxima/scripts/Editor.xml" 
+                      }
+
+  , dir "img"
         [ fileServe [] "img" ]  
   , dir "favicon.ico"
-        [ methodSP GET $ fileServe ["favicon.ico"] "."]
-
-
+        [ methodSP GET $ fileServe ["favicon.ico"] "img"]
 
   , dir "handle" 
    [ withData (\cmds -> [ method GET $ 
-                          do { responseHTML <- 
+                          do { -- liftIO $ putStrLn $ "############# commands request"
+                      
+                               responseHTML <- 
                                  liftIO $ handleCommands params initR menuR
                                                          cmds
-                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
-                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
+--                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
+--                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
                              ; ok $ addHeader "Content-Type:" "text/xml" $
-                                    addHeader "Expires:" "Mon, 28 Jul 2000 11:24:47 GMT" $
+                                    noCache $
                                     toResponse $ responseHTML
                              }
-
---                       do { responseHTML <- liftIO $ handleCommands d
---                          ; ok $ toResponse $ primHtml $ responseHTML
---                          }
-                    ])
-   ]
-
-{-
-  , withData (\cmds -> [ method GET $ 
-                          do { liftIO $ putStrLn $ "cmds = "++show cmds
-                             ; responseHTML <- 
-                                 liftIO $ handleCommands params initR menuR
-                                                         cmds
-                             ; ok $ toResponse $ primHtml $ responseHTML
-                             }
                         ])
--}
-
-  , methodSP GET $ do { liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) -- todo: take this from an init event
-                      ; fileServe [] "../proxima/scripts/Editor.xml" -- serverurl/  returns editor.html
-                      }                        -- serverurl/something fails because of methodSP get
-    -- does not work as planned, this one must be last
+   ]
   ]
 
+noCache :: Response -> Response  
+noCache = addHeader "Expires:" "Mon, 28 Jul 2000 11:24:47 GMT"
+
+data Commands = Commands String deriving Show
 
 instance FromData Commands where
   fromData = liftM Commands (look "commands")
-  
-
-data Commands = Commands String deriving Show
 
 serverLoop params initR menuR serverSocket = loop $
  do { connection <- accept serverSocket
@@ -785,7 +781,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handl
                     else do { putStrLn $ "Event not recognized: "++event
                             ; return $ SkipRen 0
                             }
-              ; print event               
+              --; print event               
               ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef event
               }
     }
@@ -793,7 +789,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handl
 
 handleMetrics ('M':'e':'t':'r':'i':'c':'s':event) =
  do { let receivedMetrics :: ((String,Int),(Int,Int,[Int])) = read $ fromHTML event
-    ; putStrLn $ "Received metrics:"++show receivedMetrics
+--    ; putStrLn $ "Received metrics:"++show receivedMetrics
     ; fh' <- openFile "queriedMetrics.txt" AppendMode
     ; hPutStrLn fh' $ show receivedMetrics
     ; hClose fh'
