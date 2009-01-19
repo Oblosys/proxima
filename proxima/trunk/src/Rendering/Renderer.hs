@@ -23,6 +23,7 @@ import Graphics.Rendering.Cairo hiding (Path)
 import System.IO.Unsafe
 import Data.IORef
 import System.IO
+import Control.Monad.Writer hiding (when)
 -----
 
 arrowHeadSize :: Double
@@ -881,10 +882,13 @@ renderHTML' scale arrDb diffTree arrangement viewedArea =
     ; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
 
     ; putStrLn "\n\n\nStart HTML rendering"
+    ; let htmlStr = execWriter $ 
+                      renderHTML
+                        arrDb scale origin viewedArea (Just [0]) diffTree arrangement
+
     ; fh <- openFile "rendering.html" AppendMode
     --; putStrLn $ "\n\n\narrangement:\n\n" ++ showTreeArr arrangement
-    ; renderHTML fh 
-                 arrDb scale origin viewedArea (Just [0]) diffTree arrangement
+    ; hPutStr fh htmlStr 
     ; hClose fh
     --; renderingHTML <- readFile "rendering.html"
     --; putStrLn $ "Rendering:\n"++ renderingHTML
@@ -902,18 +906,21 @@ renderFocusHTML scale arrDb focus arrangement viewedArea =
     ; let focusArrList = arrangeFocus focus arrangement
     ; debugLnIO Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList)
 
+    ; putStrLn "rendering focus HTML"
+    
+    ; let htmlStr = execWriter $ 
+                      renderHTML arrDb scale origin viewedArea
+                        (Just [1])
+                        (DiffLeaf False)
+                        (OverlayA NoIDA (xA arrangement) (yA arrangement)  
+                                        (widthA arrangement) (heightA arrangement) 
+                                        0 0 transparent
+                                  HeadInFront
+                                  focusArrList) 
+
    ; fh <- openFile "focusRendering.html" WriteMode
-   ; putStrLn "rendering focus HTML"
-   ; renderHTML fh 
-                arrDb scale origin viewedArea
-                
-                (Just [1])
-                (DiffLeaf False)
-                (OverlayA NoIDA (xA arrangement) (yA arrangement)  
-                                (widthA arrangement) (heightA arrangement) 
-                                0 0 transparent
-                          HeadInFront
-                          focusArrList) 
+   ; hPutStr fh htmlStr 
+                  
    ; hClose fh
 
    }
@@ -944,40 +951,44 @@ cleanParentId contains Just the parent if it was self clean. On rendering, Nothi
 Hence, we can emit a replace command if the parent is clean but the child is self dirty
 -}
 
-makeReplaceUdate fh Nothing    arrangement mkArrangement = mkArrangement
-makeReplaceUdate fh (Just pth) arrangement mkArrangement = 
- do { hPutStr fh $ "<div id='replace' op='replace'>"++htmlPath pth
-    ; putStrLn $ "\n\n*********REPLACE "++show pth
+makeReplaceUdate Nothing    arrangement mkArrangement = mkArrangement
+makeReplaceUdate (Just pth) arrangement mkArrangement = 
+ do { tell $ "<div id='replace' op='replace'>"++htmlPath pth
+    --; putStrLn $ "\n\n*********REPLACE "++show pth
     --; putStrLn $ "by:\n" ++ showTreeArr arrangement
     ; mkArrangement
-    ; hPutStr fh $ "</div>" 
+    ; tell $ "</div>" 
     }
 
 htmlPath pth = "<div id='path'>"++stepsHTML++"</div>"
  where stepsHTML = concat [ "<div id='step' childNr='"++show p++"'></div>" | p <- pth ]
 
+
+
+
 {- inUpdate is True when renderHTML is inside a replace update -}
-renderHTML :: Show node => Handle -> Bool -> Scale -> (Int,Int) ->
-                                         (Point, Size) -> Maybe Path -> DiffTree -> Arrangement node -> IO ()    
-renderHTML fh o s (lux, luy) v m (DiffNode _ _ [dt]) (StructuralA _ arr) =
-           renderHTML fh o s (lux, luy) v m dt arr
-renderHTML fh o s (lux, luy) v m (DiffLeaf d)        (StructuralA _ arr) =
-           renderHTML fh o s (lux, luy) v m (DiffLeaf d) arr
-renderHTML fh o s (lux, luy) v m _                   (StructuralA _ arr) =
+renderHTML :: Show node => Bool -> Scale -> (Int,Int) ->
+                           (Point, Size) -> Maybe Path -> DiffTree -> Arrangement node ->
+                           Writer String ()    
+renderHTML o s (lux, luy) v m (DiffNode _ _ [dt]) (StructuralA _ arr) =
+           renderHTML o s (lux, luy) v m dt arr
+renderHTML o s (lux, luy) v m (DiffLeaf d)        (StructuralA _ arr) =
+           renderHTML o s (lux, luy) v m (DiffLeaf d) arr
+renderHTML o s (lux, luy) v m _                   (StructuralA _ arr) =
            debug Err "renderHTML: difftree does not match arrangement" $ return ()
-renderHTML fh o s (lux, luy) v m (DiffNode _ _ [dt]) (ParsingA _ arr) =
-           renderHTML fh o s (lux, luy) v m dt arr
-renderHTML fh o s (lux, luy) v m (DiffLeaf d)        (ParsingA _ arr) =
-           renderHTML fh o s (lux, luy) v m (DiffLeaf d) arr
-renderHTML fh o s (lux, luy) v m _                   (ParsingA _ arr) =
+renderHTML o s (lux, luy) v m (DiffNode _ _ [dt]) (ParsingA _ arr) =
+           renderHTML o s (lux, luy) v m dt arr
+renderHTML o s (lux, luy) v m (DiffLeaf d)        (ParsingA _ arr) =
+           renderHTML o s (lux, luy) v m (DiffLeaf d) arr
+renderHTML o s (lux, luy) v m _                   (ParsingA _ arr) =
            debug Err "renderHTML: difftree does not match arrangement" $ return ()
-renderHTML fh o s (lux, luy) v m (DiffNode _ _ [dt]) (LocatorA _ arr) =
-           renderHTML fh o s (lux, luy) v m dt arr
-renderHTML fh o s (lux, luy) v m (DiffLeaf d)        (LocatorA _ arr) =
-           renderHTML fh o s (lux, luy) v m (DiffLeaf d) arr
-renderHTML fh o s (lux, luy) v m _                   (LocatorA _ arr) =
+renderHTML o s (lux, luy) v m (DiffNode _ _ [dt]) (LocatorA _ arr) =
+           renderHTML o s (lux, luy) v m dt arr
+renderHTML o s (lux, luy) v m (DiffLeaf d)        (LocatorA _ arr) =
+           renderHTML o s (lux, luy) v m (DiffLeaf d) arr
+renderHTML o s (lux, luy) v m _                   (LocatorA _ arr) =
            debug Err "renderHTML: difftree does not match arrangement" $ return ()
-renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
+renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
                                        
@@ -992,7 +1003,7 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                        ; let childDiffTrees = case diffTree of
                                                 DiffLeaf c     -> repeat $ DiffLeaf c
                                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-                       ; sequence_ $ zipWith3 (renderHTML fh arrDb scale (x, y) viewedArea) 
+                       ; sequence_ $ zipWith3 (renderHTML arrDb scale (x, y) viewedArea) 
                                        (case mPth of
                                           Nothing -> repeat Nothing
                                           Just pth -> [ Just $ pth++[i] | i <- [0..] ])
@@ -1013,35 +1024,35 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
           --when (overlap ((lux+xA arrangement, luy+yA arrangement),
           --               (widthA arrangement, heightA arrangement)) viewedArea) $
           -- only render when the arrangement is in the viewed area   
-          makeReplaceUdate fh mPth arrangement $
+          makeReplaceUdate mPth arrangement $
 --          (\mkArr -> do {putStrLn "self dirty"; mkArr}) $
           
   case arrangement of 
 
     (EmptyA  id x' y' w' h' _ _ bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
-        ; divOpen fh id x' y' w' h' bColor
-        ; divClose fh
+        ; divOpen id x' y' w' h' bColor
+        ; divClose
         }
       
     (StringA id x' y' w' h' _ vRef' str fColor bColor fnt _) ->
      do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
-        ; stringHTML fh id str x' y' w' h' fnt fColor bColor
+        ; stringHTML id str x' y' w' h' fnt fColor bColor
         }
 
     (ImageA id x' y' w' h' _ _ src style lColor bColor) ->
-     do { imageHTML fh id src x' y' w' h' lColor bColor
+     do { imageHTML id src x' y' w' h' lColor bColor
         }
 
     (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { let pts = [(0,0),(w',0),(w',h'),(0,h')]
-        ; polyHTML fh id x' y' w' h' pts (scaleInt scale lw' `max` 1) lColor fColor
+        ; polyHTML id x' y' w' h' pts (scaleInt scale lw' `max` 1) lColor fColor
         }
 
     (EllipseA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')       
         ; -- todo: take style into account
-        ; ellipseHTML fh id x' y' w h (scaleInt scale lw' `max` 1) lColor fColor
+        ; ellipseHTML id x' y' w h (scaleInt scale lw' `max` 1) lColor fColor
         }
 
     (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
@@ -1051,7 +1062,7 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
        
         
         ; -- todo: take style into account & clip
-        ; polyHTML fh id x' y' w' h' pts' (scaleInt scale lw' `max` 1) lColor fColor
+        ; polyHTML id x' y' w' h' pts' (scaleInt scale lw' `max` 1) lColor fColor
         
         }
 
@@ -1062,9 +1073,9 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
 
-        ; divOpen fh id x' y' w' h' bColor
-        ; sequence_ $ zipWith (renderHTML fh arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
-        ; divClose fh
+        ; divOpen id x' y' w' h' bColor
+        ; sequence_ $ zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
+        ; divClose
         }
 
     (ColA id x' y' w' h' _ _ bColor _ arrs) ->
@@ -1073,9 +1084,9 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
 
-        ; divOpen fh id x' y' w' h' bColor
-        ; sequence_ $ zipWith (renderHTML fh arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
-        ; divClose fh
+        ; divOpen id x' y' w' h' bColor
+        ; sequence_ $ zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
+        ; divClose
         }
 
     (OverlayA id x' y' w' h' _ _ bColor direction arrs) ->
@@ -1088,10 +1099,10 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                         HeadInFront -> reverse
                         HeadAtBack  -> Prelude.id
               
-        ; divOpen fh id x' y' w' h' bColor
+        ; divOpen id x' y' w' h' bColor
         ; sequence_ $ order $
-            zipWith (renderHTML fh arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
-        ; divClose fh
+            zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
+        ; divClose
         
         }
 
@@ -1107,13 +1118,13 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
         ; let (vertexArrs, edgeArrs) = splitAt nrOfVertices arrs
         
         
-        ; divOpen fh id x' y' w' h' bColor
-        ; sequence_ $ reverse $ zipWith (renderHTML fh arrDb scale (x, y) viewedArea Nothing) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
+        ; divOpen id x' y' w' h' bColor
+        ; sequence_ $ reverse $ zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
         
-        ; svgStart fh
-        ; sequence_ $ reverse $ zipWith (renderHTML fh arrDb scale (x, y) viewedArea Nothing) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
-        ; svgEnd fh
-        ; divClose fh
+        ; svgStart
+        ; sequence_ $ reverse $ zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
+        ; svgEnd
+        ; divClose
         }
 
     (VertexA id x' y' w' h' _ _ bColor _ arr) ->
@@ -1122,9 +1133,9 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
         
-        ; divOpen fh id x' y' w' h' bColor
-        ; renderHTML fh arrDb scale (x, y) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
-        ; divClose fh
+        ; divOpen id x' y' w' h' bColor
+        ; renderHTML arrDb scale (x, y) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; divClose
         }
 
     (EdgeA id lux' luy' rlx' rly' _ _ lw' lColor) ->
@@ -1137,8 +1148,8 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
               ptHTML1 = (rlx' - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
               ptHTML2 = (rlx' - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
         
-        ; edgeHTML fh id (lux',luy') (rlx',rly') (scaleInt scale lw' `max` 1) lColor
-        ; polyHTML' fh id 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
+        ; edgeHTML id (lux',luy') (rlx',rly') (scaleInt scale lw' `max` 1) lColor
+        ; polyHTML' id 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
         }
 
     (StructuralA id arr) -> 
@@ -1147,7 +1158,7 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderHTML fh arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderHTML arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
         }
     
     (ParsingA id arr) ->
@@ -1156,14 +1167,14 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderHTML fh arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderHTML arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
         }
 
     (LocatorA _ arr) ->
      do { let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderHTML fh arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderHTML arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
         }
 
     _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
@@ -1172,22 +1183,24 @@ renderHTML fh arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
   ; when arrDb $
       renderID scale (lux+xA arrangement) (luy+yA arrangement) (idA arrangement)      
 -}
+
+
   }
 
 
 showIDNr (IDA nr) = show nr
 showIDNr NoIDA    = {- debug Err "Renderer.showIDNr: NoIDA " $ -} show (-1)
 
-divOpen fh id x y w h (r,g,b) = hPutStr fh $ 
+divOpen id x y w h (r,g,b) = tell $ 
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                 (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
                            else "")++
                 "'>" 
-divClose fh = hPutStr fh "</div>"
+divClose = tell "</div>"
 
  
-stringHTML fh id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = hPutStr fh $ 
+stringHTML id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = tell $ 
   "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                  (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
@@ -1211,7 +1224,7 @@ toHTML str = concatMap htmlChar str
        htmlChar '>'  = "&gt;"
        htmlChar c    = [c]
 
-imageHTML fh id src x y w h lColor (br,bg,bb) = hPutStr fh $
+imageHTML id src x y w h lColor (br,bg,bb) = tell $
   "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                  (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
@@ -1220,17 +1233,17 @@ imageHTML fh id src x y w h lColor (br,bg,bb) = hPutStr fh $
                  "'>"++
   "</div>"                           
 
-svgStart fh = hPutStr fh $ 
+svgStart = tell $ 
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
-svgEnd fh = hPutStr fh $ 
+svgEnd = tell $ 
   "</svg>"
   
-edgeHTML fh id (fromX,fromY) (toX, toY) lw (lr,lg,lb) = hPutStr fh $
+edgeHTML id (fromX,fromY) (toX, toY) lw (lr,lg,lb) = tell $
   "<line x1='"++show fromX++"' y1='"++show fromY++"' x2='"++show toX++"' y2='"++show toY++"' "++
   "style='stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>"
   
   
-ellipseHTML fh id x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
+ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) = tell $
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show (h+2)++"px;"++
                 "'>" ++
@@ -1241,7 +1254,7 @@ ellipseHTML fh id x y w h lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
   "</svg></div>"
 -- TODO: why this max 4?
 
-polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $  
+polyHTML id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = tell $  
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show ((h+2)`max` 4)++"px;"++
                 "'>" ++
@@ -1256,7 +1269,7 @@ polyHTML fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $
 
 
 -- TODO: somehow the above does not work for arrowheads in Safari, this is just a quick fix
-polyHTML' fh id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = hPutStr fh $  
+polyHTML' id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = tell $  
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
   "<polygon points='"++pointsStr++"' "++
   "style='fill:"++(if fr == -1 then "none; "
