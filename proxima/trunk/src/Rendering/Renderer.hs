@@ -73,14 +73,20 @@ mkPopupMenuXY settings prs scale arr handler renderingLvlVar buffer viewedAreaRe
     ; let ctxtItems = case point x y arr of
                         Nothing -> []
                         Just pthA -> popupMenuItemsPres (pathPFromPathA' arr prs pthA) prs
-              
-    ; contextMenu <- mkMenu [ (str, popupMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
-                            | (str, upd) <- ctxtItems]
+    ; let menuItems = [ (str, popupMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas upd)
+                      | (str, upd) <- ctxtItems]
+    ; print (map fst menuItems)
+    
+    ; contextMenu <- mkMenu menuItems
     ; return $ Just contextMenu                                          
     }
 
-
-
+escape [] = []
+escape ('_':cs) = escape cs
+escape ('{':cs) = escape cs
+escape ('}':cs) = escape cs
+escape (c:cs)   = c : escape cs
+ 
 render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
  do { setLineCap LineCapRound
     ; setLineJoin LineJoinRound
@@ -138,7 +144,11 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
   case arrangement of 
 
     (EmptyA  id x' y' w' h' _ _ bColor) ->
-     return ()
+      return () {-  do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
+           
+           ; when (not (isTransparent bColor)) $
+               drawFilledRectangle (Rectangle x y w h) bColor bColor                              
+           } -}
      {- do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; when (not (isTransparent bColor)) $
            do { let bgColor = gtkColor bColor -- if isCleanDT diffTree then gtkColor bColor else red
@@ -167,9 +177,8 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
            ; moveTo (fromIntegral x) (fromIntegral y + fontExtentsAscent fExts)
            
            ; showText str
-           } 
-        {-
-        ; when (str /= "") $ 
+           }
+  {-      ; when (str /= "") $ 
            do { when (not (isTransparent bColor)) $
                  do { let bgColor = gtkColor bColor
                     ; drawFilledRectangle dw gc (Rectangle x y w h) bgColor bgColor
@@ -216,8 +225,8 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
                           }
 
 
-              } -}
-
+              }
+-}
 {-
 
               ; context <- widgetCreatePangoContext wi
