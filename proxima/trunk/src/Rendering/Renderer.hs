@@ -934,11 +934,11 @@ Hence, we can emit a replace command if the parent is clean but the child is sel
 
 makeReplaceUdate Nothing    arrangement mkArrangement = mkArrangement
 makeReplaceUdate (Just pth) arrangement mkArrangement = 
- do { tellLn $ "<div id='replace' op='replace'>"++htmlPath pth
+ do { tell $ "<div id='replace' op='replace'>"++htmlPath pth
     --; putStrLn $ "\n\n*********REPLACE "++show pth
     --; putStrLn $ "by:\n" ++ showTreeArr arrangement
     ; mkArrangement
-    ; tellLn $ "</div>" 
+    ; tell $ "</div>" 
     }
 
 htmlPath pth = "<div id='path'>"++stepsHTML++"</div>"
@@ -1172,16 +1172,16 @@ renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
 showIDNr (IDA nr) = show nr
 showIDNr NoIDA    = {- debug Err "Renderer.showIDNr: NoIDA " $ -} show (-1)
 
-divOpen id x y w h (r,g,b) = tellLn $ 
+divOpen id x y w h (r,g,b) = tell $ 
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                 (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
                            else "")++
                 "'>" 
-divClose = tellLn "</div>"
+divClose = tell "</div>"
 
  
-stringHTML id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = tellLn $ 
+stringHTML id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = tell $ 
   "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                  (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
@@ -1205,7 +1205,7 @@ toHTML str = concatMap htmlChar str
        htmlChar '>'  = "&gt;"
        htmlChar c    = [c]
 
-imageHTML id src x y w h lColor (br,bg,bb) = tellLn $
+imageHTML id src x y w h lColor (br,bg,bb) = tell $
   "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                  (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
@@ -1214,17 +1214,17 @@ imageHTML id src x y w h lColor (br,bg,bb) = tellLn $
                  "'>"++
   "</div>"                           
 
-svgStart = tellLn $ 
+svgStart = tell $ 
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>"
-svgEnd = tellLn $ 
+svgEnd = tell $ 
   "</svg>"
   
-edgeHTML id (fromX,fromY) (toX, toY) lw (lr,lg,lb) = tellLn $
+edgeHTML id (fromX,fromY) (toX, toY) lw (lr,lg,lb) = tell $
   "<line x1='"++show fromX++"' y1='"++show fromY++"' x2='"++show toX++"' y2='"++show toY++"' "++
   "style='stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>"
   
   
-ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) = tellLn $
+ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) = tell $
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show (h+2)++"px;"++
                 "'>" ++
@@ -1235,7 +1235,7 @@ ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) = tellLn $
   "</svg></div>"
 -- TODO: why this max 4?
 
-polyHTML id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = tellLn $  
+polyHTML id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = tell $  
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show ((h+2)`max` 4)++"px;"++
                 "'>" ++
@@ -1250,7 +1250,7 @@ polyHTML id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = tellLn $
 
 
 -- TODO: somehow the above does not work for arrowheads in Safari, this is just a quick fix
-polyHTML' id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = tellLn $  
+polyHTML' id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = tell $  
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
   "<polygon points='"++pointsStr++"' "++
   "style='fill:"++(if fr == -1 then "none; "
@@ -1290,8 +1290,3 @@ so 1 pt = dpi/72 px
 
 
 -}
-
-
-tellLn x = do { tell x
-             -- ; tell "\r"
-              } 

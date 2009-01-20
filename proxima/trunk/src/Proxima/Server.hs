@@ -120,29 +120,16 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Com
  do { let commands = splitCommands commandStr
    -- ; putStrLn $ "Received commands:"++ show commands
     
-    ; renderingHTMLs <- mapM (handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle)
-           commands
-    
-    ; focusRenderingHTML <- drawFocusHTML settings renderingLvlVar viewedAreaRef
-    -- ; putStrLn $ "Rendered focus:\n"++ focusRenderingHTML
-  --  ; let focusRenderingHTML = ""
-    
---          ; testRenderingHTML <- readFile "testRendering.html"
---          ; seq (length testRenderingHTML) $ return ()
-
-{-    ; renderingHTML <- readFile "rendering.html" -- todo rename rendering to updates
-    ; seq (length renderingHTML) $ return ()
-    ; focusRenderingHTML <- readFile "focusRendering.html"
-    ; seq (length focusRenderingHTML) $ return ()
--}
-
+    ; renderingHTMLss <-
+        mapM (handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle)
+             commands
  
-    -- TODO: maybe keep a list of strings, as they get big and concat is inefficient
-    ; let renderingHTML = concat renderingHTMLs
---    ; fh <- openFile "rendering.html" WriteMode
---    ; hClose fh
+    ; let renderingHTML = concat . concat $ renderingHTMLss
 
-    
+    ; focusRenderingHTML <- drawFocusHTML settings renderingLvlVar viewedAreaRef
+
+
+
     ; pendingQueriesTxt <-  readFile "metricsQueries.txt"
     ; seq (length pendingQueriesTxt) $ return ()
     ; let pendingQueries = map read $ lines pendingQueriesTxt :: [(String, Int)]
@@ -154,29 +141,12 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Com
     ; fh <- openFile "metricsQueries.txt" WriteMode
     ; hClose fh
     
-    ; isInitialRequest <- readIORef initR -- TODO: seems obsolete
-    ; treeUpdates <-
-        if isInitialRequest 
-        then
-        do { putStrLn "Initial request"
-            ; writeIORef initR False
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
-            ; if null pendingQueries then putStrLn "Sending rendering and focus" else return ()
-            ; return $ "<div id='updates'>"++(if null pendingQueries 
-                                             then renderingHTML++focusRenderingHTML
-                                             else "")
-                                           ++queryHTML++"</div>"
-            }
-        else 
-        do { putStrLn "Later request"
---                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
-            ; if null pendingQueries then putStrLn "Sending rendering and focus" else return ()
-            ; return $ "<div id='updates'>"++ (if null pendingQueries 
-                                             then renderingHTML++focusRenderingHTML
-                                             else "")
-                                           ++queryHTML++"</div>"
-            }
-    ; return treeUpdates
+    ; if null pendingQueries then putStrLn "Sending rendering and focus" else return ()
+    ; return $ "<div id='updates'>"++ (if null pendingQueries 
+                                       then renderingHTML++focusRenderingHTML
+                                       else "")
+                                   ++queryHTML++"</div>"            
     }
     
     
@@ -209,7 +179,7 @@ handleMetrics ('M':'e':'t':'r':'i':'c':'s':event) =
     ; fh' <- openFile "queriedMetrics.txt" AppendMode
     ; hPutStrLn fh' $ show receivedMetrics
     ; hClose fh'
-    ; return ""
+    ; return [""]
     }
     
 -- Current structure of handlers causes focus to be repainted after context request
@@ -227,8 +197,10 @@ handleContextMenuRequest renderingLvlVar menuR ('C':'o':'n':'t':'e':'x':'t':'R':
     
     ; writeIORef menuR $ upds
                             
-    ; return $ "<div op='contextMenu' screenX='"++show screenX++"' screenY='"++show screenY++"'>"++
-               itemsHTML++"</div>"
+    ; return [ "<div op='contextMenu' screenX='"++show screenX++"' screenY='"++show screenY++"'>" ++
+               itemsHTML ++
+               "</div>"
+             ]
     }
  
 handleContextMenuSelect :: forall doc enr clip node token .
@@ -324,7 +296,7 @@ handleSpecial viewedAreaRef malEvent editStr focus =
 genericHandlerServer :: Settings ->
                ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                IORef (RenderingLevel doc enr node clip token) -> IORef CommonTypes.Rectangle -> 
-               EditRendering doc enr node clip token -> IO String
+               EditRendering doc enr node clip token -> IO [String]
 genericHandlerServer settings handler renderingLvlVar viewedAreaRef evt =   
  do { renderingLvl@(RenderingLevel _ _ _ _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
     
@@ -333,7 +305,7 @@ genericHandlerServer settings handler renderingLvlVar viewedAreaRef evt =
           
     ; (renderingLvl', editsRendering) <- handler (renderingLvl,evt)
     ; htmlRenderings <- mapM process editsRendering
-    ; return $ concat htmlRenderings
+    ; return $ htmlRenderings
     }
  where process (SkipRen' _) = return "" -- set the renderingLvlVar ??
        process (SetRen' renderingLvl''@(RenderingLevel scale _ _ _ _ renderingHTML _ (newW,newH) _ updRegions _)) =
