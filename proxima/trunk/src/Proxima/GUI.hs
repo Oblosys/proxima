@@ -48,85 +48,98 @@ startGUI :: (Show doc, Show enr, Show node, Show token) =>
             IORef CommonTypes.Rectangle ->
             (RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO ()
 startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) = 
- do { initGUI
+ do { renderingLvlVar <- newIORef initRenderingLvl
 
-    ; fh <- openFile "queriedMetrics.txt" WriteMode
-    ; hPutStr fh ""
-    ; hClose fh
 
-    ; fh' <- openFile "metricsQueries.txt" WriteMode
-    ; hPutStr fh' ""
-    ; hClose fh'
-
-    ; window <- windowNew
-    ; onDestroy window mainQuit
-    ; set window [ windowTitle := (applicationName settings) ]
-    ; windowSetDefaultSize window (fst initialWindowSize) (snd initialWindowSize)
-
-    ; canvas <- drawingAreaNew 
-    ; widgetSetCanFocus canvas True
-    ; sw <- scrolledWindowNew Nothing Nothing
-    ; hAdj <- scrolledWindowGetHAdjustment sw
-    ; vAdj <- scrolledWindowGetVAdjustment sw
-    ; vp <- viewportNew hAdj vAdj
-    ; containerAdd vp canvas
-    ; containerAdd sw vp
-    --; sw `scrolledWindowAddWithViewport` canvas
-    ; scrolledWindowSetPolicy sw PolicyAutomatic PolicyAutomatic
-    ; scrolledWindowSetShadowType sw ShadowNone
-
-    ; buffer <- newIORef Nothing
-    ; renderingLvlVar <- newIORef initRenderingLvl
-
-    ; onExpose canvas $ catchHandler $ onPaint settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
-
-    ; onKeyPress canvas $ catchHandler $ onKeyboard settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onMotionNotify canvas False $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onButtonPress canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onButtonRelease canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onDelete window $ catchHandler $ closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; onCheckResize window $ withCatch $ resizeHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
-
-    ; fileMenu <- mkMenu
-        [ ("_Open", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
-        , ("_Save", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
-        , ("_Quit", mainQuit)
-        ]
-    
-    ; fileItem <- menuItemNewWithMnemonic "_File"
-    ; menuItemSetSubmenu fileItem fileMenu 
-   
-    ; menuBar <- menuBarNew
-    ; menuShellAppend menuBar fileItem
-  
-    ; vBox <- vBoxNew False 0
-    ; set vBox [boxHomogeneous := False]
-    
-    ; boxPackStart vBox menuBar PackNatural 0
-    ; boxPackStart vBox sw PackGrow 0
-
-    ; containerAdd window vBox
-    
-    ; widgetShowAll window
-    
---    ; putStrLn "Init"
-    ; withCatch $ genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
-    
---    ; putStrLn "Open document"
-    ; withCatch $ initializeDocument settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
-    ; withCatch $ genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
-    
---    ; timeoutAdd (withCatch $ backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas) 30000 
+{-
+    --    ; timeoutAdd (withCatch $ backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas) 30000 
     -- about every half minute, save a backup of the document
 
 --    ; timeoutAddFull (withCatch $ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
 
--- uncomment line below when using forkIO for server
---    ; timeoutAddFull (yield >> return True) priorityDefaultIdle 50
-   ; if serverMode settings 
-      then server (settings,handler,renderingLvlVar,viewedAreaRef)
-      else return ()
-    ; mainGUI
+-}
+
+    ; initialize
+    ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef initEvent
+      
+    ; initDocFilename <-
+        initialDocumentName
+    ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef (OpenFileRen initDocFilename)
+      
+    ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
+     
+    ; startEventLoop (settings,handler,renderingLvlVar,viewedAreaRef)
+
+
+{-
+      else do { -- specific init 
+               initGUI
+         
+            ; window <- windowNew
+            ; onDestroy window mainQuit
+            ; set window [ windowTitle := applicationName settings ]
+            ; windowSetDefaultSize window (fst initialWindowSize) (snd initialWindowSize)
+        
+            ; canvas <- drawingAreaNew 
+            ; widgetSetCanFocus canvas True
+            ; sw <- scrolledWindowNew Nothing Nothing
+            ; hAdj <- scrolledWindowGetHAdjustment sw
+            ; vAdj <- scrolledWindowGetVAdjustment sw
+            ; vp <- viewportNew hAdj vAdj
+            ; containerAdd vp canvas
+            ; containerAdd sw vp
+            --; sw `scrolledWindowAddWithViewport` canvas
+            ; scrolledWindowSetPolicy sw PolicyAutomatic PolicyAutomatic
+            ; scrolledWindowSetShadowType sw ShadowNone
+        
+            ; buffer <- newIORef Nothing
+        
+            ; onExpose canvas $ catchHandler $ onPaint settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+        
+        
+            ; onKeyPress canvas $ catchHandler $ onKeyboard settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+            ; onMotionNotify canvas False $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+            ; onButtonPress canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+            ; onButtonRelease canvas $ catchHandler $ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+            ; onDelete window $ catchHandler $ closeHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas
+            ; onCheckResize window $ withCatch $ resizeHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas
+        
+            ; fileMenu <- mkMenu
+                [ ("_Open", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "open")
+                , ("_Save", withCatch $ fileMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas "save")
+                , ("_Quit", mainQuit)
+                ]
+            
+            ; fileItem <- menuItemNewWithMnemonic "_File"
+            ; menuItemSetSubmenu fileItem fileMenu 
+           
+            ; menuBar <- menuBarNew
+            ; menuShellAppend menuBar fileItem
+          
+            ; vBox <- vBoxNew False 0
+            ; set vBox [boxHomogeneous := False]
+            
+            ; boxPackStart vBox menuBar PackNatural 0
+            ; boxPackStart vBox sw PackGrow 0
+        
+            ; containerAdd window vBox
+            
+            ; widgetShowAll window
+
+-- common init
+
+            ; withCatch $ genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas initEvent
+              
+              ; initDocFilename <-
+                  withCatch $ initialDocumentName
+              ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas (OpenFileRen initDocFilename)
+         
+              ; withCatch $ genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
+
+-- event loop
+              ; mainGUI
+              }
+-}
     }    
 
 -- GTK somehow catches exceptions that occur in event handlers, and terminates the program. To
@@ -284,14 +297,15 @@ genericHandler :: Settings ->
                Window -> Viewport -> DrawingArea -> EditRendering doc enr node clip token -> IO ()
 genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
  do { renderingLvl@(RenderingLevel _ _ _ _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
-    
+    ; putStrLn $ "Generic handler started"
+
     ;  when (not $ serverMode settings) $ 
         do { viewedArea <- getViewedArea settings vp
            ; writeIORef viewedAreaRef viewedArea
            } -- if Proxima runs as a server, viewedAreaRef will contain the right area
              -- set by events from the client
     ; viewedArea <- readIORef viewedAreaRef
-    ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
+--    ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
           
     ; (renderingLvl', editsRendering) <- handler (renderingLvl,evt)
     ; mapM_ process editsRendering
@@ -495,20 +509,18 @@ translateModifiers ms = CommonTypes.Modifiers (Shift `elem` ms) (Control `elem` 
 
 
 
-initializeDocument settings handler renderingLvlVar buffer viewedAreaRef window vp canvas =
+initialDocumentName =
  do { backupExists <- doesFileExist backupFilename
-    ; filename <-
-        if False -- backupExists 
-        then 
-         do { response <- okDialog "During the previous session, Proxima terminated unexpectedly. Do you wish to continue editing the document from that session?"
-            ; if response == ResponseOk
-              then return backupFilename -- we do not delete the backup, in case Proxima crashes again.
-              else do { removeFile backupFilename 
-                      ; return documentFilename
-                      }
-            }
-        else return documentFilename
-    ; genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas (OpenFileRen filename)
+    ; if False -- backupExists  -- use False to disable backup stuff
+      then 
+       do { response <- okDialog "During the previous session, Proxima terminated unexpectedly. Do you wish to continue editing the document from that session?"
+          ; if response == ResponseOk
+            then return backupFilename -- we do not delete the backup, in case Proxima crashes again.
+            else do { removeFile backupFilename 
+                    ; return documentFilename
+                    }
+          }
+      else return documentFilename
     }
 
 backupDocumentHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas =
@@ -538,7 +550,3 @@ okDialog txt =
     ; widgetDestroy dia
     ; return response
     }
-
-
-
-

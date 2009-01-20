@@ -39,7 +39,17 @@ import Control.Monad.Writer
 import Data.List
 
 
-server params = withProgName "proxima" $
+initialize = 
+ do { fh <- openFile "queriedMetrics.txt" WriteMode
+    ; hPutStr fh ""
+    ; hClose fh
+
+    ; fh' <- openFile "metricsQueries.txt" WriteMode
+    ; hPutStr fh' ""
+    ; hClose fh'
+    }              
+
+startEventLoop params = withProgName "proxima" $
  do { initR <- newIORef (True)
     ; menuR <- newIORef []
 
@@ -293,15 +303,15 @@ handleSpecial viewedAreaRef malEvent editStr focus =
     ; return $ SkipRen 0
     }
 
-genericHandlerServer :: Settings ->
+genericHandlerServer :: (Show token, Show node, Show enr, Show doc) => Settings ->
                ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                IORef (RenderingLevel doc enr node clip token) -> IORef CommonTypes.Rectangle -> 
                EditRendering doc enr node clip token -> IO [String]
 genericHandlerServer settings handler renderingLvlVar viewedAreaRef evt =   
  do { renderingLvl@(RenderingLevel _ _ _ _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
-    
+    ; putStrLn $ "Generic handler server started for edit op: " ++ show evt
     ; viewedArea <- readIORef viewedAreaRef
-    ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
+--    ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
           
     ; (renderingLvl', editsRendering) <- handler (renderingLvl,evt)
     ; htmlRenderings <- mapM process editsRendering
