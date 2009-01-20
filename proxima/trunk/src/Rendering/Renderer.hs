@@ -15,7 +15,7 @@ import Arrangement.ArrLayerUtils (point, popupMenuItemsPres, pathPFromPathA')  -
 import Layout.LayTypes hiding (Point)
 
 import Evaluation.DocTypes (DocumentLevel)
-import Proxima.GUI
+import Proxima.GUIGtk
 import Arrangement.FontLib
 
 import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout, fill, setSourceColor)

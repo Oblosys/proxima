@@ -1,4 +1,4 @@
-module Proxima.Server where
+module Proxima.GUIServer where
 
 import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO
                           , Settings (..) )
@@ -38,8 +38,10 @@ import Control.Monad hiding (when)
 import Control.Monad.Writer
 import Data.List
 
+genericHandler' settings handler renderingLvlVar viewedAreaRef () evt =
+  genericHandlerServer settings handler renderingLvlVar viewedAreaRef evt   
 
-initialize = 
+initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize) = 
  do { fh <- openFile "queriedMetrics.txt" WriteMode
     ; hPutStr fh ""
     ; hClose fh
