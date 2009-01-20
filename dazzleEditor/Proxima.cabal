@@ -55,7 +55,7 @@ other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
                Presentation.PresUtils Presentation.PresentationParsing
                Presentation.XLatex Presentation.XprezLib Proxima.Architecture
                Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima Proxima.Wrap
-               Proxima.Server
+               Proxima.GUIServer Proxima.GUIGtk
                Rendering.RenLayerTypes Rendering.RenLayerUtils
                Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
                Rendering.RenUtils Rendering.Renderer UU.Parsing.CharParser
