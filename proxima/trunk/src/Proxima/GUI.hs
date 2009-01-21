@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-} 
 module Proxima.GUI where
 
 {-
@@ -13,24 +14,16 @@ TODO: fix wrong hRef (hSpaces are the problem)
 -}
 import Data.IORef
 
-import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO
-                          , Settings (..) )
-import qualified Common.CommonTypes as CommonTypes
-import Rendering.RenTypes
-import Rendering.RenUtils
+import Common.CommonTypes
 import Common.CommonUtils
+import Rendering.RenTypes
 import Proxima.Wrap
-import Evaluation.DocTypes (DocumentLevel, EditDocument'_ (..))
-import Char
-import Maybe
-import System.IO
-import Directory
-import Data.Time.Clock
-import Control.Exception
 
-import qualified Proxima.GUIServer as Server
-import qualified Proxima.GUIGtk as Gtk
-
+#ifdef SERVER
+import Proxima.GUIServer
+#else
+import Proxima.GUIGtk
+#endif
 
 
 
@@ -43,7 +36,7 @@ documentFilename = "Document.xml"
 startGUI :: (Show doc, Show enr, Show node, Show token) =>
             Settings ->
             ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
-            IORef CommonTypes.Rectangle ->
+            IORef Rectangle ->
             (RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO ()
 startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) = 
  do { renderingLvlVar <- newIORef initRenderingLvl
@@ -56,29 +49,16 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
 --    ; timeoutAddFull (withCatch $ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
 
 -}
--- TODO: remove server mode thing from GUIGtk generic handler
+-- TODO: remove server mode thing from GUIGtk genericHandler
 
-    ; if serverMode settings then
-       do {
-    ; () <- Server.initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize)
-    ; Server.genericHandler' settings handler renderingLvlVar viewedAreaRef () initEvent
+    ; params <- withCatch $ initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize)
+    ; withCatch $ genericHandler' settings handler renderingLvlVar viewedAreaRef params initEvent
       
-    ; Server.genericHandler' settings handler renderingLvlVar viewedAreaRef () (OpenFileRen "Document.xml")
+    ; withCatch $ genericHandler' settings handler renderingLvlVar viewedAreaRef params (OpenFileRen "Document.xml")
       
-    ; Server.genericHandler' settings handler renderingLvlVar viewedAreaRef () (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
+    ; withCatch $ genericHandler' settings handler renderingLvlVar viewedAreaRef params (KeySpecialRen F1Key (Modifiers False False False))
      
-    ; Server.startEventLoop (settings,handler,renderingLvlVar,viewedAreaRef)
-    } else
-       do {
-    ; (buffer, window, vp, canvas) <- Gtk.initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize)
-    ; Gtk.genericHandler' settings handler renderingLvlVar viewedAreaRef (buffer, window, vp, canvas) initEvent
-      
-    ; Gtk.genericHandler' settings handler renderingLvlVar viewedAreaRef (buffer, window, vp, canvas) (OpenFileRen "Document.xml")
-      
-    ; Gtk.genericHandler' settings handler renderingLvlVar viewedAreaRef (buffer, window, vp, canvas) (KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))
-     
-    ; Gtk.startEventLoop (settings,handler,renderingLvlVar,viewedAreaRef)
-    }  
+    ; startEventLoop (settings,handler,renderingLvlVar,viewedAreaRef)
   
 
 

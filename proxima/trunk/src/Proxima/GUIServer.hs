@@ -51,6 +51,9 @@ initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize) =
     ; hClose fh'
     }              
 
+-- withCatch is identity in GUIServer, it is defined only in the GUIGtk module.
+withCatch io = io
+
 startEventLoop params = withProgName "proxima" $
  do { initR <- newIORef (True)
     ; menuR <- newIORef []

@@ -290,7 +290,8 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
 #else
         ; pb <- pixbufNewFromFile src
         ;    do {
-#endif
+#endif 
+-- TODO After removing these cpp constructs, also remove option LANGUAGE CPP at top of this file
                 -- TODO: make this the Tile case and make a Resize case, and add clipping
                 -- and store pixbufs in rendering state, to avoid reloading.
                 
