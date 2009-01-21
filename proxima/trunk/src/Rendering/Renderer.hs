@@ -34,10 +34,3 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
   in if oldW>newW || oldH > newH     -- if arr got smaller, repaint whole thing for now
      then [((0, 0),(max oldW newW, max oldH newH))]
      else updatedRectArr diffTree arrangement  
-
-
-arrangedFocusArea :: Show node => [Arrangement node] -> (Int,Int,Int,Int)
-arrangedFocusArea fArrList = -- compute the region that is covered by the focus
-  let (xs, ys, xs', ys') = unzip4 [(xA fLine, yA fLine, xA fLine + widthA fLine, yA fLine + heightA fLine) | fLine <- fArrList ]
-  in  (if null xs then 0 else minimum xs, if null ys then 0 else minimum ys, maximum (0:xs'), maximum (0:ys'))
-
