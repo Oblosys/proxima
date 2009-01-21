@@ -52,8 +52,8 @@ Executable DazzleEditor
   ghc-prof-options:
   ghc-options: -w -fglasgow-exts
   if flag(Server)
-    ghc-options: -DSERVER
-  extensions: CPP UndecidableInstances NoMonomorphismRestriction
+    cpp-options: -DSERVER
+  extensions: UndecidableInstances NoMonomorphismRestriction
   hugs-options:
   jhc-options:
 
