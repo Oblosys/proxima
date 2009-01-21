@@ -20,22 +20,22 @@ extra-source-files: ../proxima/src/Arrangement/ArrangerAG.ag
                     src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:
 
-Flag cpp
-  Description: Compile all modules with CPP (very slow), only use after changing the Server flag
-  Default:     False
 
 Flag server
   Description: Compile Proxima as a server application without Gtk2Hs
   Default:     False
--- NOTE: after changing this flag, make sure to use the cpp flag to recompile all modules
--- depending on the CPP variable. 
-  
+-- Following does not work after all: 
+-- After changing this flag, use clean to make sure that dependent modules are recompiled
+-- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation
+-- (maybe a ghc bug?)
+
 Executable DazzleEditor
   build-depends: base -any, haskell98 -any,
                  network >=2.0, parsec >=2.0, time >=1.0, containers >=0.1,
                  array >=0.1, cairo >= 0.9, xhtml >=2.0, mtl >=1.1,
                  old-time -any, HAppS-State >= 0.9.3, HAppS-Server >= 0.9.3
-  build-depends: gtk >=0.9.11
+  if !flag(server)
+    build-depends: gtk >=0.9.11
   main-is: Main.hs
   buildable: True
   cc-options:
@@ -49,38 +49,10 @@ Executable DazzleEditor
   install-includes:
   include-dirs:
   hs-source-dirs: ../uuagc/src/ ../proxima/src src
-  other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
-                 Arrangement.ArrPresent Arrangement.ArrTranslate
-                 Arrangement.ArrTypes Arrangement.ArrUtils Arrangement.Arranger
-                 Arrangement.ArrangerAG Arrangement.FontLib Common.CommonTypes
-                 Common.CommonUtils Common.DebugLevels Evaluation.DocTypes
-                 Evaluation.DocUtils Evaluation.DocumentEdit Evaluation.EnrTypes
-                 Evaluation.EnrUtils Evaluation.EvalLayerTypes
-                 Evaluation.EvalLayerUtils Evaluation.EvalPresent
-                 Evaluation.EvalTranslate Layout.LayLayerTypes Layout.LayLayerUtils
-                 Layout.LayPresent Layout.LayTranslate Layout.LayTypes
-                 Layout.LayUtils Layout.Layout Layout.ScanLib Layout.Scanner
-                 Layout.ScannerAG Layout.TreeEditPres Presentation.PresLayerTypes
-                 Presentation.PresLayerUtils Presentation.PresPresent
-                 Presentation.PresTranslate Presentation.PresTypes
-                 Presentation.PresUtils Presentation.PresentationParsing
-                 Presentation.XLatex Presentation.XprezLib Proxima.Architecture
-                 Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima Proxima.Wrap
-                 Proxima.GUIServer Proxima.GUIGtk
-                 Rendering.RenLayerTypes Rendering.RenLayerUtils
-                 Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
-                 Rendering.RenUtils Rendering.Renderer UU.Parsing.CharParser
-                 UU.Parsing.Derived UU.Parsing.Interface UU.Parsing.Machine
-                 UU.Parsing.MachineInterface UU.Parsing DocTypes_Generated
-                 DocUtils_Generated DocumentEdit_Generated Evaluator Main
-                 PresentationAG ProxParser ProxParser_Generated Reducer ScannerSheetHS
-                 Settings
   ghc-prof-options:
   ghc-options: -w -fglasgow-exts
   if flag(Server)
     ghc-options: -DSERVER
-  if flag(cpp)
-    extensions: CPP
   extensions: CPP UndecidableInstances NoMonomorphismRestriction
   hugs-options:
   jhc-options:
