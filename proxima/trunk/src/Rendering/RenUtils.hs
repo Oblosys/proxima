@@ -1,7 +1,6 @@
 module Rendering.RenUtils where
 
 import Common.CommonTypes
---import RenTypesGTK
 import Rendering.RenTypes
 
 import Graphics.UI.Gtk
@@ -18,3 +17,7 @@ mkMenu items =
            ; onActivateLeaf menuItem action
            ; return menuItem
            }
+
+-- | Convert an rgb 3-tuple to a GTK color
+gtkColor :: Common.CommonTypes.Color -> Graphics.UI.Gtk.Color
+gtkColor (r, g, b) = Color (256*fromIntegral r) (256*fromIntegral g) (256*fromIntegral b)
