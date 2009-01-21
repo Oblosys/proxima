@@ -25,3 +25,5 @@ mkMenu items =
 gtkColor :: Common.CommonTypes.Color -> Graphics.UI.Gtk.Color
 gtkColor (r, g, b) = Color (256*fromIntegral r) (256*fromIntegral g) (256*fromIntegral b)
 #endif
+
+
