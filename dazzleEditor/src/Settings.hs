@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-} 
 -----------------------------------------------------------------------------------------
 {-| Module      : Settings
     Copyright   : (c) 2007 Martijn Schrage
@@ -19,16 +20,19 @@ import Common.CommonTypes
 -- run-time cost of the arranger to pass the record around as an inherited attribute.
 
                 
-settings = defaultSettings { applicationName = "Dazzle documentation editor"
-
-                           , rendererIncrementality = False
-                           , arrangerIncrementality = False
+settings = defaultSettings { 
+                             applicationName = "Dazzle documentation editor"
+                           , rendererIncrementality = True
+                           , arrangerIncrementality = True
 
                                -- use a smaller rectangle as viewed area to see what happens outside it
                            , reducedViewedArea = False            
 
                                -- updated parts of the rendering are surrounded by red rectangles
                            , markUpdatedRenderingArea = False
+#ifdef SERVER
+                           , serverMode = True
+#else
                            , serverMode = False
+#endif
                            }
-           
