@@ -24,9 +24,9 @@ extra-tmp-files:
 Flag server
   Description: Compile Proxima as a server application without Gtk2Hs
   Default:     False
--- Following does not work after all: 
--- After changing this flag, use clean to make sure that dependent modules are recompiled
--- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation
+
+-- NOTE: After changing this flag, use clean to make sure that dependent modules are recompiled.
+-- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
 -- (maybe a ghc bug?)
 
 Executable DazzleEditor
