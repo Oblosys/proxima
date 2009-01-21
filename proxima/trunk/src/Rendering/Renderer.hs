@@ -2,23 +2,12 @@
 -- CPP is enabled only for this module, since it slows the build process down quite a bit
 module Rendering.Renderer (render, renderFocus, mkPopupMenuXY, computeUpdatedRegions) where
 
-import Common.CommonTypes hiding (Rectangle)
-import qualified Common.CommonTypes as CommonTypes
+import Common.CommonTypes 
 import Common.CommonUtils
 
 import Rendering.RenLayerTypes
 import Rendering.RenLayerUtils
 import Proxima.Wrap
-
-import Arrangement.ArrLayerUtils (point, popupMenuItemsPres, pathPFromPathA')  -- for context menu hack
---import Presentation.PresTypes hiding (font) -- For Locations
-import Layout.LayTypes hiding (Point)
-
-import Evaluation.DocTypes (DocumentLevel)
-import Arrangement.FontLib
-import System.IO.Unsafe
-import Data.IORef
-import System.IO
 
 #ifdef SERVER
 import Rendering.RendererServer
