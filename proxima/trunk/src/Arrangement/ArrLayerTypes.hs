@@ -8,7 +8,6 @@ import Layout.LayTypes
 import Arrangement.ArrTypes
 import Data.IORef
 
---import FontLibGTK
 import Arrangement.FontLib
 
 data LocalStateArr = LocalStateArr { getFontMetricsRef :: FontMetricsRef

@@ -18,7 +18,6 @@ import Evaluation.DocUtils -- for redirect
 import Presentation.PresPresent
 import Evaluation.EnrTypes
 --import Graphics.UI.WX.Types hiding (Size)
-import Graphics.UI.Gtk hiding (Editable)
 
 import Presentation.PresTypes -- temporarily
 import Presentation.PresUtils -- temporarily
