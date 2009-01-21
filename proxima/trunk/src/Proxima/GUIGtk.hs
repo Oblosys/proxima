@@ -249,25 +249,19 @@ genericHandler :: Settings ->
                IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> 
                Window -> Viewport -> DrawingArea -> EditRendering doc enr node clip token -> IO ()
 genericHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas evt =   
- do { renderingLvl@(RenderingLevel _ _ _ _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
-    ; putStrLn $ "Generic handler started"
+ do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
+--    ; putStrLn $ "Generic handler started"
 
-
--- TODO: in server mode, this is never called
-    ;  when (not $ serverMode settings) $ 
-        do { viewedArea <- getViewedArea settings vp
-           ; writeIORef viewedAreaRef viewedArea
-           } -- if Proxima runs as a server, viewedAreaRef will contain the right area
-             -- set by events from the client
-    ; viewedArea <- readIORef viewedAreaRef
+    ; viewedArea <- getViewedArea settings vp
+    ; writeIORef viewedAreaRef viewedArea
 --    ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
           
     ; (renderingLvl', editsRendering) <- handler (renderingLvl,evt)
     ; mapM_ process editsRendering
     }
  where process (SkipRen' _) = return () -- set the renderingLvlVar ??
-       process (SetRen' renderingLvl''@(RenderingLevel scale _ _ _ _ _ _ (newW,newH) _ updRegions _)) =
-         do { (RenderingLevel _ _ _ _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
+       process (SetRen' renderingLvl''@(RenderingLevel scale _ _ _ (newW,newH) _ updRegions _)) =
+         do { (RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
             ; writeIORef renderingLvlVar renderingLvl''
             ; widgetSetSizeRequest canvas newW newH
   --          ; putStrLn $ "Drawing " ++ show (w,h) ++ show (newW,newH)
@@ -297,7 +291,7 @@ drawRendering :: DrawableClass d =>
                  Settings ->
                  IORef (RenderingLevel doc enr node clip token) -> Window -> Viewport -> d -> IO ()
 drawRendering settings renderingLvlVar wi vp pm = 
- do { RenderingLevel scale mkPopupMenu _ rendering _ _ _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
+ do { RenderingLevel scale mkPopupMenu rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
 --    ; putStrLn "Drawing rendering"
     ; let drawFilledRectangle drw grc ((x,y),(w,h)) = drawRectangle drw grc True x y w h
     ; gc <- gcNew pm
@@ -356,7 +350,7 @@ drawRendering settings renderingLvlVar wi vp pm =
           
 paintFocus :: Settings -> IORef (RenderingLevel doc enr node clip token) -> Window -> DrawWindow -> GC -> Viewport -> IO ()
 paintFocus settings renderingLvlVar wi dw gc vp = 
- do { RenderingLevel scale _ _ rendering focusRendering _ _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
+ do { RenderingLevel scale _ rendering focusRendering (w,h) debug updRegions _ <- readIORef renderingLvlVar
     ; viewedArea <- getViewedArea settings vp 
     ; let theRendering' = focusRendering (wi, dw {-was pm-},gc) viewedArea
     ; renderWithDrawable dw theRendering'
@@ -392,7 +386,7 @@ onPaint settings handler renderingLvlVar buffer viewedAreaRef wi vp canvas (Expo
               -- If several edit events have taken place without paint events, only the last is shown
             ; when (markUpdatedRenderingArea settings) $
                do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.red }
-                  ; RenderingLevel scale _ _ rendering _ _ _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
+                  ; RenderingLevel scale _ rendering _ (w,h) debug updRegions _ <- readIORef renderingLvlVar
                   --; debugLnIO GUI $ "updated regions:" ++ show updRegions 
                   
                   ; mapM_ (\((x,y),(w,h)) -> 

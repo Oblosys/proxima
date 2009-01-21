@@ -49,7 +49,6 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
 --    ; timeoutAddFull (withCatch $ performEditSequence handler renderingLvlVar buffer viewedAreaRef window vp canvas) priorityHighIdle 0
 
 -}
--- TODO: remove server mode thing from GUIGtk genericHandler
 
     ; params <- withCatch $ initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize)
     ; withCatch $ genericHandler' settings handler renderingLvlVar viewedAreaRef params initEvent

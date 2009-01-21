@@ -1,7 +1,9 @@
 {-# LANGUAGE CPP #-}
 module Rendering.RenTypes where
 
-#ifndef SERVER
+#ifdef SERVER
+import Control.Monad.Writer
+#else
 import Graphics.UI.Gtk hiding (Scale, Size, Rectangle)
 import Graphics.Rendering.Cairo
 #endif
@@ -11,7 +13,6 @@ import Data.IORef
 import Common.CommonTypes
 import qualified Common.CommonTypes as CommonTypes
 import Common.CommonUtils
-import Control.Monad.Writer
 import Evaluation.DocTypes
 
 import Presentation.PresTypes (PopupMenuItem)
@@ -54,7 +55,7 @@ instance Show (RenderingLevel_ wrapped doc enr node clip token) where
 type Scale = Double
 
 
-{-
+
 -- to be put in RenTypesGUI
 type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc enr node clip token, EditRendering_ wrapped doc enr node clip token) -> IO (RenderingLevel_ wrapped doc enr node clip token, [EditRendering'_ wrapped doc enr node clip token])) ->
                   IORef (RenderingLevel_ wrapped doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> 
@@ -71,13 +72,9 @@ emptyGUICommand = (\_ _ _ _ _ _ _ x y -> return Nothing)
 emptyRendering :: Rendering
 emptyRendering = \dc va -> return ()
 
--}
-
--- to be put in RenTypesServer
--- also move import Writer
+{-
 type GUICommand wrapped doc enr node clip token = Int -> Int -> [PopupMenuItem doc clip]
                       
--- The () is here because the Gtk version has some extra parameters
 type Rendering = (Point,Size) -> Writer String ()
                  -- viewed area ((x,y),(w,h))
 
@@ -88,9 +85,12 @@ emptyGUICommand = (\_ _ -> [])
 emptyRendering :: Rendering
 emptyRendering = \va -> return ()
 
+type Point = (Int, Int)
+
+-}
+
 type Debugging = Bool
 type Size = (Int, Int)
-type Point = (Int, Int)
 
 origin :: (Int, Int)
 origin = (0,0)

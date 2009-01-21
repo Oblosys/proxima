@@ -64,7 +64,14 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
   in if oldW>newW || oldH > newH     -- if arr got smaller, repaint whole thing for now
      then [((0, 0),(max oldW newW, max oldH newH))]
      else updatedRectArr diffTree arrangement  
-{-
+
+
+
+
+
+
+---------- GTK RENDERING PART
+
 mkPopupMenuXY :: (DocNode node, Show token) => Settings ->
                  Layout doc node clip token -> Scale -> Arrangement node ->
                  ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) ->
@@ -792,7 +799,7 @@ vertexColor       = gtkColor (255, 0, 255)
 structuralBGColor = gtkColor (230, 230, 255)
 parsingBGColor    = gtkColor (255, 230, 230)
 
--}
+
 
 
 
@@ -892,6 +899,14 @@ arrangedFocusArea fArrList = -- compute the region that is covered by the focus
 
 
 
+
+
+
+
+
+
+---------- SERVER PART
+{-
 
 
 
@@ -1311,6 +1326,13 @@ Strange: after installing catch in handler loop, there were no more commitandrel
 1 pt = 1/72 inch
 
 so 1 pt = dpi/72 px
+
+
+-}
+
+
+
+
 
 
 -}
