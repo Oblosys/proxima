@@ -51,11 +51,11 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
 -}
 
     ; params <- withCatch $ initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize)
-    ; withCatch $ genericHandler' settings handler renderingLvlVar viewedAreaRef params initEvent
+    ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params initEvent
       
-    ; withCatch $ genericHandler' settings handler renderingLvlVar viewedAreaRef params (OpenFileRen "Document.xml")
+    ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params (OpenFileRen "Document.xml")
       
-    ; withCatch $ genericHandler' settings handler renderingLvlVar viewedAreaRef params (KeySpecialRen F1Key (Modifiers False False False))
+    ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params (KeySpecialRen F1Key (Modifiers False False False))
      
     ; startEventLoop (settings,handler,renderingLvlVar,viewedAreaRef)
   

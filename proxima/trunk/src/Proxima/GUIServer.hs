@@ -38,9 +38,6 @@ import Control.Monad hiding (when)
 import Control.Monad.Writer
 import Data.List
 
-genericHandler' settings handler renderingLvlVar viewedAreaRef () evt =
-  genericHandlerServer settings handler renderingLvlVar viewedAreaRef evt   
-
 initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize) = 
  do { fh <- openFile "queriedMetrics.txt" WriteMode
     ; hPutStr fh ""
@@ -184,7 +181,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handl
                             ; return $ SkipRen 0
                             }
               --; print event               
-              ; genericHandlerServer settings handler renderingLvlVar viewedAreaRef event
+              ; genericHandler settings handler renderingLvlVar viewedAreaRef () event
               }
     }
 
@@ -308,11 +305,12 @@ handleSpecial viewedAreaRef malEvent editStr focus =
     ; return $ SkipRen 0
     }
 
-genericHandlerServer :: (Show token, Show node, Show enr, Show doc) => Settings ->
+genericHandler :: (Show token, Show node, Show enr, Show doc) => Settings ->
                ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                IORef (RenderingLevel doc enr node clip token) -> IORef CommonTypes.Rectangle -> 
+               () -> -- is here so the type is compatible with genericHandler from GUIGtk
                EditRendering doc enr node clip token -> IO [String]
-genericHandlerServer settings handler renderingLvlVar viewedAreaRef evt =   
+genericHandler settings handler renderingLvlVar viewedAreaRef () evt =   
  do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
     ; putStrLn $ "Generic handler server started for edit op: " ++ show evt
     ; viewedArea <- readIORef viewedAreaRef
