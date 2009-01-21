@@ -32,7 +32,7 @@ render scale arrDb diffTree arrangement viewedArea =
     --; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
     -- cannot use these IO regions anymore
     
-    ; renderHTML arrDb scale origin viewedArea (Just [0]) diffTree arrangement
+    ; renderArr arrDb scale origin viewedArea (Just [0]) diffTree arrangement
     }
 
 
@@ -46,7 +46,7 @@ renderFocus scale arrDb focus arrangement viewedArea =
     ; let focusArrList = arrangeFocus focus arrangement
 
     ; debug Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList) $
-        renderHTML arrDb scale origin viewedArea
+        renderArr arrDb scale origin viewedArea
                         (Just [1])
                         (DiffLeaf False)
                         (OverlayA NoIDA (xA arrangement) (yA arrangement)  
@@ -75,7 +75,7 @@ mkPopupMenuXY settings prs scale arr x' y' =
 
 {-
 When a node is self dirty, all children are also dirty. Hence, once we end up in the last
-case of renderHTML and start generating code, we stay there.
+case of renderArr and start generating code, we stay there.
 
 cleanParentId contains Just the parent if it was self clean. On rendering, Nothing is passed on.
 
@@ -97,44 +97,44 @@ htmlPath pth = "<div id='path'>"++stepsHTML++"</div>"
 
 
 
-{- inUpdate is True when renderHTML is inside a replace update -}
-renderHTML :: Show node => Bool -> Scale -> (Int,Int) ->
+{- inUpdate is True when renderArr is inside a replace update -}
+renderArr :: Show node => Bool -> Scale -> (Int,Int) ->
                            (Point, Size) -> Maybe Path -> DiffTree -> Arrangement node ->
                            Writer String ()    
-renderHTML o s (lux, luy) v m (DiffNode _ _ [dt]) (StructuralA _ arr) =
-           renderHTML o s (lux, luy) v m dt arr
-renderHTML o s (lux, luy) v m (DiffLeaf d)        (StructuralA _ arr) =
-           renderHTML o s (lux, luy) v m (DiffLeaf d) arr
-renderHTML o s (lux, luy) v m _                   (StructuralA _ arr) =
-           debug Err "renderHTML: difftree does not match arrangement" $ return ()
-renderHTML o s (lux, luy) v m (DiffNode _ _ [dt]) (ParsingA _ arr) =
-           renderHTML o s (lux, luy) v m dt arr
-renderHTML o s (lux, luy) v m (DiffLeaf d)        (ParsingA _ arr) =
-           renderHTML o s (lux, luy) v m (DiffLeaf d) arr
-renderHTML o s (lux, luy) v m _                   (ParsingA _ arr) =
-           debug Err "renderHTML: difftree does not match arrangement" $ return ()
-renderHTML o s (lux, luy) v m (DiffNode _ _ [dt]) (LocatorA _ arr) =
-           renderHTML o s (lux, luy) v m dt arr
-renderHTML o s (lux, luy) v m (DiffLeaf d)        (LocatorA _ arr) =
-           renderHTML o s (lux, luy) v m (DiffLeaf d) arr
-renderHTML o s (lux, luy) v m _                   (LocatorA _ arr) =
-           debug Err "renderHTML: difftree does not match arrangement" $ return ()
-renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
+renderArr o s (lux, luy) v m (DiffNode _ _ [dt]) (StructuralA _ arr) =
+           renderArr o s (lux, luy) v m dt arr
+renderArr o s (lux, luy) v m (DiffLeaf d)        (StructuralA _ arr) =
+           renderArr o s (lux, luy) v m (DiffLeaf d) arr
+renderArr o s (lux, luy) v m _                   (StructuralA _ arr) =
+           debug Err "renderArr: difftree does not match arrangement" $ return ()
+renderArr o s (lux, luy) v m (DiffNode _ _ [dt]) (ParsingA _ arr) =
+           renderArr o s (lux, luy) v m dt arr
+renderArr o s (lux, luy) v m (DiffLeaf d)        (ParsingA _ arr) =
+           renderArr o s (lux, luy) v m (DiffLeaf d) arr
+renderArr o s (lux, luy) v m _                   (ParsingA _ arr) =
+           debug Err "renderArr: difftree does not match arrangement" $ return ()
+renderArr o s (lux, luy) v m (DiffNode _ _ [dt]) (LocatorA _ arr) =
+           renderArr o s (lux, luy) v m dt arr
+renderArr o s (lux, luy) v m (DiffLeaf d)        (LocatorA _ arr) =
+           renderArr o s (lux, luy) v m (DiffLeaf d) arr
+renderArr o s (lux, luy) v m _                   (LocatorA _ arr) =
+           debug Err "renderArr: difftree does not match arrangement" $ return ()
+renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
                                        
     ; if (isSelfCleanDT diffTree)  -- if self is clean, only render its children (if present)
      then if (isCleanDT diffTree)
-          then do { --putStrLn "renderHTML: self clean, children clean";
+          then do { --putStrLn "renderArr: self clean, children clean";
                    return ()
                   }
           else let renderChildren x' y' arrs =
-                    do { -- putStrLn "renderHTML: self clean, children not clean"
+                    do { -- putStrLn "renderArr: self clean, children not clean"
                        ; let (x,y)=(lux+scaleInt scale x', luy+scaleInt scale y')
                        ; let childDiffTrees = case diffTree of
                                                 DiffLeaf c     -> repeat $ DiffLeaf c
                                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-                       ; sequence_ $ zipWith3 (renderHTML arrDb scale (x, y) viewedArea) 
+                       ; sequence_ $ zipWith3 (renderArr arrDb scale (x, y) viewedArea) 
                                        (case mPth of
                                           Nothing -> repeat Nothing
                                           Just pth -> [ Just $ pth++[i] | i <- [0..] ])
@@ -205,7 +205,7 @@ renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
 
         ; divOpen id x' y' w' h' bColor
-        ; sequence_ $ zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
+        ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
         ; divClose
         }
 
@@ -216,7 +216,7 @@ renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
 
         ; divOpen id x' y' w' h' bColor
-        ; sequence_ $ zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
+        ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
         ; divClose
         }
 
@@ -232,7 +232,7 @@ renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
               
         ; divOpen id x' y' w' h' bColor
         ; sequence_ $ order $
-            zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
+            zipWith (renderArr arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
         ; divClose
         
         }
@@ -250,10 +250,10 @@ renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
         
         
         ; divOpen id x' y' w' h' bColor
-        ; sequence_ $ reverse $ zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
+        ; sequence_ $ reverse $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
         
         ; svgStart
-        ; sequence_ $ reverse $ zipWith (renderHTML arrDb scale (x, y) viewedArea Nothing) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
+        ; sequence_ $ reverse $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing) edgeDiffTrees edgeArrs -- reverse so first is drawn in front
         ; svgEnd
         ; divClose
         }
@@ -265,7 +265,7 @@ renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
         
         ; divOpen id x' y' w' h' bColor
-        ; renderHTML arrDb scale (x, y) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderArr arrDb scale (x, y) viewedArea Nothing (head' "Renderer.renderArr" childDiffTrees) arr
         ; divClose
         }
 
@@ -289,7 +289,7 @@ renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderHTML arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderArr arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderArr" childDiffTrees) arr
         }
     
     (ParsingA id arr) ->
@@ -298,14 +298,14 @@ renderHTML arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
         ; let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderHTML arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderArr arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     (LocatorA _ arr) ->
      do { let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderHTML arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderHTML" childDiffTrees) arr
+        ; renderArr arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
     _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
