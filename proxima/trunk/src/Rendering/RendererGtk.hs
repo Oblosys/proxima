@@ -97,14 +97,8 @@ mkPopupMenuXY settings prs scale arr handler renderingLvlVar buffer viewedAreaRe
     ; contextMenu <- mkMenu menuItems
     ; return $ Just contextMenu                                          
     }
-
-escape [] = []
-escape ('_':cs) = escape cs
-escape ('{':cs) = escape cs
-escape ('}':cs) = escape cs
-escape (c:cs)   = c : escape cs
  
-render' scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
+render scale arrDb diffTree arrangement (wi,dw,gc) viewedArea =
  do { setLineCap LineCapRound
     ; setLineJoin LineJoinRound
 --    ; seq (length (show arrangement)) $ return ()

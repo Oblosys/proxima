@@ -11,7 +11,7 @@ import Rendering.Renderer
 import Evaluation.DocTypes (DocumentLevel)
 
 presentIO settings state high low =  castRemainingEditOps $ \editHigh ->
- do { let (editLow, state', high') = render settings state high low editHigh
+ do { let (editLow, state', high') = Rendering.RenPresent.render settings state high low editHigh
     ; return ([editLow], state', high')
     }
     
@@ -25,7 +25,7 @@ render :: (HasPath node, Show node) => Settings ->
 render settings state (ArrangementLevel arr focus prs) ren@(RenderingLevel scale _ _ _ _ debugging updRegions lmd) (SkipArr' 0) = 
    let arr'        = if debugging then debugArrangement arr else arr
        diffTree    = DiffLeaf False
-       rendering   = render' scale debugging diffTree arr' 
+       rendering   = Rendering.Renderer.render scale debugging diffTree arr' 
        focusRendering = renderFocus scale debugging focus arr'
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arr arr'
        size        = (widthA arr', heightA arr')
@@ -37,8 +37,8 @@ render settings state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel s
        diffTree    = diffArr arr' arrOld
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arrOld arr'
        rendering   = if rendererIncrementality settings 
-                     then render' scale debugging diffTree arr'
-                     else render' scale debugging (DiffLeaf False) arr'
+                     then Rendering.Renderer.render scale debugging diffTree arr'
+                     else Rendering.Renderer.render scale debugging (DiffLeaf False) arr'
        focusRendering = renderFocus scale debugging focus arr'
        size        = (widthA arr', heightA arr')
    in  {-debug Arr ("\n\n\nRender: old/new size "++ show (widthA arrOld, heightA arrOld)++ show (widthA arr', heightA arr')

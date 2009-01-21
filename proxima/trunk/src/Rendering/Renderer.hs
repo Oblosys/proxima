@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP #-} 
 -- CPP is enabled only for this module, since it slows the build process down quite a bit
-module Rendering.Renderer (render', renderFocus, mkPopupMenuXY, computeUpdatedRegions) where
+module Rendering.Renderer (render, renderFocus, mkPopupMenuXY, computeUpdatedRegions) where
 
 import Common.CommonTypes hiding (Rectangle)
 import qualified Common.CommonTypes as CommonTypes

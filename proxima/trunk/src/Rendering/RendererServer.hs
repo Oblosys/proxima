@@ -23,8 +23,7 @@ import System.IO
 import Control.Monad.Writer hiding (when)
 
 
--- todo this name sucks
-render' scale arrDb diffTree arrangement viewedArea =
+render scale arrDb diffTree arrangement viewedArea =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
     --; putStrLn $ "Rendering on viewedArea " ++ show viewedArea
     --; putStrLn $ "DiffTree is " ++ show diffTree
