@@ -4,7 +4,9 @@ module Rendering.RenUtils where
 import Common.CommonTypes
 import Rendering.RenTypes
 
+#ifndef SERVER
 import Graphics.UI.Gtk
+
 
 mkMenu :: [(String, IO ())] -> IO Menu
 mkMenu items =
@@ -22,3 +24,4 @@ mkMenu items =
 -- | Convert an rgb 3-tuple to a GTK color
 gtkColor :: Common.CommonTypes.Color -> Graphics.UI.Gtk.Color
 gtkColor (r, g, b) = Color (256*fromIntegral r) (256*fromIntegral g) (256*fromIntegral b)
+#endif

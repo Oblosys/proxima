@@ -55,8 +55,7 @@ instance Show (RenderingLevel_ wrapped doc enr node clip token) where
 type Scale = Double
 
 
-
--- to be put in RenTypesGUI
+#ifndef SERVER
 type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc enr node clip token, EditRendering_ wrapped doc enr node clip token) -> IO (RenderingLevel_ wrapped doc enr node clip token, [EditRendering'_ wrapped doc enr node clip token])) ->
                   IORef (RenderingLevel_ wrapped doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> 
                                 Int -> Int -> IO (Maybe Menu)
@@ -72,7 +71,8 @@ emptyGUICommand = (\_ _ _ _ _ _ _ x y -> return Nothing)
 emptyRendering :: Rendering
 emptyRendering = \dc va -> return ()
 
-{-
+#else
+
 type GUICommand wrapped doc enr node clip token = Int -> Int -> [PopupMenuItem doc clip]
                       
 type Rendering = (Point,Size) -> Writer String ()
@@ -87,7 +87,7 @@ emptyRendering = \va -> return ()
 
 type Point = (Int, Int)
 
--}
+#endif
 
 type Debugging = Bool
 type Size = (Int, Int)

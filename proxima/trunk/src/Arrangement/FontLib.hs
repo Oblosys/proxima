@@ -107,13 +107,13 @@ queryFont font =
           dscnt = round $ descent metrics
           hght = ascnt + dscnt
     
-
+{-
     ; debugLnIO Arr $      "Metrics for: "++show font 
                         ++ "\nascent:   " ++ show ascnt
                         ++ "\ndescent:  " ++ show dscnt
                         ++ "\nheight: " ++ show hght
     ; debugLnIO Arr $    "\nwidths:   " ++ show widths  
-   
+-} 
 
     ; return (font, (hght,ascnt,widths))
     }
