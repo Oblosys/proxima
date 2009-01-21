@@ -62,5 +62,3 @@ collectWhitespace tokenPos scs =
   in  ( ScannedWhitespace (getFocusStartEnd scs) scannedWhitespace
       , tokenPos
       )
-
-                         

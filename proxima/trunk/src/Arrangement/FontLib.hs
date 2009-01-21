@@ -159,4 +159,3 @@ mkFontMetricsHTML fonts =
        lookupFont queries font = case lookup (fFamily font, fSize font)  queries of
                                    Nothing -> Nothing
                                    Just metrics -> Just (font, metrics)
-       
