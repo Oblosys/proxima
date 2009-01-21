@@ -15,16 +15,18 @@ import Arrangement.ArrLayerUtils (point, popupMenuItemsPres, pathPFromPathA')  -
 import Layout.LayTypes hiding (Point)
 
 import Evaluation.DocTypes (DocumentLevel)
-import Proxima.GUIGtk
 import Arrangement.FontLib
 
-import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout, fill, setSourceColor)
-import Graphics.Rendering.Cairo hiding (Path)
 import System.IO.Unsafe
 import Data.IORef
 import System.IO
 import Control.Monad.Writer hiding (when)
------
+
+#ifndef SERVER
+import Graphics.UI.Gtk hiding (Scale, Solid, Size, Layout, fill, setSourceColor)
+import Graphics.Rendering.Cairo hiding (Path)
+import Proxima.GUIGtk
+#endif
 
 arrowHeadSize :: Double
 arrowHeadSize = 10
@@ -62,7 +64,7 @@ computeUpdatedRegions oldUpdRegions scale focus diffTree oldArrangement arrangem
   in if oldW>newW || oldH > newH     -- if arr got smaller, repaint whole thing for now
      then [((0, 0),(max oldW newW, max oldH newH))]
      else updatedRectArr diffTree arrangement  
-
+{-
 mkPopupMenuXY :: (DocNode node, Show token) => Settings ->
                  Layout doc node clip token -> Scale -> Arrangement node ->
                  ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) ->
@@ -778,8 +780,8 @@ renderID (wi,dw,gc) scale x y id  =
         _ -> return ()
     }
 
+-- debug colors only supported for Gtk rendering
 
--- debug colors
 stringColor       = gtkColor (0, 255, 255)
 imageColor        = gtkColor (92, 64, 0)
 rowColor          = gtkColor (255, 0, 0)
@@ -789,6 +791,28 @@ graphColor        = gtkColor (255, 255, 0)
 vertexColor       = gtkColor (255, 0, 255)
 structuralBGColor = gtkColor (230, 230, 255)
 parsingBGColor    = gtkColor (255, 230, 230)
+
+-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+layoutFocusColor = CommonTypes.blue
 
 
 -- focus is not perfect, but this has to do with the selection algorithm as well.
@@ -845,7 +869,6 @@ mkFocusList' p i x' y' focus@(FocusA (PathA stp sti) (PathA enp eni))(a:as) =
 mkFocusList' p i x' y' focus arr = debug Err ("Renderer.mkFocusList': unimplemented arrangement: "++show focus++" "++show arr) []
 
 
-layoutFocusColor = CommonTypes.blue
 
 -- ref lines not used, because caret is not incrementally rendered
 -- because of line/box difference (line x y (x+w) y) is wider than (box x y w h) all to points are decreased
@@ -874,7 +897,7 @@ arrangedFocusArea fArrList = -- compute the region that is covered by the focus
 
 
 -- todo this name sucks
-renderHTML' scale arrDb diffTree arrangement viewedArea =
+render' scale arrDb diffTree arrangement viewedArea =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
     --; putStrLn $ "Rendering on viewedArea " ++ show viewedArea
     --; putStrLn $ "DiffTree is " ++ show diffTree
@@ -891,7 +914,7 @@ renderHTML' scale arrDb diffTree arrangement viewedArea =
 -- this makes it tricky to move the debuggedArrangement, since the Gest.Int. will not know about it
 -- however, we don't want to debug the focus
     
-renderFocusHTML scale arrDb focus arrangement viewedArea =
+renderFocus scale arrDb focus arrangement viewedArea =
  do { -- clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
 
     ; let focusArrList = arrangeFocus focus arrangement
@@ -910,10 +933,10 @@ renderFocusHTML scale arrDb focus arrangement viewedArea =
 
 
 
-mkPopupMenuXYHTML :: (DocNode node, Show token) => Settings ->
+mkPopupMenuXY :: (DocNode node, Show token) => Settings ->
                  Layout doc node clip token -> Scale -> Arrangement node ->
                  Int -> Int -> [PopupMenuItem doc clip]
-mkPopupMenuXYHTML settings prs scale arr x' y' =
+mkPopupMenuXY settings prs scale arr x' y' =
   let (x,y) = (descaleInt scale x',descaleInt scale y')
       ctxtItems = case point x y arr of
                         Nothing -> []

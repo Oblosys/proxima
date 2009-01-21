@@ -125,7 +125,11 @@ proxima settings presentationSheet parseSheet scannerSheet
                      }
                       -- initial RenderingLevel 
     ; startGUI settings handler viewedAreaRef
-                       ( RenderingLevel 1.0 (\_ _ _ _ _ _ _ x y -> return Nothing) (\_ _ -> []) (\_ _ -> return ()) (\_ _ -> return ()) (\_ -> return ()) (\_ -> return ()) (0,0) False  
+                       ( RenderingLevel 1.0 emptyGUICommand
+                                            emptyRendering
+                                            emptyRendering 
+                                            (0,0)
+                                            False  
                                             []
                                             False
                        , initEvent)

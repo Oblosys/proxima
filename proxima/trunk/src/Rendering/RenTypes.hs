@@ -1,7 +1,11 @@
+{-# LANGUAGE CPP #-}
 module Rendering.RenTypes where
 
+#ifndef SERVER
 import Graphics.UI.Gtk hiding (Scale, Size, Rectangle)
 import Graphics.Rendering.Cairo
+#endif
+
 import Data.IORef
 
 import Common.CommonTypes
@@ -13,12 +17,10 @@ import Evaluation.DocTypes
 import Presentation.PresTypes (PopupMenuItem)
 
 data RenderingLevel_ wrapped doc enr node clip token = 
-       RenderingLevel Scale (GUICommand wrapped doc enr node clip token) 
-                      (Int -> Int -> [PopupMenuItem doc clip])  -- html popup
+       RenderingLevel Scale 
+                      (GUICommand wrapped doc enr node clip token) -- used for popups
                       Rendering -- rendering
                       Rendering -- focus rendering
-                      RenderingHTML
-                      RenderingHTML -- focus
                       Size Debugging UpdatedRegions LeftButtonDown
                   
 type LocalStateRen = ()
@@ -44,36 +46,51 @@ data EditRendering_ wrapped doc enr node clip token =
 
 
 instance Show (RenderingLevel_ wrapped doc enr node clip token) where
-  show (RenderingLevel scale _ _ _ _ _ _ size debugging updRegions leftButtonDown) =
+  show (RenderingLevel scale _ _ _ size debugging updRegions leftButtonDown) =
        "RenderingLevel {Scale: "++show scale++"} {GUICommand} {Rendering} "++show size++" {debug:" ++ show debugging ++ "}\n"
     ++ "               {updated regions:"++show updRegions++"}{leftButtonDown:"++show leftButtonDown++"}\n"
 
 
 type Scale = Double
+
+
+{-
+-- to be put in RenTypesGUI
 type GUICommand wrapped doc enr node clip token = ((RenderingLevel_ wrapped doc enr node clip token, EditRendering_ wrapped doc enr node clip token) -> IO (RenderingLevel_ wrapped doc enr node clip token, [EditRendering'_ wrapped doc enr node clip token])) ->
                   IORef (RenderingLevel_ wrapped doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea -> 
                                 Int -> Int -> IO (Maybe Menu)
 -- GUICommand is currently only used for popup menus
 
--- to be put in RenTypesGUI
+
 type Rendering = DrawableClass drawWindow => (Window, drawWindow, GC) -> (Point,Size) -> Render ()
                                                                       -- viewd area ((x,y),(w,h))
 
+emptyGUICommand :: GUICommand wrapped doc enr node clip token
+emptyGUICommand = (\_ _ _ _ _ _ _ x y -> return Nothing)
+
+emptyRendering :: Rendering
+emptyRendering = \dc va -> return ()
+
+-}
 
 -- to be put in RenTypesServer
 -- also move import Writer
-
-type RenderingHTML = (Point,Size) -> Writer String ()
-                     -- viewed area ((x,y),(w,h))
+type GUICommand wrapped doc enr node clip token = Int -> Int -> [PopupMenuItem doc clip]
+                      
+-- The () is here because the Gtk version has some extra parameters
+type Rendering = (Point,Size) -> Writer String ()
+                 -- viewed area ((x,y),(w,h))
 
 --
+emptyGUICommand :: GUICommand wrapped doc enr node clip token
+emptyGUICommand = (\_ _ -> [])
 
+emptyRendering :: Rendering
+emptyRendering = \va -> return ()
 
 type Debugging = Bool
 type Size = (Int, Int)
-
-emptyR :: Rendering
-emptyR dc va = return ()
+type Point = (Int, Int)
 
 origin :: (Int, Int)
 origin = (0,0)

@@ -134,7 +134,7 @@ onMouse :: Settings ->
            IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
            Event -> IO Bool
 onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas evt@(Button _ ReleaseClick tm x y _ RightButton _ _) =
- do { (RenderingLevel _ makePopupMenu _ _ _ _ _ _ _ _ _)  <- readIORef renderingLvlVar
+ do { (RenderingLevel _ makePopupMenu _ _ _ _ _ _)  <- readIORef renderingLvlVar
     ; mContextMenu <- makePopupMenu handler renderingLvlVar buffer viewedAreaRef window vp canvas (round x) (round y)
     ; case mContextMenu of
        Just contextMenu ->
@@ -145,7 +145,7 @@ onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas e
        Nothing -> return False
     }
 onMouse settings handler renderingLvlVar buffer viewedAreaRef window vp canvas mouseEvt =
- do { (RenderingLevel _ _ _ _ _ _ _ _ _ _ leftMouseDown) <- readIORef renderingLvlVar
+ do { (RenderingLevel _ _ _ _ _ _ _ leftMouseDown) <- readIORef renderingLvlVar
     ; let editRendering = 
             case mouseEvt of 
               Button _ SingleClick _ x y mods LeftButton _ _   -> MouseDownRen (round x) (round y) (translateModifiers mods) 1

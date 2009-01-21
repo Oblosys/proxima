@@ -141,7 +141,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Com
  
     ; let renderingHTML = concat . concat $ renderingHTMLss
 
-    ; focusRenderingHTML <- drawFocusHTML settings renderingLvlVar viewedAreaRef
+    ; focusRenderingHTML <- drawFocusHTML settings renderingLvlVar viewedAreaRef 
 
 
 
@@ -202,7 +202,7 @@ handleMetrics ('M':'e':'t':'r':'i':'c':'s':event) =
 handleContextMenuRequest renderingLvlVar menuR ('C':'o':'n':'t':'e':'x':'t':'R':'e':'q':'u':'e':'s':'t':event) =
  do { let ((proxX,proxY),(screenX,screenY)) :: ((Int,Int),(Int,Int)) = read event
 
-    ; (RenderingLevel _ _ makePopupMenuHTML _ _ _ _ _ _ _ _)  <- readIORef renderingLvlVar
+    ; (RenderingLevel _ makePopupMenuHTML _ _ _ _ _ _)  <- readIORef renderingLvlVar
     ; let (itemStrs,upds) = unzip $ makePopupMenuHTML proxX proxY
           itemsHTML = concat 
                         [ "<div class='menuItem' item='"++show i++"'>"++item++"</div>"
@@ -313,7 +313,7 @@ genericHandlerServer :: (Show token, Show node, Show enr, Show doc) => Settings 
                IORef (RenderingLevel doc enr node clip token) -> IORef CommonTypes.Rectangle -> 
                EditRendering doc enr node clip token -> IO [String]
 genericHandlerServer settings handler renderingLvlVar viewedAreaRef evt =   
- do { renderingLvl@(RenderingLevel _ _ _ _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
+ do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
     ; putStrLn $ "Generic handler server started for edit op: " ++ show evt
     ; viewedArea <- readIORef viewedAreaRef
 --    ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
@@ -323,8 +323,8 @@ genericHandlerServer settings handler renderingLvlVar viewedAreaRef evt =
     ; return $ htmlRenderings
     }
  where process (SkipRen' _) = return "" -- set the renderingLvlVar ??
-       process (SetRen' renderingLvl''@(RenderingLevel scale _ _ _ _ renderingHTML _ (newW,newH) _ updRegions _)) =
-         do { (RenderingLevel _ _ _ _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
+       process (SetRen' renderingLvl''@(RenderingLevel scale _ renderingHTML _ (newW,newH) _ updRegions _)) =
+         do { (RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
             ; writeIORef renderingLvlVar renderingLvl''
   --          ; putStrLn $ "Drawing " ++ show (w,h) ++ show (newW,newH)
             
@@ -335,7 +335,7 @@ genericHandlerServer settings handler renderingLvlVar viewedAreaRef evt =
     
 
 drawFocusHTML settings renderingLvlVar viewedAreaRef = 
- do { RenderingLevel scale _ _ _ _ _ focusRenderingHTML (w,h) debug updRegions _ <- readIORef renderingLvlVar
+ do { RenderingLevel scale _ _ focusRenderingHTML (w,h) debug updRegions _ <- readIORef renderingLvlVar
     ; viewedArea <- readIORef viewedAreaRef
     ; let htmlFocusRendering = execWriter $ focusRenderingHTML viewedArea
     ; return htmlFocusRendering

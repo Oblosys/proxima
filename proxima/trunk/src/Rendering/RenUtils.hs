@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 module Rendering.RenUtils where
 
 import Common.CommonTypes
