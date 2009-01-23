@@ -115,7 +115,7 @@ modifyResponseW modResp w =
 noCache :: Response -> Response  
 noCache = addHeader "Expires" "Mon, 28 Jul 2000 11:24:47 GMT"
 -- TODO: figure out if noCache is really necessary, both for editor.xml and handle
-
+-- It does not work for IE
  
 withAgentIsMIE f = withRequest $ \rq -> 
                      (unServerPartT $ f ("MSIE" `isInfixOf` (show $ getHeader "user-agent" rq))) rq
@@ -132,8 +132,8 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
                                                then setHeader "Content-Type" "text/html"
                                                else id
                                            
-                         ; modifyResponseSP (setTypeToHTML) $
-                             fileServe [] "../proxima/scripts/Editor.xml" 
+                         ; modifyResponseSP (noCache. setTypeToHTML) $
+                              fileServe [] "../proxima/scripts/Editor.xml" 
                          })
                  
 
