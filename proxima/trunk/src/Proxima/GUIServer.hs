@@ -69,6 +69,21 @@ startEventLoop params = withProgName "proxima" $
  where time = return . ("\ntime: " ++ ) . show  =<< getClockTime
 
 {-
+HAPPS
+Server error: Prelude.last: empty list
+is the error you get when fileServe cannot find a file
+
+ServerPart is basically a Reader monad for requests
+
+The Ok part of the WebT monad contains a function out that is applied to the responses before
+sending them to the client. If the result is of type Response, set/addHeader can be fmapped to
+the monad, but it will only do something if the header is not set in the out part of Ok.
+
+Header modifications must therefore be applied to out rather than be fmapped to the monad.
+-}
+
+
+{-
 handle:
 http://<server url>/                    response: <proxima executable dir>/../proxima/scripts/Editor.xml
 http://<server url>/favicon.ico         response: <proxima executable dir>/img/favicon.ico
@@ -79,34 +94,47 @@ http://<server url>/handle?commands=<commands separated by ;>
 TODO: The proxima server requires that the proxima directory is present for favicon and 
       Editor.xml, these files should be part of a binary distribution.
 -}
+{-
+overrideHeaders :: [(String,String)] -> ServerPart a -> ServerPart a
+overrideHeaders headers s =
+ do { response <- s
+    ; modifyResponse (setHeader "Content-Type" "text/xml")
+    ; return s
+    } 
+-}
+modifyResponseSP :: (Response -> Response) -> ServerPart a -> ServerPart a
+modifyResponseSP modResp (ServerPartT f) =
+  withRequest $ \rq -> modifyResponseW modResp $ f rq
+    
+modifyResponseW modResp w =
+ do { a <- w
+    ; modifyResponse modResp
+    ; return a
+    }
+    
+noCache :: Response -> Response  
+noCache = addHeader "Expires" "Mon, 28 Jul 2000 11:24:47 GMT"
+-- TODO: figure out if noCache is really necessary, both for editor.xml and handle
 
--- addHeader "Content-type:" "text/xml" does 
-bla (ServerPartT n) (ServerPartT ie) = ServerPartT $ \rq -> 
-                        if "MSIE" `isInfixOf` (show $ getHeader "user-agent" rq)
-                        then debug Ren ("Internet Explorert") $ ie rq
-                        else  debug Ren ("Something else") $ n rq
+ 
+withAgentIsMIE f = withRequest $ \rq -> 
+                     (unServerPartT $ f ("MSIE" `isInfixOf` (show $ getHeader "user-agent" rq))) rq
+                     -- not the most elegant method of checking for Internet explorer
+
 -- handlers :: [ServerPartT IO Response]
 handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR = 
   -- debugFilter $
-  [ bla 
-    (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
-                        liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
-                        -- todo: take this from an init event
-                          
-                      ; let ServerPartT f =  fileServe [] "../proxima/scripts/Editor.html" 
-                      ; withRequest $ \rq -> do { result <- f rq
-                                                ; modifyResponse (setHeader "Content-Type" "text/xml")
-                                                ; return result
-                                                } 
-                      })
-    (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
-                        liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
-                        -- todo: take this from an init event
-                      ; fmap ( noCache .
-                               addHeader "Content-Type" "text/xhtml"
-                             ) $
-                          fileServe [] "../proxima/scripts/Editor.html" 
-                      })
+  [ withAgentIsMIE $ \agentIsMIE ->
+      (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
+                           liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
+                           -- todo: take this from an init event
+                         ; let setTypeToHTML = if agentIsMIE 
+                                               then setHeader "Content-Type" "text/html"
+                                               else id
+                                           
+                         ; modifyResponseSP (setTypeToHTML) $
+                             fileServe [] "../proxima/scripts/Editor.xml" 
+                         })
                  
 
   , dir "img"
@@ -123,16 +151,13 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
                                                          cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
-                             ; ok $ addHeader "Content-Type:" "text/xml" $
-                                    noCache $
-                                    toResponse $ responseHTML
+                             ; modifyResponseW noCache $
+                                ok $ toResponse responseHTML
                              }
                         ])
    ]
   ]
 
-noCache :: Response -> Response  
-noCache = addHeader "Expires" "Mon, 28 Jul 2000 11:24:47 GMT"
 
 data Commands = Commands String deriving Show
 
