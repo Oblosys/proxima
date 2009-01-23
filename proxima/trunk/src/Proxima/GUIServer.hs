@@ -80,16 +80,34 @@ TODO: The proxima server requires that the proxima directory is present for favi
       Editor.xml, these files should be part of a binary distribution.
 -}
 
+-- addHeader "Content-type:" "text/xml" does 
+bla (ServerPartT n) (ServerPartT ie) = ServerPartT $ \rq -> 
+                        if "MSIE" `isInfixOf` (show $ getHeader "user-agent" rq)
+                        then debug Ren ("Internet Explorert") $ ie rq
+                        else  debug Ren ("Something else") $ n rq
 -- handlers :: [ServerPartT IO Response]
 handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR = 
   -- debugFilter $
-  [ 
-    methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
+  [ bla 
+    (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
                         liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
                         -- todo: take this from an init event
-                      ; fmap noCache $
-                          fileServe [] "../proxima/scripts/Editor.xml" 
-                      }
+                          
+                      ; let ServerPartT f =  fileServe [] "../proxima/scripts/Editor.html" 
+                      ; withRequest $ \rq -> do { result <- f rq
+                                                ; modifyResponse (setHeader "Content-Type" "text/xml")
+                                                ; return result
+                                                } 
+                      })
+    (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
+                        liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
+                        -- todo: take this from an init event
+                      ; fmap ( noCache .
+                               addHeader "Content-Type" "text/xhtml"
+                             ) $
+                          fileServe [] "../proxima/scripts/Editor.html" 
+                      })
+                 
 
   , dir "img"
         [ fileServe [] "img" ]  
@@ -114,7 +132,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
   ]
 
 noCache :: Response -> Response  
-noCache = addHeader "Expires:" "Mon, 28 Jul 2000 11:24:47 GMT"
+noCache = addHeader "Expires" "Mon, 28 Jul 2000 11:24:47 GMT"
 
 data Commands = Commands String deriving Show
 
