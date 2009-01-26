@@ -139,12 +139,12 @@ proxima settings presentationSheet parseSheet scannerSheet
  `Control.Exception.catch`
    \err -> 
     do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
-       ; print err
+       ; print $ (err :: SomeException)
        ; putStrLn "\n<Press return to exit>"
        ; getLine
        ; return ()
        } -- This way, the dos window on Windows does not exit until the user can see the error.
-       
+    
 
 {- on all layers:
 group edit commands that have similar behaviour, the data structure will be neater and common behaviour

@@ -12,6 +12,7 @@ TODO: fix wrong hRef (hSpaces are the problem)
 
 -}
 import Graphics.UI.Gtk hiding (Size) --, Socket)
+import Graphics.UI.Gtk.Gdk.Events
 import Data.IORef
 
 import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO
@@ -91,16 +92,18 @@ startEventLoop _ = mainGUI
 
 -- GTK somehow catches exceptions that occur in event handlers, and terminates the program. To
 -- prevent this, we catch the exception in the event handler itself.
-withCatch io = io
- `Control.Exception.catch`
-   \err -> 
-    do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
-       ; print err
-       ; putStrLn "\n<Press return to exit>"
-       ; getLine
-       ; mainQuit
-       ; return undefined
-       } -- This way, the dos window on Windows does not exit until the user can see the error.
+withCatch :: IO a -> IO a
+withCatch io = io `Control.Exception.catch` handler
+ where handler :: SomeException-> IO a
+       handler err =
+        do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
+           ; print err
+           ; putStrLn "\n<Press return to exit>"
+           ; getLine
+           ; mainQuit
+           ; return undefined
+           } -- This way, the dos window on Windows does not exit until the user can see the error.
+
 
 -- withCatch for handlers that take one argument
 catchHandler handler = \e -> withCatch $ handler e

@@ -176,7 +176,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Com
    -- ; putStrLn $ "Received commands:"++ show commands
     
     ; renderingHTMLss <-
-        mapM (handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle)
+        mapM (handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR)
              commands
  
     ; let renderingHTML = concat . concat $ renderingHTMLss
@@ -205,7 +205,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Com
     }
     
     
-handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR handle event =
+handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR event =
  do { -- putStrLn $ "Handling: " ++ take 70 event
      if "Metrics" `isPrefixOf` event  -- is not handled by genericHandler
       then handleMetrics event
