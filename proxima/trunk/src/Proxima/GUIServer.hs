@@ -216,7 +216,8 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
                               _                       -> ""
                         
                     ; responseHTML <- 
-                        liftIO $ handleCommands params initR menuR (Commands commandsStr)
+                        liftIO $ handleCommands params initR menuR 
+                                   (Commands $ fixBrackets commandsStr)
 
                     ; sendStrLn $ responseHTML
                     })
@@ -236,6 +237,10 @@ hFakeDir dir handler def =
   $ def
 
 
+fixBrackets "" = ""
+fixBrackets ('*':cs) = '[' : fixBrackets cs
+fixBrackets ('_':cs) = ']' : fixBrackets cs
+fixBrackets (c:cs) = c : fixBrackets cs
 
 splitCommands commandStr =
   case break (==';') commandStr of
