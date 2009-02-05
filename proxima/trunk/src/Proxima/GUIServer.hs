@@ -29,6 +29,7 @@ import Control.Concurrent
 -- Salvia imports
 import Data.Maybe
 import Data.Record.Label
+--import Misc.Misc
 import Control.Concurrent.STM
 import Control.Monad.State
 import Network.Protocol.Http
@@ -199,7 +200,7 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
  do { let handler =
             hPathRouter
              [ ("/",            do { liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
-                                   ; hFileResource "../proxima/scripts/Editor.xml"
+                                   ; hFileResource "../proxima/scripts/EditorSalvia.xml"
                                    }
                )
              
@@ -214,12 +215,18 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
                             case lookup "commands" parameters of
                               Just (Just commandsStr) -> commandsStr
                               _                       -> ""
-                        
+                    
                     ; responseHTML <- 
                         liftIO $ handleCommands params initR menuR 
                                    (Commands $ fixBrackets commandsStr)
+                    ; liftIO $ putStrLn $ "resonse" ++ responseHTML    
+                    ; enterM response $ do
+                        setM contentLength (Just $ fromIntegral $ length responseHTML )
+                        setM contentType ("text/plain", Nothing)
+                        setM (comp safeRead (show) (header "Conttent-Length"))
+                             (Just 29)
 
-                    ; sendStrLn $ responseHTML
+                    ; sendStr $ responseHTML
                     })
              $ do { badRequest <- getM (path % uri % request)
                   ; liftIO $ putStrLn $ show badRequest
@@ -229,12 +236,30 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
     ; defaultC <- defaultConfig  
     ; start (defaultC {listenPort = 8080}) $ hSimple handler
     }
-    
+{-
+Connection	Keep-Alive
+Content-Length	686
+Content-Type	text/plain
+Date	Thu, 05 Feb 2009 19:13:29 GMT
+Expires	Mon, 28 Jul 2000 11:24:47 GMT
+Server	HAppS/0.9.2
+
+GET /handle?commands=Key(116,(False,False,False)); HTTP/1.2
+GET /handle?commands=Metrics((%22Times%20New%20Roman%22,12),(19,15,[40,50,50,80,80,130,120,30,50,50,80,90,40,60,40,40,80,80,80,80,80,80,80,80,80,80,30,40,120,90,90,70,150,110,100,110,110,90,90,110,110,50,60,120,90,140,120,120,90,120,100,90,90,110,110,150,110,110,90,50,40,50,80,80,50,70,80,70,80,70,40,70,70,30,40,80,30,110,70,80,80,80,50,60,40,70,70,110,70,70,60,70,30,80,90,130,130,130,130,130,130,0,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,130,40,50,80,80,80,80,30,80,50,120,50,70,90,0,120,80,60,90,50,50,50,70,70,40,40,50,50,70,120,120,120,70,110,110,110,110,110,110,130,110,90,90,90,90,50,50,50,50,110,120,120,120,120,120,120,90,120,110,110,110,110,110,100,80,70,70,70,70,70,70,110,70,70,70,70,70,30,30,30,30,80,70,80,80,80,80,80,90,80,70,70,70,70,70,80,70]));
+
+-}
 hFakeDir :: FilePath -> Handler () -> Handler () -> Handler ()
 hFakeDir dir handler def = 
     hPath   dir (hRedirect $ fromJust $ parseURI (dir ++ "/"))
   $ hPrefix dir handler
   $ def
+
+
+-- cannot import Misc.Misc??? (because salvia 0.0.5 is supposedly hidden)
+safeRead :: Read a => String -> Maybe a
+safeRead s = case reads s of
+  [(x, "")] -> Just x
+  _         -> Nothing
 
 
 fixBrackets "" = ""

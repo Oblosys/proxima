@@ -118,12 +118,12 @@ function queryFont(fontFamily, fontSize)
 
   var metrics = '(("'+fontFamily+'",'+fontSize+'),('+height + ',' + baseline + ',';
   var linesElt = fontElt.childNodes[0];
-  var widths = '*'; // Salvia URI parse bug workaround (was '[')
+  var widths = '['; // Salvia URI parse bug workaround (was '[')
   for (var childNr = 0; childNr <= endRange - beginRange; childNr++)
   { var line = linesElt.childNodes[childNr];
     widths += (childNr == 0 ? '' : ',') + (line.clientWidth);
   }
-  widths += '_'; // Salvia URI parse bug workaround (was ']')
+  widths += ']'; // Salvia URI parse bug workaround (was ']')
   metrics += widths + '))';
   return metrics;
 }
