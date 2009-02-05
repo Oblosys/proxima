@@ -11,24 +11,45 @@ import Proxima.Wrap
 
 import Data.Time.Clock
 import Control.Exception
+import Data.Char
 
+{- HAppS
 import HAppS.Server
 import HAppS.Server.SimpleHTTP
 import HAppS.State
 import System.Environment
-import Control.Concurrent
 import System.Time
 import Control.Monad.Trans
 import Control.Monad
 import Data.List
-import Data.Char
+-}
+import Control.Concurrent
+
+
+-- Salvia imports
+import Data.Maybe
+import Data.Record.Label
+import Control.Concurrent.STM
+import Control.Monad.State
+import Network.Protocol.Http
+import Network.Protocol.Uri
+import Network.Salvia.Httpd
+import Network.Salvia.Handlers.Default
+import Network.Salvia.Handlers.Printer
+import Network.Salvia.Handlers.Error
+import Network.Salvia.Handlers.FileSystem
+import Network.Salvia.Handlers.Redirect
+import Network.Salvia.Advanced.ExtendedFileSystem
+import Network.Salvia.Handlers.Login (readUserDatabase, UserPayload)
+import Network.Salvia.Handlers.Session (mkSessions, Sessions)
+import Network.Salvia.Handlers.PathRouter
+import Network.Salvia.Handlers.File
+
 
 import Data.List
 import Evaluation.DocTypes (DocumentLevel, EditDocument'_ (..))
 import Arrangement.ArrTypes
 import Presentation.PresTypes (UpdateDoc)
-import HAppS.Server
-import HAppS.State
 import System.Environment
 import Control.Concurrent
 import System.Time
@@ -51,6 +72,14 @@ initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize) =
 -- withCatch is identity in GUIServer, it is defined only in the GUIGtk module.
 withCatch io = io
 
+
+startEventLoop params = withProgName "proxima" $
+ do { initR <- newIORef (True)
+    ; menuR <- newIORef []
+
+    ; salviaServer params initR menuR
+    }
+{-
 startEventLoop params = withProgName "proxima" $
  do { initR <- newIORef (True)
     ; menuR <- newIORef []
@@ -159,10 +188,54 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
   ]
 
 
-data Commands = Commands String deriving Show
 
 instance FromData Commands where
   fromData = liftM Commands (look "commands")
+-}
+
+data Commands = Commands String deriving Show
+
+salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
+ do { let handler =
+            hPathRouter
+             [ ("/",            do { liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
+                                   ; hFileResource "../proxima/scripts/Editor.xml"
+                                   }
+               )
+             
+             , ("/favicon.ico", hFileResource "../proxima/etc/favicon.ico")
+             ]
+             $ hFakeDir "/img"    (hFileSystem "img")
+             $ hFakeDir "/handle" 
+                (do { liftIO $ putStrLn "handle"
+                    ; parameters <- hParameters
+                    -- ; liftIO $ putStrLn $ show parameters
+                    ; let commandsStr = 
+                            case lookup "commands" parameters of
+                              Just (Just commandsStr) -> commandsStr
+                              _                       -> ""
+                        
+                    ; responseHTML <- 
+                        liftIO $ handleCommands params initR menuR (Commands commandsStr)
+
+                    ; sendStrLn $ responseHTML
+                    })
+             $ do { badRequest <- getM (path % uri % request)
+                  ; liftIO $ putStrLn $ show badRequest
+                  ; hCustomError BadRequest $ "Unhandled request" ++ show badRequest
+                  }
+         
+    ; defaultC <- defaultConfig  
+    ; start (defaultC {listenPort = 8080}) $ hSimple handler
+    }
+    
+hFakeDir :: FilePath -> Handler () -> Handler () -> Handler ()
+hFakeDir dir handler def = 
+    hPath   dir (hRedirect $ fromJust $ parseURI (dir ++ "/"))
+  $ hPrefix dir handler
+  $ def
+
+
 
 splitCommands commandStr =
   case break (==';') commandStr of
