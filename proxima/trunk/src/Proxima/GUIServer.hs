@@ -151,6 +151,11 @@ withAgentIsMIE f = withRequest $ \rq ->
                      (unServerPartT $ f ("MSIE" `isInfixOf` (show $ getHeader "user-agent" rq))) rq
                      -- not the most elegant method of checking for Internet explorer
 
+                     -- IE does not support SVG and XHTML
+                     -- XHTML is not a big problem, but for SVG we need an alternative
+                     -- Maybe we also need to switch to POST for IE, since it
+                     -- cannot handle large queries with GET
+                     
 -- handlers :: [ServerPartT IO Response]
 handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR = 
   -- debugFilter $
@@ -207,7 +212,7 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
              , ("/favicon.ico", hFileResource "../proxima/etc/favicon.ico")
              ]
              $ hFakeDir "/img"    (hFileSystem "img")
-             $ hFakeDir "/handle" 
+             $ -- hFakeDir "/handle" 
                 (do { liftIO $ putStrLn "handle"
                     ; parameters <- hParameters
                     -- ; liftIO $ putStrLn $ show parameters
@@ -223,16 +228,15 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
                     ; enterM response $ do
                         setM contentLength (Just $ fromIntegral $ length responseHTML )
                         setM contentType ("text/plain", Nothing)
-                        setM (comp safeRead (show) (header "Conttent-Length"))
-                             (Just 29)
-
+--                        setM (comp safeRead (show) (header "Conttent-Length"))
+--                             (Just 29)
                     ; sendStr $ responseHTML
                     })
-             $ do { badRequest <- getM (path % uri % request)
+          {-   $ do { badRequest <- getM (path % uri % request)
                   ; liftIO $ putStrLn $ show badRequest
                   ; hCustomError BadRequest $ "Unhandled request" ++ show badRequest
                   }
-         
+         -}
     ; defaultC <- defaultConfig  
     ; start (defaultC {listenPort = 8080}) $ hSimple handler
     }
