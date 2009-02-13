@@ -3,6 +3,7 @@ module Main where
 import Data.Maybe
 import Data.Record.Label
 import Control.Concurrent.STM
+import Control.Concurrent
 import Control.Monad.State
 import Network.Protocol.Http
 import Network.Protocol.Uri
@@ -25,9 +26,37 @@ error "AAAAp" in Parser.hs
 
 
 -}
+-- these requests fail:
+
+-- localhost:8080/?commands=[
+-- localhost:8080/?commands=%5b
 
 main =
  do { let handler =
+           do { params <- hParameters
+              ; liftIO $ putStrLn $ show params
+              ; let commandsStr = 
+                      case lookup "commands" params of
+                        Just (Just commandsStr) -> commandsStr
+                        _                       -> ""
+                    
+              ; sendStr $ "<b>CommandsString is </b>" ++ commandsStr
+              }
+              
+    ; defaultC <- defaultConfig  
+    ; tId <- forkIO $ start (defaultC {listenPort = 8080}) $ hSimple handler
+    ; putStrLn "Press <Enter> to terminate server"
+    ; getLine
+    ; killThread tId 
+    }
+    
+hFakeDir :: FilePath -> Handler () -> Handler () -> Handler ()
+hFakeDir dir handler def = 
+    hPath   dir (hRedirect $ fromJust $ parseURI (dir ++ "/"))
+  $ hPrefix dir handler
+  $ def
+
+{-
             hPathRouter
              [ ("/",            hFileResource "editor.xml")
              , ("/favicon.ico", hFileResource "favicon.ico")
@@ -47,18 +76,12 @@ main =
              $ do { badRequest <- getM (path % uri % request)
                   ; hCustomError BadRequest $ "Unhandled request" ++ show badRequest
                   }
-         
-    ; defaultC <- defaultConfig  
-    ; start (defaultC {listenPort = 8080}) $ hSimple handler
-    }
-    
-hFakeDir :: FilePath -> Handler () -> Handler () -> Handler ()
-hFakeDir dir handler def = 
-    hPath   dir (hRedirect $ fromJust $ parseURI (dir ++ "/"))
-  $ hPrefix dir handler
-  $ def
 
-{-
+
+
+
+
+
 main =
  do { defaultC <- defaultConfig
     ; count    <- atomically $ newTVar 0
