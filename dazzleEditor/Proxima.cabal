@@ -30,14 +30,16 @@ Flag server
 -- (maybe a ghc bug?)
 
 Executable DazzleEditor
-  build-depends: base -any, haskell98 -any,
+  build-depends: base <4.0, haskell98 -any,
+                 
                  network >=2.0, parsec >=2.0, time >=1.0, containers >=0.1,
                  array >=0.1, xhtml >=2.0, mtl >=1.1,
                  old-time -any
   if !flag(server)
     build-depends: gtk >=0.9.11, cairo >= 0.9
   else
-    build-depends: HAppS-State >= 0.9.3, HAppS-Server >= 0.9.3
+    build-depends: salvia == 0.0.5, stm -any, fclabels -any
+--    build-depends: HAppS-State >= 0.9.3, HAppS-Server >= 0.9.3
   main-is: Main.hs
   buildable: True
   cc-options:
