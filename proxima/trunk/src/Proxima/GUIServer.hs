@@ -205,14 +205,14 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
  do { let handler =
             hPathRouter
              [ ("/",            do { liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
-                                   ; hFileResource "../proxima/scripts/EditorSalvia.xml"
+                                   ; hFileResource "../proxima/scripts/Editor.xml"
                                    }
                )
              
              , ("/favicon.ico", hFileResource "../proxima/etc/favicon.ico")
              ]
              $ hFakeDir "/img"    (hFileSystem "img")
-             $ -- hFakeDir "/handle" 
+             $ -- hFakeDir "/handle"  -- does not work since command is not "handle/?"
                 (do { liftIO $ putStrLn "handle"
                     ; parameters <- hParameters
                     -- ; liftIO $ putStrLn $ show parameters
@@ -223,12 +223,12 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
                     
                     ; responseHTML <- 
                         liftIO $ handleCommands params initR menuR 
-                                   (Commands $ fixBrackets commandsStr)
-                    ; liftIO $ putStrLn $ "resonse" ++ responseHTML    
+                                   (Commands commandsStr)
+--                    ; liftIO $ putStrLn $ "response" ++ responseHTML    
                     ; enterM response $ do
                         setM contentLength (Just $ fromIntegral $ length responseHTML )
                         setM contentType ("text/plain", Nothing)
---                        setM (comp safeRead (show) (header "Conttent-Length"))
+--                        setM (comp safeRead (show) (header "Content-Length"))
 --                             (Just 29)
                     ; sendStr $ responseHTML
                     })
@@ -238,7 +238,11 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
                   }
          -}
     ; defaultC <- defaultConfig  
-    ; start (defaultC {listenPort = 8080}) $ hSimple handler
+    ; tId <- forkIO $ start (defaultC {listenPort = 8080}) $ hSimple handler
+    ; putStrLn "Press <Enter> to terminate server"
+    ; getLine
+    ; killThread tId 
+    
     }
 {-
 Connection	Keep-Alive
@@ -265,11 +269,6 @@ safeRead s = case reads s of
   [(x, "")] -> Just x
   _         -> Nothing
 
-
-fixBrackets "" = ""
-fixBrackets ('*':cs) = '[' : fixBrackets cs
-fixBrackets ('_':cs) = ']' : fixBrackets cs
-fixBrackets (c:cs) = c : fixBrackets cs
 
 splitCommands commandStr =
   case break (==';') commandStr of
