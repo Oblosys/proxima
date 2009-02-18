@@ -1,2 +1,3 @@
+echo bla
 cd proxima/proxima
 svn update
