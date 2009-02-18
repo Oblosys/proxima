@@ -1,0 +1,5 @@
+cd proxima/dazzleEditor
+while true
+do 
+dist/build/DazzleEditor/DazzleEditor
+done
