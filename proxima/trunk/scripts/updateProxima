@@ -1,3 +1,4 @@
 echo bla
 cd proxima/proxima
 svn update
+chmod u+x proxima/proxima/scripts/*[!.bat,.xml]
