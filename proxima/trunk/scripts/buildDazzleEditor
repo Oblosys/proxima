@@ -1,0 +1,6 @@
+PATH="/home/martijn/.cabal/bin:$PATH"
+cd proxima/proxima
+cabal configure -fserver
+cabal build
+
+
