@@ -1,20 +1,17 @@
 name: HeliumEditor
 version: 0.1
-cabal-version: -any
+cabal-version: >= 1.2
+build-type: Custom
 license: AllRightsReserved
-license-file: ""
 copyright: (c) 2007 Martijn Schrage
+author: Martijn Schrage
 maintainer: martijn@cs.uu.nl
-build-depends: Cabal -any, base -any, gtk >=0.9.11, haskell98 -any,
-               network >=2.0, parsec >=2.0, time >=1.0, containers >=0.1,
-               array >=0.1, directory -any, cairo >=0.9
 stability: experimental
 homepage: http://www.cs.uu.nl/research/projects/proxima
 package-url:
 synopsis: Proxima is a generic presentation-oriented structure editor.
 description:
 category:
-author: Martijn Schrage
 tested-with: GHC -any
 data-files:
 extra-source-files: ../proxima/src/Arrangement/ArrangerAG.ag
@@ -22,48 +19,47 @@ extra-source-files: ../proxima/src/Arrangement/ArrangerAG.ag
                     ../proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
                     src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:
- 
-executable: HeliumEditor
-main-is: Main.hs
-buildable: True
-cc-options:
-ld-options:
-frameworks:
-c-sources:
-extensions:
-extra-libraries:
-extra-lib-dirs: .
-includes:
-install-includes:
-include-dirs:
-hs-source-dirs: ../uuagc/src/ ../proxima/src src
-other-modules: Arrangement.ArrLayerTypes Arrangement.ArrLayerUtils
-               Arrangement.ArrPresent Arrangement.ArrTranslate
-               Arrangement.ArrTypes Arrangement.ArrUtils Arrangement.Arranger
-               Arrangement.ArrangerAG Arrangement.FontLib Common.CommonTypes
-               Common.CommonUtils Common.DebugLevels Evaluation.DocTypes
-               Evaluation.DocUtils Evaluation.DocumentEdit Evaluation.EnrTypes
-               Evaluation.EnrUtils Evaluation.EvalLayerTypes
-               Evaluation.EvalLayerUtils Evaluation.EvalPresent
-               Evaluation.EvalTranslate Layout.LayLayerTypes Layout.LayLayerUtils
-               Layout.LayPresent Layout.LayTranslate Layout.LayTypes
-               Layout.LayUtils Layout.Layout Layout.ScanLib Layout.Scanner
-               Layout.ScannerAG Layout.TreeEditPres Presentation.PresLayerTypes
-               Presentation.PresLayerUtils Presentation.PresPresent
-               Presentation.PresTranslate Presentation.PresTypes
-               Presentation.PresUtils Presentation.PresentationParsing
-               Presentation.XLatex Presentation.XprezLib Proxima.Architecture
-               Proxima.ArchitectureLibM Proxima.GUI Proxima.Proxima Proxima.Wrap
-               Rendering.RenLayerTypes Rendering.RenLayerUtils
-               Rendering.RenPresent Rendering.RenTranslate Rendering.RenTypes
-               Rendering.RenUtils Rendering.Renderer UU.Parsing.CharParser
-               UU.Parsing.Derived UU.Parsing.Interface UU.Parsing.Machine
-               UU.Parsing.MachineInterface UU.Parsing Chess DocTypes_Generated
-               DocUtils_Generated DocumentEdit_Generated EvaluateTypesStubs
-               Evaluator Main PresentationAG ProxParser ProxParser_Generated
-               Reducer ScannerSheetHS Settings
-ghc-prof-options:
-ghc-options: -w -fglasgow-exts -fallow-undecidable-instances -fno-monomorphism-restriction
-hugs-options:
-nhc-options:
-jhc-options:
+
+
+Flag server
+  Description: Compile Proxima as a server application without Gtk2Hs
+  Default:     False
+
+-- NOTE: After changing this flag, use clean to make sure that dependent modules are recompiled.
+-- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
+-- (maybe a ghc bug?)
+
+Executable HeliumEditor
+  build-depends: base <4.0, haskell98 -any,
+                 
+                 network >=2.0, parsec ==2.1.0.1, time >=1.0, containers >=0.1,
+                 array >=0.1, xhtml >=2.0, mtl >=1.1,
+                 old-time -any,
+                 directory -any
+  if !flag(server)
+    build-depends: gtk >=0.9.11, cairo >= 0.9
+  else
+    build-depends: salvia == 0.0.5, stm -any, fclabels -any
+--    build-depends: HAppS-State >= 0.9.3, HAppS-Server >= 0.9.3
+  main-is: Main.hs
+  buildable: True
+  cc-options:
+  ld-options:
+  frameworks:
+  c-sources:
+  extensions:
+  extra-libraries:
+  extra-lib-dirs: .
+  includes:
+  install-includes:
+  include-dirs:
+  hs-source-dirs: ../uuagc/src/ ../proxima/src src
+  ghc-prof-options:
+  ghc-options: -w -fglasgow-exts
+  if flag(Server)
+    cpp-options: -DSERVER
+  extensions: UndecidableInstances NoMonomorphismRestriction
+  hugs-options:
+  jhc-options:
+
+
