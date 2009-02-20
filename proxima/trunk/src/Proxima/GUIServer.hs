@@ -240,34 +240,22 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
          -}
     ; defaultC <- defaultConfig  
     ; tId <- forkIO $ start (defaultC {listenPort = 8080}) $ hSimple handler
-  {-
-#ifdef UNIX
-    ; istty <- queryTerminal stdInput
-    ; mv <- newEmptyMVar
-    ; installHandler softwareTermination (CatchOnce (putMVar mv ())) Nothing
-         case istty of
-           True  -> do installHandler keyboardSignal (CatchOnce (putMVar mv ())) Nothing
-                       return ()
-           False -> return ()
-         takeMVar mv
-#else
-         let loop 'e' = return () 
-             loop _   = getChar >>= loop
-         loop 'c'
-#endif
--}
   
-    ; threadDelay 31536000000000000 -- wait a thousand years
-{-
-#else
     ; putStrLn "Press <Enter> to terminate server"
-    ; getLine
-#endif
--}
-    ; killThread tId 
-    
+    ; getLine `Control.Exception.catch` exceptionHandler
+    ; killThread tId    
     }
+ where exceptionHandler :: Exception-> IO String
+       exceptionHandler err =
+        do { -- if getLine fails, we assume to have stdin from /dev/null, so 
+             -- we just wait until the process is killed externally
+           ; putStrLn "No stdin, waiting for explicit termination"
+           ; threadDelay 31536000000000000 -- wait a thousand years
+           ; return "" -- not reached
+           }
+
 {-
+
 Connection	Keep-Alive
 Content-Length	686
 Content-Type	text/plain
