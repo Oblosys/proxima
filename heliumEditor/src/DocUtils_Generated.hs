@@ -626,7 +626,7 @@ instance Ord Node where
 
 toXMLInt i = EmptyElt "Integer" [("val", show i)]
 
-toXMLInt f = EmptyElt "Float" [("val", show f)]
+toXMLFloat f = EmptyElt "Float" [("val", show f)]
 
 toXMLBool b = EmptyElt "Bool" [("val", show b)]
 
@@ -673,8 +673,8 @@ parseXML_String  =
 presentPrimXMLInt :: Int -> Presentation_Doc_Node_Clip_Token
 presentPrimXMLInt x = text $ "<Int>"++show x++"<Int/>"
 
-presentPrimXMLFloat :: String -> Presentation_Doc_Node_Clip_Token
-presentPrimXMLFloat x = text $ "<Float>"++x++"<Float>"
+presentPrimXMLFloat :: Float -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLFloat x = text $ "<Float>"++show x++"<Float>"
 
 presentPrimXMLBool :: Bool -> Presentation doc node clip token
 presentPrimXMLBool x = text $ "<Bool>"++show x++"<Bool/>"
