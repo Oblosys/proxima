@@ -1,0 +1,6 @@
+PATH="/home/martijn/.cabal/bin:$PATH"
+cd proxima/dazzleEditor
+cabal configure -fserver
+cabal build
+
+

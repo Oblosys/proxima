@@ -1,0 +1,5 @@
+cd proxima/heliumEditor
+while true
+do 
+dist/build/HeliumEditor/HeliumEditor
+done
