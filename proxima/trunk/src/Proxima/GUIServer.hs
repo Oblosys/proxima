@@ -239,7 +239,9 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
                   }
          -}
     ; defaultC <- defaultConfig  
-    ; tId <- forkIO $ start (defaultC {listenPort = 8080}) $ hSimple handler
+    ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
+    
+    ; tId <- forkIO $ start (defaultC {listenPort = fromIntegral $ serverPort settings}) $ hSimple handler
   
     ; putStrLn "Press <Enter> to terminate server"
     ; getLine `Control.Exception.catch` exceptionHandler

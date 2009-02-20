@@ -327,6 +327,7 @@ data Settings =
                   -- updated parts of the rendering are surrounded by red rectangles
                 , markUpdatedRenderingArea :: Bool
                 , serverMode :: Bool -- run Proxima as a web-server
+                , serverPort :: Int
                 }
 
 defaultSettings = 
@@ -336,4 +337,5 @@ defaultSettings =
            , reducedViewedArea = False            
            , markUpdatedRenderingArea = False
            , serverMode = False
+           , serverPort = 8080
            }
