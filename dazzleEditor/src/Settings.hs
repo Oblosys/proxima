@@ -34,5 +34,6 @@ settings = defaultSettings {
                            , serverMode = True
 #else
                            , serverMode = False
+                           , serverPort = 8080
 #endif
                            }
