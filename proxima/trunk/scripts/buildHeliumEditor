@@ -1,5 +1,5 @@
 PATH="/home/martijn/.cabal/bin:$PATH"
-cd proxima/dazzleEditor
+cd proxima/heliumEditor
 cabal configure -fserver
 cabal build
 
