@@ -119,7 +119,7 @@ ALLSRCDIRS = src:$(PROXIMASRCDIR):$(HELIUMDIRS):$(UUSRCDIR)
 
 HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances \
 		-package gtk -package parsec -package mtl -package time\
-		-fno-monomorphism-restriction $(EXTRA_OPTS)
+		-package base-3.0.3.0 -hide-package syb -fno-monomorphism-restriction $(EXTRA_OPTS)
 
 
 proxima:
