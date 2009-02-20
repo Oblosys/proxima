@@ -40,7 +40,6 @@ startGUI :: (Show doc, Show enr, Show node, Show token) =>
             (RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO ()
 startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) = 
  do { renderingLvlVar <- newIORef initRenderingLvl
-    ; putStrLn $ "serverMode"++show (serverMode settings)
 
 {-
     --    ; timeoutAdd (withCatch $ backupDocumentHandler handler renderingLvlVar buffer viewedAreaRef window vp canvas) 30000 
