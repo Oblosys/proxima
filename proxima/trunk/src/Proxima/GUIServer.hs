@@ -257,12 +257,13 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
 #endif
 -}
   
-#ifdef UNIX
     ; threadDelay 31536000000000000 -- wait a thousand years
+{-
 #else
     ; putStrLn "Press <Enter> to terminate server"
     ; getLine
 #endif
+-}
     ; killThread tId 
     
     }
