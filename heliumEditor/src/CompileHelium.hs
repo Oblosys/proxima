@@ -32,7 +32,7 @@ compileHelium :: Module -> Phase (Either Error TypeError) (TypeEnvironment, [(Ra
 compileHelium resolvedModule =
  do mapM_ (checkExistence myLvmPath)
        ["Prelude", "PreludePrim", "HeliumLang", "LvmLang", "LvmIO", "LvmException"]
-    compile "Main" [NoLogging, Overloading] myLvmPath resolvedModule
+    compile "Main" [DisableLogging, Overloading] myLvmPath resolvedModule
 
 compile :: 
    String -> [Option] -> [String] -> Module -> 
