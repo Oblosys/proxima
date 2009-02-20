@@ -30,10 +30,5 @@ settings = defaultSettings {
 
                                -- updated parts of the rendering are surrounded by red rectangles
                            , markUpdatedRenderingArea = False
-#ifdef SERVER
-                           , serverMode = True
-#else
-                           , serverMode = False
                            , serverPort = 8080
-#endif
                            }
