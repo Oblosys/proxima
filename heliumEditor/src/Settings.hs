@@ -29,6 +29,5 @@ settings = defaultSettings { applicationName = "Helium editor"
 
                                -- updated parts of the rendering are surrounded by red rectangles
                            , markUpdatedRenderingArea = False
-                           , serverMode = False
                            , serverPort = 8090
                            }
