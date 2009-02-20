@@ -9,6 +9,7 @@
 # het vanuit de Proxima makefile gebeurde.
 
 HC   = ghc
+ALEX = alex
 FIND = /usr/bin/find
 
 PROXIMADIR = ../proxima
@@ -70,11 +71,13 @@ lexer: src/ScannerSheetHS.hs
 
 # the -t causes Alex to look for a template file. 
 src/ScannerSheetHS.hs: src/ScannerSheet.x $(LAYOUTDIR)/AlexTemplate-ghc
-	alex -t $(LAYOUTDIR) --o src/ScannerSheetHS.hs --ghc src/ScannerSheet.x 
+	$(ALEX) -t $(LAYOUTDIR) --o src/ScannerSheetHS.hs --ghc src/ScannerSheet.x 
 
 # the generated file is ScannerSheetHS, because if ScannerSheet is listed as a source in the
 # cabal file, setup automatically runs Alex on it, and in cabal it's not possible to specify
 # the extra Alex options we need.
+
+# NOTE: on Windows, alex only works when make is invoked from a bash shell, not the command prompt
 
 
 clean:
