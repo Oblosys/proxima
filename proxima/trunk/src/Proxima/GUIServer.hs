@@ -14,7 +14,7 @@ import Data.Time.Clock
 import Control.Exception
 import Data.Char
 
-{- HAppS
+{- HAppS -}
 import HAppS.Server
 import HAppS.Server.SimpleHTTP
 import HAppS.State
@@ -23,10 +23,8 @@ import System.Time
 import Control.Monad.Trans
 import Control.Monad
 import Data.List
--}
-import Control.Concurrent
 
-
+{-
 -- Salvia imports
 import Data.Maybe
 import Data.Record.Label
@@ -46,8 +44,10 @@ import Network.Salvia.Handlers.Login (readUserDatabase, UserPayload)
 import Network.Salvia.Handlers.Session (mkSessions, Sessions)
 import Network.Salvia.Handlers.PathRouter
 import Network.Salvia.Handlers.File
+-}
 
 
+import Control.Concurrent
 import Data.List
 import Evaluation.DocTypes (DocumentLevel, EditDocument'_ (..))
 import Arrangement.ArrTypes
@@ -74,30 +74,25 @@ initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize) =
 -- withCatch is identity in GUIServer, it is defined only in the GUIGtk module.
 withCatch io = io
 
-
-startEventLoop params = withProgName "proxima" $
+startEventLoop params@(settings,_,_,_) = withProgName "proxima" $
  do { initR <- newIORef (True)
     ; menuR <- newIORef []
 
-    ; salviaServer params initR menuR
+    ; tId <- forkIO $ server params initR menuR
+    ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
+    ; putStrLn "Press <Enter> to terminate server"
+    ; getLine `Control.Exception.catch` exceptionHandler
+    ; killThread tId    
     }
-{-
-startEventLoop params = withProgName "proxima" $
- do { initR <- newIORef (True)
-    ; menuR <- newIORef []
+ where exceptionHandler :: Exception-> IO String
+       exceptionHandler err =
+        do { -- if getLine fails, we assume to have stdin from /dev/null, so 
+             -- we just wait until the process is killed externally
+           ; putStrLn "No stdin, waiting for explicit termination"
+           ; threadDelay 31536000000000000 -- wait a thousand years
+           ; return "" -- not reached
+           }
 
-    ; tid <- forkIO $ simpleHTTP (Conf 8080 Nothing) (handlers params initR menuR)
-    ; putStrLn . ( ( "Proxima 2.0 server started on port 8080\n" ++
-                 "shut down with ctrl-c" ) ++) =<< time
-
-
-    ; waitForTermination
-    ; killThread tid
-      
-      
-    ; putStrLn .  ( "exiting: " ++ ) =<< time
-    }
- where time = return . ("\ntime: " ++ ) . show  =<< getClockTime
 
 {-
 HAPPS
@@ -113,7 +108,8 @@ the monad, but it will only do something if the header is not set in the out par
 Header modifications must therefore be applied to out rather than be fmapped to the monad.
 -}
 
-
+server params initR menuR =
+  simpleHTTP (Conf 8080 Nothing) (handlers params initR menuR)
 {-
 handle:
 http://<server url>/                    response: <proxima executable dir>/../proxima/scripts/Editor.xml
@@ -198,11 +194,10 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
 
 instance FromData Commands where
   fromData = liftM Commands (look "commands")
--}
 
-data Commands = Commands String deriving Show
 
-salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
+{- Salvia
+server params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
  do { let handler =
             hPathRouter
              [ ("/",            do { liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
@@ -239,22 +234,9 @@ salviaServer params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR
                   }
          -}
     ; defaultC <- defaultConfig  
-    ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
-    
-    ; tId <- forkIO $ start (defaultC {listenPort = fromIntegral $ serverPort settings}) $ hSimple handler
-  
-    ; putStrLn "Press <Enter> to terminate server"
-    ; getLine `Control.Exception.catch` exceptionHandler
-    ; killThread tId    
+    ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."    
+    ; start (defaultC {listenPort = fromIntegral $ serverPort settings}) $ hSimple handler
     }
- where exceptionHandler :: Exception-> IO String
-       exceptionHandler err =
-        do { -- if getLine fails, we assume to have stdin from /dev/null, so 
-             -- we just wait until the process is killed externally
-           ; putStrLn "No stdin, waiting for explicit termination"
-           ; threadDelay 31536000000000000 -- wait a thousand years
-           ; return "" -- not reached
-           }
 
 {-
 
@@ -281,7 +263,11 @@ safeRead :: Read a => String -> Maybe a
 safeRead s = case reads s of
   [(x, "")] -> Just x
   _         -> Nothing
+-}
 
+
+
+data Commands = Commands String deriving Show
 
 splitCommands commandStr =
   case break (==';') commandStr of
