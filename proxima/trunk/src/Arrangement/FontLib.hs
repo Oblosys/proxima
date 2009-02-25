@@ -43,27 +43,28 @@ mkFontMetrics :: Settings -> [Font] -> IO FontMetrics
 mkFontMetrics settings fonts =
  do { putStrLn "Before reading queriedMetrics.txt"
     ; fh <- openFile "queriedMetrics.txt" ReadMode -- readFile and seq gives problems when clearing it in GUI.hs
-    ; putStrLn "check 1"
     ; queriedFontsTxt <- hGetContents fh 
-    ; putStrLn "check 2"
     ; seq (length queriedFontsTxt) $ return ()
-    ; putStrLn "check 3"
     ; hClose fh
-    ; putStrLn "check 4"
     ; let queriedFonts :: [((String, Int),(Int,Int,[Int]))]
             = map read $ lines queriedFontsTxt
     ; let alreadyQueried = catMaybes $ map (lookupFont queriedFonts) fonts
-    
+    ; putStrLn "check 1"
     ; pendingQueriesTxt <-  readFile "metricsQueries.txt"
+    ; putStrLn "check 2"
     ; seq (length pendingQueriesTxt) $ return ()
     ; let pendingQueries = map read $ lines pendingQueriesTxt 
           newQueries  = fonts \\ (map fst alreadyQueried)
           queryTuples = [ (fFamily font, fSize font) | font <- newQueries ]
           newQueryTuples = queryTuples \\ pendingQueries
           
+    ; putStrLn "check 3"
     ; fh' <- openFile "metricsQueries.txt" AppendMode
+    ; putStrLn "check 4"
     ; hPutStr fh' $ unlines (map show newQueryTuples)
+    ; putStrLn "check 5"
     ; hClose fh'
+    ; putStrLn "check 6"
 
     ; return $ Map.fromList $ map mkFontMetric alreadyQueried
     }
