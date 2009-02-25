@@ -176,13 +176,17 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
 
   , dir "handle" 
    [ withData (\cmds -> [ method GET $ 
-                          do { -- liftIO $ putStrLn $ "############# commands request"
+                          do { liftIO $ putStrLn $ "Command received " ++ take 10 (show cmds)
                       
-                               responseHTML <- 
+                             ; responseHTML <- 
                                  liftIO $ handleCommands params initR menuR
                                                          cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
+                             
+                             ; seq (length responseHTML) $ return ()
+                             ; liftIO $ putStrLn $ "Sending response sent to client: " ++
+                                                   take 10 responseHTML ++ "..."
                              ; modifyResponseW noCache $
                                 ok $ toResponse responseHTML
                              }
