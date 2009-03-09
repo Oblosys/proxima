@@ -179,7 +179,7 @@ renderArr oldClipRegion (wi,dw,gc) arrDb scale (lux, luy) viewedArea diffTree ar
            ; selectFontFace (fFamily fnt) 
                             (if fItalic fnt then FontSlantItalic else FontSlantNormal) 
                             (if fBold fnt   then FontWeightBold  else FontWeightNormal)
-           ; setFontSize ((fromIntegral $ fSize fnt)*1.25)
+           ; setFontSize (fromIntegral $ fSize fnt)
            -- TODO fontsize seems to be in pixels
            
            ; setSourceColor fColor
