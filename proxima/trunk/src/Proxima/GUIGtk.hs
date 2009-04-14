@@ -393,6 +393,11 @@ onPaint settings handler renderingLvlVar buffer viewedAreaRef window vp canvas (
                           ) updRegions
                   }                     
                    
+            ; gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.orange }
+            ; let ((x,y),(w,h)) = viewedArea
+            ; drawRectangle dw gc False x y w h 
+                  
+
             ; when (reducedViewedArea settings) $
                do { gcSetValues gc $ newGCValues { foreground = gtkColor CommonTypes.orange }
                   ; let ((x,y),(w,h)) = viewedArea
@@ -412,7 +417,7 @@ getViewedArea settings vp =
     ; (w,h) <- widgetGetSize vp
     ; if (reducedViewedArea settings) -- return a smaller viewed area, for testing incrementality algorithms.
       then return ((round x+ (w `div` 4),round y + (h `div` 4)),((w `div` 2) -5,(h `div` 2) -5))
-      else return ((round x,round y),(w-5,h-5))  -- Unclear why this -5 is necessary. Maybe for relief?
+      else return ((round x,round y),(w-3,h-2))  -- Unclear why this -5 is necessary. Maybe for relief?
            
     }
     

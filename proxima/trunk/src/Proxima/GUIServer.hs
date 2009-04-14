@@ -14,7 +14,7 @@ import Data.Time.Clock
 import Control.Exception
 import Data.Char
 
-{- HAppS 
+{- HAppS -}
 import HAppS.Server
 import HAppS.Server.SimpleHTTP
 import HAppS.State
@@ -23,9 +23,9 @@ import System.Time
 import Control.Monad.Trans
 import Control.Monad
 import Data.List
- End of HApps imports -}
+{- End of HApps imports -}
 
-{- Salvia imports -}
+{- Salvia imports 
 import Data.Maybe
 import Data.Record.Label
 --import Misc.Misc
@@ -35,7 +35,7 @@ import Network.Protocol.Http hiding (server)
 import Network.Protocol.Uri
 import Network.Salvia.Httpd
 import Network.Salvia.Handlers
-{- End of Salvia imports -}
+ End of Salvia imports -}
 
 
 import Control.Concurrent
@@ -98,7 +98,7 @@ the monad, but it will only do something if the header is not set in the out par
 
 Header modifications must therefore be applied to out rather than be fmapped to the monad.
 -}
-{-
+
 server params initR menuR =
   simpleHTTP (Conf 8080 Nothing) (handlers params initR menuR)
 {-
@@ -190,9 +190,9 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
 instance FromData Commands where
   fromData = liftM Commands (look "commands")
 
--}
 
-{- Salvia -}
+
+{- Salvia -} {-
 server params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
  do { let handler =
             hPathRouter
@@ -285,7 +285,7 @@ safeRead s = case reads s of
   [(x, "")] -> Just x
   _         -> Nothing
 
-
+-}
 
 
 data Commands = Commands String deriving Show
