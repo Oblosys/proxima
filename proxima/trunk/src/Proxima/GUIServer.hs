@@ -99,8 +99,8 @@ the monad, but it will only do something if the header is not set in the out par
 Header modifications must therefore be applied to out rather than be fmapped to the monad.
 -}
 
-server params initR menuR =
-  simpleHTTP (Conf 8080 Nothing) (handlers params initR menuR)
+server params@(settings,_,_,_) initR menuR =
+  simpleHTTP (Conf (serverPort settings) Nothing) (handlers params initR menuR)
 {-
 handle:
 http://<server url>/                    response: <proxima executable dir>/../proxima/scripts/Editor.xml
