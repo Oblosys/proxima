@@ -53,7 +53,7 @@ Executable HeliumEditor
   includes:
   install-includes:
   include-dirs:
---  hs-source-dirs: ../uuagc/src/ ../proxima/src src
+  hs-source-dirs: ../uuagc/src/ ../proxima/src src
 --  hs-source-dirs: ../helium/src/utils ../helium/src/parser ../helium/src/staticanalysis/miscellaneous ../helium/src/staticanalysis/inferencers ../helium/src/staticanalysis/directives ../helium/src/staticanalysis/staticchecks ../helium/src/staticanalysis/heuristics ../helium/src/staticanalysis/messages ../helium/src/syntax ../helium/src/codegeneration ../helium/src/main ../helium/src/modulesystem
 --  hs-source-dirs: ../lvm/src/lib/common ../lvm/src/lib/common/ghc ../lvm/src/lib/lvm ../lvm/src/lib/asm ../lvm/src/lib/core
 --  hs-source-dirs: ../Top/src
