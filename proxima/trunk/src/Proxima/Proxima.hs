@@ -137,9 +137,9 @@ proxima settings presentationSheet parseSheet scannerSheet
 
     }
  `Control.Exception.catch`
-   \err -> 
+   \(err :: SomeException) -> 
     do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
-       ; print $ (err :: Exception)
+       ; print err
        ; putStrLn "\n<Press return to exit>"
        ; getLine
        ; return ()

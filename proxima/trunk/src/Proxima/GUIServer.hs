@@ -75,7 +75,7 @@ startEventLoop params@(settings,_,_,_) = withProgName "proxima" $
     ; getLine `Control.Exception.catch` exceptionHandler
     ; killThread tId    
     }
- where exceptionHandler :: Exception-> IO String
+ where exceptionHandler :: SomeException -> IO String
        exceptionHandler err =
         do { -- if getLine fails, we assume to have stdin from /dev/null, so 
              -- we just wait until the process is killed externally
