@@ -1,0 +1,179 @@
+imports
+{
+import Common.CommonTypes hiding (Dirty (..))
+import Common.CommonUtils
+import GHC.Float (formatRealFloat, FFFormat(FFFixed))
+
+import Presentation.PresLayerTypes
+import Presentation.PresLayerUtils
+
+import Presentation.XprezLib
+import Presentation.XLatex hiding (bold)
+
+import Evaluation.DocumentEdit
+
+import List
+import Maybe
+import qualified Data.Map as Map
+import Data.Map (Map)
+
+
+import Evaluation.DocTypes (DocumentLevel (..))
+import DocTypes_Generated
+import DocUtils_Generated
+import DocumentEdit_Generated
+
+import ProxParser   
+}
+
+INCLUDE "PresentationAG_Generated.ag"
+
+
+SEM EnrichedDoc
+  | RootEnr
+      loc.pres = structural $ @form.pres `withbgColor` lightBlue
+                   
+SEM Form
+  | Form
+      loc.pres = structural $ leftTopMargins 30 40 $
+                   col [ text "Travel declaration form"
+                       , vSpace 5
+                       , textField 400 @name
+                       , vSpace 5
+                       , textField 400 @faculty
+                       , vSpace 10
+                       , text "Expenses"
+                       , @expenses.pres
+                       , row [ hSpace (400 + 5 + 30 + 5 + 60 + 10 + 6)
+                             , textField 120 (showCurrency @expenses.total ++ " Euro")
+                             ]
+                       , vSpace 30
+                       , @currencies.pres `withFontSize_` (\fs -> (fs * 80) `div` 100) 
+                       ] 
+SEM List_Expense
+ | List_Expense
+      loc.pres = structural $ 
+                   col $ intersperse (vSpace 5) @elts.press
+
+SEM Expense
+  | Expense
+      loc.pres = structural $ addCurrencyItems @lhs.allCurrencies @lhs.path $
+                   row [ textField 400 @description
+                       , hSpace 5
+                       , textField 30 (show @amount)
+                       , hSpace 5
+                       , textField 60 $ (fst $ index "Expense.pres" @lhs.allCurrencies @currencyIx)
+                       , hSpace 10
+                       , textField 120 (showCurrency @total ++ " Euro") 
+                                       -- Expense.total is total euro amount for one expense
+                       ]
+                         
+                       
+
+SEM List_Currency [ | | ]
+ | List_Currency
+      loc.pres = structural $ 
+                   row $ intersperse (hSpace 5) @elts.press ++
+                         [ hSpace 5, text "add currency" `withMouseDown` addNewCurrency @lhs.path ]
+
+  
+SEM Currency
+  | Currency
+      loc.pres = structural $ col [ textField 80 @name
+                                  , textField 120 $ show @euroRate
+                                  ]
+
+
+-- currency names and rates are put in synthesized attribute that is inherited to Expenses
+  
+ATTR List_Currency ConsList_Currency Currency
+     [ | | allCurrencies USE {++} {[]} : {[(String,Float)]} ]
+
+SEM Currency
+  | Currency
+      lhs.allCurrencies = [(@name, @euroRate)]
+
+ATTR List_Expense ConsList_Expense Expense
+     [ allCurrencies : {[(String,Float)]} | | ]
+
+SEM Form
+  | Form
+      expenses.allCurrencies = @currencies.allCurrencies
+
+
+ATTR List_Expense ConsList_Expense Expense 
+     [ | | total USE {+} {0} : {Float} ]
+                         
+SEM Expense
+  | Expense
+      loc.total = @amount * (snd $ index "Expense.total" @lhs.allCurrencies @currencyIx)
+        
+{
+addCurrencyItems currencies path pres = 
+  pres `addPopupItems` [ (name, setCurrencyIx path ix) | (ix, (name, _)) <- zip [0..] currencies ]
+
+addNewCurrency :: Path -> UpdateDoc Document ClipDoc
+addNewCurrency pth =
+  insertElementAtEnd newCurrency pth
+  
+newCurrency = Clip_Currency $ Currency "new" 0.0
+
+setCurrencyIx :: Path -> Int -> UpdateDoc Document ClipDoc
+setCurrencyIx pth newCurrencyIx= 
+  \(DocumentLevel doc focus clip) ->
+    let doc' = case selectD pth doc of
+                 Clip_Expense (Expense desc amount _) -> 
+                   pasteD pth (Clip_Expense (Expense desc amount newCurrencyIx)) doc
+                 _ -> doc
+    in  DocumentLevel doc' focus clip
+
+-- Document utils
+
+-- PRECONDITION: path points to a list element of the same type as clip
+addElementAfter :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
+addElementAfter clip path = 
+  \(DocumentLevel d pth cl) ->
+    (DocumentLevel (insertListD (init path) (last path+1) clip d) pth cl)
+
+-- PRECONDITION: path points to a list of elements of the same type as clip
+-- NB path points to the list, rather than to an element.
+insertElementAtHead :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
+insertElementAtHead  clip listPath = 
+  \(DocumentLevel d pth cl) ->
+    (DocumentLevel (insertListD listPath 0 clip d) pth cl)
+
+-- PRECONDITION: path points to a list of elements of the same type as clip
+-- NB path points to the list, rather than to an element.
+insertElementAtEnd :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
+insertElementAtEnd  clip listPath = 
+  \(DocumentLevel d pth cl) ->
+    let list = selectD listPath d
+    in  (DocumentLevel (insertListD listPath (arityClip list) clip d) pth cl)
+
+deleteAtPath :: Path -> UpdateDoc Document ClipDoc
+deleteAtPath pth =
+   \(DocumentLevel d _ cl) ->
+     editCutD (DocumentLevel d (PathD pth) cl)
+
+-- Presentation utils
+
+leftTopMargins left top pres = 
+  row [ hSpace left, col [ vSpace top, pres, empty `withStretch` True ], empty `withStretch` True] 
+  `withStretch` True
+  
+textField w str = boxed $ row [text str, empty `withHStretch` True]  `withbgColor` white `withWidth` w  
+
+-- Utils
+
+
+showCurrency :: Float -> String
+showCurrency f =
+    let s = formatRealFloat FFFixed (Just 2) f
+        s' = reverse s -- s -- dropWhile (== '0') (reverse s)
+        s'' = if head s' == '.' then '0':s' else s'
+    in reverse s''
+}
+
+-- TODO: why does withStretch not override col and row stretch settings?
+-- Stretch does not seem to work for text fields anymore
+-- empty has no background

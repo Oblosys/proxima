@@ -1,0 +1,7 @@
+data Document = RootDoc form : Form    
+
+data Form = Form name : String faculty : String expenses : [Expense] currencies : [Currency]
+
+data Expense = Expense description : String amount : Float currencyIx : Int
+
+data Currency = Currency name : String euroRate : Float

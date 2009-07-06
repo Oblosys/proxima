@@ -1,0 +1,64 @@
+name: DeclarationForm
+version: 0.1
+cabal-version: >= 1.2
+build-type: Custom
+license: AllRightsReserved
+copyright: (c) 2007 Martijn Schrage
+author: Martijn Schrage
+maintainer: martijn@cs.uu.nl
+stability: experimental
+homepage: http://www.cs.uu.nl/research/projects/proxima
+package-url:
+synopsis: Proxima is a generic presentation-oriented structure editor.
+description:
+category:
+tested-with: GHC -any
+data-files:
+extra-source-files: src/proxima/src/Arrangement/ArrangerAG.ag
+                    src/proxima/src/Layout/AlexTemplate-ghc
+                    src/proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
+                    src/PresentationAG.ag src/PresentationAG_Generated.ag
+extra-tmp-files:
+
+
+Flag server
+  Description: Compile Proxima as a server application without Gtk2Hs
+  Default:     False
+
+-- NOTE: After changing this flag, use clean to make sure that dependent modules are recompiled.
+-- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
+-- (maybe a ghc bug?)
+
+Executable DeclarationForm
+  build-depends: base >=4.0, haskell98 -any,
+                 syb -any,
+                 network >=2.0, parsec -any, time >=1.0, containers >=0.1,
+                 array >=0.1, xhtml >=2.0, mtl >=1.1,
+                 old-time -any
+  if !flag(server)
+    build-depends: gtk >=0.9.11, cairo >= 0.9
+  else
+--    build-depends: salvia -any, salvia-extras -any, stm -any, fclabels -any
+    build-depends: HAppS-State >= 0.9.3, HAppS-Server >= 0.9.3
+  main-is: Main.hs
+  buildable: True
+  cc-options:
+  ld-options:
+  frameworks:
+  c-sources:
+  extensions:
+  extra-libraries:
+  extra-lib-dirs: .
+  includes:
+  install-includes:
+  include-dirs:
+  hs-source-dirs: src/uuagc/src/ src/proxima/src src
+  ghc-prof-options:
+  ghc-options: -w -fglasgow-exts -fobject-code
+  if flag(Server)
+    cpp-options: -DSERVER
+  extensions: UndecidableInstances NoMonomorphismRestriction
+  extensions: IncoherentInstances
+  hugs-options:
+  jhc-options:
+
