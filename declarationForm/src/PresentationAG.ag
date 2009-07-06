@@ -209,15 +209,15 @@ SEM Task
                                   , presentCompleted @completed
                                       `withMouseDown` flipCompleted @lhs.path @self
 
-                                  , hSpace 2, text @description `withColor` if @completed then green else blue]
+                                  , hSpace 2, vRefHalf $ text @description `withColor` if @completed then green else blue]
   | CompositeTask
-      loc.pres = structural $ col $ row [ (text $ if @expanded then "-" else "+") `withFontFam` "Courier"
+      loc.pres = structural $ col $ row [ (if @expanded then minusImg else plusImg)
                                           `withMouseDown` flipExpanded @lhs.path @self
                                         , hSpace 5
                                         , presentCompleted @subtasks.completed
                                             `withMouseDown` setCompletedRec (not @subtasks.completed) @lhs.path @self
                                         , hSpace 2
-                                        ,  text @description
+                                        , vRefHalf $ text @description
                                              `withColor` if @subtasks.completed then green else blue
                                         ] 
                                   : if @expanded 
@@ -241,7 +241,7 @@ setCompletedRec completed pth task = pasteAt (Clip_Task (setCompletedRec' task))
  where setCompletedRec' (BasicTask descr _) = BasicTask descr completed
        setCompletedRec' (CompositeTask exp descr subtasks) = CompositeTask exp descr $ toList_Task $ map setCompletedRec' (fromList_Task subtasks)
 
-presentCompleted completed =
+presentCompleted completed = vRefHalf $ 
   boxed (text ch) `withFontFam` "Courier" 
  where ch = if completed then "v" else " "
 

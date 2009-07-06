@@ -106,7 +106,7 @@ setCompletedRec completed pth task = pasteAt (Clip_Task (setCompletedRec' task))
  where setCompletedRec' (BasicTask descr _) = BasicTask descr completed
        setCompletedRec' (CompositeTask exp descr subtasks) = CompositeTask exp descr $ toList_Task $ map setCompletedRec' (fromList_Task subtasks)
 
-presentCompleted completed =
+presentCompleted completed = vRefHalf $ 
   boxed (text ch) `withFontFam` "Courier" 
  where ch = if completed then "v" else " "
 
@@ -3717,7 +3717,7 @@ sem_Task_BasicTask description_ completed_  =
                                    , hSpace 5
                                    , presentCompleted completed_
                                        `withMouseDown` flipCompleted _lhsIpath _self
-                                   , hSpace 2, text description_ `withColor` if completed_ then green else blue]
+                                   , hSpace 2, vRefHalf $ text description_ `withColor` if completed_ then green else blue]
                   {-# LINE 3722 "src/PresentationAG.hs" #-}
               -- "src/PresentationAG.ag"(line 233, column 7)
               _completed =
@@ -3818,13 +3818,13 @@ sem_Task_CompositeTask expanded_ description_ subtasks_  =
               -- "src/PresentationAG.ag"(line 214, column 7)
               _pres =
                   {-# LINE 214 "src/PresentationAG.ag" #-}
-                  structural $ col $ row [ (text $ if expanded_ then "-" else "+") `withFontFam` "Courier"
+                  structural $ col $ row [ (if expanded_ then minusImg else plusImg)
                                            `withMouseDown` flipExpanded _lhsIpath _self
                                          , hSpace 5
                                          , presentCompleted _subtasksIcompleted
                                              `withMouseDown` setCompletedRec (not _subtasksIcompleted) _lhsIpath _self
                                          , hSpace 2
-                                         ,  text description_
+                                         , vRefHalf $ text description_
                                               `withColor` if _subtasksIcompleted then green else blue
                                          ]
                                    : if expanded_
