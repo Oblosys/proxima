@@ -400,7 +400,7 @@ pStructuralEx :: (Editable a doc node clip token, Clip clip, Construct doc node 
                 DocNode node, Ord token, Show token, Show clip) =>
                 Maybe (a -> Path -> node) -> ListParser doc node clip token a
 pStructuralEx mNodeConstr =  
-          (\structuralToken -> debug Prs ("pStructural on\n"++deepShowTks 0 structuralToken) $
+          (\structuralToken -> --debug Prs ("pStructural on\n"++deepShowTks 0 structuralToken) $
                    let clip = recognizeClip structuralToken
                    in  case fromClip clip of 
                          Just enr -> enr
@@ -414,7 +414,7 @@ pStructuralEx mNodeConstr =
 recognizeClip :: (Clip clip, Construct doc node clip token, DocNode node, Show token, Ord token) =>
              Token doc node clip token -> clip
 recognizeClip strTk@(StructuralTk _ (Just node) _ childTokens _) = 
-  debug Prs ("Recognize on "++show node++" with children"++show childTokens) $
+  --debug Prs ("Recognize on "++show node++" with children"++show childTokens) $
   if isListClip (construct node strTk []) 
   then 
   let thisPath = case pathNode node of
@@ -440,7 +440,7 @@ recognizeClip strTk@(StructuralTk _ (Just node) _ childTokens _) =
                   ]
       parsedChildren = map recognizeClip childTokens
       result = construct node strTk reuseArgs
-  in  debug Prs ("\nThis path"++ show thisPath ++"\nChildren (max "++show constructorArity++"):\n"++show numberedChildTokens++"\n" ++ show childTokenGroups) $
+  in  -- debug Prs ("\nThis path"++ show thisPath ++"\nChildren (max "++show constructorArity++"):\n"++show numberedChildTokens++"\n" ++ show childTokenGroups) $
       result
 recognizeClip tk@(StructuralTk _ Nothing _ childTokens _) =
   error $ "recognize: Encountered StructuralTk without node: " ++ show tk
