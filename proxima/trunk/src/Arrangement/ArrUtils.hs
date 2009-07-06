@@ -257,6 +257,7 @@ pointDoc x' y' arr = fmap snd $ point' (clip 0 (widthA arr-1) x') (clip 0 (heigh
 point' :: Show node => Int -> Int -> [Int] -> node -> Arrangement node -> Maybe ([Int], node)
 point' x' y' pth loc p@(EmptyA _ x y w h _ _ _)           = Just (pth, loc)
 point' x' y' pth loc p@(StringA _ x y w h _ _ _ _ _ _ _)  = Just (pth, loc)
+point' x' y' pth loc p@(ImageA _ x y w h _ _ _ _ _ _)     = Just (pth, loc)
 point' x' y' pth loc p@(RectangleA _ x y w h _ _ _ __ _ _ _) = Just (pth, loc)
 point' x' y' pth loc p@(EllipseA _ x y w h _ _ _ _ _ _ _)   = Just (pth, loc)
 point' x' y' pth loc p@(RowA _ x y w h _ _ _ arrs)        = pointRowList 0 (x'-x) (y'-y) pth loc arrs
