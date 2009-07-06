@@ -94,7 +94,7 @@ startEventLoop _ = mainGUI
 -- prevent this, we catch the exception in the event handler itself.
 withCatch :: IO a -> IO a
 withCatch io = io `Control.Exception.catch` handler
- where handler :: Exception-> IO a
+ where handler :: SomeException-> IO a
        handler err =
         do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
            ; print err
