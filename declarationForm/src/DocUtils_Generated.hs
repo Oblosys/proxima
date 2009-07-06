@@ -17,13 +17,13 @@ initialDocument :: IO Document
 initialDocument = return $ RootDoc $
   TaskDoc $
     Tasks $ toList_Task
-      [ BasicTask "Pinpas bestellen" True
-      , CompositeTask True "Declaratie editor bouwen" $ toList_Task
-          [ CompositeTask True "Upgrade Proxima" $ toList_Task
-              [ BasicTask "Drag & Drop" True
-              , BasicTask "Xprez" True
+      [ BasicTask (Description "Pinpas bestellen") True
+      , CompositeTask True (Description "Declaratie editor bouwen") $ toList_Task
+          [ CompositeTask True (Description "Upgrade Proxima") $ toList_Task
+              [ BasicTask (Description "Drag & Drop") True
+              , BasicTask (Description "Xprez") True
               ]
-          , BasicTask "Instantie maken" False 
+          , BasicTask (Description "Instantie maken") False 
           ]         
       ]       
 {-                        FormDoc
@@ -78,15 +78,18 @@ rankNode (Node_BasicTask _ _) = 23
 rankNode (Node_CompositeTask _ _) = 24
 rankNode (Node_HoleTask _ _) = 25
 rankNode (Node_ParseErrTask _ _) = 26
-rankNode (Node_List_Expense _ _) = 27
-rankNode (Node_HoleList_Expense _ _) = 28
-rankNode (Node_ParseErrList_Expense _ _) = 29
-rankNode (Node_List_Currency _ _) = 30
-rankNode (Node_HoleList_Currency _ _) = 31
-rankNode (Node_ParseErrList_Currency _ _) = 32
-rankNode (Node_List_Task _ _) = 33
-rankNode (Node_HoleList_Task _ _) = 34
-rankNode (Node_ParseErrList_Task _ _) = 35
+rankNode (Node_Description _ _) = 27
+rankNode (Node_HoleDescription _ _) = 28
+rankNode (Node_ParseErrDescription _ _) = 29
+rankNode (Node_List_Expense _ _) = 30
+rankNode (Node_HoleList_Expense _ _) = 31
+rankNode (Node_ParseErrList_Expense _ _) = 32
+rankNode (Node_List_Currency _ _) = 33
+rankNode (Node_HoleList_Currency _ _) = 34
+rankNode (Node_ParseErrList_Currency _ _) = 35
+rankNode (Node_List_Task _ _) = 36
+rankNode (Node_HoleList_Task _ _) = 37
+rankNode (Node_ParseErrList_Task _ _) = 38
 
 
 
@@ -123,6 +126,9 @@ instance DocNode Node where
   pathNode (Node_CompositeTask _ pth) = PathD pth
   pathNode (Node_HoleTask _ pth) = PathD pth
   pathNode (Node_ParseErrTask _ pth) = PathD pth
+  pathNode (Node_Description _ pth) = PathD pth
+  pathNode (Node_HoleDescription _ pth) = PathD pth
+  pathNode (Node_ParseErrDescription _ pth) = PathD pth
   pathNode (Node_List_Expense _ pth) = PathD pth
   pathNode (Node_HoleList_Expense _ pth) = PathD pth
   pathNode (Node_ParseErrList_Expense _ pth) = PathD pth
@@ -161,10 +167,13 @@ toXMLCurrency (ParseErrCurrency error) = EmptyElt "ParseErrCurrency" []
 toXMLTasks (Tasks tasks) = Elt "Tasks" [] $ toXMLList_Task tasks
 toXMLTasks (HoleTasks) = EmptyElt "HoleTasks" [] 
 toXMLTasks (ParseErrTasks error) = EmptyElt "ParseErrTasks" []
-toXMLTask (BasicTask description completed) = Elt "BasicTask" [] $ [toXMLString description] ++ [toXMLBool completed]
-toXMLTask (CompositeTask expanded description subtasks) = Elt "CompositeTask" [] $ [toXMLBool expanded] ++ [toXMLString description] ++ toXMLList_Task subtasks
+toXMLTask (BasicTask description completed) = Elt "BasicTask" [] $ [toXMLDescription description] ++ [toXMLBool completed]
+toXMLTask (CompositeTask expanded description subtasks) = Elt "CompositeTask" [] $ [toXMLBool expanded] ++ [toXMLDescription description] ++ toXMLList_Task subtasks
 toXMLTask (HoleTask) = EmptyElt "HoleTask" [] 
 toXMLTask (ParseErrTask error) = EmptyElt "ParseErrTask" []
+toXMLDescription (Description str) = Elt "Description" [] $ [toXMLString str]
+toXMLDescription (HoleDescription) = EmptyElt "HoleDescription" [] 
+toXMLDescription (ParseErrDescription error) = EmptyElt "ParseErrDescription" []
 toXMLList_Expense (List_Expense xs) = toXMLConsList_Expense xs
 toXMLList_Expense HoleList_Expense = []
 toXMLList_Expense (ParseErrList_Expense _) = []
@@ -203,8 +212,10 @@ parseXMLCns_Currency = Currency <$ startTag "Currency" <*> parseXML_String <*> p
 parseXML_Tasks = parseXMLCns_Tasks <|> parseHoleAndParseErr "Tasks" HoleTasks
 parseXMLCns_Tasks = Tasks <$ startTag "Tasks" <*> parseXML_List_Task<* endTag "Tasks"
 parseXML_Task = parseXMLCns_BasicTask <|> parseXMLCns_CompositeTask <|> parseHoleAndParseErr "Task" HoleTask
-parseXMLCns_BasicTask = BasicTask <$ startTag "BasicTask" <*> parseXML_String <*> parseXML_Bool<* endTag "BasicTask"
-parseXMLCns_CompositeTask = CompositeTask <$ startTag "CompositeTask" <*> parseXML_Bool <*> parseXML_String <*> parseXML_List_Task<* endTag "CompositeTask"
+parseXMLCns_BasicTask = BasicTask <$ startTag "BasicTask" <*> parseXML_Description <*> parseXML_Bool<* endTag "BasicTask"
+parseXMLCns_CompositeTask = CompositeTask <$ startTag "CompositeTask" <*> parseXML_Bool <*> parseXML_Description <*> parseXML_List_Task<* endTag "CompositeTask"
+parseXML_Description = parseXMLCns_Description <|> parseHoleAndParseErr "Description" HoleDescription
+parseXMLCns_Description = Description <$ startTag "Description" <*> parseXML_String<* endTag "Description"
 parseXML_List_Expense = mkList List_Expense Cons_Expense Nil_Expense <$> pList_ng parseXML_Expense
 parseXML_List_Currency = mkList List_Currency Cons_Currency Nil_Currency <$> pList_ng parseXML_Currency
 parseXML_List_Task = mkList List_Task Cons_Task Nil_Task <$> pList_ng parseXML_Task

@@ -33,6 +33,21 @@ recognizeEnrichedDoc = pStr $
 
 recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeEnrichedDoc = pStructural
+
+
+pDescription :: ListParser Document Node ClipDoc UserToken Description
+pDescription = Description 
+  <$> pLine
+
+
+pLine = 
+      (\wrds -> concat wrds)
+  <$> pList ((++) <$> pWord <*> pSpaces)
+
+pSpaces = concat <$> pList (const " " <$> pToken (KeyTk " "))
+
+pWord = tokenString <$> pToken WordTk
+
 {-
 intParser :: ListParser Document Node ClipDoc UserToken Int
 intParser = 0 

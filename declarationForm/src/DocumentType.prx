@@ -12,5 +12,7 @@ data Currency = Currency name : String euroRate : Float
 
 data Tasks = Tasks tasks : [Task]
 
-data Task = BasicTask description : String completed : Bool 
-          | CompositeTask expanded : Bool description : String subtasks : [Task]
+data Task = BasicTask description : Description completed : Bool 
+          | CompositeTask expanded : Bool description : Description subtasks : [Task]
+
+data Description = Description str : String

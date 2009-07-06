@@ -9,10 +9,11 @@ import Layout.ScanLib
 $char = .#[\n\ ]
 
 tokens :-
-  \n+                             { collectWhitespace }
-  \ +                             { collectWhitespace }
-  [0-9]+                          { mkToken $ \s -> IntToken }
-  [\(\)]                          { mkToken $ \s -> SymToken s }
+  \n                              { mkToken $ \s -> KeyTk s }
+  \                               { mkToken $ \s -> KeyTk s }
+--  [0-9]+                          { mkToken $ \s -> IntToken }
+--  [\(\)]                          { mkToken $ \s -> SymToken s }
+  $char+                          { mkToken $ \s -> WordTk }
 
 {
 }

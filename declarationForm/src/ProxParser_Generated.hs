@@ -46,6 +46,9 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_CompositeTask _ _) = construct_CompositeTask
   construct (Node_HoleTask _ _) = construct_HoleTask
   construct (Node_ParseErrTask _ _) = construct_ParseErrTask
+  construct (Node_Description _ _) = construct_Description
+  construct (Node_HoleDescription _ _) = construct_HoleDescription
+  construct (Node_ParseErrDescription _ _) = construct_ParseErrDescription
   construct (Node_List_Expense _ _) = construct_List_Expense
   construct (Node_HoleList_Expense _ _) = construct_HoleList_Expense
   construct (Node_ParseErrList_Expense _ _) = construct_ParseErrList_Expense
@@ -77,10 +80,13 @@ construct_ParseErrCurrency (StructuralTk _ _ pres _ _) ~[] = Clip_Currency $ par
 construct_Tasks tk ~[mClip0] = Clip_Tasks $ reuseTasks [tk]  (retrieveArg "Tasks" "tasks::List_Task" mClip0)
 construct_HoleTasks tk ~[] = Clip_Tasks $ hole
 construct_ParseErrTasks (StructuralTk _ _ pres _ _) ~[] = Clip_Tasks $ parseErr (StructuralParseErr pres)
-construct_BasicTask tk ~[mClip0,mClip1] = Clip_Task $ reuseBasicTask [tk]  (retrieveArg "BasicTask" "description::String" mClip0) (retrieveArg "BasicTask" "completed::Bool" mClip1)
-construct_CompositeTask tk ~[mClip0,mClip1,mClip2] = Clip_Task $ reuseCompositeTask [tk]  (retrieveArg "CompositeTask" "expanded::Bool" mClip0) (retrieveArg "CompositeTask" "description::String" mClip1) (retrieveArg "CompositeTask" "subtasks::List_Task" mClip2)
+construct_BasicTask tk ~[mClip0,mClip1] = Clip_Task $ reuseBasicTask [tk]  (retrieveArg "BasicTask" "description::Description" mClip0) (retrieveArg "BasicTask" "completed::Bool" mClip1)
+construct_CompositeTask tk ~[mClip0,mClip1,mClip2] = Clip_Task $ reuseCompositeTask [tk]  (retrieveArg "CompositeTask" "expanded::Bool" mClip0) (retrieveArg "CompositeTask" "description::Description" mClip1) (retrieveArg "CompositeTask" "subtasks::List_Task" mClip2)
 construct_HoleTask tk ~[] = Clip_Task $ hole
 construct_ParseErrTask (StructuralTk _ _ pres _ _) ~[] = Clip_Task $ parseErr (StructuralParseErr pres)
+construct_Description tk ~[mClip0] = Clip_Description $ reuseDescription [tk]  (retrieveArg "Description" "str::String" mClip0)
+construct_HoleDescription tk ~[] = Clip_Description $ hole
+construct_ParseErrDescription (StructuralTk _ _ pres _ _) ~[] = Clip_Description $ parseErr (StructuralParseErr pres)
 construct_List_Expense tk mClips = genericConstruct_List "Expense" toList_Expense mClips
 construct_HoleList_Expense tk ~[] = Clip_List_Expense $ hole
 construct_ParseErrList_Expense (StructuralTk _ _ pres _ _) ~[] = Clip_List_Expense $ parseErr (StructuralParseErr pres)
@@ -145,17 +151,23 @@ reuseTasks nodes ma0
            (Tasks a0) -> genericReuse1 Tasks a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseTasks"
 
-reuseBasicTask :: [Token doc Node clip token] -> Maybe String -> Maybe Bool -> Task
+reuseBasicTask :: [Token doc Node clip token] -> Maybe Description -> Maybe Bool -> Task
 reuseBasicTask nodes ma0 ma1
   = case extractFromTokens extractBasicTask defaultBasicTask nodes of
            (BasicTask a0 a1) -> genericReuse2 BasicTask a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseBasicTask"
 
-reuseCompositeTask :: [Token doc Node clip token] -> Maybe Bool -> Maybe String -> Maybe List_Task -> Task
+reuseCompositeTask :: [Token doc Node clip token] -> Maybe Bool -> Maybe Description -> Maybe List_Task -> Task
 reuseCompositeTask nodes ma0 ma1 ma2
   = case extractFromTokens extractCompositeTask defaultCompositeTask nodes of
            (CompositeTask a0 a1 a2) -> genericReuse3 CompositeTask a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseCompositeTask"
+
+reuseDescription :: [Token doc Node clip token] -> Maybe String -> Description
+reuseDescription nodes ma0
+  = case extractFromTokens extractDescription defaultDescription nodes of
+           (Description a0) -> genericReuse1 Description a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseDescription"
 
 reuseList_Expense :: [Token doc Node clip token] -> Maybe ConsList_Expense -> List_Expense
 reuseList_Expense nodes ma0
@@ -222,6 +234,10 @@ extractCompositeTask :: Maybe Node -> Maybe Task
 extractCompositeTask (Just (Node_CompositeTask x@(CompositeTask _ _ _) _)) = Just x
 extractCompositeTask _ = Nothing
 
+extractDescription :: Maybe Node -> Maybe Description
+extractDescription (Just (Node_Description x@(Description _) _)) = Just x
+extractDescription _ = Nothing
+
 extractList_Expense :: Maybe Node -> Maybe List_Expense
 extractList_Expense (Just (Node_List_Expense x@(List_Expense _) _)) = Just x
 extractList_Expense _ = Nothing
@@ -270,6 +286,9 @@ defaultBasicTask = BasicTask hole hole
 
 defaultCompositeTask :: Task
 defaultCompositeTask = CompositeTask hole hole hole
+
+defaultDescription :: Description
+defaultDescription = Description hole
 
 defaultList_Expense :: List_Expense
 defaultList_Expense = List_Expense Nil_Expense

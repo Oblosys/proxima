@@ -66,10 +66,15 @@ DATA Tasks
   | ParseErrTasks error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Task
-  | BasicTask description:String completed:Bool
-  | CompositeTask expanded:Bool description:String subtasks:List_Task
+  | BasicTask description:Description completed:Bool
+  | CompositeTask expanded:Bool description:Description subtasks:List_Task
   | HoleTask
   | ParseErrTask error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA Description
+  | Description str:String
+  | HoleDescription
+  | ParseErrDescription error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA List_Expense
   | List_Expense elts:ConsList_Expense
@@ -105,16 +110,16 @@ DATA ConsList_Task
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task Description List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task List_Expense List_Currency List_Task
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task Description List_Expense List_Currency List_Task
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
-ATTR ChoiceDoc Form Expense Currency Tasks Task List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
+ATTR ChoiceDoc Form Expense Currency Tasks Task Description List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
-ATTR ChoiceDoc Form Expense Currency Tasks Task List_Expense List_Currency List_Task
+ATTR ChoiceDoc Form Expense Currency Tasks Task Description List_Expense List_Currency List_Task
      [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
@@ -245,13 +250,19 @@ SEM Tasks
 
 SEM Task
   | BasicTask 
-      lhs.pIdC = @lhs.pIdC + 0
+      description.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @description.pIdC
+      description.path  = @lhs.path++[0]
   | CompositeTask 
-      subtasks.pIdC = @lhs.pIdC + 0
+      description.pIdC = @lhs.pIdC + 0
+      subtasks.pIdC = @description.pIdC
       lhs.pIdC = @subtasks.pIdC
+      description.path  = @lhs.path++[1]
       subtasks.path  = @lhs.path++[2]
   | BasicTask
+    description.ix = 0
   | CompositeTask
+    description.ix = 1
     subtasks.ix = 2
   | BasicTask
       lhs.pres = loc (Node_BasicTask @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
@@ -264,6 +275,21 @@ SEM Task
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | ParseErrTask
       lhs.pres = presParseErr (Node_ParseErrTask @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM Description
+  | Description 
+      lhs.pIdC = @lhs.pIdC + 0
+  | Description
+  | Description
+      lhs.pres = loc (Node_Description @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleDescription
+      lhs.pres = presHole @lhs.focusD "Description" (Node_HoleDescription @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrDescription
+      lhs.pres = presParseErr (Node_ParseErrDescription @self @lhs.path) @error
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
@@ -396,6 +422,9 @@ SEM Task
   | BasicTask lhs.path = @lhs.path
   | CompositeTask lhs.path = @lhs.path
 
+SEM Description
+  | Description lhs.path = @lhs.path
+
 SEM List_Expense
   | List_Expense lhs.path = @lhs.path
 
@@ -446,11 +475,17 @@ SEM Tasks
 
 SEM Task
   | BasicTask
-      lhs.presXML = presentElementXML @lhs.focusD (Node_BasicTask @self @lhs.path) @lhs.path "BasicTask" [ presentPrimXMLString @description, presentPrimXMLBool @completed ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_BasicTask @self @lhs.path) @lhs.path "BasicTask" [ @description.presXML, presentPrimXMLBool @completed ] 
   | CompositeTask
-      lhs.presXML = presentElementXML @lhs.focusD (Node_CompositeTask @self @lhs.path) @lhs.path "CompositeTask" [ presentPrimXMLBool @expanded, presentPrimXMLString @description, @subtasks.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_CompositeTask @self @lhs.path) @lhs.path "CompositeTask" [ presentPrimXMLBool @expanded, @description.presXML, @subtasks.presXML ] 
   | HoleTask     lhs.presXML = presHole @lhs.focusD "Task" (Node_HoleTask @self @lhs.path) @lhs.path
   | ParseErrTask lhs.presXML = presParseErr (Node_ParseErrTask @self @lhs.path) @error
+
+SEM Description
+  | Description
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Description @self @lhs.path) @lhs.path "Description" [ presentPrimXMLString @str ] 
+  | HoleDescription     lhs.presXML = presHole @lhs.focusD "Description" (Node_HoleDescription @self @lhs.path) @lhs.path
+  | ParseErrDescription lhs.presXML = presParseErr (Node_ParseErrDescription @self @lhs.path) @error
 
 SEM List_Expense
   | List_Expense
@@ -538,11 +573,17 @@ SEM Tasks
 
 SEM Task
   | BasicTask
-      lhs.presTree = presentElementTree @lhs.focusD (Node_BasicTask @self @lhs.path) @lhs.path "BasicTask" [ presentPrimXMLString @description, presentPrimXMLBool @completed ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_BasicTask @self @lhs.path) @lhs.path "BasicTask" [ @description.presTree, presentPrimXMLBool @completed ] 
   | CompositeTask
-      lhs.presTree = presentElementTree @lhs.focusD (Node_CompositeTask @self @lhs.path) @lhs.path "CompositeTask" [ presentPrimXMLBool @expanded, presentPrimXMLString @description, @subtasks.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_CompositeTask @self @lhs.path) @lhs.path "CompositeTask" [ presentPrimXMLBool @expanded, @description.presTree, @subtasks.presTree ] 
   | HoleTask     lhs.presTree = presHole @lhs.focusD "Task" (Node_HoleTask @self @lhs.path) @lhs.path
   | ParseErrTask lhs.presTree = presParseErr (Node_ParseErrTask @self @lhs.path) @error
+
+SEM Description
+  | Description
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Description @self @lhs.path) @lhs.path "Description" [ presentPrimXMLString @str ] 
+  | HoleDescription     lhs.presTree = presHole @lhs.focusD "Description" (Node_HoleDescription @self @lhs.path) @lhs.path
+  | ParseErrDescription lhs.presTree = presParseErr (Node_ParseErrDescription @self @lhs.path) @error
 
 SEM List_Expense
   | List_Expense

@@ -195,7 +195,7 @@ showCurrency f =
 
 SEM Tasks
   | Tasks
-      loc.pres = structural $ @tasks.pres
+      loc.pres = structural $ @tasks.pres `withFontSize` 12
 
 SEM List_Task
   | List_Task
@@ -204,33 +204,40 @@ SEM List_Task
 
 SEM Task
   | BasicTask
-      loc.pres = structural $ row [ text " " `withFontFam` "Courier" 
-                                  , hSpace 5
-                                  , presentCompleted @completed
+      loc.pres = structural $ row [ hSpace $ 9 + 5
+                                  , presentCompleted @completed (not @completed)
                                       `withMouseDown` flipCompleted @lhs.path @self
 
-                                  , hSpace 2, vRefHalf $ text @description `withColor` if @completed then green else blue]
+                                  , hSpace 5, @description.pres `withColor` if @completed then green else blue]
   | CompositeTask
-      loc.pres = structural $ col $ row [ (if @expanded then minusImg else plusImg)
+      loc.pres = structural $ col $ row [ (if @expanded then minusImg else plusImg) `withRef` (0,4)
                                           `withMouseDown` flipExpanded @lhs.path @self
                                         , hSpace 5
-                                        , presentCompleted @subtasks.completed
+                                        , presentCompleted @subtasks.completed @subtasks.notStarted
                                             `withMouseDown` setCompletedRec (not @subtasks.completed) @lhs.path @self
-                                        , hSpace 2
-                                        , vRefHalf $ text @description
+                                        , hSpace 5
+                                        , @description.pres
                                              `withColor` if @subtasks.completed then green else blue
                                         ] 
                                   : if @expanded 
-                                    then [row [text " " `withFontFam` "Courier", hSpace 5, @subtasks.pres]] 
+                                    then [row [hSpace $ 9 + 5, @subtasks.pres]] 
                                     else []
 
+
+SEM Description
+  | Description
+      loc.pres = parsingWithParser pDescription @self $ vRefHalf $ text @str
 
 ATTR List_Task ConsList_Task Task 
      [ | | completed USE {&&} {True} : {Bool} ]
 
+ATTR List_Task ConsList_Task Task 
+     [ | | notStarted USE {&&} {True} : {Bool} ]
+
 SEM Task
   | BasicTask
       loc.completed = @completed
+      loc.notStarted = not @completed
 
 {
 flipCompleted pth (BasicTask descr completed) = pasteAt (Clip_Task (BasicTask descr (not completed))) pth
@@ -241,9 +248,9 @@ setCompletedRec completed pth task = pasteAt (Clip_Task (setCompletedRec' task))
  where setCompletedRec' (BasicTask descr _) = BasicTask descr completed
        setCompletedRec' (CompositeTask exp descr subtasks) = CompositeTask exp descr $ toList_Task $ map setCompletedRec' (fromList_Task subtasks)
 
-presentCompleted completed = vRefHalf $ 
-  boxed (text ch) `withFontFam` "Courier" 
- where ch = if completed then "v" else " "
+presentCompleted completed notStarted = vRefHalf $ 
+  img (if completed then "img/completed.bmp" else if notStarted then "img/notStarted.bmp" else "img/partiallyCompleted.bmp") `withSize` (9,9) `withRef` (4,4)
+
 
 
 pasteAt :: ClipDoc -> Path -> UpdateDoc Document ClipDoc

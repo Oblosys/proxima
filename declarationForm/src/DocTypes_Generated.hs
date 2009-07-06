@@ -8,7 +8,7 @@ import List
 import Char
 import Data.Generics
 
-data UserToken = BinToken | LeafToken | IntToken | SymToken String deriving (Show, Eq, Ord, Typeable)
+data UserToken = WordTk | KeyTk String | IntTk | SymTk String deriving (Show, Eq, Ord, Typeable)
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -52,11 +52,16 @@ data Tasks = Tasks List_Task
            | ParseErrTasks (ParseError Document Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
-data Task = BasicTask String Bool
-          | CompositeTask Bool String List_Task
+data Task = BasicTask Description Bool
+          | CompositeTask Bool Description List_Task
           | HoleTask
           | ParseErrTask (ParseError Document Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
+
+data Description = Description String
+                 | HoleDescription
+                 | ParseErrDescription (ParseError Document Node ClipDoc UserToken)
+                     deriving (Show, Data, Typeable)
 
 data List_Expense = List_Expense ConsList_Expense
                   | HoleList_Expense
@@ -100,6 +105,7 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Currency Currency
              | Clip_Tasks Tasks
              | Clip_Task Task
+             | Clip_Description Description
              | Clip_List_Expense List_Expense
              | Clip_List_Currency List_Currency
              | Clip_List_Task List_Task
@@ -142,6 +148,9 @@ data Node = NoNode
           | Node_CompositeTask Task Path
           | Node_HoleTask Task Path
           | Node_ParseErrTask Task Path
+          | Node_Description Description Path
+          | Node_HoleDescription Description Path
+          | Node_ParseErrDescription Description Path
           | Node_List_Expense List_Expense Path
           | Node_HoleList_Expense List_Expense Path
           | Node_ParseErrList_Expense List_Expense Path
@@ -187,6 +196,9 @@ instance Show Node where
   show (Node_CompositeTask _ _) = "Node_CompositeTask" 
   show (Node_HoleTask _ _) = "Node_HoleTask" 
   show (Node_ParseErrTask _ _) = "Node_ParseErrTask" 
+  show (Node_Description _ _) = "Node_Description" 
+  show (Node_HoleDescription _ _) = "Node_HoleDescription" 
+  show (Node_ParseErrDescription _ _) = "Node_ParseErrDescription" 
   show (Node_List_Expense _ _) = "Node_List_Expense" 
   show (Node_HoleList_Expense _ _) = "Node_HoleList_Expense" 
   show (Node_ParseErrList_Expense _ _) = "Node_ParseErrList_Expense" 

@@ -24,6 +24,7 @@ instance Clip ClipDoc where
   arityClip (Clip_Currency x) = arity x
   arityClip (Clip_Tasks x) = arity x
   arityClip (Clip_Task x) = arity x
+  arityClip (Clip_Description x) = arity x
   arityClip (Clip_List_Expense x) = arity x
   arityClip (Clip_List_Currency x) = arity x
   arityClip (Clip_List_Task x) = arity x
@@ -41,6 +42,7 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Currency x) = alternatives x
   alternativesClip (Clip_Tasks x) = alternatives x
   alternativesClip (Clip_Task x) = alternatives x
+  alternativesClip (Clip_Description x) = alternatives x
   alternativesClip (Clip_List_Expense x) = alternatives x
   alternativesClip (Clip_List_Currency x) = alternatives x
   alternativesClip (Clip_List_Task x) = alternatives x
@@ -58,6 +60,7 @@ instance Clip ClipDoc where
   holeClip (Clip_Currency x) = Clip_Currency hole
   holeClip (Clip_Tasks x) = Clip_Tasks hole
   holeClip (Clip_Task x) = Clip_Task hole
+  holeClip (Clip_Description x) = Clip_Description hole
   holeClip (Clip_List_Expense x) = Clip_List_Expense hole
   holeClip (Clip_List_Currency x) = Clip_List_Currency hole
   holeClip (Clip_List_Task x) = Clip_List_Task hole
@@ -75,6 +78,7 @@ instance Clip ClipDoc where
   isListClip (Clip_Currency x) = isList x
   isListClip (Clip_Tasks x) = isList x
   isListClip (Clip_Task x) = isList x
+  isListClip (Clip_Description x) = isList x
   isListClip (Clip_List_Expense x) = isList x
   isListClip (Clip_List_Currency x) = isList x
   isListClip (Clip_List_Task x) = isList x
@@ -92,6 +96,7 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Currency x) = insertList i c x
   insertListClip i c (Clip_Tasks x) = insertList i c x
   insertListClip i c (Clip_Task x) = insertList i c x
+  insertListClip i c (Clip_Description x) = insertList i c x
   insertListClip i c (Clip_List_Expense x) = insertList i c x
   insertListClip i c (Clip_List_Currency x) = insertList i c x
   insertListClip i c (Clip_List_Task x) = insertList i c x
@@ -109,6 +114,7 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Currency x) = removeList i x
   removeListClip i (Clip_Tasks x) = removeList i x
   removeListClip i (Clip_Task x) = removeList i x
+  removeListClip i (Clip_Description x) = removeList i x
   removeListClip i (Clip_List_Expense x) = removeList i x
   removeListClip i (Clip_List_Currency x) = removeList i x
   removeListClip i (Clip_List_Task x) = removeList i x
@@ -382,8 +388,8 @@ instance Editable Task Document Node ClipDoc UserToken where
   paste (2:p) c (CompositeTask x0 x1 x2) = CompositeTask x0 x1 (paste p c x2)
   paste _ _ x = x
 
-  alternatives _ = [ ("BasicTask {String} {Bool} "  , Clip_Task $ BasicTask hole hole)
-                   , ("CompositeTask {Bool} {String} {List_Task} "  , Clip_Task $ CompositeTask hole hole hole)
+  alternatives _ = [ ("BasicTask {Description} {Bool} "  , Clip_Task $ BasicTask hole hole)
+                   , ("CompositeTask {Bool} {Description} {List_Task} "  , Clip_Task $ CompositeTask hole hole hole)
                    ,("{Task}", Clip_Task hole)
                    ]
 
@@ -401,6 +407,38 @@ instance Editable Task Document Node ClipDoc UserToken where
   hole = HoleTask
 
   holeNodeConstr = Node_HoleTask
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Description Document Node ClipDoc UserToken where
+  select [] x = Clip_Description x
+  select (0:p) (Description x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Description c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Description") x
+  paste (0:p) c (Description x0) = Description (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("Description {String} "  , Clip_Description $ Description hole)
+                   ,("{Description}", Clip_Description hole)
+                   ]
+
+  arity (Description x0) = 1
+  arity _                        = 0
+
+  toClip t = Clip_Description t
+
+  fromClip (Clip_Description t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrDescription
+
+  hole = HoleDescription
+
+  holeNodeConstr = Node_HoleDescription
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
