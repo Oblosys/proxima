@@ -14,8 +14,20 @@ import UU.Parsing.CharParser
 import Common.CommonTypes hiding (Clean, Dirty)
 
 initialDocument :: IO Document
-initialDocument = return (RootDoc 
-                           (Form "Martijn" "Informatica" 
+initialDocument = return $ RootDoc $
+  TaskDoc $
+    Tasks $ toList_Task
+      [ BasicTask "Pinpas bestellen" True
+      , CompositeTask True "Declaratie editor bouwen" $ toList_Task
+          [ CompositeTask True "Upgrade Proxima" $ toList_Task
+              [ BasicTask "Drag & Drop" True
+              , BasicTask "Xprez" True
+              ]
+          , BasicTask "Instantie maken" False 
+          ]         
+      ]       
+{-                        FormDoc
+                          (Form "Martijn" "Informatica" 
                              (toList_Expense 
                                [ Expense "Koffie" 1 0
                                , Expense "Caipirinha" 3 1
@@ -25,7 +37,12 @@ initialDocument = return (RootDoc
                                , Currency "Dollar" 0.790938
                                ])
                            )
-                         )
+                          
+v + Task 1
+  v - Task 1.1
+  v   Task 1.2
+
+-}                         
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -41,21 +58,35 @@ rankNode (Node_ParseErrEnrichedDoc _ _) = 3
 rankNode (Node_RootDoc _ _) = 4
 rankNode (Node_HoleDocument _ _) = 5
 rankNode (Node_ParseErrDocument _ _) = 6
-rankNode (Node_Form _ _) = 7
-rankNode (Node_HoleForm _ _) = 8
-rankNode (Node_ParseErrForm _ _) = 9
-rankNode (Node_Expense _ _) = 10
-rankNode (Node_HoleExpense _ _) = 11
-rankNode (Node_ParseErrExpense _ _) = 12
-rankNode (Node_Currency _ _) = 13
-rankNode (Node_HoleCurrency _ _) = 14
-rankNode (Node_ParseErrCurrency _ _) = 15
-rankNode (Node_List_Expense _ _) = 16
-rankNode (Node_HoleList_Expense _ _) = 17
-rankNode (Node_ParseErrList_Expense _ _) = 18
-rankNode (Node_List_Currency _ _) = 19
-rankNode (Node_HoleList_Currency _ _) = 20
-rankNode (Node_ParseErrList_Currency _ _) = 21
+rankNode (Node_FormDoc _ _) = 7
+rankNode (Node_TaskDoc _ _) = 8
+rankNode (Node_HoleChoiceDoc _ _) = 9
+rankNode (Node_ParseErrChoiceDoc _ _) = 10
+rankNode (Node_Form _ _) = 11
+rankNode (Node_HoleForm _ _) = 12
+rankNode (Node_ParseErrForm _ _) = 13
+rankNode (Node_Expense _ _) = 14
+rankNode (Node_HoleExpense _ _) = 15
+rankNode (Node_ParseErrExpense _ _) = 16
+rankNode (Node_Currency _ _) = 17
+rankNode (Node_HoleCurrency _ _) = 18
+rankNode (Node_ParseErrCurrency _ _) = 19
+rankNode (Node_Tasks _ _) = 20
+rankNode (Node_HoleTasks _ _) = 21
+rankNode (Node_ParseErrTasks _ _) = 22
+rankNode (Node_BasicTask _ _) = 23
+rankNode (Node_CompositeTask _ _) = 24
+rankNode (Node_HoleTask _ _) = 25
+rankNode (Node_ParseErrTask _ _) = 26
+rankNode (Node_List_Expense _ _) = 27
+rankNode (Node_HoleList_Expense _ _) = 28
+rankNode (Node_ParseErrList_Expense _ _) = 29
+rankNode (Node_List_Currency _ _) = 30
+rankNode (Node_HoleList_Currency _ _) = 31
+rankNode (Node_ParseErrList_Currency _ _) = 32
+rankNode (Node_List_Task _ _) = 33
+rankNode (Node_HoleList_Task _ _) = 34
+rankNode (Node_ParseErrList_Task _ _) = 35
 
 
 
@@ -72,6 +103,10 @@ instance DocNode Node where
   pathNode (Node_RootDoc _ pth) = PathD pth
   pathNode (Node_HoleDocument _ pth) = PathD pth
   pathNode (Node_ParseErrDocument _ pth) = PathD pth
+  pathNode (Node_FormDoc _ pth) = PathD pth
+  pathNode (Node_TaskDoc _ pth) = PathD pth
+  pathNode (Node_HoleChoiceDoc _ pth) = PathD pth
+  pathNode (Node_ParseErrChoiceDoc _ pth) = PathD pth
   pathNode (Node_Form _ pth) = PathD pth
   pathNode (Node_HoleForm _ pth) = PathD pth
   pathNode (Node_ParseErrForm _ pth) = PathD pth
@@ -81,12 +116,22 @@ instance DocNode Node where
   pathNode (Node_Currency _ pth) = PathD pth
   pathNode (Node_HoleCurrency _ pth) = PathD pth
   pathNode (Node_ParseErrCurrency _ pth) = PathD pth
+  pathNode (Node_Tasks _ pth) = PathD pth
+  pathNode (Node_HoleTasks _ pth) = PathD pth
+  pathNode (Node_ParseErrTasks _ pth) = PathD pth
+  pathNode (Node_BasicTask _ pth) = PathD pth
+  pathNode (Node_CompositeTask _ pth) = PathD pth
+  pathNode (Node_HoleTask _ pth) = PathD pth
+  pathNode (Node_ParseErrTask _ pth) = PathD pth
   pathNode (Node_List_Expense _ pth) = PathD pth
   pathNode (Node_HoleList_Expense _ pth) = PathD pth
   pathNode (Node_ParseErrList_Expense _ pth) = PathD pth
   pathNode (Node_List_Currency _ pth) = PathD pth
   pathNode (Node_HoleList_Currency _ pth) = PathD pth
   pathNode (Node_ParseErrList_Currency _ pth) = PathD pth
+  pathNode (Node_List_Task _ pth) = PathD pth
+  pathNode (Node_HoleList_Task _ pth) = PathD pth
+  pathNode (Node_ParseErrList_Task _ pth) = PathD pth
 
 
 
@@ -94,12 +139,16 @@ instance DocNode Node where
 -- toXML functions                                                      --
 --------------------------------------------------------------------------
 
-toXMLEnrichedDoc (RootEnr form) = Elt "RootEnr" [] $ [toXMLForm form]
+toXMLEnrichedDoc (RootEnr choiceDoc) = Elt "RootEnr" [] $ [toXMLChoiceDoc choiceDoc]
 toXMLEnrichedDoc (HoleEnrichedDoc) = EmptyElt "HoleEnrichedDoc" [] 
 toXMLEnrichedDoc (ParseErrEnrichedDoc error) = EmptyElt "ParseErrEnrichedDoc" []
-toXMLDocument (RootDoc form) = Elt "RootDoc" [] $ [toXMLForm form]
+toXMLDocument (RootDoc choiceDoc) = Elt "RootDoc" [] $ [toXMLChoiceDoc choiceDoc]
 toXMLDocument (HoleDocument) = EmptyElt "HoleDocument" [] 
 toXMLDocument (ParseErrDocument error) = EmptyElt "ParseErrDocument" []
+toXMLChoiceDoc (FormDoc form) = Elt "FormDoc" [] $ [toXMLForm form]
+toXMLChoiceDoc (TaskDoc tasks) = Elt "TaskDoc" [] $ [toXMLTasks tasks]
+toXMLChoiceDoc (HoleChoiceDoc) = EmptyElt "HoleChoiceDoc" [] 
+toXMLChoiceDoc (ParseErrChoiceDoc error) = EmptyElt "ParseErrChoiceDoc" []
 toXMLForm (Form name faculty expenses currencies) = Elt "Form" [] $ [toXMLString name] ++ [toXMLString faculty] ++ toXMLList_Expense expenses ++ toXMLList_Currency currencies
 toXMLForm (HoleForm) = EmptyElt "HoleForm" [] 
 toXMLForm (ParseErrForm error) = EmptyElt "ParseErrForm" []
@@ -109,16 +158,28 @@ toXMLExpense (ParseErrExpense error) = EmptyElt "ParseErrExpense" []
 toXMLCurrency (Currency name euroRate) = Elt "Currency" [] $ [toXMLString name] ++ [toXMLFloat euroRate]
 toXMLCurrency (HoleCurrency) = EmptyElt "HoleCurrency" [] 
 toXMLCurrency (ParseErrCurrency error) = EmptyElt "ParseErrCurrency" []
+toXMLTasks (Tasks tasks) = Elt "Tasks" [] $ toXMLList_Task tasks
+toXMLTasks (HoleTasks) = EmptyElt "HoleTasks" [] 
+toXMLTasks (ParseErrTasks error) = EmptyElt "ParseErrTasks" []
+toXMLTask (BasicTask description completed) = Elt "BasicTask" [] $ [toXMLString description] ++ [toXMLBool completed]
+toXMLTask (CompositeTask expanded description subtasks) = Elt "CompositeTask" [] $ [toXMLBool expanded] ++ [toXMLString description] ++ toXMLList_Task subtasks
+toXMLTask (HoleTask) = EmptyElt "HoleTask" [] 
+toXMLTask (ParseErrTask error) = EmptyElt "ParseErrTask" []
 toXMLList_Expense (List_Expense xs) = toXMLConsList_Expense xs
 toXMLList_Expense HoleList_Expense = []
 toXMLList_Expense (ParseErrList_Expense _) = []
 toXMLList_Currency (List_Currency xs) = toXMLConsList_Currency xs
 toXMLList_Currency HoleList_Currency = []
 toXMLList_Currency (ParseErrList_Currency _) = []
+toXMLList_Task (List_Task xs) = toXMLConsList_Task xs
+toXMLList_Task HoleList_Task = []
+toXMLList_Task (ParseErrList_Task _) = []
 toXMLConsList_Expense (Cons_Expense x xs) = toXMLExpense x : toXMLConsList_Expense xs
 toXMLConsList_Expense Nil_Expense             = []
 toXMLConsList_Currency (Cons_Currency x xs) = toXMLCurrency x : toXMLConsList_Currency xs
 toXMLConsList_Currency Nil_Currency             = []
+toXMLConsList_Task (Cons_Task x xs) = toXMLTask x : toXMLConsList_Task xs
+toXMLConsList_Task Nil_Task             = []
 
 
 
@@ -127,17 +188,26 @@ toXMLConsList_Currency Nil_Currency             = []
 --------------------------------------------------------------------------
 
 parseXML_EnrichedDoc = parseXMLCns_RootEnr <|> parseHoleAndParseErr "EnrichedDoc" HoleEnrichedDoc
-parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_Form<* endTag "RootEnr"
+parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_ChoiceDoc<* endTag "RootEnr"
 parseXML_Document = parseXMLCns_RootDoc <|> parseHoleAndParseErr "Document" HoleDocument
-parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_Form<* endTag "RootDoc"
+parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_ChoiceDoc<* endTag "RootDoc"
+parseXML_ChoiceDoc = parseXMLCns_FormDoc <|> parseXMLCns_TaskDoc <|> parseHoleAndParseErr "ChoiceDoc" HoleChoiceDoc
+parseXMLCns_FormDoc = FormDoc <$ startTag "FormDoc" <*> parseXML_Form<* endTag "FormDoc"
+parseXMLCns_TaskDoc = TaskDoc <$ startTag "TaskDoc" <*> parseXML_Tasks<* endTag "TaskDoc"
 parseXML_Form = parseXMLCns_Form <|> parseHoleAndParseErr "Form" HoleForm
 parseXMLCns_Form = Form <$ startTag "Form" <*> parseXML_String <*> parseXML_String <*> parseXML_List_Expense <*> parseXML_List_Currency<* endTag "Form"
 parseXML_Expense = parseXMLCns_Expense <|> parseHoleAndParseErr "Expense" HoleExpense
 parseXMLCns_Expense = Expense <$ startTag "Expense" <*> parseXML_String <*> parseXML_Float <*> parseXML_Int<* endTag "Expense"
 parseXML_Currency = parseXMLCns_Currency <|> parseHoleAndParseErr "Currency" HoleCurrency
 parseXMLCns_Currency = Currency <$ startTag "Currency" <*> parseXML_String <*> parseXML_Float<* endTag "Currency"
+parseXML_Tasks = parseXMLCns_Tasks <|> parseHoleAndParseErr "Tasks" HoleTasks
+parseXMLCns_Tasks = Tasks <$ startTag "Tasks" <*> parseXML_List_Task<* endTag "Tasks"
+parseXML_Task = parseXMLCns_BasicTask <|> parseXMLCns_CompositeTask <|> parseHoleAndParseErr "Task" HoleTask
+parseXMLCns_BasicTask = BasicTask <$ startTag "BasicTask" <*> parseXML_String <*> parseXML_Bool<* endTag "BasicTask"
+parseXMLCns_CompositeTask = CompositeTask <$ startTag "CompositeTask" <*> parseXML_Bool <*> parseXML_String <*> parseXML_List_Task<* endTag "CompositeTask"
 parseXML_List_Expense = mkList List_Expense Cons_Expense Nil_Expense <$> pList_ng parseXML_Expense
 parseXML_List_Currency = mkList List_Currency Cons_Currency Nil_Currency <$> pList_ng parseXML_Currency
+parseXML_List_Task = mkList List_Task Cons_Task Nil_Task <$> pList_ng parseXML_Task
 
 
 
@@ -190,6 +260,29 @@ insertList_Currency n x (Cons_Currency cx cxs) = Cons_Currency cx (insertList_Cu
 removeList_Currency _ Nil_Currency  = Nil_Currency  -- remove beyond end of list
 removeList_Currency 0 (Cons_Currency cx cxs) = cxs
 removeList_Currency n (Cons_Currency cx cxs) = Cons_Currency cx (removeList_Currency (n-1) cxs)
+
+toList_Task vs = List_Task (toConsList_Task vs)
+
+fromList_Task (List_Task vs) = fromConsList_Task vs
+fromList_Task _ = []
+
+toConsList_Task [] = Nil_Task
+toConsList_Task (x:xs) = Cons_Task x (toConsList_Task xs)
+
+fromConsList_Task Nil_Task = []
+fromConsList_Task (Cons_Task x xs) = x: fromConsList_Task xs
+
+replaceList_Task _ x Nil_Task = Nil_Task  -- replace beyond end of list
+replaceList_Task 0 x (Cons_Task cx cxs) = Cons_Task x cxs
+replaceList_Task n x (Cons_Task cx cxs) = Cons_Task cx (replaceList_Task (n-1) x cxs)
+
+insertList_Task 0 x cxs = Cons_Task x cxs
+insertList_Task _ x Nil_Task  = Nil_Task  -- insert beyond end of list
+insertList_Task n x (Cons_Task cx cxs) = Cons_Task cx (insertList_Task (n-1) x cxs)
+
+removeList_Task _ Nil_Task  = Nil_Task  -- remove beyond end of list
+removeList_Task 0 (Cons_Task cx cxs) = cxs
+removeList_Task n (Cons_Task cx cxs) = Cons_Task cx (removeList_Task (n-1) cxs)
 
 
 

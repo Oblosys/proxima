@@ -1,7 +1,16 @@
-data Document = RootDoc form : Form    
+data Document = RootDoc choiceDoc : ChoiceDoc    
+
+data ChoiceDoc = FormDoc form : Form
+               | TaskDoc tasks : Tasks
 
 data Form = Form name : String faculty : String expenses : [Expense] currencies : [Currency]
 
 data Expense = Expense description : String amount : Float currencyIx : Int
 
 data Currency = Currency name : String euroRate : Float
+
+
+data Tasks = Tasks tasks : [Task]
+
+data Task = BasicTask description : String completed : Bool 
+          | CompositeTask expanded : Bool description : String subtasks : [Task]

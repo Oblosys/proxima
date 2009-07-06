@@ -35,9 +35,15 @@ EnrichedDoc  [ focusD : FocusDoc path : Path
 --------------------------------------------------------------------------
 
 DATA EnrichedDoc
-  | RootEnr form:Form
+  | RootEnr choiceDoc:ChoiceDoc
   | HoleEnrichedDoc
   | ParseErrEnrichedDoc error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA ChoiceDoc
+  | FormDoc form:Form
+  | TaskDoc tasks:Tasks
+  | HoleChoiceDoc
+  | ParseErrChoiceDoc error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Form
   | Form name:String faculty:String expenses:List_Expense currencies:List_Currency
@@ -54,6 +60,17 @@ DATA Currency
   | HoleCurrency
   | ParseErrCurrency error:{(ParseError Document Node ClipDoc UserToken)}
 
+DATA Tasks
+  | Tasks tasks:List_Task
+  | HoleTasks
+  | ParseErrTasks error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA Task
+  | BasicTask description:String completed:Bool
+  | CompositeTask expanded:Bool description:String subtasks:List_Task
+  | HoleTask
+  | ParseErrTask error:{(ParseError Document Node ClipDoc UserToken)}
+
 DATA List_Expense
   | List_Expense elts:ConsList_Expense
   | HoleList_Expense
@@ -64,6 +81,11 @@ DATA List_Currency
   | HoleList_Currency
   | ParseErrList_Currency error:{(ParseError Document Node ClipDoc UserToken)}
 
+DATA List_Task
+  | List_Task elts:ConsList_Task
+  | HoleList_Task
+  | ParseErrList_Task error:{(ParseError Document Node ClipDoc UserToken)}
+
 DATA ConsList_Expense
   | Cons_Expense head:Expense tail:ConsList_Expense
   | Nil_Expense
@@ -72,6 +94,10 @@ DATA ConsList_Currency
   | Cons_Currency head:Currency tail:ConsList_Currency
   | Nil_Currency
 
+DATA ConsList_Task
+  | Cons_Task head:Task tail:ConsList_Task
+  | Nil_Task
+
 
 
 
@@ -79,22 +105,22 @@ DATA ConsList_Currency
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc Form Expense Currency List_Expense List_Currency ConsList_Expense ConsList_Currency
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR EnrichedDoc Form Expense Currency List_Expense List_Currency
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task List_Expense List_Currency List_Task
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
-ATTR Form Expense Currency List_Expense List_Currency ConsList_Expense ConsList_Currency
+ATTR ChoiceDoc Form Expense Currency Tasks Task List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
-ATTR Form Expense Currency List_Expense List_Currency
+ATTR ChoiceDoc Form Expense Currency Tasks Task List_Expense List_Currency List_Task
      [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
-ATTR List_Expense List_Currency ConsList_Expense ConsList_Currency
+ATTR List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]
 
-ATTR ConsList_Expense ConsList_Currency
+ATTR ConsList_Expense ConsList_Currency ConsList_Task
      [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]
 
 
@@ -106,11 +132,11 @@ ATTR ConsList_Expense ConsList_Currency
 
 SEM EnrichedDoc
   | RootEnr 
-      form.pIdC = @lhs.pIdC + 0
-      lhs.pIdC = @form.pIdC
-      form.path  = @lhs.path++[0]
+      choiceDoc.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @choiceDoc.pIdC
+      choiceDoc.path  = @lhs.path++[0]
   | RootEnr
-    form.ix = 0
+    choiceDoc.ix = 0
   | RootEnr
       lhs.pres = loc (Node_RootEnr @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -120,6 +146,33 @@ SEM EnrichedDoc
   | ParseErrEnrichedDoc
       lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self @lhs.path) @error
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+
+SEM ChoiceDoc
+  | FormDoc 
+      form.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @form.pIdC
+      form.path  = @lhs.path++[0]
+  | TaskDoc 
+      tasks.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @tasks.pIdC
+      tasks.path  = @lhs.path++[0]
+  | FormDoc
+    form.ix = 0
+  | TaskDoc
+    tasks.ix = 0
+  | FormDoc
+      lhs.pres = loc (Node_FormDoc @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | TaskDoc
+      lhs.pres = loc (Node_TaskDoc @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleChoiceDoc
+      lhs.pres = presHole @lhs.focusD "ChoiceDoc" (Node_HoleChoiceDoc @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrChoiceDoc
+      lhs.pres = presParseErr (Node_ParseErrChoiceDoc @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
 
 SEM Form
   | Form 
@@ -172,6 +225,48 @@ SEM Currency
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
+SEM Tasks
+  | Tasks 
+      tasks.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @tasks.pIdC
+      tasks.path  = @lhs.path++[0]
+  | Tasks
+    tasks.ix = 0
+  | Tasks
+      lhs.pres = loc (Node_Tasks @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleTasks
+      lhs.pres = presHole @lhs.focusD "Tasks" (Node_HoleTasks @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrTasks
+      lhs.pres = presParseErr (Node_ParseErrTasks @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM Task
+  | BasicTask 
+      lhs.pIdC = @lhs.pIdC + 0
+  | CompositeTask 
+      subtasks.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @subtasks.pIdC
+      subtasks.path  = @lhs.path++[2]
+  | BasicTask
+  | CompositeTask
+    subtasks.ix = 2
+  | BasicTask
+      lhs.pres = loc (Node_BasicTask @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | CompositeTask
+      lhs.pres = loc (Node_CompositeTask @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleTask
+      lhs.pres = presHole @lhs.focusD "Task" (Node_HoleTask @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrTask
+      lhs.pres = presParseErr (Node_ParseErrTask @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
 SEM List_Expense
   | List_Expense
       lhs.press = map ( loc (Node_List_Expense @self @lhs.path)
@@ -218,6 +313,29 @@ SEM List_Currency
       lhs.pres = presHole @lhs.focusD "Currency" (Node_HoleList_Currency @self @lhs.path) @lhs.path
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
 
+SEM List_Task
+  | List_Task
+      lhs.press = map ( loc (Node_List_Task @self @lhs.path)
+                      . presentFocus @lhs.focusD @lhs.path )
+                      @elts.press
+                      -- parent is reponsible for setting parsing/structural
+      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def.
+      lhs.pIdC = @elts.pIdC
+      elts.path = @lhs.path
+      elts.ix = 0
+  | HoleList_Task     lhs.press = []
+  | ParseErrList_Task lhs.press = []
+  | List_Task
+      lhs.pres = loc (Node_List_Task @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrList_Task
+      lhs.pres = presParseErr (Node_ParseErrList_Task @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+  | HoleList_Task
+      lhs.pres = presHole @lhs.focusD "Task" (Node_HoleList_Task @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+
 SEM ConsList_Expense
   | Cons_Expense
       head.path  = @lhs.path++[@lhs.ix]
@@ -240,12 +358,27 @@ SEM ConsList_Currency
       tail.ix  = @lhs.ix + 1
   | Nil_Currency      lhs.press = []
 
+SEM ConsList_Task
+  | Cons_Task
+      head.path  = @lhs.path++[@lhs.ix]
+      tail.path = @lhs.path
+      lhs.press = @head.pres : @tail.press
+      head.pIdC = @lhs.pIdC + 30 -- NOT RIGHT, should be taken from document type def.
+      tail.pIdC = @head.pIdC
+      lhs.pIdC = @tail.pIdC
+      tail.ix  = @lhs.ix + 1
+  | Nil_Task      lhs.press = []
+
 
 
 
 --------------------------------------------------------------------------
 -- Synthesized path rules                                               --
 --------------------------------------------------------------------------
+
+SEM ChoiceDoc
+  | FormDoc lhs.path = @lhs.path
+  | TaskDoc lhs.path = @lhs.path
 
 SEM Form
   | Form lhs.path = @lhs.path
@@ -256,11 +389,21 @@ SEM Expense
 SEM Currency
   | Currency lhs.path = @lhs.path
 
+SEM Tasks
+  | Tasks lhs.path = @lhs.path
+
+SEM Task
+  | BasicTask lhs.path = @lhs.path
+  | CompositeTask lhs.path = @lhs.path
+
 SEM List_Expense
   | List_Expense lhs.path = @lhs.path
 
 SEM List_Currency
   | List_Currency lhs.path = @lhs.path
+
+SEM List_Task
+  | List_Task lhs.path = @lhs.path
 
 
 
@@ -268,6 +411,14 @@ SEM List_Currency
 --------------------------------------------------------------------------
 -- Sem functions for XML presentation                                   --
 --------------------------------------------------------------------------
+
+SEM ChoiceDoc
+  | FormDoc
+      lhs.presXML = presentElementXML @lhs.focusD (Node_FormDoc @self @lhs.path) @lhs.path "FormDoc" [ @form.presXML ] 
+  | TaskDoc
+      lhs.presXML = presentElementXML @lhs.focusD (Node_TaskDoc @self @lhs.path) @lhs.path "TaskDoc" [ @tasks.presXML ] 
+  | HoleChoiceDoc     lhs.presXML = presHole @lhs.focusD "ChoiceDoc" (Node_HoleChoiceDoc @self @lhs.path) @lhs.path
+  | ParseErrChoiceDoc lhs.presXML = presParseErr (Node_ParseErrChoiceDoc @self @lhs.path) @error
 
 SEM Form
   | Form
@@ -286,6 +437,20 @@ SEM Currency
       lhs.presXML = presentElementXML @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ presentPrimXMLString @name, presentPrimXMLFloat @euroRate ] 
   | HoleCurrency     lhs.presXML = presHole @lhs.focusD "Currency" (Node_HoleCurrency @self @lhs.path) @lhs.path
   | ParseErrCurrency lhs.presXML = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
+
+SEM Tasks
+  | Tasks
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ @tasks.presXML ] 
+  | HoleTasks     lhs.presXML = presHole @lhs.focusD "Tasks" (Node_HoleTasks @self @lhs.path) @lhs.path
+  | ParseErrTasks lhs.presXML = presParseErr (Node_ParseErrTasks @self @lhs.path) @error
+
+SEM Task
+  | BasicTask
+      lhs.presXML = presentElementXML @lhs.focusD (Node_BasicTask @self @lhs.path) @lhs.path "BasicTask" [ presentPrimXMLString @description, presentPrimXMLBool @completed ] 
+  | CompositeTask
+      lhs.presXML = presentElementXML @lhs.focusD (Node_CompositeTask @self @lhs.path) @lhs.path "CompositeTask" [ presentPrimXMLBool @expanded, presentPrimXMLString @description, @subtasks.presXML ] 
+  | HoleTask     lhs.presXML = presHole @lhs.focusD "Task" (Node_HoleTask @self @lhs.path) @lhs.path
+  | ParseErrTask lhs.presXML = presParseErr (Node_ParseErrTask @self @lhs.path) @error
 
 SEM List_Expense
   | List_Expense
@@ -309,6 +474,17 @@ SEM List_Currency
       lhs.presXML = loc (Node_List_Currency @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Currency" (Node_HoleList_Currency @self @lhs.path) @lhs.path
 
+SEM List_Task
+  | List_Task
+      lhs.presXML = loc (Node_List_Task @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    col @elts.pressXML
+  | ParseErrList_Task
+      lhs.presXML = loc (Node_List_Task @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presParseErr (Node_ParseErrList_Task @self @lhs.path) @error
+  | HoleList_Task
+      lhs.presXML = loc (Node_List_Task @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presHole @lhs.focusD "List_Task" (Node_HoleList_Task @self @lhs.path) @lhs.path
+
 SEM ConsList_Expense
   | Cons_Expense lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Expense  lhs.pressXML  = []
@@ -317,12 +493,24 @@ SEM ConsList_Currency
   | Cons_Currency lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Currency  lhs.pressXML  = []
 
+SEM ConsList_Task
+  | Cons_Task lhs.pressXML  = @head.presXML : @tail.pressXML
+  | Nil_Task  lhs.pressXML  = []
+
 
 
 
 --------------------------------------------------------------------------
 -- Sem functions for tree presentation                                  --
 --------------------------------------------------------------------------
+
+SEM ChoiceDoc
+  | FormDoc
+      lhs.presTree = presentElementTree @lhs.focusD (Node_FormDoc @self @lhs.path) @lhs.path "FormDoc" [ @form.presTree ] 
+  | TaskDoc
+      lhs.presTree = presentElementTree @lhs.focusD (Node_TaskDoc @self @lhs.path) @lhs.path "TaskDoc" [ @tasks.presTree ] 
+  | HoleChoiceDoc     lhs.presTree = presHole @lhs.focusD "ChoiceDoc" (Node_HoleChoiceDoc @self @lhs.path) @lhs.path
+  | ParseErrChoiceDoc lhs.presTree = presParseErr (Node_ParseErrChoiceDoc @self @lhs.path) @error
 
 SEM Form
   | Form
@@ -341,6 +529,20 @@ SEM Currency
       lhs.presTree = presentElementTree @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ presentPrimXMLString @name, presentPrimXMLFloat @euroRate ] 
   | HoleCurrency     lhs.presTree = presHole @lhs.focusD "Currency" (Node_HoleCurrency @self @lhs.path) @lhs.path
   | ParseErrCurrency lhs.presTree = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
+
+SEM Tasks
+  | Tasks
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ @tasks.presTree ] 
+  | HoleTasks     lhs.presTree = presHole @lhs.focusD "Tasks" (Node_HoleTasks @self @lhs.path) @lhs.path
+  | ParseErrTasks lhs.presTree = presParseErr (Node_ParseErrTasks @self @lhs.path) @error
+
+SEM Task
+  | BasicTask
+      lhs.presTree = presentElementTree @lhs.focusD (Node_BasicTask @self @lhs.path) @lhs.path "BasicTask" [ presentPrimXMLString @description, presentPrimXMLBool @completed ] 
+  | CompositeTask
+      lhs.presTree = presentElementTree @lhs.focusD (Node_CompositeTask @self @lhs.path) @lhs.path "CompositeTask" [ presentPrimXMLBool @expanded, presentPrimXMLString @description, @subtasks.presTree ] 
+  | HoleTask     lhs.presTree = presHole @lhs.focusD "Task" (Node_HoleTask @self @lhs.path) @lhs.path
+  | ParseErrTask lhs.presTree = presParseErr (Node_ParseErrTask @self @lhs.path) @error
 
 SEM List_Expense
   | List_Expense
@@ -364,6 +566,17 @@ SEM List_Currency
       lhs.presTree = loc (Node_List_Currency @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Currency" (Node_HoleList_Currency @self @lhs.path) @lhs.path
 
+SEM List_Task
+  | List_Task
+      lhs.presTree = loc (Node_List_Task @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       col @elts.pressTree
+  | ParseErrList_Task
+      lhs.presTree = loc (Node_List_Task @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presParseErr (Node_ParseErrList_Task @self @lhs.path) @error
+  | HoleList_Task
+      lhs.presTree = loc (Node_List_Task @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presHole @lhs.focusD "List_Task" (Node_HoleList_Task @self @lhs.path) @lhs.path
+
 SEM ConsList_Expense
   | Cons_Expense lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Expense  lhs.pressTree  = []
@@ -371,6 +584,10 @@ SEM ConsList_Expense
 SEM ConsList_Currency
   | Cons_Currency lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Currency  lhs.pressTree  = []
+
+SEM ConsList_Task
+  | Cons_Task lhs.pressTree  = @head.presTree : @tail.pressTree
+  | Nil_Task  lhs.pressTree  = []
 
 
 

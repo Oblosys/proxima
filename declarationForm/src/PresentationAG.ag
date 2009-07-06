@@ -31,7 +31,13 @@ INCLUDE "PresentationAG_Generated.ag"
 
 SEM EnrichedDoc
   | RootEnr
+      loc.pres = structural $ @choiceDoc.pres
+                   
+SEM ChoiceDoc
+  | FormDoc
       loc.pres = structural $ @form.pres `withbgColor` lightBlue
+  | TaskDoc
+      loc.pres = structural $ @tasks.pres
                    
 SEM Form
   | Form
@@ -177,3 +183,72 @@ showCurrency f =
 -- TODO: why does withStretch not override col and row stretch settings?
 -- Stretch does not seem to work for text fields anymore
 -- empty has no background
+
+
+
+
+
+
+
+
+
+
+SEM Tasks
+  | Tasks
+      loc.pres = structural $ @tasks.pres
+
+SEM List_Task
+  | List_Task
+      loc.pres = structural $ 
+                   col @elts.press
+
+SEM Task
+  | BasicTask
+      loc.pres = structural $ row [ text " " `withFontFam` "Courier" 
+                                  , hSpace 5
+                                  , presentCompleted @completed
+                                      `withMouseDown` flipCompleted @lhs.path @self
+
+                                  , hSpace 2, text @description `withColor` if @completed then green else blue]
+  | CompositeTask
+      loc.pres = structural $ col $ row [ (text $ if @expanded then "-" else "+") `withFontFam` "Courier"
+                                          `withMouseDown` flipExpanded @lhs.path @self
+                                        , hSpace 5
+                                        , presentCompleted @subtasks.completed
+                                            `withMouseDown` setCompletedRec (not @subtasks.completed) @lhs.path @self
+                                        , hSpace 2
+                                        ,  text @description
+                                             `withColor` if @subtasks.completed then green else blue
+                                        ] 
+                                  : if @expanded 
+                                    then [row [text " " `withFontFam` "Courier", hSpace 5, @subtasks.pres]] 
+                                    else []
+
+
+ATTR List_Task ConsList_Task Task 
+     [ | | completed USE {&&} {True} : {Bool} ]
+
+SEM Task
+  | BasicTask
+      loc.completed = @completed
+
+{
+flipCompleted pth (BasicTask descr completed) = pasteAt (Clip_Task (BasicTask descr (not completed))) pth
+
+flipExpanded pth (CompositeTask expanded descr subtasks) = pasteAt (Clip_Task (CompositeTask (not expanded) descr subtasks)) pth
+
+setCompletedRec completed pth task = pasteAt (Clip_Task (setCompletedRec' task)) pth
+ where setCompletedRec' (BasicTask descr _) = BasicTask descr completed
+       setCompletedRec' (CompositeTask exp descr subtasks) = CompositeTask exp descr $ toList_Task $ map setCompletedRec' (fromList_Task subtasks)
+
+presentCompleted completed =
+  boxed (text ch) `withFontFam` "Courier" 
+ where ch = if completed then "v" else " "
+
+
+pasteAt :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
+pasteAt clip pth =
+  \(DocumentLevel d path cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) clip)
+    in  (DocumentLevel d' path cl)
+}
