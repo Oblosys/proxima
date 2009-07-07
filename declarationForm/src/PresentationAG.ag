@@ -190,9 +190,9 @@ SEM Task
 
                                   , hSpace 5, @description.pres `withColor` if @completed then green else blue]
                               `addPopupItems` 
- 			      [ ("Delete task", fixTask @lhs.path . deleteAt @lhs.path)
-			      , ("Insert subtask", changeToComposite @lhs.path)
-                              ]
+ 			      ([ ("Delete task", fixTask @lhs.path . deleteAt @lhs.path)
+			       , ("Insert subtask", changeToComposite @lhs.path)
+                               ] ++ mkMoveItems @lhs.path)
   | CompositeTask
       loc.pres = structural $ col $ row [ (if @expanded then minusImg else plusImg) `withRef` (0,4)
                                           `withMouseDown` flipExpanded @lhs.path @self
@@ -203,9 +203,9 @@ SEM Task
                                         , @description.pres
                                              `withColor` if @subtasks.completed then green else blue
                                         ] `addPopupItems` 
-                                        [ ("Delete task", deleteAt @lhs.path)
-					, ("Insert subtask", insertElementAtEnd (toClip newTask) (@lhs.path++[2]))
-                                        ]
+                                        ([ ("Delete task", deleteAt @lhs.path)
+					 , ("Insert subtask", insertElementAtEnd (toClip newTask) (@lhs.path++[2]))
+                                         ] ++ mkMoveItems @lhs.path)
  
                                   : if @expanded 
                                     then [row [hSpace $ 9 + 5, @subtasks.pres]] 
@@ -258,6 +258,39 @@ changeToComposite pth =
         Clip_Task $ CompositeTask True descr $
           toList_Task [newTask]
       clip -> clip 
+
+-- TODO: we either need the entire document here, or an isLast attribute to hide move down
+--       in case of the last task.
+mkMoveItems [] = []
+mkMoveItems pth =
+ -- if last pth > 0 
+ -- then 
+ [ ("Move task up", moveTaskUp pth), ("Move task down", moveTaskDown pth) ]
+
+moveTaskUp []  = id
+moveTaskUp pth = 
+  let parentListPth = init pth
+      indexInList = last pth
+  in  \(DocumentLevel d f cl) ->
+        if indexInList > 0
+        then let elt = selectD pth d
+                 (d', f') = deleteD pth d
+                 d'' = insertListD parentListPth (indexInList - 1) elt d'
+             in  DocumentLevel d'' f cl
+        else DocumentLevel d f cl
+
+moveTaskDown []  = id
+moveTaskDown [_] = id
+moveTaskDown pth =
+  let parentListPth = init pth
+      indexInList = last pth
+  in  \(DocumentLevel d f cl) ->
+        if indexInList < arityClip (selectD parentListPth d) - 1
+        then let elt = selectD pth d
+                 (d', f') = deleteD pth d
+                 d'' = insertListD parentListPth (indexInList + 1) elt d'
+             in  DocumentLevel d'' f cl
+        else DocumentLevel d f cl
 
 newTask = BasicTask (Description " ") False
 
