@@ -292,7 +292,7 @@ moveTaskDown pth =
              in  DocumentLevel d'' f cl
         else DocumentLevel d f cl
 
-newTask = BasicTask (Description " ") False
+newTask = BasicTask (Description "") False
 
 -- TODO: move these to library
 
