@@ -133,33 +133,6 @@ setCurrencyIx pth newCurrencyIx=
                  _ -> doc
     in  DocumentLevel doc' focus clip
 
--- Document utils
-
--- PRECONDITION: path points to a list element of the same type as clip
-addElementAfter :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
-addElementAfter clip path = 
-  \(DocumentLevel d pth cl) ->
-    (DocumentLevel (insertListD (init path) (last path+1) clip d) pth cl)
-
--- PRECONDITION: path points to a list of elements of the same type as clip
--- NB path points to the list, rather than to an element.
-insertElementAtHead :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
-insertElementAtHead  clip listPath = 
-  \(DocumentLevel d pth cl) ->
-    (DocumentLevel (insertListD listPath 0 clip d) pth cl)
-
--- PRECONDITION: path points to a list of elements of the same type as clip
--- NB path points to the list, rather than to an element.
-insertElementAtEnd :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
-insertElementAtEnd  clip listPath = 
-  \(DocumentLevel d pth cl) ->
-    let list = selectD listPath d
-    in  (DocumentLevel (insertListD listPath (arityClip list) clip d) pth cl)
-
-deleteAtPath :: Path -> UpdateDoc Document ClipDoc
-deleteAtPath pth =
-   \(DocumentLevel d _ cl) ->
-     editCutD (DocumentLevel d (PathD pth) cl)
 
 -- Presentation utils
 
@@ -195,7 +168,7 @@ showCurrency f =
 
 SEM Tasks
   | Tasks
-      loc.pres = structural $ @tasks.pres `withFontSize` 12
+      loc.pres = structural $ row [ hSpace 4, @tasks.pres `withFontSize` 12]
 
 SEM List_Task
   | List_Task
@@ -209,6 +182,7 @@ SEM Task
                                       `withMouseDown` flipCompleted @lhs.path @self
 
                                   , hSpace 5, @description.pres `withColor` if @completed then green else blue]
+                              `addPopupItems` [("Delete task", fixTask @lhs.path . deleteAt @lhs.path)]
   | CompositeTask
       loc.pres = structural $ col $ row [ (if @expanded then minusImg else plusImg) `withRef` (0,4)
                                           `withMouseDown` flipExpanded @lhs.path @self
@@ -218,7 +192,8 @@ SEM Task
                                         , hSpace 5
                                         , @description.pres
                                              `withColor` if @subtasks.completed then green else blue
-                                        ] 
+                                        ] `addPopupItems` [("Delete task", deleteAt @lhs.path)]
+ 
                                   : if @expanded 
                                     then [row [hSpace $ 9 + 5, @subtasks.pres]] 
                                     else []
@@ -252,10 +227,57 @@ presentCompleted completed notStarted = vRefHalf $
   img (if completed then "img/completed.bmp" else if notStarted then "img/notStarted.bmp" else "img/partiallyCompleted.bmp") `withSize` (9,9) `withRef` (4,4)
 
 
+fixTask [] = id
+fixTask [_] = id
+fixTask pth = 
+  let parentPath = (init (init pth))
+  in  updateAt parentPath $ \clip ->
+        case clip of
+          Clip_Task (CompositeTask _ descr (List_Task Nil_Task)) -> 
+            Clip_Task (BasicTask descr False)
+          clip -> clip
+
+-- TODO: move these to library
+
+-- called deleteAtPath in dazzleEditor
+
+deleteAt :: Path -> UpdateDoc Document ClipDoc
+deleteAt pth =
+   \(DocumentLevel d _ cl) ->
+     editCutD (DocumentLevel d (PathD pth) cl)
 
 pasteAt :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
 pasteAt clip pth =
   \(DocumentLevel d path cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) clip)
     in  (DocumentLevel d' path cl)
+
+updateAt :: Path -> (ClipDoc -> ClipDoc) -> UpdateDoc Document ClipDoc
+updateAt pth f =
+  \(DocumentLevel d path cl) ->
+    let clip = f (selectD pth d)
+        (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) clip)
+    in  (DocumentLevel d' path cl)
+
+
+-- PRECONDITION: path points to a list element of the same type as clip
+addElementAfter :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
+addElementAfter clip path = 
+  \(DocumentLevel d pth cl) ->
+    (DocumentLevel (insertListD (init path) (last path+1) clip d) pth cl)
+
+-- PRECONDITION: path points to a list of elements of the same type as clip
+-- NB path points to the list, rather than to an element.
+insertElementAtHead :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
+insertElementAtHead  clip listPath = 
+  \(DocumentLevel d pth cl) ->
+    (DocumentLevel (insertListD listPath 0 clip d) pth cl)
+
+-- PRECONDITION: path points to a list of elements of the same type as clip
+-- NB path points to the list, rather than to an element.
+insertElementAtEnd :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
+insertElementAtEnd  clip listPath = 
+  \(DocumentLevel d pth cl) ->
+    let list = selectD listPath d
+    in  (DocumentLevel (insertListD listPath (arityClip list) clip d) pth cl)
 }
