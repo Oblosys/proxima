@@ -14,9 +14,9 @@ description:
 category:
 tested-with: GHC -any
 data-files:
-extra-source-files: ../proxima/src/Arrangement/ArrangerAG.ag
-                    ../proxima/src/Layout/AlexTemplate-ghc
-                    ../proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
+extra-source-files: src/proxima/src/Arrangement/ArrangerAG.ag
+                    src/proxima/src/Layout/AlexTemplate-ghc
+                    src/proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
                     src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:
 
@@ -52,12 +52,13 @@ Executable DazzleEditor
   includes:
   install-includes:
   include-dirs:
-  hs-source-dirs: ../uuagc/src/ ../proxima/src src
+  hs-source-dirs: src/uuagc/src/ src/proxima/src src
   ghc-prof-options:
-  ghc-options: -w -fglasgow-exts
+  ghc-options: -w -fglasgow-exts -fobject-code
   if flag(Server)
     cpp-options: -DSERVER
   extensions: UndecidableInstances NoMonomorphismRestriction
+  extensions: IncoherentInstances
   hugs-options:
   jhc-options:
 

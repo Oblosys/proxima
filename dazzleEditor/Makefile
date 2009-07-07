@@ -1,13 +1,13 @@
 HC = ghc
 ALEX = alex
-PROXIMADIR = ../proxima
+PROXIMADIR = src/proxima
 
 FIND = /usr/bin/find
 
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
 
-UUSRCDIR = ../uuagc/src
+UUSRCDIR = src/uuagc/src
 
 AGC  = $(PROXIMABINDIR)/uuagc$(EXE)
 GEN  = $(PROXIMABINDIR)/generate$(EXE)
