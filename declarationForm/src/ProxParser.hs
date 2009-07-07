@@ -41,8 +41,8 @@ pDescription = Description
 
 
 pLine = 
-      (\wrds -> concat wrds)
-  <$> pList ((++) <$> pWord <*> pSpaces)
+      (\spcs wrds -> spcs ++ concat wrds)
+  <$> pSpaces <*> pList ((++) <$> pWord <*> pSpaces)
 
 pSpaces = concat <$> pList (const " " <$> pToken (KeyTk " "))
 
