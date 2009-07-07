@@ -340,19 +340,21 @@ instance Editable Currency Document Node ClipDoc UserToken where
 
 instance Editable Tasks Document Node ClipDoc UserToken where
   select [] x = Clip_Tasks x
-  select (0:p) (Tasks x0) = select p x0
+  select (0:p) (Tasks x0 x1) = select p x0
+  select (1:p) (Tasks x0 x1) = select p x1
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Tasks c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Tasks") x
-  paste (0:p) c (Tasks x0) = Tasks (paste p c x0)
+  paste (0:p) c (Tasks x0 x1) = Tasks (paste p c x0) x1
+  paste (1:p) c (Tasks x0 x1) = Tasks x0 (paste p c x1)
   paste _ _ x = x
 
-  alternatives _ = [ ("Tasks {List_Task} "  , Clip_Tasks $ Tasks hole)
+  alternatives _ = [ ("Tasks {Bool} {List_Task} "  , Clip_Tasks $ Tasks hole hole)
                    ,("{Tasks}", Clip_Tasks hole)
                    ]
 
-  arity (Tasks x0) = 1
+  arity (Tasks x0 x1) = 2
   arity _                        = 0
 
   toClip t = Clip_Tasks t

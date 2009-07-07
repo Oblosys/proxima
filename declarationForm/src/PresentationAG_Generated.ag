@@ -61,7 +61,7 @@ DATA Currency
   | ParseErrCurrency error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Tasks
-  | Tasks tasks:List_Task
+  | Tasks showCompleted:Bool tasks:List_Task
   | HoleTasks
   | ParseErrTasks error:{(ParseError Document Node ClipDoc UserToken)}
 
@@ -234,9 +234,9 @@ SEM Tasks
   | Tasks 
       tasks.pIdC = @lhs.pIdC + 0
       lhs.pIdC = @tasks.pIdC
-      tasks.path  = @lhs.path++[0]
+      tasks.path  = @lhs.path++[1]
   | Tasks
-    tasks.ix = 0
+    tasks.ix = 1
   | Tasks
       lhs.pres = loc (Node_Tasks @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -469,7 +469,7 @@ SEM Currency
 
 SEM Tasks
   | Tasks
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ @tasks.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ presentPrimXMLBool @showCompleted, @tasks.presXML ] 
   | HoleTasks     lhs.presXML = presHole @lhs.focusD "Tasks" (Node_HoleTasks @self @lhs.path) @lhs.path
   | ParseErrTasks lhs.presXML = presParseErr (Node_ParseErrTasks @self @lhs.path) @error
 
@@ -567,7 +567,7 @@ SEM Currency
 
 SEM Tasks
   | Tasks
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ @tasks.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ presentPrimXMLBool @showCompleted, @tasks.presTree ] 
   | HoleTasks     lhs.presTree = presHole @lhs.focusD "Tasks" (Node_HoleTasks @self @lhs.path) @lhs.path
   | ParseErrTasks lhs.presTree = presParseErr (Node_ParseErrTasks @self @lhs.path) @error
 

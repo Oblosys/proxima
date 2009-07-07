@@ -10,7 +10,7 @@ data Expense = Expense description : String amount : Float currencyIx : Int
 data Currency = Currency name : String euroRate : Float
 
 
-data Tasks = Tasks tasks : [Task]
+data Tasks = Tasks showCompleted : Bool tasks : [Task]
 
 data Task = BasicTask description : Description completed : Bool 
           | CompositeTask expanded : Bool description : Description subtasks : [Task]

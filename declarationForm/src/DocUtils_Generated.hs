@@ -16,7 +16,7 @@ import Common.CommonTypes hiding (Clean, Dirty)
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
   TaskDoc $
-    Tasks $ toList_Task
+    Tasks True $ toList_Task
       [ BasicTask (Description "Pinpas bestellen") True
       , CompositeTask True (Description "Declaratie editor bouwen") $ toList_Task
           [ CompositeTask True (Description "Upgrade Proxima") $ toList_Task
@@ -164,7 +164,7 @@ toXMLExpense (ParseErrExpense error) = EmptyElt "ParseErrExpense" []
 toXMLCurrency (Currency name euroRate) = Elt "Currency" [] $ [toXMLString name] ++ [toXMLFloat euroRate]
 toXMLCurrency (HoleCurrency) = EmptyElt "HoleCurrency" [] 
 toXMLCurrency (ParseErrCurrency error) = EmptyElt "ParseErrCurrency" []
-toXMLTasks (Tasks tasks) = Elt "Tasks" [] $ toXMLList_Task tasks
+toXMLTasks (Tasks showCompleted tasks) = Elt "Tasks" [] $ [toXMLBool showCompleted] ++ toXMLList_Task tasks
 toXMLTasks (HoleTasks) = EmptyElt "HoleTasks" [] 
 toXMLTasks (ParseErrTasks error) = EmptyElt "ParseErrTasks" []
 toXMLTask (BasicTask description completed) = Elt "BasicTask" [] $ [toXMLDescription description] ++ [toXMLBool completed]
@@ -210,7 +210,7 @@ parseXMLCns_Expense = Expense <$ startTag "Expense" <*> parseXML_String <*> pars
 parseXML_Currency = parseXMLCns_Currency <|> parseHoleAndParseErr "Currency" HoleCurrency
 parseXMLCns_Currency = Currency <$ startTag "Currency" <*> parseXML_String <*> parseXML_Float<* endTag "Currency"
 parseXML_Tasks = parseXMLCns_Tasks <|> parseHoleAndParseErr "Tasks" HoleTasks
-parseXMLCns_Tasks = Tasks <$ startTag "Tasks" <*> parseXML_List_Task<* endTag "Tasks"
+parseXMLCns_Tasks = Tasks <$ startTag "Tasks" <*> parseXML_Bool <*> parseXML_List_Task<* endTag "Tasks"
 parseXML_Task = parseXMLCns_BasicTask <|> parseXMLCns_CompositeTask <|> parseHoleAndParseErr "Task" HoleTask
 parseXMLCns_BasicTask = BasicTask <$ startTag "BasicTask" <*> parseXML_Description <*> parseXML_Bool<* endTag "BasicTask"
 parseXMLCns_CompositeTask = CompositeTask <$ startTag "CompositeTask" <*> parseXML_Bool <*> parseXML_Description <*> parseXML_List_Task<* endTag "CompositeTask"

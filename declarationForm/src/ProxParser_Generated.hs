@@ -77,7 +77,7 @@ construct_ParseErrExpense (StructuralTk _ _ pres _ _) ~[] = Clip_Expense $ parse
 construct_Currency tk ~[mClip0,mClip1] = Clip_Currency $ reuseCurrency [tk]  (retrieveArg "Currency" "name::String" mClip0) (retrieveArg "Currency" "euroRate::Float" mClip1)
 construct_HoleCurrency tk ~[] = Clip_Currency $ hole
 construct_ParseErrCurrency (StructuralTk _ _ pres _ _) ~[] = Clip_Currency $ parseErr (StructuralParseErr pres)
-construct_Tasks tk ~[mClip0] = Clip_Tasks $ reuseTasks [tk]  (retrieveArg "Tasks" "tasks::List_Task" mClip0)
+construct_Tasks tk ~[mClip0,mClip1] = Clip_Tasks $ reuseTasks [tk]  (retrieveArg "Tasks" "showCompleted::Bool" mClip0) (retrieveArg "Tasks" "tasks::List_Task" mClip1)
 construct_HoleTasks tk ~[] = Clip_Tasks $ hole
 construct_ParseErrTasks (StructuralTk _ _ pres _ _) ~[] = Clip_Tasks $ parseErr (StructuralParseErr pres)
 construct_BasicTask tk ~[mClip0,mClip1] = Clip_Task $ reuseBasicTask [tk]  (retrieveArg "BasicTask" "description::Description" mClip0) (retrieveArg "BasicTask" "completed::Bool" mClip1)
@@ -145,10 +145,10 @@ reuseCurrency nodes ma0 ma1
            (Currency a0 a1) -> genericReuse2 Currency a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseCurrency"
 
-reuseTasks :: [Token doc Node clip token] -> Maybe List_Task -> Tasks
-reuseTasks nodes ma0
+reuseTasks :: [Token doc Node clip token] -> Maybe Bool -> Maybe List_Task -> Tasks
+reuseTasks nodes ma0 ma1
   = case extractFromTokens extractTasks defaultTasks nodes of
-           (Tasks a0) -> genericReuse1 Tasks a0 ma0
+           (Tasks a0 a1) -> genericReuse2 Tasks a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseTasks"
 
 reuseBasicTask :: [Token doc Node clip token] -> Maybe Description -> Maybe Bool -> Task
@@ -223,7 +223,7 @@ extractCurrency (Just (Node_Currency x@(Currency _ _) _)) = Just x
 extractCurrency _ = Nothing
 
 extractTasks :: Maybe Node -> Maybe Tasks
-extractTasks (Just (Node_Tasks x@(Tasks _) _)) = Just x
+extractTasks (Just (Node_Tasks x@(Tasks _ _) _)) = Just x
 extractTasks _ = Nothing
 
 extractBasicTask :: Maybe Node -> Maybe Task
@@ -279,7 +279,7 @@ defaultCurrency :: Currency
 defaultCurrency = Currency hole hole
 
 defaultTasks :: Tasks
-defaultTasks = Tasks hole
+defaultTasks = Tasks hole hole
 
 defaultBasicTask :: Task
 defaultBasicTask = BasicTask hole hole

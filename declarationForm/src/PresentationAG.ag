@@ -171,8 +171,8 @@ SEM Tasks
       loc.pres = structural $ row [ hSpace 4
       	       	 	      	  , col [ text "Tasks:"
       	       	 	      	    	`addPopupItems` 
-                                        [ ("Insert task", insertElementAtEnd (toClip newTask) (@lhs.path++[0]))
-                                        ]
+                                        ([ ("Insert task", insertElementAtEnd (toClip newTask) (@lhs.path++[1]))
+                                         ] ++ showHideCompletedItem @lhs.path @self)
 					, @tasks.pres `withFontSize` 12
 					]
 				  ]
@@ -184,7 +184,8 @@ SEM List_Task
 
 SEM Task
   | BasicTask
-      loc.pres = structural $ row [ hSpace $ 9 + 5
+      loc.pres = structural $ showHideCompleted @lhs.showCompleted @completed $
+                              row [ hSpace $ 9 + 5
                                   , presentCompleted @completed (not @completed)
                                       `withMouseDown` flipCompleted @lhs.path @self
 
@@ -194,7 +195,8 @@ SEM Task
 			       , ("Insert subtask", changeToComposite @lhs.path)
                                ] ++ mkMoveItems @lhs.path)
   | CompositeTask
-      loc.pres = structural $ col $ row [ (if @expanded then minusImg else plusImg) `withRef` (0,4)
+      loc.pres = structural $ showHideCompleted @lhs.showCompleted @subtasks.completed $
+                              col $ row [ (if @expanded then minusImg else plusImg) `withRef` (0,4)
                                           `withMouseDown` flipExpanded @lhs.path @self
                                         , hSpace 5
                                         , presentCompleted @subtasks.completed @subtasks.notStarted
@@ -216,6 +218,14 @@ SEM Description
   | Description
       loc.pres = parsingWithParser pDescription @self $ vRefHalf $ text @str
 
+-- copy showCompleted field down to tasks
+ATTR List_Task ConsList_Task Task
+     [ showCompleted : Bool | | ]
+
+SEM Tasks
+  | Tasks 
+      tasks.showCompleted = @showCompleted
+
 ATTR List_Task ConsList_Task Task 
      [ | | completed USE {&&} {True} : {Bool} ]
 
@@ -228,6 +238,19 @@ SEM Task
       loc.notStarted = not @completed
 
 {
+showHideCompleted showCompleted completed pres = 
+  if showCompleted || not completed then pres else empty
+
+showHideCompletedItem pth (Tasks showCompleted _) = 
+  [ ((if showCompleted then "Hide " else "Show ") ++ " completed tasks"
+    , updateAt pth $ \clip ->
+        case clip of
+          Clip_Tasks (Tasks _ tasks) -> toClip $ Tasks (not showCompleted) tasks
+          clip -> clip
+    )
+  ]
+showHideCompletedItem _ _ = []
+
 flipCompleted pth (BasicTask descr completed) = pasteAt (Clip_Task (BasicTask descr (not completed))) pth
 
 flipExpanded pth (CompositeTask expanded descr subtasks) = pasteAt (Clip_Task (CompositeTask (not expanded) descr subtasks)) pth
