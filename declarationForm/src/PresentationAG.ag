@@ -168,7 +168,14 @@ showCurrency f =
 
 SEM Tasks
   | Tasks
-      loc.pres = structural $ row [ hSpace 4, @tasks.pres `withFontSize` 12]
+      loc.pres = structural $ row [ hSpace 4
+      	       	 	      	  , col [ text "Tasks:"
+      	       	 	      	    	`addPopupItems` 
+                                        [ ("Insert task", insertElementAtEnd (toClip newTask) (@lhs.path++[0]))
+                                        ]
+					, @tasks.pres `withFontSize` 12
+					]
+				  ]
 
 SEM List_Task
   | List_Task
@@ -182,7 +189,10 @@ SEM Task
                                       `withMouseDown` flipCompleted @lhs.path @self
 
                                   , hSpace 5, @description.pres `withColor` if @completed then green else blue]
-                              `addPopupItems` [("Delete task", fixTask @lhs.path . deleteAt @lhs.path)]
+                              `addPopupItems` 
+ 			      [ ("Delete task", fixTask @lhs.path . deleteAt @lhs.path)
+			      , ("Insert subtask", changeToComposite @lhs.path)
+                              ]
   | CompositeTask
       loc.pres = structural $ col $ row [ (if @expanded then minusImg else plusImg) `withRef` (0,4)
                                           `withMouseDown` flipExpanded @lhs.path @self
@@ -192,7 +202,10 @@ SEM Task
                                         , hSpace 5
                                         , @description.pres
                                              `withColor` if @subtasks.completed then green else blue
-                                        ] `addPopupItems` [("Delete task", deleteAt @lhs.path)]
+                                        ] `addPopupItems` 
+                                        [ ("Delete task", deleteAt @lhs.path)
+					, ("Insert subtask", insertElementAtEnd (toClip newTask) (@lhs.path++[2]))
+                                        ]
  
                                   : if @expanded 
                                     then [row [hSpace $ 9 + 5, @subtasks.pres]] 
@@ -227,6 +240,7 @@ presentCompleted completed notStarted = vRefHalf $
   img (if completed then "img/completed.bmp" else if notStarted then "img/notStarted.bmp" else "img/partiallyCompleted.bmp") `withSize` (9,9) `withRef` (4,4)
 
 
+-- change parent composite to basic if it has no subtasks
 fixTask [] = id
 fixTask [_] = id
 fixTask pth = 
@@ -234,8 +248,18 @@ fixTask pth =
   in  updateAt parentPath $ \clip ->
         case clip of
           Clip_Task (CompositeTask _ descr (List_Task Nil_Task)) -> 
-            Clip_Task (BasicTask descr False)
+            toClip $ BasicTask descr False
           clip -> clip
+
+changeToComposite pth =
+  updateAt pth $ \clip ->
+    case clip of
+      (Clip_Task (BasicTask descr _)) ->
+        Clip_Task $ CompositeTask True descr $
+          toList_Task [newTask]
+      clip -> clip 
+
+newTask = BasicTask (Description " ") False
 
 -- TODO: move these to library
 
