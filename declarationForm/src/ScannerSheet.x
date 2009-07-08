@@ -14,7 +14,7 @@ tokens :-
   \                               { mkToken $ \s -> KeyTk s }
 --  [0-9]+                        { mkToken $ \s -> IntToken }
 --  [\(\)]                        { mkToken $ \s -> SymToken s }
-  $digit+\.$digit+                { mkToken $ \s -> FloatTk }
+  $digit[+\.$digit+]?             { mkToken $ \s -> FloatTk }
   $char+                          { mkToken $ \s -> WordTk }
 
 {
