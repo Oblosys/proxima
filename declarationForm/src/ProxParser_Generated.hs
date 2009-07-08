@@ -68,13 +68,13 @@ construct_FormDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseFormDoc [tk]  (retrieveAr
 construct_TaskDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseTaskDoc [tk]  (retrieveArg "TaskDoc" "tasks::Tasks" mClip0)
 construct_HoleChoiceDoc tk ~[] = Clip_ChoiceDoc $ hole
 construct_ParseErrChoiceDoc (StructuralTk _ _ pres _ _) ~[] = Clip_ChoiceDoc $ parseErr (StructuralParseErr pres)
-construct_Form tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Form $ reuseForm [tk]  (retrieveArg "Form" "name::String" mClip0) (retrieveArg "Form" "faculty::String" mClip1) (retrieveArg "Form" "expenses::List_Expense" mClip2) (retrieveArg "Form" "currencies::List_Currency" mClip3)
+construct_Form tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Form $ reuseForm [tk]  (retrieveArg "Form" "name::Description" mClip0) (retrieveArg "Form" "faculty::Description" mClip1) (retrieveArg "Form" "expenses::List_Expense" mClip2) (retrieveArg "Form" "currencies::List_Currency" mClip3)
 construct_HoleForm tk ~[] = Clip_Form $ hole
 construct_ParseErrForm (StructuralTk _ _ pres _ _) ~[] = Clip_Form $ parseErr (StructuralParseErr pres)
-construct_Expense tk ~[mClip0,mClip1,mClip2] = Clip_Expense $ reuseExpense [tk]  (retrieveArg "Expense" "description::String" mClip0) (retrieveArg "Expense" "amount::Float" mClip1) (retrieveArg "Expense" "currencyIx::Int" mClip2)
+construct_Expense tk ~[mClip0,mClip1,mClip2] = Clip_Expense $ reuseExpense [tk]  (retrieveArg "Expense" "description::Description" mClip0) (retrieveArg "Expense" "amount::Float" mClip1) (retrieveArg "Expense" "currencyIx::Int" mClip2)
 construct_HoleExpense tk ~[] = Clip_Expense $ hole
 construct_ParseErrExpense (StructuralTk _ _ pres _ _) ~[] = Clip_Expense $ parseErr (StructuralParseErr pres)
-construct_Currency tk ~[mClip0,mClip1] = Clip_Currency $ reuseCurrency [tk]  (retrieveArg "Currency" "name::String" mClip0) (retrieveArg "Currency" "euroRate::Float" mClip1)
+construct_Currency tk ~[mClip0,mClip1] = Clip_Currency $ reuseCurrency [tk]  (retrieveArg "Currency" "name::Description" mClip0) (retrieveArg "Currency" "euroRate::Float" mClip1)
 construct_HoleCurrency tk ~[] = Clip_Currency $ hole
 construct_ParseErrCurrency (StructuralTk _ _ pres _ _) ~[] = Clip_Currency $ parseErr (StructuralParseErr pres)
 construct_Tasks tk ~[mClip0,mClip1] = Clip_Tasks $ reuseTasks [tk]  (retrieveArg "Tasks" "showCompleted::Bool" mClip0) (retrieveArg "Tasks" "tasks::List_Task" mClip1)
@@ -127,19 +127,19 @@ reuseTaskDoc nodes ma0
            (TaskDoc a0) -> genericReuse1 TaskDoc a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseTaskDoc"
 
-reuseForm :: [Token doc Node clip token] -> Maybe String -> Maybe String -> Maybe List_Expense -> Maybe List_Currency -> Form
+reuseForm :: [Token doc Node clip token] -> Maybe Description -> Maybe Description -> Maybe List_Expense -> Maybe List_Currency -> Form
 reuseForm nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractForm defaultForm nodes of
            (Form a0 a1 a2 a3) -> genericReuse4 Form a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseForm"
 
-reuseExpense :: [Token doc Node clip token] -> Maybe String -> Maybe Float -> Maybe Int -> Expense
+reuseExpense :: [Token doc Node clip token] -> Maybe Description -> Maybe Float -> Maybe Int -> Expense
 reuseExpense nodes ma0 ma1 ma2
   = case extractFromTokens extractExpense defaultExpense nodes of
            (Expense a0 a1 a2) -> genericReuse3 Expense a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseExpense"
 
-reuseCurrency :: [Token doc Node clip token] -> Maybe String -> Maybe Float -> Currency
+reuseCurrency :: [Token doc Node clip token] -> Maybe Description -> Maybe Float -> Currency
 reuseCurrency nodes ma0 ma1
   = case extractFromTokens extractCurrency defaultCurrency nodes of
            (Currency a0 a1) -> genericReuse2 Currency a0 a1 ma0 ma1

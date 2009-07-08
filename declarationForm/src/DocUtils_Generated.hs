@@ -15,7 +15,7 @@ import Common.CommonTypes hiding (Clean, Dirty)
 
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
-  TaskDoc $
+ {- TaskDoc $
     Tasks True $ toList_Task
       [ BasicTask (Description "Pinpas bestellen") True
       , CompositeTask True (Description "Declaratie editor bouwen") $ toList_Task
@@ -26,24 +26,19 @@ initialDocument = return $ RootDoc $
           , BasicTask (Description "Instantie maken") False 
           ]         
       ]       
-{-                        FormDoc
-                          (Form "Martijn" "Informatica" 
+  -}                      
+  FormDoc
+                          (Form (Description "Martijn") (Description "Informatica") 
                              (toList_Expense 
-                               [ Expense "Koffie" 1 0
-                               , Expense "Caipirinha" 3 1
+                               [ Expense (Description "Koffie") 1 0
+                               , Expense (Description "Caipirinha") 3 1
                                ])
                              (toList_Currency
-                               [ Currency "Real"   0.345715
-                               , Currency "Dollar" 0.790938
+                               [ Currency (Description "Real")   0.345715
+                               , Currency (Description "Dollar") 0.790938
                                ])
                            )
-                          
-v + Task 1
-  v - Task 1.1
-  v   Task 1.2
-
--}                         
-
+    
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 --------------------------------------------------------------------------
@@ -155,13 +150,13 @@ toXMLChoiceDoc (FormDoc form) = Elt "FormDoc" [] $ [toXMLForm form]
 toXMLChoiceDoc (TaskDoc tasks) = Elt "TaskDoc" [] $ [toXMLTasks tasks]
 toXMLChoiceDoc (HoleChoiceDoc) = EmptyElt "HoleChoiceDoc" [] 
 toXMLChoiceDoc (ParseErrChoiceDoc error) = EmptyElt "ParseErrChoiceDoc" []
-toXMLForm (Form name faculty expenses currencies) = Elt "Form" [] $ [toXMLString name] ++ [toXMLString faculty] ++ toXMLList_Expense expenses ++ toXMLList_Currency currencies
+toXMLForm (Form name faculty expenses currencies) = Elt "Form" [] $ [toXMLDescription name] ++ [toXMLDescription faculty] ++ toXMLList_Expense expenses ++ toXMLList_Currency currencies
 toXMLForm (HoleForm) = EmptyElt "HoleForm" [] 
 toXMLForm (ParseErrForm error) = EmptyElt "ParseErrForm" []
-toXMLExpense (Expense description amount currencyIx) = Elt "Expense" [] $ [toXMLString description] ++ [toXMLFloat amount] ++ [toXMLInt currencyIx]
+toXMLExpense (Expense description amount currencyIx) = Elt "Expense" [] $ [toXMLDescription description] ++ [toXMLFloat amount] ++ [toXMLInt currencyIx]
 toXMLExpense (HoleExpense) = EmptyElt "HoleExpense" [] 
 toXMLExpense (ParseErrExpense error) = EmptyElt "ParseErrExpense" []
-toXMLCurrency (Currency name euroRate) = Elt "Currency" [] $ [toXMLString name] ++ [toXMLFloat euroRate]
+toXMLCurrency (Currency name euroRate) = Elt "Currency" [] $ [toXMLDescription name] ++ [toXMLFloat euroRate]
 toXMLCurrency (HoleCurrency) = EmptyElt "HoleCurrency" [] 
 toXMLCurrency (ParseErrCurrency error) = EmptyElt "ParseErrCurrency" []
 toXMLTasks (Tasks showCompleted tasks) = Elt "Tasks" [] $ [toXMLBool showCompleted] ++ toXMLList_Task tasks
@@ -204,11 +199,11 @@ parseXML_ChoiceDoc = parseXMLCns_FormDoc <|> parseXMLCns_TaskDoc <|> parseHoleAn
 parseXMLCns_FormDoc = FormDoc <$ startTag "FormDoc" <*> parseXML_Form<* endTag "FormDoc"
 parseXMLCns_TaskDoc = TaskDoc <$ startTag "TaskDoc" <*> parseXML_Tasks<* endTag "TaskDoc"
 parseXML_Form = parseXMLCns_Form <|> parseHoleAndParseErr "Form" HoleForm
-parseXMLCns_Form = Form <$ startTag "Form" <*> parseXML_String <*> parseXML_String <*> parseXML_List_Expense <*> parseXML_List_Currency<* endTag "Form"
+parseXMLCns_Form = Form <$ startTag "Form" <*> parseXML_Description <*> parseXML_Description <*> parseXML_List_Expense <*> parseXML_List_Currency<* endTag "Form"
 parseXML_Expense = parseXMLCns_Expense <|> parseHoleAndParseErr "Expense" HoleExpense
-parseXMLCns_Expense = Expense <$ startTag "Expense" <*> parseXML_String <*> parseXML_Float <*> parseXML_Int<* endTag "Expense"
+parseXMLCns_Expense = Expense <$ startTag "Expense" <*> parseXML_Description <*> parseXML_Float <*> parseXML_Int<* endTag "Expense"
 parseXML_Currency = parseXMLCns_Currency <|> parseHoleAndParseErr "Currency" HoleCurrency
-parseXMLCns_Currency = Currency <$ startTag "Currency" <*> parseXML_String <*> parseXML_Float<* endTag "Currency"
+parseXMLCns_Currency = Currency <$ startTag "Currency" <*> parseXML_Description <*> parseXML_Float<* endTag "Currency"
 parseXML_Tasks = parseXMLCns_Tasks <|> parseHoleAndParseErr "Tasks" HoleTasks
 parseXMLCns_Tasks = Tasks <$ startTag "Tasks" <*> parseXML_Bool <*> parseXML_List_Task<* endTag "Tasks"
 parseXML_Task = parseXMLCns_BasicTask <|> parseXMLCns_CompositeTask <|> parseHoleAndParseErr "Task" HoleTask

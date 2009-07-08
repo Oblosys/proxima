@@ -32,17 +32,17 @@ data ChoiceDoc = FormDoc Form
                | ParseErrChoiceDoc (ParseError Document Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
-data Form = Form String String List_Expense List_Currency
+data Form = Form Description Description List_Expense List_Currency
           | HoleForm
           | ParseErrForm (ParseError Document Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
-data Expense = Expense String Float Int
+data Expense = Expense Description Float Int
              | HoleExpense
              | ParseErrExpense (ParseError Document Node ClipDoc UserToken)
                  deriving (Show, Data, Typeable)
 
-data Currency = Currency String Float
+data Currency = Currency Description Float
               | HoleCurrency
               | ParseErrCurrency (ParseError Document Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)

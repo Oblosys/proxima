@@ -246,7 +246,7 @@ instance Editable Form Document Node ClipDoc UserToken where
   paste (3:p) c (Form x0 x1 x2 x3) = Form x0 x1 x2 (paste p c x3)
   paste _ _ x = x
 
-  alternatives _ = [ ("Form {String} {String} {List_Expense} {List_Currency} "  , Clip_Form $ Form hole hole hole hole)
+  alternatives _ = [ ("Form {Description} {Description} {List_Expense} {List_Currency} "  , Clip_Form $ Form hole hole hole hole)
                    ,("{Form}", Clip_Form hole)
                    ]
 
@@ -282,7 +282,7 @@ instance Editable Expense Document Node ClipDoc UserToken where
   paste (2:p) c (Expense x0 x1 x2) = Expense x0 x1 (paste p c x2)
   paste _ _ x = x
 
-  alternatives _ = [ ("Expense {String} {Float} {Int} "  , Clip_Expense $ Expense hole hole hole)
+  alternatives _ = [ ("Expense {Description} {Float} {Int} "  , Clip_Expense $ Expense hole hole hole)
                    ,("{Expense}", Clip_Expense hole)
                    ]
 
@@ -316,7 +316,7 @@ instance Editable Currency Document Node ClipDoc UserToken where
   paste (1:p) c (Currency x0 x1) = Currency x0 (paste p c x1)
   paste _ _ x = x
 
-  alternatives _ = [ ("Currency {String} {Float} "  , Clip_Currency $ Currency hole hole)
+  alternatives _ = [ ("Currency {Description} {Float} "  , Clip_Currency $ Currency hole hole)
                    ,("{Currency}", Clip_Currency hole)
                    ]
 

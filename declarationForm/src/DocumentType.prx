@@ -3,11 +3,11 @@ data Document = RootDoc choiceDoc : ChoiceDoc
 data ChoiceDoc = FormDoc form : Form
                | TaskDoc tasks : Tasks
 
-data Form = Form name : String faculty : String expenses : [Expense] currencies : [Currency]
+data Form = Form name :  Description faculty :  Description expenses : [Expense] currencies : [Currency]
 
-data Expense = Expense description : String amount : Float currencyIx : Int
+data Expense = Expense description :  Description amount : Float currencyIx : Int
 
-data Currency = Currency name : String euroRate : Float
+data Currency = Currency name : Description euroRate : Float
 
 
 data Tasks = Tasks showCompleted : Bool tasks : [Task]

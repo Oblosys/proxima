@@ -46,17 +46,17 @@ DATA ChoiceDoc
   | ParseErrChoiceDoc error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Form
-  | Form name:String faculty:String expenses:List_Expense currencies:List_Currency
+  | Form name:Description faculty:Description expenses:List_Expense currencies:List_Currency
   | HoleForm
   | ParseErrForm error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Expense
-  | Expense description:String amount:Float currencyIx:Int
+  | Expense description:Description amount:Float currencyIx:Int
   | HoleExpense
   | ParseErrExpense error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Currency
-  | Currency name:String euroRate:Float
+  | Currency name:Description euroRate:Float
   | HoleCurrency
   | ParseErrCurrency error:{(ParseError Document Node ClipDoc UserToken)}
 
@@ -181,12 +181,18 @@ SEM ChoiceDoc
 
 SEM Form
   | Form 
-      expenses.pIdC = @lhs.pIdC + 0
+      name.pIdC = @lhs.pIdC + 0
+      faculty.pIdC = @name.pIdC
+      expenses.pIdC = @faculty.pIdC
       currencies.pIdC = @expenses.pIdC
       lhs.pIdC = @currencies.pIdC
+      name.path  = @lhs.path++[0]
+      faculty.path  = @lhs.path++[1]
       expenses.path  = @lhs.path++[2]
       currencies.path  = @lhs.path++[3]
   | Form
+    name.ix = 0
+    faculty.ix = 1
     expenses.ix = 2
     currencies.ix = 3
   | Form
@@ -202,8 +208,11 @@ SEM Form
 
 SEM Expense
   | Expense 
-      lhs.pIdC = @lhs.pIdC + 0
+      description.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @description.pIdC
+      description.path  = @lhs.path++[0]
   | Expense
+    description.ix = 0
   | Expense
       lhs.pres = loc (Node_Expense @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -217,8 +226,11 @@ SEM Expense
 
 SEM Currency
   | Currency 
-      lhs.pIdC = @lhs.pIdC + 0
+      name.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @name.pIdC
+      name.path  = @lhs.path++[0]
   | Currency
+    name.ix = 0
   | Currency
       lhs.pres = loc (Node_Currency @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -451,19 +463,19 @@ SEM ChoiceDoc
 
 SEM Form
   | Form
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Form @self @lhs.path) @lhs.path "Form" [ presentPrimXMLString @name, presentPrimXMLString @faculty, @expenses.presXML, @currencies.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Form @self @lhs.path) @lhs.path "Form" [ @name.presXML, @faculty.presXML, @expenses.presXML, @currencies.presXML ] 
   | HoleForm     lhs.presXML = presHole @lhs.focusD "Form" (Node_HoleForm @self @lhs.path) @lhs.path
   | ParseErrForm lhs.presXML = presParseErr (Node_ParseErrForm @self @lhs.path) @error
 
 SEM Expense
   | Expense
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Expense @self @lhs.path) @lhs.path "Expense" [ presentPrimXMLString @description, presentPrimXMLFloat @amount, presentPrimXMLInt @currencyIx ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Expense @self @lhs.path) @lhs.path "Expense" [ @description.presXML, presentPrimXMLFloat @amount, presentPrimXMLInt @currencyIx ] 
   | HoleExpense     lhs.presXML = presHole @lhs.focusD "Expense" (Node_HoleExpense @self @lhs.path) @lhs.path
   | ParseErrExpense lhs.presXML = presParseErr (Node_ParseErrExpense @self @lhs.path) @error
 
 SEM Currency
   | Currency
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ presentPrimXMLString @name, presentPrimXMLFloat @euroRate ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ @name.presXML, presentPrimXMLFloat @euroRate ] 
   | HoleCurrency     lhs.presXML = presHole @lhs.focusD "Currency" (Node_HoleCurrency @self @lhs.path) @lhs.path
   | ParseErrCurrency lhs.presXML = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
 
@@ -549,19 +561,19 @@ SEM ChoiceDoc
 
 SEM Form
   | Form
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Form @self @lhs.path) @lhs.path "Form" [ presentPrimXMLString @name, presentPrimXMLString @faculty, @expenses.presTree, @currencies.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Form @self @lhs.path) @lhs.path "Form" [ @name.presTree, @faculty.presTree, @expenses.presTree, @currencies.presTree ] 
   | HoleForm     lhs.presTree = presHole @lhs.focusD "Form" (Node_HoleForm @self @lhs.path) @lhs.path
   | ParseErrForm lhs.presTree = presParseErr (Node_ParseErrForm @self @lhs.path) @error
 
 SEM Expense
   | Expense
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Expense @self @lhs.path) @lhs.path "Expense" [ presentPrimXMLString @description, presentPrimXMLFloat @amount, presentPrimXMLInt @currencyIx ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Expense @self @lhs.path) @lhs.path "Expense" [ @description.presTree, presentPrimXMLFloat @amount, presentPrimXMLInt @currencyIx ] 
   | HoleExpense     lhs.presTree = presHole @lhs.focusD "Expense" (Node_HoleExpense @self @lhs.path) @lhs.path
   | ParseErrExpense lhs.presTree = presParseErr (Node_ParseErrExpense @self @lhs.path) @error
 
 SEM Currency
   | Currency
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ presentPrimXMLString @name, presentPrimXMLFloat @euroRate ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ @name.presTree, presentPrimXMLFloat @euroRate ] 
   | HoleCurrency     lhs.presTree = presHole @lhs.focusD "Currency" (Node_HoleCurrency @self @lhs.path) @lhs.path
   | ParseErrCurrency lhs.presTree = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
 

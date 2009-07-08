@@ -44,14 +44,14 @@ SEM Form
       loc.pres = structural $ leftTopMargins 30 40 $
                    col [ text "Travel declaration form"
                        , vSpace 5
-                       , textField 400 @name
+                       , textField 400 @name.pres
                        , vSpace 5
-                       , textField 400 @faculty
+                       , textField 400 @faculty.pres
                        , vSpace 10
                        , text "Expenses"
                        , @expenses.pres
                        , row [ hSpace (400 + 5 + 30 + 5 + 60 + 10 + 6)
-                             , textField 120 (showCurrency @expenses.total ++ " Euro")
+                             , textField 120 (text $ showCurrency @expenses.total ++ " Euro")
                              ]
                        , vSpace 30
                        , @currencies.pres `withFontSize_` (\fs -> (fs * 80) `div` 100) 
@@ -64,13 +64,13 @@ SEM List_Expense
 SEM Expense
   | Expense
       loc.pres = structural $ addCurrencyItems @lhs.allCurrencies @lhs.path $
-                   row [ textField 400 @description
+                   row [ textField 400 @description.pres
                        , hSpace 5
-                       , textField 30 (show @amount)
+                       , textField 30 (text $ show @amount)
                        , hSpace 5
-                       , textField 60 $ (fst $ index "Expense.pres" @lhs.allCurrencies @currencyIx)
+                       , textField 60 $ (text $ fst $ index "Expense.pres" @lhs.allCurrencies @currencyIx)
                        , hSpace 10
-                       , textField 120 (showCurrency @total ++ " Euro") 
+                       , textField 120 (text $ showCurrency @total ++ " Euro") 
                                        -- Expense.total is total euro amount for one expense
                        ]
                          
@@ -85,8 +85,8 @@ SEM List_Currency [ | | ]
   
 SEM Currency
   | Currency
-      loc.pres = structural $ col [ textField 80 @name
-                                  , textField 120 $ show @euroRate
+      loc.pres = structural $ col [ textField 80 @name.pres
+                                  , textField 120 (text $ show @euroRate)
                                   ]
 
 
@@ -97,7 +97,7 @@ ATTR List_Currency ConsList_Currency Currency
 
 SEM Currency
   | Currency
-      lhs.allCurrencies = [(@name, @euroRate)]
+      lhs.allCurrencies = [(@name.strVal, @euroRate)]
 
 ATTR List_Expense ConsList_Expense Expense
      [ allCurrencies : {[(String,Float)]} | | ]
@@ -122,7 +122,7 @@ addNewCurrency :: Path -> UpdateDoc Document ClipDoc
 addNewCurrency pth =
   insertElementAtEnd newCurrency pth
   
-newCurrency = Clip_Currency $ Currency "new" 0.0
+newCurrency = Clip_Currency $ Currency (Description "new") 0.0
 
 setCurrencyIx :: Path -> Int -> UpdateDoc Document ClipDoc
 setCurrencyIx pth newCurrencyIx= 
@@ -140,7 +140,7 @@ leftTopMargins left top pres =
   row [ hSpace left, col [ vSpace top, pres, empty `withStretch` True ], empty `withStretch` True] 
   `withStretch` True
   
-textField w str = boxed $ row [text str, empty `withHStretch` True]  `withbgColor` white `withWidth` w  
+textField w pres = boxed $ row [pres, empty `withHStretch` True]  `withbgColor` white `withWidth` w  
 
 -- Utils
 
@@ -158,6 +158,15 @@ showCurrency f =
 -- empty has no background
 
 
+
+
+
+
+
+
+SEM Description [ | | strVal : String ]
+  | Description
+      lhs.strVal = @str
 
 
 
