@@ -249,12 +249,26 @@ move x y xp = xp `withRef_` (\(h,v)-> (h-x, v-y))
                                     in (i',s'))
 
 
+{-
+Polies are not rendered accurately in Web browsers, so for Proxima 2.0, we need to use empties 
+with background to create lines.
+-}
+hLinePoly :: Xprez doc node clip token
+hLinePoly = poly [(0,0),(1.0,0)] Transparent `withHeight` 1 
 
 hLine :: Xprez doc node clip token
-hLine = poly [(0,0),(1.0,0)] Transparent `withHeight` 1 
+hLine = lineColorAsBGColor $ empty `withHeight` 1 `withHStretch` True
+
+vLinePoly :: Xprez doc node clip token
+vLinePoly = poly [(0,0),(0,1.0)] Transparent `withWidth` 1
 
 vLine :: Xprez doc node clip token
-vLine = poly [(0,0),(0,1.0)] Transparent `withWidth` 1
+vLine = lineColorAsBGColor $ empty `withWidth` 1 `withVStretch` True
+
+lineColorAsBGColor pres =  pres `with_` (\(i,s) -> let i' = i { backgroundColor = lineColor i
+                                               } 
+                                    in (i',s))
+
 
 -- lineWidth should be an attribute, so we can use a with here
 hLineW :: Int -> Xprez doc node clip token
