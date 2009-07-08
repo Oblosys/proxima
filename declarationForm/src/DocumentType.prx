@@ -5,10 +5,11 @@ data ChoiceDoc = FormDoc form : Form
 
 data Form = Form name :  Description faculty :  Description expenses : [Expense] currencies : [Currency]
 
-data Expense = Expense description :  Description amount : Float currencyIx : Int
+data Expense = Expense description :  Description amount : FloatField currencyIx : Int
 
-data Currency = Currency name : Description euroRate : Float
+data Currency = Currency name : Description euroRate : FloatField
 
+data FloatField = FloatField float : Float
 
 data Tasks = Tasks showCompleted : Bool tasks : [Task]
 

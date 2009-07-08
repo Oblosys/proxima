@@ -34,8 +34,7 @@ recognizeEnrichedDoc = pStr $
 recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
 recognizeEnrichedDoc = pStructural
 
-
-pDescription :: ListParser Document Node ClipDoc UserToken Description
+pDescription :: ProxParser Description
 pDescription = Description 
   <$> pLine
 
@@ -47,6 +46,12 @@ pLine =
 pSpaces = concat <$> pList (const " " <$> pToken (KeyTk " "))
 
 pWord = tokenString <$> pToken WordTk
+
+pFloat = read . tokenString <$> pToken FloatTk
+
+pFloatField :: ProxParser FloatField
+pFloatField = FloatField
+  <$> pFloat
 
 {-
 intParser :: ListParser Document Node ClipDoc UserToken Int

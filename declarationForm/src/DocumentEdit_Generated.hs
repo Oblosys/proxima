@@ -22,6 +22,7 @@ instance Clip ClipDoc where
   arityClip (Clip_Form x) = arity x
   arityClip (Clip_Expense x) = arity x
   arityClip (Clip_Currency x) = arity x
+  arityClip (Clip_FloatField x) = arity x
   arityClip (Clip_Tasks x) = arity x
   arityClip (Clip_Task x) = arity x
   arityClip (Clip_Description x) = arity x
@@ -40,6 +41,7 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Form x) = alternatives x
   alternativesClip (Clip_Expense x) = alternatives x
   alternativesClip (Clip_Currency x) = alternatives x
+  alternativesClip (Clip_FloatField x) = alternatives x
   alternativesClip (Clip_Tasks x) = alternatives x
   alternativesClip (Clip_Task x) = alternatives x
   alternativesClip (Clip_Description x) = alternatives x
@@ -58,6 +60,7 @@ instance Clip ClipDoc where
   holeClip (Clip_Form x) = Clip_Form hole
   holeClip (Clip_Expense x) = Clip_Expense hole
   holeClip (Clip_Currency x) = Clip_Currency hole
+  holeClip (Clip_FloatField x) = Clip_FloatField hole
   holeClip (Clip_Tasks x) = Clip_Tasks hole
   holeClip (Clip_Task x) = Clip_Task hole
   holeClip (Clip_Description x) = Clip_Description hole
@@ -76,6 +79,7 @@ instance Clip ClipDoc where
   isListClip (Clip_Form x) = isList x
   isListClip (Clip_Expense x) = isList x
   isListClip (Clip_Currency x) = isList x
+  isListClip (Clip_FloatField x) = isList x
   isListClip (Clip_Tasks x) = isList x
   isListClip (Clip_Task x) = isList x
   isListClip (Clip_Description x) = isList x
@@ -94,6 +98,7 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Form x) = insertList i c x
   insertListClip i c (Clip_Expense x) = insertList i c x
   insertListClip i c (Clip_Currency x) = insertList i c x
+  insertListClip i c (Clip_FloatField x) = insertList i c x
   insertListClip i c (Clip_Tasks x) = insertList i c x
   insertListClip i c (Clip_Task x) = insertList i c x
   insertListClip i c (Clip_Description x) = insertList i c x
@@ -112,6 +117,7 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Form x) = removeList i x
   removeListClip i (Clip_Expense x) = removeList i x
   removeListClip i (Clip_Currency x) = removeList i x
+  removeListClip i (Clip_FloatField x) = removeList i x
   removeListClip i (Clip_Tasks x) = removeList i x
   removeListClip i (Clip_Task x) = removeList i x
   removeListClip i (Clip_Description x) = removeList i x
@@ -282,7 +288,7 @@ instance Editable Expense Document Node ClipDoc UserToken where
   paste (2:p) c (Expense x0 x1 x2) = Expense x0 x1 (paste p c x2)
   paste _ _ x = x
 
-  alternatives _ = [ ("Expense {Description} {Float} {Int} "  , Clip_Expense $ Expense hole hole hole)
+  alternatives _ = [ ("Expense {Description} {FloatField} {Int} "  , Clip_Expense $ Expense hole hole hole)
                    ,("{Expense}", Clip_Expense hole)
                    ]
 
@@ -316,7 +322,7 @@ instance Editable Currency Document Node ClipDoc UserToken where
   paste (1:p) c (Currency x0 x1) = Currency x0 (paste p c x1)
   paste _ _ x = x
 
-  alternatives _ = [ ("Currency {Description} {Float} "  , Clip_Currency $ Currency hole hole)
+  alternatives _ = [ ("Currency {Description} {FloatField} "  , Clip_Currency $ Currency hole hole)
                    ,("{Currency}", Clip_Currency hole)
                    ]
 
@@ -333,6 +339,38 @@ instance Editable Currency Document Node ClipDoc UserToken where
   hole = HoleCurrency
 
   holeNodeConstr = Node_HoleCurrency
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable FloatField Document Node ClipDoc UserToken where
+  select [] x = Clip_FloatField x
+  select (0:p) (FloatField x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_FloatField c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on FloatField") x
+  paste (0:p) c (FloatField x0) = FloatField (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("FloatField {Float} "  , Clip_FloatField $ FloatField hole)
+                   ,("{FloatField}", Clip_FloatField hole)
+                   ]
+
+  arity (FloatField x0) = 1
+  arity _                        = 0
+
+  toClip t = Clip_FloatField t
+
+  fromClip (Clip_FloatField t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrFloatField
+
+  hole = HoleFloatField
+
+  holeNodeConstr = Node_HoleFloatField
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing

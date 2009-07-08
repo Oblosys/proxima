@@ -8,7 +8,7 @@ import List
 import Char
 import Data.Generics
 
-data UserToken = WordTk | KeyTk String | IntTk | SymTk String deriving (Show, Eq, Ord, Typeable)
+data UserToken = WordTk | KeyTk String | FloatTk | IntTk | SymTk String deriving (Show, Eq, Ord, Typeable)
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -37,15 +37,20 @@ data Form = Form Description Description List_Expense List_Currency
           | ParseErrForm (ParseError Document Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
-data Expense = Expense Description Float Int
+data Expense = Expense Description FloatField Int
              | HoleExpense
              | ParseErrExpense (ParseError Document Node ClipDoc UserToken)
                  deriving (Show, Data, Typeable)
 
-data Currency = Currency Description Float
+data Currency = Currency Description FloatField
               | HoleCurrency
               | ParseErrCurrency (ParseError Document Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
+
+data FloatField = FloatField Float
+                | HoleFloatField
+                | ParseErrFloatField (ParseError Document Node ClipDoc UserToken)
+                    deriving (Show, Data, Typeable)
 
 data Tasks = Tasks Bool List_Task
            | HoleTasks
@@ -103,6 +108,7 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Form Form
              | Clip_Expense Expense
              | Clip_Currency Currency
+             | Clip_FloatField FloatField
              | Clip_Tasks Tasks
              | Clip_Task Task
              | Clip_Description Description
@@ -141,6 +147,9 @@ data Node = NoNode
           | Node_Currency Currency Path
           | Node_HoleCurrency Currency Path
           | Node_ParseErrCurrency Currency Path
+          | Node_FloatField FloatField Path
+          | Node_HoleFloatField FloatField Path
+          | Node_ParseErrFloatField FloatField Path
           | Node_Tasks Tasks Path
           | Node_HoleTasks Tasks Path
           | Node_ParseErrTasks Tasks Path
@@ -189,6 +198,9 @@ instance Show Node where
   show (Node_Currency _ _) = "Node_Currency" 
   show (Node_HoleCurrency _ _) = "Node_HoleCurrency" 
   show (Node_ParseErrCurrency _ _) = "Node_ParseErrCurrency" 
+  show (Node_FloatField _ _) = "Node_FloatField" 
+  show (Node_HoleFloatField _ _) = "Node_HoleFloatField" 
+  show (Node_ParseErrFloatField _ _) = "Node_ParseErrFloatField" 
   show (Node_Tasks _ _) = "Node_Tasks" 
   show (Node_HoleTasks _ _) = "Node_HoleTasks" 
   show (Node_ParseErrTasks _ _) = "Node_ParseErrTasks" 

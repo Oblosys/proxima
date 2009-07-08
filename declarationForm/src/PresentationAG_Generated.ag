@@ -51,14 +51,19 @@ DATA Form
   | ParseErrForm error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Expense
-  | Expense description:Description amount:Float currencyIx:Int
+  | Expense description:Description amount:FloatField currencyIx:Int
   | HoleExpense
   | ParseErrExpense error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Currency
-  | Currency name:Description euroRate:Float
+  | Currency name:Description euroRate:FloatField
   | HoleCurrency
   | ParseErrCurrency error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA FloatField
+  | FloatField float:Float
+  | HoleFloatField
+  | ParseErrFloatField error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Tasks
   | Tasks showCompleted:Bool tasks:List_Task
@@ -110,16 +115,16 @@ DATA ConsList_Task
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task Description List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency FloatField Tasks Task Description List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task Description List_Expense List_Currency List_Task
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency FloatField Tasks Task Description List_Expense List_Currency List_Task
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
-ATTR ChoiceDoc Form Expense Currency Tasks Task Description List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
+ATTR ChoiceDoc Form Expense Currency FloatField Tasks Task Description List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
-ATTR ChoiceDoc Form Expense Currency Tasks Task Description List_Expense List_Currency List_Task
+ATTR ChoiceDoc Form Expense Currency FloatField Tasks Task Description List_Expense List_Currency List_Task
      [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
@@ -209,10 +214,13 @@ SEM Form
 SEM Expense
   | Expense 
       description.pIdC = @lhs.pIdC + 0
-      lhs.pIdC = @description.pIdC
+      amount.pIdC = @description.pIdC
+      lhs.pIdC = @amount.pIdC
       description.path  = @lhs.path++[0]
+      amount.path  = @lhs.path++[1]
   | Expense
     description.ix = 0
+    amount.ix = 1
   | Expense
       lhs.pres = loc (Node_Expense @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -227,10 +235,13 @@ SEM Expense
 SEM Currency
   | Currency 
       name.pIdC = @lhs.pIdC + 0
-      lhs.pIdC = @name.pIdC
+      euroRate.pIdC = @name.pIdC
+      lhs.pIdC = @euroRate.pIdC
       name.path  = @lhs.path++[0]
+      euroRate.path  = @lhs.path++[1]
   | Currency
     name.ix = 0
+    euroRate.ix = 1
   | Currency
       lhs.pres = loc (Node_Currency @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -239,6 +250,21 @@ SEM Currency
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | ParseErrCurrency
       lhs.pres = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM FloatField
+  | FloatField 
+      lhs.pIdC = @lhs.pIdC + 0
+  | FloatField
+  | FloatField
+      lhs.pres = loc (Node_FloatField @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleFloatField
+      lhs.pres = presHole @lhs.focusD "FloatField" (Node_HoleFloatField @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrFloatField
+      lhs.pres = presParseErr (Node_ParseErrFloatField @self @lhs.path) @error
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
@@ -427,6 +453,9 @@ SEM Expense
 SEM Currency
   | Currency lhs.path = @lhs.path
 
+SEM FloatField
+  | FloatField lhs.path = @lhs.path
+
 SEM Tasks
   | Tasks lhs.path = @lhs.path
 
@@ -469,15 +498,21 @@ SEM Form
 
 SEM Expense
   | Expense
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Expense @self @lhs.path) @lhs.path "Expense" [ @description.presXML, presentPrimXMLFloat @amount, presentPrimXMLInt @currencyIx ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Expense @self @lhs.path) @lhs.path "Expense" [ @description.presXML, @amount.presXML, presentPrimXMLInt @currencyIx ] 
   | HoleExpense     lhs.presXML = presHole @lhs.focusD "Expense" (Node_HoleExpense @self @lhs.path) @lhs.path
   | ParseErrExpense lhs.presXML = presParseErr (Node_ParseErrExpense @self @lhs.path) @error
 
 SEM Currency
   | Currency
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ @name.presXML, presentPrimXMLFloat @euroRate ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ @name.presXML, @euroRate.presXML ] 
   | HoleCurrency     lhs.presXML = presHole @lhs.focusD "Currency" (Node_HoleCurrency @self @lhs.path) @lhs.path
   | ParseErrCurrency lhs.presXML = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
+
+SEM FloatField
+  | FloatField
+      lhs.presXML = presentElementXML @lhs.focusD (Node_FloatField @self @lhs.path) @lhs.path "FloatField" [ presentPrimXMLFloat @float ] 
+  | HoleFloatField     lhs.presXML = presHole @lhs.focusD "FloatField" (Node_HoleFloatField @self @lhs.path) @lhs.path
+  | ParseErrFloatField lhs.presXML = presParseErr (Node_ParseErrFloatField @self @lhs.path) @error
 
 SEM Tasks
   | Tasks
@@ -567,15 +602,21 @@ SEM Form
 
 SEM Expense
   | Expense
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Expense @self @lhs.path) @lhs.path "Expense" [ @description.presTree, presentPrimXMLFloat @amount, presentPrimXMLInt @currencyIx ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Expense @self @lhs.path) @lhs.path "Expense" [ @description.presTree, @amount.presTree, presentPrimXMLInt @currencyIx ] 
   | HoleExpense     lhs.presTree = presHole @lhs.focusD "Expense" (Node_HoleExpense @self @lhs.path) @lhs.path
   | ParseErrExpense lhs.presTree = presParseErr (Node_ParseErrExpense @self @lhs.path) @error
 
 SEM Currency
   | Currency
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ @name.presTree, presentPrimXMLFloat @euroRate ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Currency @self @lhs.path) @lhs.path "Currency" [ @name.presTree, @euroRate.presTree ] 
   | HoleCurrency     lhs.presTree = presHole @lhs.focusD "Currency" (Node_HoleCurrency @self @lhs.path) @lhs.path
   | ParseErrCurrency lhs.presTree = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
+
+SEM FloatField
+  | FloatField
+      lhs.presTree = presentElementTree @lhs.focusD (Node_FloatField @self @lhs.path) @lhs.path "FloatField" [ presentPrimXMLFloat @float ] 
+  | HoleFloatField     lhs.presTree = presHole @lhs.focusD "FloatField" (Node_HoleFloatField @self @lhs.path) @lhs.path
+  | ParseErrFloatField lhs.presTree = presParseErr (Node_ParseErrFloatField @self @lhs.path) @error
 
 SEM Tasks
   | Tasks

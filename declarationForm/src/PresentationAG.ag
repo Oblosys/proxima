@@ -48,7 +48,9 @@ SEM Form
                        , vSpace 5
                        , textField 400 @faculty.pres
                        , vSpace 10
-                       , text "Expenses"
+                       , text "Expenses" `addPopupItems` 
+                           [ ("Add expense", insertElementAtEnd (toClip newExpense) (@lhs.path++[2]))
+                           ]
                        , @expenses.pres
                        , row [ hSpace (400 + 5 + 30 + 5 + 60 + 10 + 6)
                              , textField 120 (text $ showCurrency @expenses.total ++ " Euro")
@@ -66,13 +68,15 @@ SEM Expense
       loc.pres = structural $ addCurrencyItems @lhs.allCurrencies @lhs.path $
                    row [ textField 400 @description.pres
                        , hSpace 5
-                       , textField 30 (text $ show @amount)
+                       , textField 30 @amount.pres
                        , hSpace 5
                        , textField 60 $ (text $ fst $ index "Expense.pres" @lhs.allCurrencies @currencyIx)
                        , hSpace 10
                        , textField 120 (text $ showCurrency @total ++ " Euro") 
                                        -- Expense.total is total euro amount for one expense
-                       ]
+                       ] `addPopupItems` 
+                       [ ("Delete", deleteAt @lhs.path)
+		       ]
                          
                        
 
@@ -86,7 +90,7 @@ SEM List_Currency [ | | ]
 SEM Currency
   | Currency
       loc.pres = structural $ col [ textField 80 @name.pres
-                                  , textField 120 (text $ show @euroRate)
+                                  , textField 120 @euroRate.pres
                                   ]
 
 
@@ -97,7 +101,7 @@ ATTR List_Currency ConsList_Currency Currency
 
 SEM Currency
   | Currency
-      lhs.allCurrencies = [(@name.strVal, @euroRate)]
+      lhs.allCurrencies = [(@name.strVal, @euroRate.floatVal)]
 
 ATTR List_Expense ConsList_Expense Expense
      [ allCurrencies : {[(String,Float)]} | | ]
@@ -112,17 +116,20 @@ ATTR List_Expense ConsList_Expense Expense
                          
 SEM Expense
   | Expense
-      loc.total = @amount * (snd $ index "Expense.total" @lhs.allCurrencies @currencyIx)
+      loc.total = @amount.floatVal * (snd $ index "Expense.total" @lhs.allCurrencies @currencyIx)
         
 {
+
 addCurrencyItems currencies path pres = 
   pres `addPopupItems` [ (name, setCurrencyIx path ix) | (ix, (name, _)) <- zip [0..] currencies ]
 
 addNewCurrency :: Path -> UpdateDoc Document ClipDoc
 addNewCurrency pth =
   insertElementAtEnd newCurrency pth
+
+newExpense = Expense (Description "") (FloatField 0) 0
   
-newCurrency = Clip_Currency $ Currency (Description "new") 0.0
+newCurrency = Clip_Currency $ Currency (Description "new") (FloatField 0.0)
 
 setCurrencyIx :: Path -> Int -> UpdateDoc Document ClipDoc
 setCurrencyIx pth newCurrencyIx= 
@@ -166,8 +173,21 @@ showCurrency f =
 
 SEM Description [ | | strVal : String ]
   | Description
+      loc.pres = parsingWithParser pDescription @self $ text @str
       lhs.strVal = @str
+  | HoleDescription
+      lhs.strVal = "{Description}"
+  | ParseErrDescription
+      lhs.strVal = "{parse error}"
 
+SEM FloatField [ | | floatVal : Float ]
+  | FloatField
+      loc.pres = parsingWithParser pFloatField @self $ text (show @float)
+      lhs.floatVal = @float
+  | HoleFloatField
+      lhs.floatVal = 0
+  | ParseErrFloatField
+      lhs.floatVal = 0
 
 
 
@@ -198,7 +218,7 @@ SEM Task
                                   , presentCompleted @completed (not @completed)
                                       `withMouseDown` flipCompleted @lhs.path @self
 
-                                  , hSpace 5, @description.pres `withColor` if @completed then green else blue]
+                                  , hSpace 5, vRefHalf $ @description.pres `withColor` if @completed then green else blue]
                               `addPopupItems` 
  			      ([ ("Delete task", fixTask @lhs.path . deleteAt @lhs.path)
 			       , ("Insert subtask", changeToComposite @lhs.path)
@@ -211,7 +231,7 @@ SEM Task
                                         , presentCompleted @subtasks.completed @subtasks.notStarted
                                             `withMouseDown` setCompletedRec (not @subtasks.completed) @lhs.path @self
                                         , hSpace 5
-                                        , @description.pres
+                                        , vRefHalf $ @description.pres
                                              `withColor` if @subtasks.completed then green else blue
                                         ] `addPopupItems` 
                                         ([ ("Delete task", deleteAt @lhs.path)
@@ -223,9 +243,6 @@ SEM Task
                                     else []
 
 
-SEM Description
-  | Description
-      loc.pres = parsingWithParser pDescription @self $ vRefHalf $ text @str
 
 -- copy showCompleted field down to tasks
 ATTR List_Task ConsList_Task Task

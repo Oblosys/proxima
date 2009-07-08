@@ -30,12 +30,12 @@ initialDocument = return $ RootDoc $
   FormDoc
                           (Form (Description "Martijn") (Description "Informatica") 
                              (toList_Expense 
-                               [ Expense (Description "Koffie") 1 0
-                               , Expense (Description "Caipirinha") 3 1
+                               [ Expense (Description "Koffie") (FloatField 1) 0
+                               , Expense (Description "Caipirinha") (FloatField 3) 1
                                ])
                              (toList_Currency
-                               [ Currency (Description "Real")   0.345715
-                               , Currency (Description "Dollar") 0.790938
+                               [ Currency (Description "Real")   (FloatField 0.345715)
+                               , Currency (Description "Dollar") (FloatField 0.790938)
                                ])
                            )
     
@@ -66,25 +66,28 @@ rankNode (Node_ParseErrExpense _ _) = 16
 rankNode (Node_Currency _ _) = 17
 rankNode (Node_HoleCurrency _ _) = 18
 rankNode (Node_ParseErrCurrency _ _) = 19
-rankNode (Node_Tasks _ _) = 20
-rankNode (Node_HoleTasks _ _) = 21
-rankNode (Node_ParseErrTasks _ _) = 22
-rankNode (Node_BasicTask _ _) = 23
-rankNode (Node_CompositeTask _ _) = 24
-rankNode (Node_HoleTask _ _) = 25
-rankNode (Node_ParseErrTask _ _) = 26
-rankNode (Node_Description _ _) = 27
-rankNode (Node_HoleDescription _ _) = 28
-rankNode (Node_ParseErrDescription _ _) = 29
-rankNode (Node_List_Expense _ _) = 30
-rankNode (Node_HoleList_Expense _ _) = 31
-rankNode (Node_ParseErrList_Expense _ _) = 32
-rankNode (Node_List_Currency _ _) = 33
-rankNode (Node_HoleList_Currency _ _) = 34
-rankNode (Node_ParseErrList_Currency _ _) = 35
-rankNode (Node_List_Task _ _) = 36
-rankNode (Node_HoleList_Task _ _) = 37
-rankNode (Node_ParseErrList_Task _ _) = 38
+rankNode (Node_FloatField _ _) = 20
+rankNode (Node_HoleFloatField _ _) = 21
+rankNode (Node_ParseErrFloatField _ _) = 22
+rankNode (Node_Tasks _ _) = 23
+rankNode (Node_HoleTasks _ _) = 24
+rankNode (Node_ParseErrTasks _ _) = 25
+rankNode (Node_BasicTask _ _) = 26
+rankNode (Node_CompositeTask _ _) = 27
+rankNode (Node_HoleTask _ _) = 28
+rankNode (Node_ParseErrTask _ _) = 29
+rankNode (Node_Description _ _) = 30
+rankNode (Node_HoleDescription _ _) = 31
+rankNode (Node_ParseErrDescription _ _) = 32
+rankNode (Node_List_Expense _ _) = 33
+rankNode (Node_HoleList_Expense _ _) = 34
+rankNode (Node_ParseErrList_Expense _ _) = 35
+rankNode (Node_List_Currency _ _) = 36
+rankNode (Node_HoleList_Currency _ _) = 37
+rankNode (Node_ParseErrList_Currency _ _) = 38
+rankNode (Node_List_Task _ _) = 39
+rankNode (Node_HoleList_Task _ _) = 40
+rankNode (Node_ParseErrList_Task _ _) = 41
 
 
 
@@ -114,6 +117,9 @@ instance DocNode Node where
   pathNode (Node_Currency _ pth) = PathD pth
   pathNode (Node_HoleCurrency _ pth) = PathD pth
   pathNode (Node_ParseErrCurrency _ pth) = PathD pth
+  pathNode (Node_FloatField _ pth) = PathD pth
+  pathNode (Node_HoleFloatField _ pth) = PathD pth
+  pathNode (Node_ParseErrFloatField _ pth) = PathD pth
   pathNode (Node_Tasks _ pth) = PathD pth
   pathNode (Node_HoleTasks _ pth) = PathD pth
   pathNode (Node_ParseErrTasks _ pth) = PathD pth
@@ -153,12 +159,15 @@ toXMLChoiceDoc (ParseErrChoiceDoc error) = EmptyElt "ParseErrChoiceDoc" []
 toXMLForm (Form name faculty expenses currencies) = Elt "Form" [] $ [toXMLDescription name] ++ [toXMLDescription faculty] ++ toXMLList_Expense expenses ++ toXMLList_Currency currencies
 toXMLForm (HoleForm) = EmptyElt "HoleForm" [] 
 toXMLForm (ParseErrForm error) = EmptyElt "ParseErrForm" []
-toXMLExpense (Expense description amount currencyIx) = Elt "Expense" [] $ [toXMLDescription description] ++ [toXMLFloat amount] ++ [toXMLInt currencyIx]
+toXMLExpense (Expense description amount currencyIx) = Elt "Expense" [] $ [toXMLDescription description] ++ [toXMLFloatField amount] ++ [toXMLInt currencyIx]
 toXMLExpense (HoleExpense) = EmptyElt "HoleExpense" [] 
 toXMLExpense (ParseErrExpense error) = EmptyElt "ParseErrExpense" []
-toXMLCurrency (Currency name euroRate) = Elt "Currency" [] $ [toXMLDescription name] ++ [toXMLFloat euroRate]
+toXMLCurrency (Currency name euroRate) = Elt "Currency" [] $ [toXMLDescription name] ++ [toXMLFloatField euroRate]
 toXMLCurrency (HoleCurrency) = EmptyElt "HoleCurrency" [] 
 toXMLCurrency (ParseErrCurrency error) = EmptyElt "ParseErrCurrency" []
+toXMLFloatField (FloatField float) = Elt "FloatField" [] $ [toXMLFloat float]
+toXMLFloatField (HoleFloatField) = EmptyElt "HoleFloatField" [] 
+toXMLFloatField (ParseErrFloatField error) = EmptyElt "ParseErrFloatField" []
 toXMLTasks (Tasks showCompleted tasks) = Elt "Tasks" [] $ [toXMLBool showCompleted] ++ toXMLList_Task tasks
 toXMLTasks (HoleTasks) = EmptyElt "HoleTasks" [] 
 toXMLTasks (ParseErrTasks error) = EmptyElt "ParseErrTasks" []
@@ -201,9 +210,11 @@ parseXMLCns_TaskDoc = TaskDoc <$ startTag "TaskDoc" <*> parseXML_Tasks<* endTag 
 parseXML_Form = parseXMLCns_Form <|> parseHoleAndParseErr "Form" HoleForm
 parseXMLCns_Form = Form <$ startTag "Form" <*> parseXML_Description <*> parseXML_Description <*> parseXML_List_Expense <*> parseXML_List_Currency<* endTag "Form"
 parseXML_Expense = parseXMLCns_Expense <|> parseHoleAndParseErr "Expense" HoleExpense
-parseXMLCns_Expense = Expense <$ startTag "Expense" <*> parseXML_Description <*> parseXML_Float <*> parseXML_Int<* endTag "Expense"
+parseXMLCns_Expense = Expense <$ startTag "Expense" <*> parseXML_Description <*> parseXML_FloatField <*> parseXML_Int<* endTag "Expense"
 parseXML_Currency = parseXMLCns_Currency <|> parseHoleAndParseErr "Currency" HoleCurrency
-parseXMLCns_Currency = Currency <$ startTag "Currency" <*> parseXML_Description <*> parseXML_Float<* endTag "Currency"
+parseXMLCns_Currency = Currency <$ startTag "Currency" <*> parseXML_Description <*> parseXML_FloatField<* endTag "Currency"
+parseXML_FloatField = parseXMLCns_FloatField <|> parseHoleAndParseErr "FloatField" HoleFloatField
+parseXMLCns_FloatField = FloatField <$ startTag "FloatField" <*> parseXML_Float<* endTag "FloatField"
 parseXML_Tasks = parseXMLCns_Tasks <|> parseHoleAndParseErr "Tasks" HoleTasks
 parseXMLCns_Tasks = Tasks <$ startTag "Tasks" <*> parseXML_Bool <*> parseXML_List_Task<* endTag "Tasks"
 parseXML_Task = parseXMLCns_BasicTask <|> parseXMLCns_CompositeTask <|> parseHoleAndParseErr "Task" HoleTask
