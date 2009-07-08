@@ -14,7 +14,8 @@ module Gen_ProxParser where
 import TypesUtils
 
 generate :: DocumentType -> [String]
-generate docType = genConstruct (addHolesParseErrs docTypeWithLists)
+generate docType = genProxParserTypeSynonym
+                ++ genConstruct (addHolesParseErrs docTypeWithLists)
                 ++ genReuse   docTypeWithLists
                 ++ genExtract docTypeWithLists
                 ++ genDefault docTypeWithLists
@@ -23,6 +24,10 @@ generate docType = genConstruct (addHolesParseErrs docTypeWithLists)
   where docTypeWithLists = addListDecls (addEnrichedDocDecl docType)
   
 
+genProxParserTypeSynonym = genBanner "ProxParser type synonym" $
+  [ "type ProxParser a = ListParser Document Node ClipDoc UserToken a"
+  ]
+  
 genConstruct decls = genBanner "Construct instance" $
   [ "instance Construct Document Node ClipDoc UserToken where"
   ,   "  construct NoNode = error $ \"ProxParser_Generated.construct not defined on NoNode\""
