@@ -379,38 +379,103 @@ SEM Field
 				               ]
       	       	 	      	         , empty `withVStretch` True
 				         ]  `withSize` (35,35)) `withColor` darkGrey
-                              `addPopupItems` fieldPopupItems @lhs.path @lhs.allRowNrs
+                              `addPopupItems` 
+			      fieldPopupItems @lhs.path @lhs.rowNrs @lhs.colNrs @lhs.blockNrs
 
-ATTR Field [ | | rowNrs : {[Int]} ]
+SEM Field [ | | val : Int ]
+  | Field lhs.val = @val
 
-SEM Field
-  | Field lhs.rowNrs = [ @val ]
+SEM Row [ | | rowNrs : {[Int]} ]
+  | Row
+      loc.rowNrs = [@f0.val,@f1.val,@f2.val,@f3.val,@f4.val,@f5.val,@f6.val,@f7.val,@f8.val]
+
+
+ATTR Field [ rowNrs : {[Int]} | |  ]
+
+
+ATTR Row   [ colsNrs : {([Int],[Int],[Int],[Int],[Int],[Int],[Int],[Int],[Int])} | | ]
+ATTR Field [ colNrs : {[Int]} | | ]
+
+SEM Sudoku
+  | Sudoku 
+      loc.colsNrs = debug Prs (show @blockss)$ listTo9Tuple $ transpose
+                         [ @r0.rowNrs, @r1.rowNrs, @r2.rowNrs
+      	  	         , @r3.rowNrs, @r4.rowNrs, @r5.rowNrs
+      	                 , @r6.rowNrs, @r7.rowNrs, @r8.rowNrs
+      	                 ]
 
 SEM Row
-  | Row loc.allRowNrs = @f0.rowNrs ++ @f1.rowNrs ++ @f2.rowNrs ++
-    		        @f3.rowNrs ++ @f4.rowNrs ++ @f5.rowNrs ++
-    		        @f6.rowNrs ++ @f7.rowNrs ++ @f8.rowNrs
+  | Row
+      (f0.colNrs,f1.colNrs,f2.colNrs,f3.colNrs,f4.colNrs,f5.colNrs,f6.colNrs,f7.colNrs,f8.colNrs) = @lhs.colsNrs
 
-ATTR Field [ allRowNrs : {[Int]} | | ]
+SEM Row [ | | rowGroups : {[[Int]]} ]
+  | Row
+      lhs.rowGroups = [ [@f0.val, @f1.val, @f2.val]
+                      , [@f3.val, @f4.val, @f5.val]
+                      , [@f6.val, @f7.val, @f8.val]
+                      ]
+
+ATTR Row [ blocks : {([Int],[Int],[Int])} | | ]
+
+SEM Sudoku
+  | Sudoku
+      loc.rowsGroups = [ [@r0.rowGroups, @r1.rowGroups, @r2.rowGroups ]
+      		       , [@r3.rowGroups, @r4.rowGroups, @r5.rowGroups ]
+		       , [@r6.rowGroups, @r7.rowGroups, @r8.rowGroups ]
+		       ]
+      loc.blockss = let [[nw,n,ne],[w,c,e],[sw,s,se]] = 
+                          map (map concat . transpose) @rowsGroups
+                    in  ((nw,n,ne),(w,c,e),(sw,s,se))
+
+      r0.blocks = fst3 @blockss
+      r1.blocks = fst3 @blockss
+      r2.blocks = fst3 @blockss
+      r3.blocks = snd3 @blockss
+      r4.blocks = snd3 @blockss
+      r5.blocks = snd3 @blockss
+      r6.blocks = thd3 @blockss
+      r7.blocks = thd3 @blockss
+      r8.blocks = thd3 @blockss
+            
+
+ATTR Field [ blockNrs : {[Int]} | | ]
+
 SEM Row
-  | Row f0.allRowNrs = @loc.allRowNrs
-        f1.allRowNrs = @loc.allRowNrs
-        f2.allRowNrs = @loc.allRowNrs
-        f3.allRowNrs = @loc.allRowNrs
-        f4.allRowNrs = @loc.allRowNrs
-        f5.allRowNrs = @loc.allRowNrs
-        f6.allRowNrs = @loc.allRowNrs
-        f7.allRowNrs = @loc.allRowNrs
-        f8.allRowNrs = @loc.allRowNrs
+  | Row
+      f0.blockNrs = fst3 @lhs.blocks
+      f1.blockNrs = fst3 @lhs.blocks
+      f2.blockNrs = fst3 @lhs.blocks
+      f3.blockNrs = snd3 @lhs.blocks
+      f4.blockNrs = snd3 @lhs.blocks
+      f5.blockNrs = snd3 @lhs.blocks
+      f6.blockNrs = thd3 @lhs.blocks
+      f7.blockNrs = thd3 @lhs.blocks
+      f8.blockNrs = thd3 @lhs.blocks
+
+      
 {
-fieldPopupItems path rowNrs =
-  let validNrs = [1..9] \\ rowNrs
-  in [ (if i == 0 then "<clear>" else show i, setFieldValue path i) 
+
+-- [ [ [left0] [center0] [right0] ], [ [left1], [center1], [right1] ] ...
+
+-- [ [ [left0] [left1] [left2] ], [ [center0] [center1] [center2] ], ...
+
+listTo9Tuple [x0,x1,x2,x3,x4,x5,x6,x7,x8] = (x0,x1,x2,x3,x4,x5,x6,x7,x8)
+
+fst3 (x,_,_) = x
+
+snd3 (_,x,_) = x
+
+thd3 (_,_,x) = x
+
+fieldPopupItems path rowNrs colNrs blockNrs =
+  let validNrs = (([1..9] \\ rowNrs) \\ colNrs) \\ blockNrs
+  in [ (if i == 0 then show "<clear>" else show i, setFieldValue path i) 
      | i <- 0:validNrs 
      ] 
 
 setFieldValue path n = pasteAt (toClip $ Field n) path
 
+-- http://www.sudokutoday.com/difficult-sudoku-puzzle-i1-answers.html
 }
 
 
