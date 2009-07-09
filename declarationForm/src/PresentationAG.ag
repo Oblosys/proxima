@@ -373,15 +373,45 @@ SEM Field
   | Field
       loc.pres = structural $ boxed (col [ empty `withVStretch` True
                                          , row [ empty `withHStretch` True
-			                       , text (if @val == 0 then " " else show @val)
+			                       , text (if @val == 0 then "" else show @val)
       	       	 	            	         `withColor` black
 					       , empty `withHStretch` True
 				               ]
       	       	 	      	         , empty `withVStretch` True
 				         ]  `withSize` (35,35)) `withColor` darkGrey
+                              `addPopupItems` fieldPopupItems @lhs.path @lhs.allRowNrs
 
+ATTR Field [ | | rowNrs : {[Int]} ]
 
+SEM Field
+  | Field lhs.rowNrs = [ @val ]
 
+SEM Row
+  | Row loc.allRowNrs = @f0.rowNrs ++ @f1.rowNrs ++ @f2.rowNrs ++
+    		        @f3.rowNrs ++ @f4.rowNrs ++ @f5.rowNrs ++
+    		        @f6.rowNrs ++ @f7.rowNrs ++ @f8.rowNrs
+
+ATTR Field [ allRowNrs : {[Int]} | | ]
+SEM Row
+  | Row f0.allRowNrs = @loc.allRowNrs
+        f1.allRowNrs = @loc.allRowNrs
+        f2.allRowNrs = @loc.allRowNrs
+        f3.allRowNrs = @loc.allRowNrs
+        f4.allRowNrs = @loc.allRowNrs
+        f5.allRowNrs = @loc.allRowNrs
+        f6.allRowNrs = @loc.allRowNrs
+        f7.allRowNrs = @loc.allRowNrs
+        f8.allRowNrs = @loc.allRowNrs
+{
+fieldPopupItems path rowNrs =
+  let validNrs = [1..9] \\ rowNrs
+  in [ (if i == 0 then "<clear>" else show i, setFieldValue path i) 
+     | i <- 0:validNrs 
+     ] 
+
+setFieldValue path n = pasteAt (toClip $ Field n) path
+
+}
 
 
 
