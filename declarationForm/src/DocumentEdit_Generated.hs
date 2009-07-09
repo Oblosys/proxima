@@ -26,6 +26,9 @@ instance Clip ClipDoc where
   arityClip (Clip_Tasks x) = arity x
   arityClip (Clip_Task x) = arity x
   arityClip (Clip_Description x) = arity x
+  arityClip (Clip_Sudoku x) = arity x
+  arityClip (Clip_Row x) = arity x
+  arityClip (Clip_Field x) = arity x
   arityClip (Clip_List_Expense x) = arity x
   arityClip (Clip_List_Currency x) = arity x
   arityClip (Clip_List_Task x) = arity x
@@ -45,6 +48,9 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Tasks x) = alternatives x
   alternativesClip (Clip_Task x) = alternatives x
   alternativesClip (Clip_Description x) = alternatives x
+  alternativesClip (Clip_Sudoku x) = alternatives x
+  alternativesClip (Clip_Row x) = alternatives x
+  alternativesClip (Clip_Field x) = alternatives x
   alternativesClip (Clip_List_Expense x) = alternatives x
   alternativesClip (Clip_List_Currency x) = alternatives x
   alternativesClip (Clip_List_Task x) = alternatives x
@@ -64,6 +70,9 @@ instance Clip ClipDoc where
   holeClip (Clip_Tasks x) = Clip_Tasks hole
   holeClip (Clip_Task x) = Clip_Task hole
   holeClip (Clip_Description x) = Clip_Description hole
+  holeClip (Clip_Sudoku x) = Clip_Sudoku hole
+  holeClip (Clip_Row x) = Clip_Row hole
+  holeClip (Clip_Field x) = Clip_Field hole
   holeClip (Clip_List_Expense x) = Clip_List_Expense hole
   holeClip (Clip_List_Currency x) = Clip_List_Currency hole
   holeClip (Clip_List_Task x) = Clip_List_Task hole
@@ -83,6 +92,9 @@ instance Clip ClipDoc where
   isListClip (Clip_Tasks x) = isList x
   isListClip (Clip_Task x) = isList x
   isListClip (Clip_Description x) = isList x
+  isListClip (Clip_Sudoku x) = isList x
+  isListClip (Clip_Row x) = isList x
+  isListClip (Clip_Field x) = isList x
   isListClip (Clip_List_Expense x) = isList x
   isListClip (Clip_List_Currency x) = isList x
   isListClip (Clip_List_Task x) = isList x
@@ -102,6 +114,9 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Tasks x) = insertList i c x
   insertListClip i c (Clip_Task x) = insertList i c x
   insertListClip i c (Clip_Description x) = insertList i c x
+  insertListClip i c (Clip_Sudoku x) = insertList i c x
+  insertListClip i c (Clip_Row x) = insertList i c x
+  insertListClip i c (Clip_Field x) = insertList i c x
   insertListClip i c (Clip_List_Expense x) = insertList i c x
   insertListClip i c (Clip_List_Currency x) = insertList i c x
   insertListClip i c (Clip_List_Task x) = insertList i c x
@@ -121,6 +136,9 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Tasks x) = removeList i x
   removeListClip i (Clip_Task x) = removeList i x
   removeListClip i (Clip_Description x) = removeList i x
+  removeListClip i (Clip_Sudoku x) = removeList i x
+  removeListClip i (Clip_Row x) = removeList i x
+  removeListClip i (Clip_Field x) = removeList i x
   removeListClip i (Clip_List_Expense x) = removeList i x
   removeListClip i (Clip_List_Currency x) = removeList i x
   removeListClip i (Clip_List_Task x) = removeList i x
@@ -204,21 +222,25 @@ instance Editable ChoiceDoc Document Node ClipDoc UserToken where
   select [] x = Clip_ChoiceDoc x
   select (0:p) (FormDoc x0) = select p x0
   select (0:p) (TaskDoc x0) = select p x0
+  select (0:p) (SudokuDoc x0) = select p x0
   select _ _ = Clip_Nothing
 
   paste [] (Clip_ChoiceDoc c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on ChoiceDoc") x
   paste (0:p) c (FormDoc x0) = FormDoc (paste p c x0)
   paste (0:p) c (TaskDoc x0) = TaskDoc (paste p c x0)
+  paste (0:p) c (SudokuDoc x0) = SudokuDoc (paste p c x0)
   paste _ _ x = x
 
   alternatives _ = [ ("FormDoc {Form} "  , Clip_ChoiceDoc $ FormDoc hole)
                    , ("TaskDoc {Tasks} "  , Clip_ChoiceDoc $ TaskDoc hole)
+                   , ("SudokuDoc {Sudoku} "  , Clip_ChoiceDoc $ SudokuDoc hole)
                    ,("{ChoiceDoc}", Clip_ChoiceDoc hole)
                    ]
 
   arity (FormDoc x0) = 1
   arity (TaskDoc x0) = 1
+  arity (SudokuDoc x0) = 1
   arity _                        = 0
 
   toClip t = Clip_ChoiceDoc t
@@ -479,6 +501,134 @@ instance Editable Description Document Node ClipDoc UserToken where
   hole = HoleDescription
 
   holeNodeConstr = Node_HoleDescription
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Sudoku Document Node ClipDoc UserToken where
+  select [] x = Clip_Sudoku x
+  select (0:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x0
+  select (1:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x1
+  select (2:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x2
+  select (3:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x3
+  select (4:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x4
+  select (5:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x5
+  select (6:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x6
+  select (7:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x7
+  select (8:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x8
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Sudoku c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Sudoku") x
+  paste (0:p) c (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = Sudoku (paste p c x0) x1 x2 x3 x4 x5 x6 x7 x8
+  paste (1:p) c (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = Sudoku x0 (paste p c x1) x2 x3 x4 x5 x6 x7 x8
+  paste (2:p) c (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = Sudoku x0 x1 (paste p c x2) x3 x4 x5 x6 x7 x8
+  paste (3:p) c (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = Sudoku x0 x1 x2 (paste p c x3) x4 x5 x6 x7 x8
+  paste (4:p) c (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = Sudoku x0 x1 x2 x3 (paste p c x4) x5 x6 x7 x8
+  paste (5:p) c (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = Sudoku x0 x1 x2 x3 x4 (paste p c x5) x6 x7 x8
+  paste (6:p) c (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = Sudoku x0 x1 x2 x3 x4 x5 (paste p c x6) x7 x8
+  paste (7:p) c (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = Sudoku x0 x1 x2 x3 x4 x5 x6 (paste p c x7) x8
+  paste (8:p) c (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = Sudoku x0 x1 x2 x3 x4 x5 x6 x7 (paste p c x8)
+  paste _ _ x = x
+
+  alternatives _ = [ ("Sudoku {Row} {Row} {Row} {Row} {Row} {Row} {Row} {Row} {Row} "  , Clip_Sudoku $ Sudoku hole hole hole hole hole hole hole hole hole)
+                   ,("{Sudoku}", Clip_Sudoku hole)
+                   ]
+
+  arity (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = 9
+  arity _                        = 0
+
+  toClip t = Clip_Sudoku t
+
+  fromClip (Clip_Sudoku t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrSudoku
+
+  hole = HoleSudoku
+
+  holeNodeConstr = Node_HoleSudoku
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Row Document Node ClipDoc UserToken where
+  select [] x = Clip_Row x
+  select (0:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x0
+  select (1:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x1
+  select (2:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x2
+  select (3:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x3
+  select (4:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x4
+  select (5:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x5
+  select (6:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x6
+  select (7:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x7
+  select (8:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x8
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Row c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Row") x
+  paste (0:p) c (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = Row (paste p c x0) x1 x2 x3 x4 x5 x6 x7 x8
+  paste (1:p) c (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = Row x0 (paste p c x1) x2 x3 x4 x5 x6 x7 x8
+  paste (2:p) c (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = Row x0 x1 (paste p c x2) x3 x4 x5 x6 x7 x8
+  paste (3:p) c (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = Row x0 x1 x2 (paste p c x3) x4 x5 x6 x7 x8
+  paste (4:p) c (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = Row x0 x1 x2 x3 (paste p c x4) x5 x6 x7 x8
+  paste (5:p) c (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = Row x0 x1 x2 x3 x4 (paste p c x5) x6 x7 x8
+  paste (6:p) c (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = Row x0 x1 x2 x3 x4 x5 (paste p c x6) x7 x8
+  paste (7:p) c (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = Row x0 x1 x2 x3 x4 x5 x6 (paste p c x7) x8
+  paste (8:p) c (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = Row x0 x1 x2 x3 x4 x5 x6 x7 (paste p c x8)
+  paste _ _ x = x
+
+  alternatives _ = [ ("Row {Field} {Field} {Field} {Field} {Field} {Field} {Field} {Field} {Field} "  , Clip_Row $ Row hole hole hole hole hole hole hole hole hole)
+                   ,("{Row}", Clip_Row hole)
+                   ]
+
+  arity (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = 9
+  arity _                        = 0
+
+  toClip t = Clip_Row t
+
+  fromClip (Clip_Row t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrRow
+
+  hole = HoleRow
+
+  holeNodeConstr = Node_HoleRow
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Field Document Node ClipDoc UserToken where
+  select [] x = Clip_Field x
+  select (0:p) (Field x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Field c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Field") x
+  paste (0:p) c (Field x0) = Field (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("Field {Int} "  , Clip_Field $ Field hole)
+                   ,("{Field}", Clip_Field hole)
+                   ]
+
+  arity (Field x0) = 1
+  arity _                        = 0
+
+  toClip t = Clip_Field t
+
+  fromClip (Clip_Field t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrField
+
+  hole = HoleField
+
+  holeNodeConstr = Node_HoleField
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing

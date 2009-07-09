@@ -27,6 +27,7 @@ initialDocument = return $ RootDoc $
           ]         
       ]       
   -}                      
+{-  
   FormDoc
                           (Form (Description "Martijn") (Description "Informatica") 
                              (toList_Expense 
@@ -38,7 +39,21 @@ initialDocument = return $ RootDoc $
                                , Currency (Description "Dollar") (FloatField 0.790938)
                                ])
                            )
+-}    
+  SudokuDoc $ Sudoku 
+    (Row (Field 0) (Field 0) (Field 3)  (Field 2) (Field 0) (Field 0)  (Field 5) (Field 7) (Field 0)) 
+    (Row (Field 0) (Field 0) (Field 7)  (Field 0) (Field 0) (Field 0)  (Field 0) (Field 0) (Field 0)) 
+    (Row (Field 0) (Field 0) (Field 0)  (Field 6) (Field 0) (Field 0)  (Field 3) (Field 0) (Field 0)) 
     
+    (Row (Field 0) (Field 2) (Field 0)  (Field 0) (Field 3) (Field 9)  (Field 0) (Field 1) (Field 0)) 
+    (Row (Field 9) (Field 0) (Field 0)  (Field 0) (Field 1) (Field 0)  (Field 0) (Field 0) (Field 4)) 
+    (Row (Field 0) (Field 5) (Field 0)  (Field 7) (Field 2) (Field 0)  (Field 0) (Field 8) (Field 0)) 
+    
+    (Row (Field 0) (Field 0) (Field 9)  (Field 0) (Field 0) (Field 3)  (Field 0) (Field 0) (Field 0)) 
+    (Row (Field 0) (Field 0) (Field 0)  (Field 0) (Field 0) (Field 0)  (Field 4) (Field 0) (Field 0)) 
+    (Row (Field 0) (Field 4) (Field 5)  (Field 0) (Field 0) (Field 8)  (Field 6) (Field 0) (Field 0)) 
+    
+   
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 --------------------------------------------------------------------------
@@ -55,39 +70,49 @@ rankNode (Node_HoleDocument _ _) = 5
 rankNode (Node_ParseErrDocument _ _) = 6
 rankNode (Node_FormDoc _ _) = 7
 rankNode (Node_TaskDoc _ _) = 8
-rankNode (Node_HoleChoiceDoc _ _) = 9
-rankNode (Node_ParseErrChoiceDoc _ _) = 10
-rankNode (Node_Form _ _) = 11
-rankNode (Node_HoleForm _ _) = 12
-rankNode (Node_ParseErrForm _ _) = 13
-rankNode (Node_Expense _ _) = 14
-rankNode (Node_HoleExpense _ _) = 15
-rankNode (Node_ParseErrExpense _ _) = 16
-rankNode (Node_Currency _ _) = 17
-rankNode (Node_HoleCurrency _ _) = 18
-rankNode (Node_ParseErrCurrency _ _) = 19
-rankNode (Node_FloatField _ _) = 20
-rankNode (Node_HoleFloatField _ _) = 21
-rankNode (Node_ParseErrFloatField _ _) = 22
-rankNode (Node_Tasks _ _) = 23
-rankNode (Node_HoleTasks _ _) = 24
-rankNode (Node_ParseErrTasks _ _) = 25
-rankNode (Node_BasicTask _ _) = 26
-rankNode (Node_CompositeTask _ _) = 27
-rankNode (Node_HoleTask _ _) = 28
-rankNode (Node_ParseErrTask _ _) = 29
-rankNode (Node_Description _ _) = 30
-rankNode (Node_HoleDescription _ _) = 31
-rankNode (Node_ParseErrDescription _ _) = 32
-rankNode (Node_List_Expense _ _) = 33
-rankNode (Node_HoleList_Expense _ _) = 34
-rankNode (Node_ParseErrList_Expense _ _) = 35
-rankNode (Node_List_Currency _ _) = 36
-rankNode (Node_HoleList_Currency _ _) = 37
-rankNode (Node_ParseErrList_Currency _ _) = 38
-rankNode (Node_List_Task _ _) = 39
-rankNode (Node_HoleList_Task _ _) = 40
-rankNode (Node_ParseErrList_Task _ _) = 41
+rankNode (Node_SudokuDoc _ _) = 9
+rankNode (Node_HoleChoiceDoc _ _) = 10
+rankNode (Node_ParseErrChoiceDoc _ _) = 11
+rankNode (Node_Form _ _) = 12
+rankNode (Node_HoleForm _ _) = 13
+rankNode (Node_ParseErrForm _ _) = 14
+rankNode (Node_Expense _ _) = 15
+rankNode (Node_HoleExpense _ _) = 16
+rankNode (Node_ParseErrExpense _ _) = 17
+rankNode (Node_Currency _ _) = 18
+rankNode (Node_HoleCurrency _ _) = 19
+rankNode (Node_ParseErrCurrency _ _) = 20
+rankNode (Node_FloatField _ _) = 21
+rankNode (Node_HoleFloatField _ _) = 22
+rankNode (Node_ParseErrFloatField _ _) = 23
+rankNode (Node_Tasks _ _) = 24
+rankNode (Node_HoleTasks _ _) = 25
+rankNode (Node_ParseErrTasks _ _) = 26
+rankNode (Node_BasicTask _ _) = 27
+rankNode (Node_CompositeTask _ _) = 28
+rankNode (Node_HoleTask _ _) = 29
+rankNode (Node_ParseErrTask _ _) = 30
+rankNode (Node_Description _ _) = 31
+rankNode (Node_HoleDescription _ _) = 32
+rankNode (Node_ParseErrDescription _ _) = 33
+rankNode (Node_Sudoku _ _) = 34
+rankNode (Node_HoleSudoku _ _) = 35
+rankNode (Node_ParseErrSudoku _ _) = 36
+rankNode (Node_Row _ _) = 37
+rankNode (Node_HoleRow _ _) = 38
+rankNode (Node_ParseErrRow _ _) = 39
+rankNode (Node_Field _ _) = 40
+rankNode (Node_HoleField _ _) = 41
+rankNode (Node_ParseErrField _ _) = 42
+rankNode (Node_List_Expense _ _) = 43
+rankNode (Node_HoleList_Expense _ _) = 44
+rankNode (Node_ParseErrList_Expense _ _) = 45
+rankNode (Node_List_Currency _ _) = 46
+rankNode (Node_HoleList_Currency _ _) = 47
+rankNode (Node_ParseErrList_Currency _ _) = 48
+rankNode (Node_List_Task _ _) = 49
+rankNode (Node_HoleList_Task _ _) = 50
+rankNode (Node_ParseErrList_Task _ _) = 51
 
 
 
@@ -106,6 +131,7 @@ instance DocNode Node where
   pathNode (Node_ParseErrDocument _ pth) = PathD pth
   pathNode (Node_FormDoc _ pth) = PathD pth
   pathNode (Node_TaskDoc _ pth) = PathD pth
+  pathNode (Node_SudokuDoc _ pth) = PathD pth
   pathNode (Node_HoleChoiceDoc _ pth) = PathD pth
   pathNode (Node_ParseErrChoiceDoc _ pth) = PathD pth
   pathNode (Node_Form _ pth) = PathD pth
@@ -130,6 +156,15 @@ instance DocNode Node where
   pathNode (Node_Description _ pth) = PathD pth
   pathNode (Node_HoleDescription _ pth) = PathD pth
   pathNode (Node_ParseErrDescription _ pth) = PathD pth
+  pathNode (Node_Sudoku _ pth) = PathD pth
+  pathNode (Node_HoleSudoku _ pth) = PathD pth
+  pathNode (Node_ParseErrSudoku _ pth) = PathD pth
+  pathNode (Node_Row _ pth) = PathD pth
+  pathNode (Node_HoleRow _ pth) = PathD pth
+  pathNode (Node_ParseErrRow _ pth) = PathD pth
+  pathNode (Node_Field _ pth) = PathD pth
+  pathNode (Node_HoleField _ pth) = PathD pth
+  pathNode (Node_ParseErrField _ pth) = PathD pth
   pathNode (Node_List_Expense _ pth) = PathD pth
   pathNode (Node_HoleList_Expense _ pth) = PathD pth
   pathNode (Node_ParseErrList_Expense _ pth) = PathD pth
@@ -154,6 +189,7 @@ toXMLDocument (HoleDocument) = EmptyElt "HoleDocument" []
 toXMLDocument (ParseErrDocument error) = EmptyElt "ParseErrDocument" []
 toXMLChoiceDoc (FormDoc form) = Elt "FormDoc" [] $ [toXMLForm form]
 toXMLChoiceDoc (TaskDoc tasks) = Elt "TaskDoc" [] $ [toXMLTasks tasks]
+toXMLChoiceDoc (SudokuDoc sudoku) = Elt "SudokuDoc" [] $ [toXMLSudoku sudoku]
 toXMLChoiceDoc (HoleChoiceDoc) = EmptyElt "HoleChoiceDoc" [] 
 toXMLChoiceDoc (ParseErrChoiceDoc error) = EmptyElt "ParseErrChoiceDoc" []
 toXMLForm (Form name faculty expenses currencies) = Elt "Form" [] $ [toXMLDescription name] ++ [toXMLDescription faculty] ++ toXMLList_Expense expenses ++ toXMLList_Currency currencies
@@ -178,6 +214,15 @@ toXMLTask (ParseErrTask error) = EmptyElt "ParseErrTask" []
 toXMLDescription (Description str) = Elt "Description" [] $ [toXMLString str]
 toXMLDescription (HoleDescription) = EmptyElt "HoleDescription" [] 
 toXMLDescription (ParseErrDescription error) = EmptyElt "ParseErrDescription" []
+toXMLSudoku (Sudoku r0 r1 r2 r3 r4 r5 r6 r7 r8) = Elt "Sudoku" [] $ [toXMLRow r0] ++ [toXMLRow r1] ++ [toXMLRow r2] ++ [toXMLRow r3] ++ [toXMLRow r4] ++ [toXMLRow r5] ++ [toXMLRow r6] ++ [toXMLRow r7] ++ [toXMLRow r8]
+toXMLSudoku (HoleSudoku) = EmptyElt "HoleSudoku" [] 
+toXMLSudoku (ParseErrSudoku error) = EmptyElt "ParseErrSudoku" []
+toXMLRow (Row f0 f1 f2 f3 f4 f5 f6 f7 f8) = Elt "Row" [] $ [toXMLField f0] ++ [toXMLField f1] ++ [toXMLField f2] ++ [toXMLField f3] ++ [toXMLField f4] ++ [toXMLField f5] ++ [toXMLField f6] ++ [toXMLField f7] ++ [toXMLField f8]
+toXMLRow (HoleRow) = EmptyElt "HoleRow" [] 
+toXMLRow (ParseErrRow error) = EmptyElt "ParseErrRow" []
+toXMLField (Field val) = Elt "Field" [] $ [toXMLInt val]
+toXMLField (HoleField) = EmptyElt "HoleField" [] 
+toXMLField (ParseErrField error) = EmptyElt "ParseErrField" []
 toXMLList_Expense (List_Expense xs) = toXMLConsList_Expense xs
 toXMLList_Expense HoleList_Expense = []
 toXMLList_Expense (ParseErrList_Expense _) = []
@@ -204,9 +249,10 @@ parseXML_EnrichedDoc = parseXMLCns_RootEnr <|> parseHoleAndParseErr "EnrichedDoc
 parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_ChoiceDoc<* endTag "RootEnr"
 parseXML_Document = parseXMLCns_RootDoc <|> parseHoleAndParseErr "Document" HoleDocument
 parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_ChoiceDoc<* endTag "RootDoc"
-parseXML_ChoiceDoc = parseXMLCns_FormDoc <|> parseXMLCns_TaskDoc <|> parseHoleAndParseErr "ChoiceDoc" HoleChoiceDoc
+parseXML_ChoiceDoc = parseXMLCns_FormDoc <|> parseXMLCns_TaskDoc <|> parseXMLCns_SudokuDoc <|> parseHoleAndParseErr "ChoiceDoc" HoleChoiceDoc
 parseXMLCns_FormDoc = FormDoc <$ startTag "FormDoc" <*> parseXML_Form<* endTag "FormDoc"
 parseXMLCns_TaskDoc = TaskDoc <$ startTag "TaskDoc" <*> parseXML_Tasks<* endTag "TaskDoc"
+parseXMLCns_SudokuDoc = SudokuDoc <$ startTag "SudokuDoc" <*> parseXML_Sudoku<* endTag "SudokuDoc"
 parseXML_Form = parseXMLCns_Form <|> parseHoleAndParseErr "Form" HoleForm
 parseXMLCns_Form = Form <$ startTag "Form" <*> parseXML_Description <*> parseXML_Description <*> parseXML_List_Expense <*> parseXML_List_Currency<* endTag "Form"
 parseXML_Expense = parseXMLCns_Expense <|> parseHoleAndParseErr "Expense" HoleExpense
@@ -222,6 +268,12 @@ parseXMLCns_BasicTask = BasicTask <$ startTag "BasicTask" <*> parseXML_Descripti
 parseXMLCns_CompositeTask = CompositeTask <$ startTag "CompositeTask" <*> parseXML_Bool <*> parseXML_Description <*> parseXML_List_Task<* endTag "CompositeTask"
 parseXML_Description = parseXMLCns_Description <|> parseHoleAndParseErr "Description" HoleDescription
 parseXMLCns_Description = Description <$ startTag "Description" <*> parseXML_String<* endTag "Description"
+parseXML_Sudoku = parseXMLCns_Sudoku <|> parseHoleAndParseErr "Sudoku" HoleSudoku
+parseXMLCns_Sudoku = Sudoku <$ startTag "Sudoku" <*> parseXML_Row <*> parseXML_Row <*> parseXML_Row <*> parseXML_Row <*> parseXML_Row <*> parseXML_Row <*> parseXML_Row <*> parseXML_Row <*> parseXML_Row<* endTag "Sudoku"
+parseXML_Row = parseXMLCns_Row <|> parseHoleAndParseErr "Row" HoleRow
+parseXMLCns_Row = Row <$ startTag "Row" <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field<* endTag "Row"
+parseXML_Field = parseXMLCns_Field <|> parseHoleAndParseErr "Field" HoleField
+parseXMLCns_Field = Field <$ startTag "Field" <*> parseXML_Int<* endTag "Field"
 parseXML_List_Expense = mkList List_Expense Cons_Expense Nil_Expense <$> pList_ng parseXML_Expense
 parseXML_List_Currency = mkList List_Currency Cons_Currency Nil_Currency <$> pList_ng parseXML_Currency
 parseXML_List_Task = mkList List_Task Cons_Task Nil_Task <$> pList_ng parseXML_Task

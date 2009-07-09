@@ -28,6 +28,7 @@ data Document = RootDoc ChoiceDoc
 
 data ChoiceDoc = FormDoc Form
                | TaskDoc Tasks
+               | SudokuDoc Sudoku
                | HoleChoiceDoc
                | ParseErrChoiceDoc (ParseError Document Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
@@ -67,6 +68,21 @@ data Description = Description String
                  | HoleDescription
                  | ParseErrDescription (ParseError Document Node ClipDoc UserToken)
                      deriving (Show, Data, Typeable)
+
+data Sudoku = Sudoku Row Row Row Row Row Row Row Row Row
+            | HoleSudoku
+            | ParseErrSudoku (ParseError Document Node ClipDoc UserToken)
+                deriving (Show, Data, Typeable)
+
+data Row = Row Field Field Field Field Field Field Field Field Field
+         | HoleRow
+         | ParseErrRow (ParseError Document Node ClipDoc UserToken)
+             deriving (Show, Data, Typeable)
+
+data Field = Field Int
+           | HoleField
+           | ParseErrField (ParseError Document Node ClipDoc UserToken)
+               deriving (Show, Data, Typeable)
 
 data List_Expense = List_Expense ConsList_Expense
                   | HoleList_Expense
@@ -112,6 +128,9 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Tasks Tasks
              | Clip_Task Task
              | Clip_Description Description
+             | Clip_Sudoku Sudoku
+             | Clip_Row Row
+             | Clip_Field Field
              | Clip_List_Expense List_Expense
              | Clip_List_Currency List_Currency
              | Clip_List_Task List_Task
@@ -136,6 +155,7 @@ data Node = NoNode
           | Node_ParseErrDocument Document Path
           | Node_FormDoc ChoiceDoc Path
           | Node_TaskDoc ChoiceDoc Path
+          | Node_SudokuDoc ChoiceDoc Path
           | Node_HoleChoiceDoc ChoiceDoc Path
           | Node_ParseErrChoiceDoc ChoiceDoc Path
           | Node_Form Form Path
@@ -160,6 +180,15 @@ data Node = NoNode
           | Node_Description Description Path
           | Node_HoleDescription Description Path
           | Node_ParseErrDescription Description Path
+          | Node_Sudoku Sudoku Path
+          | Node_HoleSudoku Sudoku Path
+          | Node_ParseErrSudoku Sudoku Path
+          | Node_Row Row Path
+          | Node_HoleRow Row Path
+          | Node_ParseErrRow Row Path
+          | Node_Field Field Path
+          | Node_HoleField Field Path
+          | Node_ParseErrField Field Path
           | Node_List_Expense List_Expense Path
           | Node_HoleList_Expense List_Expense Path
           | Node_ParseErrList_Expense List_Expense Path
@@ -187,6 +216,7 @@ instance Show Node where
   show (Node_ParseErrDocument _ _) = "Node_ParseErrDocument" 
   show (Node_FormDoc _ _) = "Node_FormDoc" 
   show (Node_TaskDoc _ _) = "Node_TaskDoc" 
+  show (Node_SudokuDoc _ _) = "Node_SudokuDoc" 
   show (Node_HoleChoiceDoc _ _) = "Node_HoleChoiceDoc" 
   show (Node_ParseErrChoiceDoc _ _) = "Node_ParseErrChoiceDoc" 
   show (Node_Form _ _) = "Node_Form" 
@@ -211,6 +241,15 @@ instance Show Node where
   show (Node_Description _ _) = "Node_Description" 
   show (Node_HoleDescription _ _) = "Node_HoleDescription" 
   show (Node_ParseErrDescription _ _) = "Node_ParseErrDescription" 
+  show (Node_Sudoku _ _) = "Node_Sudoku" 
+  show (Node_HoleSudoku _ _) = "Node_HoleSudoku" 
+  show (Node_ParseErrSudoku _ _) = "Node_ParseErrSudoku" 
+  show (Node_Row _ _) = "Node_Row" 
+  show (Node_HoleRow _ _) = "Node_HoleRow" 
+  show (Node_ParseErrRow _ _) = "Node_ParseErrRow" 
+  show (Node_Field _ _) = "Node_Field" 
+  show (Node_HoleField _ _) = "Node_HoleField" 
+  show (Node_ParseErrField _ _) = "Node_ParseErrField" 
   show (Node_List_Expense _ _) = "Node_List_Expense" 
   show (Node_HoleList_Expense _ _) = "Node_HoleList_Expense" 
   show (Node_ParseErrList_Expense _ _) = "Node_ParseErrList_Expense" 

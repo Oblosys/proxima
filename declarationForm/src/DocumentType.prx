@@ -2,6 +2,7 @@ data Document = RootDoc choiceDoc : ChoiceDoc
 
 data ChoiceDoc = FormDoc form : Form
                | TaskDoc tasks : Tasks
+               | SudokuDoc sudoku : Sudoku
 
 data Form = Form name :  Description faculty :  Description expenses : [Expense] currencies : [Currency]
 
@@ -11,9 +12,21 @@ data Currency = Currency name : Description euroRate : FloatField
 
 data FloatField = FloatField float : Float
 
+
+
 data Tasks = Tasks showCompleted : Bool tasks : [Task]
 
 data Task = BasicTask description : Description completed : Bool 
           | CompositeTask expanded : Bool description : Description subtasks : [Task]
 
 data Description = Description str : String
+
+
+
+data Sudoku = Sudoku r0 : Row r1 : Row r2 : Row r3 : Row r4 : Row 
+     	      	     r5 : Row r6 : Row r7 : Row r8 : Row
+
+data Row = Row f0 : Field f1 : Field f2 : Field f3 : Field f4 : Field
+     	       f5 : Field f6 : Field f7 : Field f8 : Field
+
+data Field = Field val : Int

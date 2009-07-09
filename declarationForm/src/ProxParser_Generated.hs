@@ -36,6 +36,7 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_ParseErrDocument _ _) = construct_ParseErrDocument
   construct (Node_FormDoc _ _) = construct_FormDoc
   construct (Node_TaskDoc _ _) = construct_TaskDoc
+  construct (Node_SudokuDoc _ _) = construct_SudokuDoc
   construct (Node_HoleChoiceDoc _ _) = construct_HoleChoiceDoc
   construct (Node_ParseErrChoiceDoc _ _) = construct_ParseErrChoiceDoc
   construct (Node_Form _ _) = construct_Form
@@ -60,6 +61,15 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_Description _ _) = construct_Description
   construct (Node_HoleDescription _ _) = construct_HoleDescription
   construct (Node_ParseErrDescription _ _) = construct_ParseErrDescription
+  construct (Node_Sudoku _ _) = construct_Sudoku
+  construct (Node_HoleSudoku _ _) = construct_HoleSudoku
+  construct (Node_ParseErrSudoku _ _) = construct_ParseErrSudoku
+  construct (Node_Row _ _) = construct_Row
+  construct (Node_HoleRow _ _) = construct_HoleRow
+  construct (Node_ParseErrRow _ _) = construct_ParseErrRow
+  construct (Node_Field _ _) = construct_Field
+  construct (Node_HoleField _ _) = construct_HoleField
+  construct (Node_ParseErrField _ _) = construct_ParseErrField
   construct (Node_List_Expense _ _) = construct_List_Expense
   construct (Node_HoleList_Expense _ _) = construct_HoleList_Expense
   construct (Node_ParseErrList_Expense _ _) = construct_ParseErrList_Expense
@@ -77,6 +87,7 @@ construct_HoleDocument tk ~[] = Clip_Document $ hole
 construct_ParseErrDocument (StructuralTk _ _ pres _ _) ~[] = Clip_Document $ parseErr (StructuralParseErr pres)
 construct_FormDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseFormDoc [tk]  (retrieveArg "FormDoc" "form::Form" mClip0)
 construct_TaskDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseTaskDoc [tk]  (retrieveArg "TaskDoc" "tasks::Tasks" mClip0)
+construct_SudokuDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseSudokuDoc [tk]  (retrieveArg "SudokuDoc" "sudoku::Sudoku" mClip0)
 construct_HoleChoiceDoc tk ~[] = Clip_ChoiceDoc $ hole
 construct_ParseErrChoiceDoc (StructuralTk _ _ pres _ _) ~[] = Clip_ChoiceDoc $ parseErr (StructuralParseErr pres)
 construct_Form tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Form $ reuseForm [tk]  (retrieveArg "Form" "name::Description" mClip0) (retrieveArg "Form" "faculty::Description" mClip1) (retrieveArg "Form" "expenses::List_Expense" mClip2) (retrieveArg "Form" "currencies::List_Currency" mClip3)
@@ -101,6 +112,15 @@ construct_ParseErrTask (StructuralTk _ _ pres _ _) ~[] = Clip_Task $ parseErr (S
 construct_Description tk ~[mClip0] = Clip_Description $ reuseDescription [tk]  (retrieveArg "Description" "str::String" mClip0)
 construct_HoleDescription tk ~[] = Clip_Description $ hole
 construct_ParseErrDescription (StructuralTk _ _ pres _ _) ~[] = Clip_Description $ parseErr (StructuralParseErr pres)
+construct_Sudoku tk ~[mClip0,mClip1,mClip2,mClip3,mClip4,mClip5,mClip6,mClip7,mClip8] = Clip_Sudoku $ reuseSudoku [tk]  (retrieveArg "Sudoku" "r0::Row" mClip0) (retrieveArg "Sudoku" "r1::Row" mClip1) (retrieveArg "Sudoku" "r2::Row" mClip2) (retrieveArg "Sudoku" "r3::Row" mClip3) (retrieveArg "Sudoku" "r4::Row" mClip4) (retrieveArg "Sudoku" "r5::Row" mClip5) (retrieveArg "Sudoku" "r6::Row" mClip6) (retrieveArg "Sudoku" "r7::Row" mClip7) (retrieveArg "Sudoku" "r8::Row" mClip8)
+construct_HoleSudoku tk ~[] = Clip_Sudoku $ hole
+construct_ParseErrSudoku (StructuralTk _ _ pres _ _) ~[] = Clip_Sudoku $ parseErr (StructuralParseErr pres)
+construct_Row tk ~[mClip0,mClip1,mClip2,mClip3,mClip4,mClip5,mClip6,mClip7,mClip8] = Clip_Row $ reuseRow [tk]  (retrieveArg "Row" "f0::Field" mClip0) (retrieveArg "Row" "f1::Field" mClip1) (retrieveArg "Row" "f2::Field" mClip2) (retrieveArg "Row" "f3::Field" mClip3) (retrieveArg "Row" "f4::Field" mClip4) (retrieveArg "Row" "f5::Field" mClip5) (retrieveArg "Row" "f6::Field" mClip6) (retrieveArg "Row" "f7::Field" mClip7) (retrieveArg "Row" "f8::Field" mClip8)
+construct_HoleRow tk ~[] = Clip_Row $ hole
+construct_ParseErrRow (StructuralTk _ _ pres _ _) ~[] = Clip_Row $ parseErr (StructuralParseErr pres)
+construct_Field tk ~[mClip0] = Clip_Field $ reuseField [tk]  (retrieveArg "Field" "val::Int" mClip0)
+construct_HoleField tk ~[] = Clip_Field $ hole
+construct_ParseErrField (StructuralTk _ _ pres _ _) ~[] = Clip_Field $ parseErr (StructuralParseErr pres)
 construct_List_Expense tk mClips = genericConstruct_List "Expense" toList_Expense mClips
 construct_HoleList_Expense tk ~[] = Clip_List_Expense $ hole
 construct_ParseErrList_Expense (StructuralTk _ _ pres _ _) ~[] = Clip_List_Expense $ parseErr (StructuralParseErr pres)
@@ -140,6 +160,12 @@ reuseTaskDoc nodes ma0
   = case extractFromTokens extractTaskDoc defaultTaskDoc nodes of
            (TaskDoc a0) -> genericReuse1 TaskDoc a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseTaskDoc"
+
+reuseSudokuDoc :: [Token doc Node clip token] -> Maybe Sudoku -> ChoiceDoc
+reuseSudokuDoc nodes ma0
+  = case extractFromTokens extractSudokuDoc defaultSudokuDoc nodes of
+           (SudokuDoc a0) -> genericReuse1 SudokuDoc a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseSudokuDoc"
 
 reuseForm :: [Token doc Node clip token] -> Maybe Description -> Maybe Description -> Maybe List_Expense -> Maybe List_Currency -> Form
 reuseForm nodes ma0 ma1 ma2 ma3
@@ -189,6 +215,24 @@ reuseDescription nodes ma0
            (Description a0) -> genericReuse1 Description a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseDescription"
 
+reuseSudoku :: [Token doc Node clip token] -> Maybe Row -> Maybe Row -> Maybe Row -> Maybe Row -> Maybe Row -> Maybe Row -> Maybe Row -> Maybe Row -> Maybe Row -> Sudoku
+reuseSudoku nodes ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
+  = case extractFromTokens extractSudoku defaultSudoku nodes of
+           (Sudoku a0 a1 a2 a3 a4 a5 a6 a7 a8) -> genericReuse9 Sudoku a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
+           _ -> error "Internal error:ProxParser_Generated.reuseSudoku"
+
+reuseRow :: [Token doc Node clip token] -> Maybe Field -> Maybe Field -> Maybe Field -> Maybe Field -> Maybe Field -> Maybe Field -> Maybe Field -> Maybe Field -> Maybe Field -> Row
+reuseRow nodes ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
+  = case extractFromTokens extractRow defaultRow nodes of
+           (Row a0 a1 a2 a3 a4 a5 a6 a7 a8) -> genericReuse9 Row a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
+           _ -> error "Internal error:ProxParser_Generated.reuseRow"
+
+reuseField :: [Token doc Node clip token] -> Maybe Int -> Field
+reuseField nodes ma0
+  = case extractFromTokens extractField defaultField nodes of
+           (Field a0) -> genericReuse1 Field a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseField"
+
 reuseList_Expense :: [Token doc Node clip token] -> Maybe ConsList_Expense -> List_Expense
 reuseList_Expense nodes ma0
   = case extractFromTokens extractList_Expense defaultList_Expense nodes of
@@ -230,6 +274,10 @@ extractTaskDoc :: Maybe Node -> Maybe ChoiceDoc
 extractTaskDoc (Just (Node_TaskDoc x@(TaskDoc _) _)) = Just x
 extractTaskDoc _ = Nothing
 
+extractSudokuDoc :: Maybe Node -> Maybe ChoiceDoc
+extractSudokuDoc (Just (Node_SudokuDoc x@(SudokuDoc _) _)) = Just x
+extractSudokuDoc _ = Nothing
+
 extractForm :: Maybe Node -> Maybe Form
 extractForm (Just (Node_Form x@(Form _ _ _ _) _)) = Just x
 extractForm _ = Nothing
@@ -262,6 +310,18 @@ extractDescription :: Maybe Node -> Maybe Description
 extractDescription (Just (Node_Description x@(Description _) _)) = Just x
 extractDescription _ = Nothing
 
+extractSudoku :: Maybe Node -> Maybe Sudoku
+extractSudoku (Just (Node_Sudoku x@(Sudoku _ _ _ _ _ _ _ _ _) _)) = Just x
+extractSudoku _ = Nothing
+
+extractRow :: Maybe Node -> Maybe Row
+extractRow (Just (Node_Row x@(Row _ _ _ _ _ _ _ _ _) _)) = Just x
+extractRow _ = Nothing
+
+extractField :: Maybe Node -> Maybe Field
+extractField (Just (Node_Field x@(Field _) _)) = Just x
+extractField _ = Nothing
+
 extractList_Expense :: Maybe Node -> Maybe List_Expense
 extractList_Expense (Just (Node_List_Expense x@(List_Expense _) _)) = Just x
 extractList_Expense _ = Nothing
@@ -293,6 +353,9 @@ defaultFormDoc = FormDoc hole
 defaultTaskDoc :: ChoiceDoc
 defaultTaskDoc = TaskDoc hole
 
+defaultSudokuDoc :: ChoiceDoc
+defaultSudokuDoc = SudokuDoc hole
+
 defaultForm :: Form
 defaultForm = Form hole hole hole hole
 
@@ -316,6 +379,15 @@ defaultCompositeTask = CompositeTask hole hole hole
 
 defaultDescription :: Description
 defaultDescription = Description hole
+
+defaultSudoku :: Sudoku
+defaultSudoku = Sudoku hole hole hole hole hole hole hole hole hole
+
+defaultRow :: Row
+defaultRow = Row hole hole hole hole hole hole hole hole hole
+
+defaultField :: Field
+defaultField = Field hole
 
 defaultList_Expense :: List_Expense
 defaultList_Expense = List_Expense Nil_Expense
@@ -373,6 +445,36 @@ genericReuse4 :: (a0 -> a1 -> a2 -> a3 -> r) ->
                  Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> r
 genericReuse4 f a0 a1 a2 a3 ma0 ma1 ma2 ma3 =
   f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3)
+
+genericReuse5 :: (a0 -> a1 -> a2 -> a3 -> a4 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> r
+genericReuse5 f a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4)
+
+genericReuse6 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> r
+genericReuse6 f a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5)
+
+genericReuse7 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> r
+genericReuse7 f a0 a1 a2 a3 a4 a5 a6 ma0 ma1 ma2 ma3 ma4 ma5 ma6 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) (maybe a6 id ma6)
+
+genericReuse8 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> Maybe a7 -> r
+genericReuse8 f a0 a1 a2 a3 a4 a5 a6 a7 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) (maybe a6 id ma6) (maybe a7 id ma7)
+
+genericReuse9 :: (a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> r) ->
+                 a0 -> a1 -> a2 -> a3 -> a4 -> a5 -> a6 -> a7 -> a8 -> 
+                 Maybe a0 -> Maybe a1 -> Maybe a2 -> Maybe a3 -> Maybe a4 -> Maybe a5 -> Maybe a6 -> Maybe a7 -> Maybe a8 -> r
+genericReuse9 f a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8 =
+  f (maybe a0 id ma0) (maybe a1 id ma1) (maybe a2 id ma2) (maybe a3 id ma3) (maybe a4 id ma4) (maybe a5 id ma5) (maybe a6 id ma6) (maybe a7 id ma7) (maybe a8 id ma8)
 
 
 

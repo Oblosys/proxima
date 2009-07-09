@@ -38,6 +38,8 @@ SEM ChoiceDoc
       loc.pres = structural $ @form.pres `withbgColor` lightBlue
   | TaskDoc
       loc.pres = structural $ @tasks.pres
+  | SudokuDoc
+      loc.pres = structural $ @sudoku.pres
                    
 SEM Form
   | Form
@@ -165,7 +167,8 @@ leftTopMargins left top pres =
   `withStretch` True
   
 textField w pres = boxed $ row [hSpace 2, pres, empty `withHStretch` True]  `withbgColor` white
-                   `withWidth` w
+                           `withWidth` w 
+-- setting width for entire pres including box is buggy in Xprez
 
 -- Utils
 
@@ -336,7 +339,54 @@ mkMoveItems path =
 
 
 newTask = BasicTask (Description "") False
+}
 
+
+
+
+
+
+
+SEM Sudoku
+  | Sudoku
+      loc.pres = structural $ col [ hLine `withColor` darkGrey
+      	       	 	      	  , @r0.pres, @r1.pres, @r2.pres
+      	       	 	      	  , hLine `withColor` darkGrey
+				  , @r3.pres, @r4.pres, @r5.pres
+				  , hLine `withColor` darkGrey
+				  , @r6.pres, @r7.pres, @r8.pres
+				  , hLine `withColor` darkGrey
+				  ]
+
+
+SEM Row
+  | Row
+      loc.pres = structural $ row [ vLine `withColor` darkGrey
+      	       	 	      	  , @f0.pres, @f1.pres, @f2.pres
+      	       	 	      	  , vLine `withColor` darkGrey
+      	       	 	      	  , @f3.pres, @f4.pres, @f5.pres
+				  , vLine `withColor` darkGrey
+      	       	 	      	  , @f6.pres, @f7.pres, @f8.pres
+				  , vLine `withColor` darkGrey
+				  ]
+SEM Field
+  | Field
+      loc.pres = structural $ boxed (col [ empty `withVStretch` True
+                                         , row [ empty `withHStretch` True
+			                       , text (if @val == 0 then " " else show @val)
+      	       	 	            	         `withColor` black
+					       , empty `withHStretch` True
+				               ]
+      	       	 	      	         , empty `withVStretch` True
+				         ]  `withSize` (35,35)) `withColor` darkGrey
+
+
+
+
+
+
+
+{
 -- TODO: move these to library
 
 -- called deleteAtPath in dazzleEditor

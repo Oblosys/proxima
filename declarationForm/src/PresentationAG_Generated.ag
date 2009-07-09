@@ -42,6 +42,7 @@ DATA EnrichedDoc
 DATA ChoiceDoc
   | FormDoc form:Form
   | TaskDoc tasks:Tasks
+  | SudokuDoc sudoku:Sudoku
   | HoleChoiceDoc
   | ParseErrChoiceDoc error:{(ParseError Document Node ClipDoc UserToken)}
 
@@ -81,6 +82,21 @@ DATA Description
   | HoleDescription
   | ParseErrDescription error:{(ParseError Document Node ClipDoc UserToken)}
 
+DATA Sudoku
+  | Sudoku r0:Row r1:Row r2:Row r3:Row r4:Row r5:Row r6:Row r7:Row r8:Row
+  | HoleSudoku
+  | ParseErrSudoku error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA Row
+  | Row f0:Field f1:Field f2:Field f3:Field f4:Field f5:Field f6:Field f7:Field f8:Field
+  | HoleRow
+  | ParseErrRow error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA Field
+  | Field val:Int
+  | HoleField
+  | ParseErrField error:{(ParseError Document Node ClipDoc UserToken)}
+
 DATA List_Expense
   | List_Expense elts:ConsList_Expense
   | HoleList_Expense
@@ -115,16 +131,16 @@ DATA ConsList_Task
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency FloatField Tasks Task Description List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency FloatField Tasks Task Description Sudoku Row Field List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency FloatField Tasks Task Description List_Expense List_Currency List_Task
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency FloatField Tasks Task Description Sudoku Row Field List_Expense List_Currency List_Task
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
-ATTR ChoiceDoc Form Expense Currency FloatField Tasks Task Description List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
+ATTR ChoiceDoc Form Expense Currency FloatField Tasks Task Description Sudoku Row Field List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
-ATTR ChoiceDoc Form Expense Currency FloatField Tasks Task Description List_Expense List_Currency List_Task
+ATTR ChoiceDoc Form Expense Currency FloatField Tasks Task Description Sudoku Row Field List_Expense List_Currency List_Task
      [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
@@ -166,15 +182,24 @@ SEM ChoiceDoc
       tasks.pIdC = @lhs.pIdC + 0
       lhs.pIdC = @tasks.pIdC
       tasks.path  = @lhs.path++[0]
+  | SudokuDoc 
+      sudoku.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @sudoku.pIdC
+      sudoku.path  = @lhs.path++[0]
   | FormDoc
     form.ix = 0
   | TaskDoc
     tasks.ix = 0
+  | SudokuDoc
+    sudoku.ix = 0
   | FormDoc
       lhs.pres = loc (Node_FormDoc @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | TaskDoc
       lhs.pres = loc (Node_TaskDoc @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | SudokuDoc
+      lhs.pres = loc (Node_SudokuDoc @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | HoleChoiceDoc
       lhs.pres = presHole @lhs.focusD "ChoiceDoc" (Node_HoleChoiceDoc @self @lhs.path) @lhs.path
@@ -331,6 +356,105 @@ SEM Description
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
+SEM Sudoku
+  | Sudoku 
+      r0.pIdC = @lhs.pIdC + 0
+      r1.pIdC = @r0.pIdC
+      r2.pIdC = @r1.pIdC
+      r3.pIdC = @r2.pIdC
+      r4.pIdC = @r3.pIdC
+      r5.pIdC = @r4.pIdC
+      r6.pIdC = @r5.pIdC
+      r7.pIdC = @r6.pIdC
+      r8.pIdC = @r7.pIdC
+      lhs.pIdC = @r8.pIdC
+      r0.path  = @lhs.path++[0]
+      r1.path  = @lhs.path++[1]
+      r2.path  = @lhs.path++[2]
+      r3.path  = @lhs.path++[3]
+      r4.path  = @lhs.path++[4]
+      r5.path  = @lhs.path++[5]
+      r6.path  = @lhs.path++[6]
+      r7.path  = @lhs.path++[7]
+      r8.path  = @lhs.path++[8]
+  | Sudoku
+    r0.ix = 0
+    r1.ix = 1
+    r2.ix = 2
+    r3.ix = 3
+    r4.ix = 4
+    r5.ix = 5
+    r6.ix = 6
+    r7.ix = 7
+    r8.ix = 8
+  | Sudoku
+      lhs.pres = loc (Node_Sudoku @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleSudoku
+      lhs.pres = presHole @lhs.focusD "Sudoku" (Node_HoleSudoku @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrSudoku
+      lhs.pres = presParseErr (Node_ParseErrSudoku @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM Row
+  | Row 
+      f0.pIdC = @lhs.pIdC + 0
+      f1.pIdC = @f0.pIdC
+      f2.pIdC = @f1.pIdC
+      f3.pIdC = @f2.pIdC
+      f4.pIdC = @f3.pIdC
+      f5.pIdC = @f4.pIdC
+      f6.pIdC = @f5.pIdC
+      f7.pIdC = @f6.pIdC
+      f8.pIdC = @f7.pIdC
+      lhs.pIdC = @f8.pIdC
+      f0.path  = @lhs.path++[0]
+      f1.path  = @lhs.path++[1]
+      f2.path  = @lhs.path++[2]
+      f3.path  = @lhs.path++[3]
+      f4.path  = @lhs.path++[4]
+      f5.path  = @lhs.path++[5]
+      f6.path  = @lhs.path++[6]
+      f7.path  = @lhs.path++[7]
+      f8.path  = @lhs.path++[8]
+  | Row
+    f0.ix = 0
+    f1.ix = 1
+    f2.ix = 2
+    f3.ix = 3
+    f4.ix = 4
+    f5.ix = 5
+    f6.ix = 6
+    f7.ix = 7
+    f8.ix = 8
+  | Row
+      lhs.pres = loc (Node_Row @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleRow
+      lhs.pres = presHole @lhs.focusD "Row" (Node_HoleRow @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrRow
+      lhs.pres = presParseErr (Node_ParseErrRow @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM Field
+  | Field 
+      lhs.pIdC = @lhs.pIdC + 0
+  | Field
+  | Field
+      lhs.pres = loc (Node_Field @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleField
+      lhs.pres = presHole @lhs.focusD "Field" (Node_HoleField @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrField
+      lhs.pres = presParseErr (Node_ParseErrField @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
 SEM List_Expense
   | List_Expense
       lhs.press = map ( loc (Node_List_Expense @self @lhs.path)
@@ -443,6 +567,7 @@ SEM ConsList_Task
 SEM ChoiceDoc
   | FormDoc lhs.path = @lhs.path
   | TaskDoc lhs.path = @lhs.path
+  | SudokuDoc lhs.path = @lhs.path
 
 SEM Form
   | Form lhs.path = @lhs.path
@@ -466,6 +591,15 @@ SEM Task
 SEM Description
   | Description lhs.path = @lhs.path
 
+SEM Sudoku
+  | Sudoku lhs.path = @lhs.path
+
+SEM Row
+  | Row lhs.path = @lhs.path
+
+SEM Field
+  | Field lhs.path = @lhs.path
+
 SEM List_Expense
   | List_Expense lhs.path = @lhs.path
 
@@ -487,6 +621,8 @@ SEM ChoiceDoc
       lhs.presXML = presentElementXML @lhs.focusD (Node_FormDoc @self @lhs.path) @lhs.path "FormDoc" [ @form.presXML ] 
   | TaskDoc
       lhs.presXML = presentElementXML @lhs.focusD (Node_TaskDoc @self @lhs.path) @lhs.path "TaskDoc" [ @tasks.presXML ] 
+  | SudokuDoc
+      lhs.presXML = presentElementXML @lhs.focusD (Node_SudokuDoc @self @lhs.path) @lhs.path "SudokuDoc" [ @sudoku.presXML ] 
   | HoleChoiceDoc     lhs.presXML = presHole @lhs.focusD "ChoiceDoc" (Node_HoleChoiceDoc @self @lhs.path) @lhs.path
   | ParseErrChoiceDoc lhs.presXML = presParseErr (Node_ParseErrChoiceDoc @self @lhs.path) @error
 
@@ -533,6 +669,24 @@ SEM Description
       lhs.presXML = presentElementXML @lhs.focusD (Node_Description @self @lhs.path) @lhs.path "Description" [ presentPrimXMLString @str ] 
   | HoleDescription     lhs.presXML = presHole @lhs.focusD "Description" (Node_HoleDescription @self @lhs.path) @lhs.path
   | ParseErrDescription lhs.presXML = presParseErr (Node_ParseErrDescription @self @lhs.path) @error
+
+SEM Sudoku
+  | Sudoku
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Sudoku @self @lhs.path) @lhs.path "Sudoku" [ @r0.presXML, @r1.presXML, @r2.presXML, @r3.presXML, @r4.presXML, @r5.presXML, @r6.presXML, @r7.presXML, @r8.presXML ] 
+  | HoleSudoku     lhs.presXML = presHole @lhs.focusD "Sudoku" (Node_HoleSudoku @self @lhs.path) @lhs.path
+  | ParseErrSudoku lhs.presXML = presParseErr (Node_ParseErrSudoku @self @lhs.path) @error
+
+SEM Row
+  | Row
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Row @self @lhs.path) @lhs.path "Row" [ @f0.presXML, @f1.presXML, @f2.presXML, @f3.presXML, @f4.presXML, @f5.presXML, @f6.presXML, @f7.presXML, @f8.presXML ] 
+  | HoleRow     lhs.presXML = presHole @lhs.focusD "Row" (Node_HoleRow @self @lhs.path) @lhs.path
+  | ParseErrRow lhs.presXML = presParseErr (Node_ParseErrRow @self @lhs.path) @error
+
+SEM Field
+  | Field
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Field @self @lhs.path) @lhs.path "Field" [ presentPrimXMLInt @val ] 
+  | HoleField     lhs.presXML = presHole @lhs.focusD "Field" (Node_HoleField @self @lhs.path) @lhs.path
+  | ParseErrField lhs.presXML = presParseErr (Node_ParseErrField @self @lhs.path) @error
 
 SEM List_Expense
   | List_Expense
@@ -591,6 +745,8 @@ SEM ChoiceDoc
       lhs.presTree = presentElementTree @lhs.focusD (Node_FormDoc @self @lhs.path) @lhs.path "FormDoc" [ @form.presTree ] 
   | TaskDoc
       lhs.presTree = presentElementTree @lhs.focusD (Node_TaskDoc @self @lhs.path) @lhs.path "TaskDoc" [ @tasks.presTree ] 
+  | SudokuDoc
+      lhs.presTree = presentElementTree @lhs.focusD (Node_SudokuDoc @self @lhs.path) @lhs.path "SudokuDoc" [ @sudoku.presTree ] 
   | HoleChoiceDoc     lhs.presTree = presHole @lhs.focusD "ChoiceDoc" (Node_HoleChoiceDoc @self @lhs.path) @lhs.path
   | ParseErrChoiceDoc lhs.presTree = presParseErr (Node_ParseErrChoiceDoc @self @lhs.path) @error
 
@@ -637,6 +793,24 @@ SEM Description
       lhs.presTree = presentElementTree @lhs.focusD (Node_Description @self @lhs.path) @lhs.path "Description" [ presentPrimXMLString @str ] 
   | HoleDescription     lhs.presTree = presHole @lhs.focusD "Description" (Node_HoleDescription @self @lhs.path) @lhs.path
   | ParseErrDescription lhs.presTree = presParseErr (Node_ParseErrDescription @self @lhs.path) @error
+
+SEM Sudoku
+  | Sudoku
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Sudoku @self @lhs.path) @lhs.path "Sudoku" [ @r0.presTree, @r1.presTree, @r2.presTree, @r3.presTree, @r4.presTree, @r5.presTree, @r6.presTree, @r7.presTree, @r8.presTree ] 
+  | HoleSudoku     lhs.presTree = presHole @lhs.focusD "Sudoku" (Node_HoleSudoku @self @lhs.path) @lhs.path
+  | ParseErrSudoku lhs.presTree = presParseErr (Node_ParseErrSudoku @self @lhs.path) @error
+
+SEM Row
+  | Row
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Row @self @lhs.path) @lhs.path "Row" [ @f0.presTree, @f1.presTree, @f2.presTree, @f3.presTree, @f4.presTree, @f5.presTree, @f6.presTree, @f7.presTree, @f8.presTree ] 
+  | HoleRow     lhs.presTree = presHole @lhs.focusD "Row" (Node_HoleRow @self @lhs.path) @lhs.path
+  | ParseErrRow lhs.presTree = presParseErr (Node_ParseErrRow @self @lhs.path) @error
+
+SEM Field
+  | Field
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Field @self @lhs.path) @lhs.path "Field" [ presentPrimXMLInt @val ] 
+  | HoleField     lhs.presTree = presHole @lhs.focusD "Field" (Node_HoleField @self @lhs.path) @lhs.path
+  | ParseErrField lhs.presTree = presParseErr (Node_ParseErrField @self @lhs.path) @error
 
 SEM List_Expense
   | List_Expense
