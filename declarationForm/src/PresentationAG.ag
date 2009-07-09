@@ -52,10 +52,18 @@ SEM Form
                            [ ("Add expense", insertElementAtEnd (toClip newExpense) (@lhs.path++[2]))
                            ]
                        , @expenses.pres
-                       , row [ hSpace (400 + 5 + 30 + 5 + 60 + 10 + 6)
-                             , textField 120 (text $ showCurrency @expenses.total ++ " Euro")
-                             ]
-                       , vSpace 30
+                       , vSpace 5
+                       , row [ img "img/add.png" `withSize` (23,20) `withVRef` 10
+       		               `withMouseDown` insertElementAtEnd (toClip newExpense) (@lhs.path++[2])
+			     , hSpace 5
+			     , vRefHalf $ text "add expense" 
+		             , empty `withHStretch` True
+                             , col [ empty `withSize` (120,2) `withbgColor` black
+                                   , vSpace 5
+                                   , textField 120 (text $ showCurrency @expenses.total ++ " Euro")
+                                   ] `withVRef` (10)
+			     ]
+                       , vSpace 15
                        , @currencies.pres `withFontSize_` (\fs -> (fs * 80) `div` 100) 
                        ] 
 SEM List_Expense
@@ -68,14 +76,16 @@ SEM Expense
       loc.pres = structural $ addCurrencyItems @lhs.allCurrencies @lhs.path $
                    row [ textField 400 @description.pres
                        , hSpace 5
-                       , textField 30 @amount.pres
+                       , textField 60 @amount.pres
                        , hSpace 5
-                       , textField 60 $ (text $ fst $ index "Expense.pres" @lhs.allCurrencies @currencyIx)
+                       , textField 80 $ (text $ fst $ index "Expense.pres" @lhs.allCurrencies @currencyIx)
                        , hSpace 10
                        , textField 120 (text $ showCurrency @total ++ " Euro") 
                                        -- Expense.total is total euro amount for one expense
                        ] `addPopupItems` 
-                       [ ("Delete", deleteAt @lhs.path)
+                       [ ("Delete expense", deleteAt @lhs.path)
+		       , ("Move expense up", moveElementUp @lhs.path)
+		       , ("Move expense down", moveElementDown @lhs.path)
 		       ]
                          
                        
@@ -83,14 +93,21 @@ SEM Expense
 SEM List_Currency [ | | ]
  | List_Currency
       loc.pres = structural $ 
-                   row $ intersperse (hSpace 5) @elts.press ++
-                         [ hSpace 5, text "add currency" `withMouseDown` addNewCurrency @lhs.path ]
+                   col [ row $ intersperse (hSpace 5) @elts.press
+                       , vSpace 5
+                       , row [ img "img/add.png" `withSize` (23,20) `withVRef` 10
+       		       	       `withMouseDown` addNewCurrency @lhs.path
+			     , hSpace 5
+			     , vRefHalf $ text "add currency" 
+			     ]
+		       ]
 
   
 SEM Currency
   | Currency
-      loc.pres = structural $ col [ textField 80 @name.pres
-                                  , textField 120 @euroRate.pres
+      loc.pres = structural $ col [ textField 120 @name.pres
+                                  , vSpace 4
+				  , textField 120 @euroRate.pres
                                   ]
 
 
@@ -121,22 +138,22 @@ SEM Expense
 {
 
 addCurrencyItems currencies path pres = 
-  pres `addPopupItems` [ (name, setCurrencyIx path ix) | (ix, (name, _)) <- zip [0..] currencies ]
+  pres `addPopupItems` [ ("Change currency to "++name, setCurrencyIx path ix) | (ix, (name, _)) <- zip [0..] currencies ]
 
 addNewCurrency :: Path -> UpdateDoc Document ClipDoc
-addNewCurrency pth =
-  insertElementAtEnd newCurrency pth
+addNewCurrency path =
+  insertElementAtEnd newCurrency path
 
 newExpense = Expense (Description "") (FloatField 0) 0
   
 newCurrency = Clip_Currency $ Currency (Description "new") (FloatField 0.0)
 
 setCurrencyIx :: Path -> Int -> UpdateDoc Document ClipDoc
-setCurrencyIx pth newCurrencyIx= 
+setCurrencyIx path newCurrencyIx= 
   \(DocumentLevel doc focus clip) ->
-    let doc' = case selectD pth doc of
+    let doc' = case selectD path doc of
                  Clip_Expense (Expense desc amount _) -> 
-                   pasteD pth (Clip_Expense (Expense desc amount newCurrencyIx)) doc
+                   pasteD path (Clip_Expense (Expense desc amount newCurrencyIx)) doc
                  _ -> doc
     in  DocumentLevel doc' focus clip
 
@@ -147,7 +164,8 @@ leftTopMargins left top pres =
   row [ hSpace left, col [ vSpace top, pres, empty `withStretch` True ], empty `withStretch` True] 
   `withStretch` True
   
-textField w pres = boxed $ row [pres, empty `withHStretch` True]  `withbgColor` white `withWidth` w  
+textField w pres = boxed $ row [hSpace 2, pres, empty `withHStretch` True]  `withbgColor` white
+                   `withWidth` w
 
 -- Utils
 
@@ -267,9 +285,9 @@ SEM Task
 showHideCompleted showCompleted completed pres = 
   if showCompleted || not completed then pres else empty
 
-showHideCompletedItem pth (Tasks showCompleted _) = 
+showHideCompletedItem path (Tasks showCompleted _) = 
   [ ((if showCompleted then "Hide " else "Show ") ++ " completed tasks"
-    , updateAt pth $ \clip ->
+    , updateAt path $ \clip ->
         case clip of
           Clip_Tasks (Tasks _ tasks) -> toClip $ Tasks (not showCompleted) tasks
           clip -> clip
@@ -277,11 +295,11 @@ showHideCompletedItem pth (Tasks showCompleted _) =
   ]
 showHideCompletedItem _ _ = []
 
-flipCompleted pth (BasicTask descr completed) = pasteAt (Clip_Task (BasicTask descr (not completed))) pth
+flipCompleted path (BasicTask descr completed) = pasteAt (Clip_Task (BasicTask descr (not completed))) path
 
-flipExpanded pth (CompositeTask expanded descr subtasks) = pasteAt (Clip_Task (CompositeTask (not expanded) descr subtasks)) pth
+flipExpanded path (CompositeTask expanded descr subtasks) = pasteAt (Clip_Task (CompositeTask (not expanded) descr subtasks)) path
 
-setCompletedRec completed pth task = pasteAt (Clip_Task (setCompletedRec' task)) pth
+setCompletedRec completed path task = pasteAt (Clip_Task (setCompletedRec' task)) path
  where setCompletedRec' (BasicTask descr _) = BasicTask descr completed
        setCompletedRec' (CompositeTask exp descr subtasks) = CompositeTask exp descr $ toList_Task $ map setCompletedRec' (fromList_Task subtasks)
 
@@ -292,16 +310,16 @@ presentCompleted completed notStarted = vRefHalf $
 -- change parent composite to basic if it has no subtasks
 fixTask [] = id
 fixTask [_] = id
-fixTask pth = 
-  let parentPath = (init (init pth))
+fixTask path = 
+  let parentPath = (init (init path))
   in  updateAt parentPath $ \clip ->
         case clip of
           Clip_Task (CompositeTask _ descr (List_Task Nil_Task)) -> 
             toClip $ BasicTask descr False
           clip -> clip
 
-changeToComposite pth =
-  updateAt pth $ \clip ->
+changeToComposite path =
+  updateAt path $ \clip ->
     case clip of
       (Clip_Task (BasicTask descr _)) ->
         Clip_Task $ CompositeTask True descr $
@@ -311,35 +329,11 @@ changeToComposite pth =
 -- TODO: we either need the entire document here, or an isLast attribute to hide move down
 --       in case of the last task.
 mkMoveItems [] = []
-mkMoveItems pth =
- -- if last pth > 0 
+mkMoveItems path =
+ -- if last path > 0 
  -- then 
- [ ("Move task up", moveTaskUp pth), ("Move task down", moveTaskDown pth) ]
+ [ ("Move task up", moveElementUp path), ("Move task down", moveElementDown path) ]
 
-moveTaskUp []  = id
-moveTaskUp pth = 
-  let parentListPth = init pth
-      indexInList = last pth
-  in  \(DocumentLevel d f cl) ->
-        if indexInList > 0
-        then let elt = selectD pth d
-                 (d', f') = deleteD pth d
-                 d'' = insertListD parentListPth (indexInList - 1) elt d'
-             in  DocumentLevel d'' f cl
-        else DocumentLevel d f cl
-
-moveTaskDown []  = id
-moveTaskDown [_] = id
-moveTaskDown pth =
-  let parentListPth = init pth
-      indexInList = last pth
-  in  \(DocumentLevel d f cl) ->
-        if indexInList < arityClip (selectD parentListPth d) - 1
-        then let elt = selectD pth d
-                 (d', f') = deleteD pth d
-                 d'' = insertListD parentListPth (indexInList + 1) elt d'
-             in  DocumentLevel d'' f cl
-        else DocumentLevel d f cl
 
 newTask = BasicTask (Description "") False
 
@@ -348,42 +342,69 @@ newTask = BasicTask (Description "") False
 -- called deleteAtPath in dazzleEditor
 
 deleteAt :: Path -> UpdateDoc Document ClipDoc
-deleteAt pth =
+deleteAt path =
    \(DocumentLevel d _ cl) ->
-     editCutD (DocumentLevel d (PathD pth) cl)
+     editCutD (DocumentLevel d (PathD path) cl)
 
 pasteAt :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
-pasteAt clip pth =
-  \(DocumentLevel d path cl) ->
-    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) clip)
-    in  (DocumentLevel d' path cl)
+pasteAt clip path =
+  \(DocumentLevel d pathD cl) ->
+    let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD path) clip)
+    in  (DocumentLevel d' pathD cl)
 
 updateAt :: Path -> (ClipDoc -> ClipDoc) -> UpdateDoc Document ClipDoc
-updateAt pth f =
-  \(DocumentLevel d path cl) ->
-    let clip = f (selectD pth d)
-        (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD pth) clip)
-    in  (DocumentLevel d' path cl)
+updateAt path f =
+  \(DocumentLevel d pathD cl) ->
+    let clip = f (selectD path d)
+        (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD path) clip)
+    in  (DocumentLevel d' pathD cl)
 
 
 -- PRECONDITION: path points to a list element of the same type as clip
 addElementAfter :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
 addElementAfter clip path = 
-  \(DocumentLevel d pth cl) ->
-    (DocumentLevel (insertListD (init path) (last path+1) clip d) pth cl)
+  \(DocumentLevel d pathD cl) ->
+    (DocumentLevel (insertListD (init path) (last path+1) clip d) pathD cl)
 
 -- PRECONDITION: path points to a list of elements of the same type as clip
--- NB path points to the list, rather than to an element.
+-- NB path points to the list, not to an element.
 insertElementAtHead :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
 insertElementAtHead  clip listPath = 
-  \(DocumentLevel d pth cl) ->
-    (DocumentLevel (insertListD listPath 0 clip d) pth cl)
+  \(DocumentLevel d pathD cl) ->
+    (DocumentLevel (insertListD listPath 0 clip d) pathD cl)
 
 -- PRECONDITION: path points to a list of elements of the same type as clip
--- NB path points to the list, rather than to an element.
+-- NB path points to the list, not to an element.
 insertElementAtEnd :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
 insertElementAtEnd  clip listPath = 
-  \(DocumentLevel d pth cl) ->
+  \(DocumentLevel d pathD cl) ->
     let list = selectD listPath d
-    in  (DocumentLevel (insertListD listPath (arityClip list) clip d) pth cl)
+    in  (DocumentLevel (insertListD listPath (arityClip list) clip d) pathD cl)
+
+-- up/down? maybe choose better name
+-- PRECONDITION: path points to an element in a list
+moveElementUp []  = id
+moveElementUp path = 
+  let parentListPath = init path
+      indexInList = last path
+  in  \(DocumentLevel d f cl) ->
+        if indexInList > 0
+        then let elt = selectD path d
+                 (d', f') = deleteD path d
+                 d'' = insertListD parentListPath (indexInList - 1) elt d'
+             in  DocumentLevel d'' f cl
+        else DocumentLevel d f cl
+
+-- PRECONDITION: path points to an element in a list
+moveElementDown []  = id
+moveElementDown path =
+  let parentListPath = init path
+      indexInList = last path
+  in  \(DocumentLevel d f cl) ->
+        if indexInList < arityClip (selectD parentListPath d) - 1
+        then let elt = selectD path d
+                 (d', f') = deleteD path d
+                 d'' = insertListD parentListPath (indexInList + 1) elt d'
+             in  DocumentLevel d'' f cl
+        else DocumentLevel d f cl
 }
