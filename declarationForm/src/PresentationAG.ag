@@ -24,6 +24,8 @@ import DocUtils_Generated
 import DocumentEdit_Generated
 
 import ProxParser   
+
+import Sudoku hiding (fst3, snd3, thd3)
 }
 
 INCLUDE "PresentationAG_Generated.ag"
@@ -289,11 +291,12 @@ showHideCompletedItem path (Tasks showCompleted _) =
   ]
 showHideCompletedItem _ _ = []
 
-flipCompleted path (BasicTask descr completed) = pasteAt (Clip_Task (BasicTask descr (not completed))) path
+-- todo toClip in pasteAt
+flipCompleted path (BasicTask descr completed) = pasteAt path $ toClip $ BasicTask descr $ not completed
 
-flipExpanded path (CompositeTask expanded descr subtasks) = pasteAt (Clip_Task (CompositeTask (not expanded) descr subtasks)) path
+flipExpanded path (CompositeTask expanded descr subtasks) = pasteAt path $ toClip $ CompositeTask (not expanded) descr subtasks
 
-setCompletedRec completed path task = pasteAt (Clip_Task (setCompletedRec' task)) path
+setCompletedRec completed path task = pasteAt path $ toClip $ setCompletedRec' task
  where setCompletedRec' (BasicTask descr _) = BasicTask descr completed
        setCompletedRec' (CompositeTask exp descr subtasks) = CompositeTask exp descr $ toList_Task $ map setCompletedRec' (fromList_Task subtasks)
 
@@ -347,6 +350,7 @@ SEM Sudoku
 				  , hLine `withColor` darkGrey
 				  , @r6.pres, @r7.pres, @r8.pres
 				  , hLine `withColor` darkGrey
+				  , vSpace 30
 				  ]
 
 
@@ -364,7 +368,8 @@ SEM Field
   | Field
       loc.pres = structural $ boxed (col [ empty `withVStretch` True
                                          , row [ empty `withHStretch` True
-			                       , @val.pres
+			                       , bold $ squiggleInvalidField @val.value @lhs.rowNrs @lhs.colNrs @lhs.blockNrs $ 
+                                                 @val.pres
       	       	 	            	         `withColor` black
 					       , empty `withHStretch` True
 				               ]
@@ -372,6 +377,7 @@ SEM Field
 				         ]  `withSize` (35,35)) `withColor` darkGrey
                               `addPopupItems` 
 			      fieldPopupItems @lhs.path @lhs.rowNrs @lhs.colNrs @lhs.blockNrs
+                                              @lhs.inhBoardStr @lhs.rowNr @lhs.colNr 
 
 SEM Field [ | | val : Int ]
   | Field 
@@ -444,13 +450,62 @@ SEM Row
       f7.blockNrs = thd3 @lhs.blocks
       f8.blockNrs = thd3 @lhs.blocks
 
+-- todo remame
+-- not quite an unboxed int, due to empty presentation for 0
+SEM Int_ [ | | value : Int ]
+  | Int_
+      loc.pres = parsingWithParser pInt_ @self $ text $ if @value == 0 then "" else show @value
+      lhs.value = @value
+  | HoleInt_
+      lhs.value = 0
+  | ParseErrInt_
+      lhs.value = 0
+
+
+-- get a string representing the board in every field
+
+ATTR Sudoku Row Field
+     [ | | synBoardStr USE {++} {[]} : String ]
+
+SEM Field
+  | Field
+      lhs.synBoardStr = if @val.value == 0 then " " else show @val.value
+
+ATTR Sudoku Row Field [ inhBoardStr : String | | ]
+
+SEM ChoiceDoc
+  | SudokuDoc
+      sudoku.inhBoardStr = @sudoku.synBoardStr
+
+
+-- row/column coordinates
+
+-- todo: nr is confusing here
+
+ATTR Row Field [ rowNr : Int | | ]
+
+SEM Sudoku
+  | Sudoku
+      (r0.rowNr,r1.rowNr,r2.rowNr,r3.rowNr,r4.rowNr,r5.rowNr,r6.rowNr,r7.rowNr,r8.rowNr) =
+        (0,1,2,3,4,5,6,7,8)
+
+ATTR Field [ colNr : Int | | ]
+
+SEM Row
+  | Row
+      (f0.colNr,f1.colNr,f2.colNr,f3.colNr,f4.colNr,f5.colNr,f6.colNr,f7.colNr,f8.colNr) =
+        (0,1,2,3,4,5,6,7,8)
+
       
 {
 
--- [ [ [left0] [center0] [right0] ], [ [left1], [center1], [right1] ] ...
-
--- [ [ [left0] [left1] [left2] ], [ [center0] [center1] [center2] ], ...
-
+squiggleInvalidField nr rowNrs colNrs blockNrs =
+  squiggle green $
+    nr /= 0 &&
+    (length (filter (==nr) rowNrs) > 1 ||
+     length (filter (==nr) colNrs) > 1 ||
+     length (filter (==nr) blockNrs) > 1) 
+  
 listTo9Tuple [x0,x1,x2,x3,x4,x5,x6,x7,x8] = (x0,x1,x2,x3,x4,x5,x6,x7,x8)
 
 fst3 (x,_,_) = x
@@ -459,14 +514,18 @@ snd3 (_,x,_) = x
 
 thd3 (_,_,x) = x
 
-fieldPopupItems :: Path -> [Int] -> [Int] -> [Int] -> [ PopupMenuItem Document ClipDoc ] 
-fieldPopupItems path rowNrs colNrs blockNrs =
+fieldPopupItems :: Path -> [Int] -> [Int] -> [Int] -> String -> Int -> Int ->
+                   [ PopupMenuItem Document ClipDoc ] 
+fieldPopupItems path rowNrs colNrs blockNrs boardStr row col =
   let validNrs = (([1..9] \\ rowNrs) \\ colNrs) \\ blockNrs
   in [ (if i == 0 then show "<clear>" else show i, setFieldValue path i) 
      | i <- 0:validNrs 
-     ] 
+     ] ++ case sudokuHint boardStr row col of
+            Just nr -> [ ( "Give hint"
+                         , pasteAt path $ toClip $ Field $ toInt_ nr) ]
+            Nothing -> [ ("No hints, solution is incorrect", id) ]
 
-setFieldValue path n = pasteAt (toClip $ Field $ Int_ n) path
+setFieldValue path n = pasteAt path $ toClip $ Field $ Int_ n
 
 -- http://www.sudokutoday.com/difficult-sudoku-puzzle-i1-answers.html
 }
@@ -484,16 +543,6 @@ SEM Float_ [ | | floatVal : Float ]
   | ParseErrFloat_
       lhs.floatVal = 0
 
-SEM Int_ [ | | value : Int ]
-  | Int_
-      loc.pres = parsingWithParser pInt_ @self $ text $ if @value == 0 then "" else (show @value)
-      lhs.value = @value
-  | HoleInt_
-      lhs.value = 0
-  | ParseErrInt_
-      lhs.value = 0
-
-
 {
 -- TODO: move these to library
 
@@ -504,8 +553,8 @@ deleteAt path =
    \(DocumentLevel d _ cl) ->
      editCutD (DocumentLevel d (PathD path) cl)
 
-pasteAt :: ClipDoc -> Path -> UpdateDoc Document ClipDoc
-pasteAt clip path =
+pasteAt :: Path -> ClipDoc -> UpdateDoc Document ClipDoc
+pasteAt path clip =
   \(DocumentLevel d pathD cl) ->
     let (DocumentLevel d' _ _) = editPasteD (DocumentLevel d (PathD path) clip)
     in  (DocumentLevel d' pathD cl)

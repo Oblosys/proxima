@@ -1,6 +1,6 @@
-{-# OPTIONS_GHC -fglasgow-exts #-}
+{-# OPTIONS_GHC -fglasgow-exts -XMonomorphismRestriction #-}
 {- By Chris Kuklewicz <haskell@list.mightyreason.com> -}
-module Deduce (deduce,lo,hi,oneStep) where
+module Sudoku where
 
 {- This has 3 methods that perform deductions:
 
@@ -87,17 +87,15 @@ default ()
 
 
 
-solveSudoku :: String -> IO (Maybe (Int,Int,Int))
-solveSudoku s = 
+sudokuHint :: String -> Int -> Int -> Maybe Int
+sudokuHint s r c = unsafePerformIO $
  do let board = parseBoard s
     (p',guesses,solStr) <- deduce board
+    print s
     print solStr
-    let sol = parseBoard solStr
-        hints = sol \\ board
-    print hints
-    case hints of
-      (r,c,v):_ -> return $ Just (r-1, c-1,v)
-      _         -> return Nothing
+    let sol = parseBoard solStr -- row & col start at 1 in hints
+        solMap = [ ((r1-1,c1-1),v) | (r1,c1,v) <- sol ]
+    return $ lookup (r,c) solMap
  `Control.Exception.catch` \(exc :: SomeException) -> return Nothing
                  
 loC = intToDigit lo
