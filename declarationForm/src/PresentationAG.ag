@@ -146,9 +146,9 @@ addNewCurrency :: Path -> UpdateDoc Document ClipDoc
 addNewCurrency path =
   insertElementAtEnd newCurrency path
 
-newExpense = Expense (Description "") (FloatField 0) 0
+newExpense = Expense (Description "") (Float_ 0) 0
   
-newCurrency = Clip_Currency $ Currency (Description "new") (FloatField 0.0)
+newCurrency = Clip_Currency $ Currency (Description "new") (Float_ 0.0)
 
 setCurrencyIx :: Path -> Int -> UpdateDoc Document ClipDoc
 setCurrencyIx path newCurrencyIx= 
@@ -200,15 +200,6 @@ SEM Description [ | | strVal : String ]
       lhs.strVal = "{Description}"
   | ParseErrDescription
       lhs.strVal = "{parse error}"
-
-SEM FloatField [ | | floatVal : Float ]
-  | FloatField
-      loc.pres = parsingWithParser pFloatField @self $ text (show @float)
-      lhs.floatVal = @float
-  | HoleFloatField
-      lhs.floatVal = 0
-  | ParseErrFloatField
-      lhs.floatVal = 0
 
 
 
@@ -373,7 +364,7 @@ SEM Field
   | Field
       loc.pres = structural $ boxed (col [ empty `withVStretch` True
                                          , row [ empty `withHStretch` True
-			                       , text (if @val == 0 then "" else show @val)
+			                       , @val.pres
       	       	 	            	         `withColor` black
 					       , empty `withHStretch` True
 				               ]
@@ -383,7 +374,8 @@ SEM Field
 			      fieldPopupItems @lhs.path @lhs.rowNrs @lhs.colNrs @lhs.blockNrs
 
 SEM Field [ | | val : Int ]
-  | Field lhs.val = @val
+  | Field 
+      lhs.val = @val.value
 
 SEM Row [ | | rowNrs : {[Int]} ]
   | Row
@@ -467,18 +459,39 @@ snd3 (_,x,_) = x
 
 thd3 (_,_,x) = x
 
+fieldPopupItems :: Path -> [Int] -> [Int] -> [Int] -> [ PopupMenuItem Document ClipDoc ] 
 fieldPopupItems path rowNrs colNrs blockNrs =
   let validNrs = (([1..9] \\ rowNrs) \\ colNrs) \\ blockNrs
   in [ (if i == 0 then show "<clear>" else show i, setFieldValue path i) 
      | i <- 0:validNrs 
      ] 
 
-setFieldValue path n = pasteAt (toClip $ Field n) path
+setFieldValue path n = pasteAt (toClip $ Field $ Int_ n) path
 
 -- http://www.sudokutoday.com/difficult-sudoku-puzzle-i1-answers.html
 }
 
 
+
+-- TODO: move these to library
+
+SEM Float_ [ | | floatVal : Float ]
+  | Float_
+      loc.pres = parsingWithParser pFloat_ @self $ text (show @value)
+      lhs.floatVal = @value
+  | HoleFloat_
+      lhs.floatVal = 0
+  | ParseErrFloat_
+      lhs.floatVal = 0
+
+SEM Int_ [ | | value : Int ]
+  | Int_
+      loc.pres = parsingWithParser pInt_ @self $ text $ if @value == 0 then "" else (show @value)
+      lhs.value = @value
+  | HoleInt_
+      lhs.value = 0
+  | ParseErrInt_
+      lhs.value = 0
 
 
 {

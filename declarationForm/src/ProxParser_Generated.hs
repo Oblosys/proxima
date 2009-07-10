@@ -48,9 +48,6 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_Currency _ _) = construct_Currency
   construct (Node_HoleCurrency _ _) = construct_HoleCurrency
   construct (Node_ParseErrCurrency _ _) = construct_ParseErrCurrency
-  construct (Node_FloatField _ _) = construct_FloatField
-  construct (Node_HoleFloatField _ _) = construct_HoleFloatField
-  construct (Node_ParseErrFloatField _ _) = construct_ParseErrFloatField
   construct (Node_Tasks _ _) = construct_Tasks
   construct (Node_HoleTasks _ _) = construct_HoleTasks
   construct (Node_ParseErrTasks _ _) = construct_ParseErrTasks
@@ -70,6 +67,12 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_Field _ _) = construct_Field
   construct (Node_HoleField _ _) = construct_HoleField
   construct (Node_ParseErrField _ _) = construct_ParseErrField
+  construct (Node_Int_ _ _) = construct_Int_
+  construct (Node_HoleInt_ _ _) = construct_HoleInt_
+  construct (Node_ParseErrInt_ _ _) = construct_ParseErrInt_
+  construct (Node_Float_ _ _) = construct_Float_
+  construct (Node_HoleFloat_ _ _) = construct_HoleFloat_
+  construct (Node_ParseErrFloat_ _ _) = construct_ParseErrFloat_
   construct (Node_List_Expense _ _) = construct_List_Expense
   construct (Node_HoleList_Expense _ _) = construct_HoleList_Expense
   construct (Node_ParseErrList_Expense _ _) = construct_ParseErrList_Expense
@@ -93,15 +96,12 @@ construct_ParseErrChoiceDoc (StructuralTk _ _ pres _ _) ~[] = Clip_ChoiceDoc $ p
 construct_Form tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Form $ reuseForm [tk]  (retrieveArg "Form" "name::Description" mClip0) (retrieveArg "Form" "faculty::Description" mClip1) (retrieveArg "Form" "expenses::List_Expense" mClip2) (retrieveArg "Form" "currencies::List_Currency" mClip3)
 construct_HoleForm tk ~[] = Clip_Form $ hole
 construct_ParseErrForm (StructuralTk _ _ pres _ _) ~[] = Clip_Form $ parseErr (StructuralParseErr pres)
-construct_Expense tk ~[mClip0,mClip1,mClip2] = Clip_Expense $ reuseExpense [tk]  (retrieveArg "Expense" "description::Description" mClip0) (retrieveArg "Expense" "amount::FloatField" mClip1) (retrieveArg "Expense" "currencyIx::Int" mClip2)
+construct_Expense tk ~[mClip0,mClip1,mClip2] = Clip_Expense $ reuseExpense [tk]  (retrieveArg "Expense" "description::Description" mClip0) (retrieveArg "Expense" "amount::Float_" mClip1) (retrieveArg "Expense" "currencyIx::Int" mClip2)
 construct_HoleExpense tk ~[] = Clip_Expense $ hole
 construct_ParseErrExpense (StructuralTk _ _ pres _ _) ~[] = Clip_Expense $ parseErr (StructuralParseErr pres)
-construct_Currency tk ~[mClip0,mClip1] = Clip_Currency $ reuseCurrency [tk]  (retrieveArg "Currency" "name::Description" mClip0) (retrieveArg "Currency" "euroRate::FloatField" mClip1)
+construct_Currency tk ~[mClip0,mClip1] = Clip_Currency $ reuseCurrency [tk]  (retrieveArg "Currency" "name::Description" mClip0) (retrieveArg "Currency" "euroRate::Float_" mClip1)
 construct_HoleCurrency tk ~[] = Clip_Currency $ hole
 construct_ParseErrCurrency (StructuralTk _ _ pres _ _) ~[] = Clip_Currency $ parseErr (StructuralParseErr pres)
-construct_FloatField tk ~[mClip0] = Clip_FloatField $ reuseFloatField [tk]  (retrieveArg "FloatField" "float::Float" mClip0)
-construct_HoleFloatField tk ~[] = Clip_FloatField $ hole
-construct_ParseErrFloatField (StructuralTk _ _ pres _ _) ~[] = Clip_FloatField $ parseErr (StructuralParseErr pres)
 construct_Tasks tk ~[mClip0,mClip1] = Clip_Tasks $ reuseTasks [tk]  (retrieveArg "Tasks" "showCompleted::Bool" mClip0) (retrieveArg "Tasks" "tasks::List_Task" mClip1)
 construct_HoleTasks tk ~[] = Clip_Tasks $ hole
 construct_ParseErrTasks (StructuralTk _ _ pres _ _) ~[] = Clip_Tasks $ parseErr (StructuralParseErr pres)
@@ -118,9 +118,15 @@ construct_ParseErrSudoku (StructuralTk _ _ pres _ _) ~[] = Clip_Sudoku $ parseEr
 construct_Row tk ~[mClip0,mClip1,mClip2,mClip3,mClip4,mClip5,mClip6,mClip7,mClip8] = Clip_Row $ reuseRow [tk]  (retrieveArg "Row" "f0::Field" mClip0) (retrieveArg "Row" "f1::Field" mClip1) (retrieveArg "Row" "f2::Field" mClip2) (retrieveArg "Row" "f3::Field" mClip3) (retrieveArg "Row" "f4::Field" mClip4) (retrieveArg "Row" "f5::Field" mClip5) (retrieveArg "Row" "f6::Field" mClip6) (retrieveArg "Row" "f7::Field" mClip7) (retrieveArg "Row" "f8::Field" mClip8)
 construct_HoleRow tk ~[] = Clip_Row $ hole
 construct_ParseErrRow (StructuralTk _ _ pres _ _) ~[] = Clip_Row $ parseErr (StructuralParseErr pres)
-construct_Field tk ~[mClip0] = Clip_Field $ reuseField [tk]  (retrieveArg "Field" "val::Int" mClip0)
+construct_Field tk ~[mClip0] = Clip_Field $ reuseField [tk]  (retrieveArg "Field" "val::Int_" mClip0)
 construct_HoleField tk ~[] = Clip_Field $ hole
 construct_ParseErrField (StructuralTk _ _ pres _ _) ~[] = Clip_Field $ parseErr (StructuralParseErr pres)
+construct_Int_ tk ~[mClip0] = Clip_Int_ $ reuseInt_ [tk]  (retrieveArg "Int_" "value::Int" mClip0)
+construct_HoleInt_ tk ~[] = Clip_Int_ $ hole
+construct_ParseErrInt_ (StructuralTk _ _ pres _ _) ~[] = Clip_Int_ $ parseErr (StructuralParseErr pres)
+construct_Float_ tk ~[mClip0] = Clip_Float_ $ reuseFloat_ [tk]  (retrieveArg "Float_" "value::Float" mClip0)
+construct_HoleFloat_ tk ~[] = Clip_Float_ $ hole
+construct_ParseErrFloat_ (StructuralTk _ _ pres _ _) ~[] = Clip_Float_ $ parseErr (StructuralParseErr pres)
 construct_List_Expense tk mClips = genericConstruct_List "Expense" toList_Expense mClips
 construct_HoleList_Expense tk ~[] = Clip_List_Expense $ hole
 construct_ParseErrList_Expense (StructuralTk _ _ pres _ _) ~[] = Clip_List_Expense $ parseErr (StructuralParseErr pres)
@@ -173,23 +179,17 @@ reuseForm nodes ma0 ma1 ma2 ma3
            (Form a0 a1 a2 a3) -> genericReuse4 Form a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseForm"
 
-reuseExpense :: [Token doc Node clip token] -> Maybe Description -> Maybe FloatField -> Maybe Int -> Expense
+reuseExpense :: [Token doc Node clip token] -> Maybe Description -> Maybe Float_ -> Maybe Int -> Expense
 reuseExpense nodes ma0 ma1 ma2
   = case extractFromTokens extractExpense defaultExpense nodes of
            (Expense a0 a1 a2) -> genericReuse3 Expense a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseExpense"
 
-reuseCurrency :: [Token doc Node clip token] -> Maybe Description -> Maybe FloatField -> Currency
+reuseCurrency :: [Token doc Node clip token] -> Maybe Description -> Maybe Float_ -> Currency
 reuseCurrency nodes ma0 ma1
   = case extractFromTokens extractCurrency defaultCurrency nodes of
            (Currency a0 a1) -> genericReuse2 Currency a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseCurrency"
-
-reuseFloatField :: [Token doc Node clip token] -> Maybe Float -> FloatField
-reuseFloatField nodes ma0
-  = case extractFromTokens extractFloatField defaultFloatField nodes of
-           (FloatField a0) -> genericReuse1 FloatField a0 ma0
-           _ -> error "Internal error:ProxParser_Generated.reuseFloatField"
 
 reuseTasks :: [Token doc Node clip token] -> Maybe Bool -> Maybe List_Task -> Tasks
 reuseTasks nodes ma0 ma1
@@ -227,11 +227,23 @@ reuseRow nodes ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
            (Row a0 a1 a2 a3 a4 a5 a6 a7 a8) -> genericReuse9 Row a0 a1 a2 a3 a4 a5 a6 a7 a8 ma0 ma1 ma2 ma3 ma4 ma5 ma6 ma7 ma8
            _ -> error "Internal error:ProxParser_Generated.reuseRow"
 
-reuseField :: [Token doc Node clip token] -> Maybe Int -> Field
+reuseField :: [Token doc Node clip token] -> Maybe Int_ -> Field
 reuseField nodes ma0
   = case extractFromTokens extractField defaultField nodes of
            (Field a0) -> genericReuse1 Field a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseField"
+
+reuseInt_ :: [Token doc Node clip token] -> Maybe Int -> Int_
+reuseInt_ nodes ma0
+  = case extractFromTokens extractInt_ defaultInt_ nodes of
+           (Int_ a0) -> genericReuse1 Int_ a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseInt_"
+
+reuseFloat_ :: [Token doc Node clip token] -> Maybe Float -> Float_
+reuseFloat_ nodes ma0
+  = case extractFromTokens extractFloat_ defaultFloat_ nodes of
+           (Float_ a0) -> genericReuse1 Float_ a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseFloat_"
 
 reuseList_Expense :: [Token doc Node clip token] -> Maybe ConsList_Expense -> List_Expense
 reuseList_Expense nodes ma0
@@ -290,10 +302,6 @@ extractCurrency :: Maybe Node -> Maybe Currency
 extractCurrency (Just (Node_Currency x@(Currency _ _) _)) = Just x
 extractCurrency _ = Nothing
 
-extractFloatField :: Maybe Node -> Maybe FloatField
-extractFloatField (Just (Node_FloatField x@(FloatField _) _)) = Just x
-extractFloatField _ = Nothing
-
 extractTasks :: Maybe Node -> Maybe Tasks
 extractTasks (Just (Node_Tasks x@(Tasks _ _) _)) = Just x
 extractTasks _ = Nothing
@@ -321,6 +329,14 @@ extractRow _ = Nothing
 extractField :: Maybe Node -> Maybe Field
 extractField (Just (Node_Field x@(Field _) _)) = Just x
 extractField _ = Nothing
+
+extractInt_ :: Maybe Node -> Maybe Int_
+extractInt_ (Just (Node_Int_ x@(Int_ _) _)) = Just x
+extractInt_ _ = Nothing
+
+extractFloat_ :: Maybe Node -> Maybe Float_
+extractFloat_ (Just (Node_Float_ x@(Float_ _) _)) = Just x
+extractFloat_ _ = Nothing
 
 extractList_Expense :: Maybe Node -> Maybe List_Expense
 extractList_Expense (Just (Node_List_Expense x@(List_Expense _) _)) = Just x
@@ -365,9 +381,6 @@ defaultExpense = Expense hole hole hole
 defaultCurrency :: Currency
 defaultCurrency = Currency hole hole
 
-defaultFloatField :: FloatField
-defaultFloatField = FloatField hole
-
 defaultTasks :: Tasks
 defaultTasks = Tasks hole hole
 
@@ -388,6 +401,12 @@ defaultRow = Row hole hole hole hole hole hole hole hole hole
 
 defaultField :: Field
 defaultField = Field hole
+
+defaultInt_ :: Int_
+defaultInt_ = Int_ hole
+
+defaultFloat_ :: Float_
+defaultFloat_ = Float_ hole
 
 defaultList_Expense :: List_Expense
 defaultList_Expense = List_Expense Nil_Expense

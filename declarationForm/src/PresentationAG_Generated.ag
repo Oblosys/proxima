@@ -52,19 +52,14 @@ DATA Form
   | ParseErrForm error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Expense
-  | Expense description:Description amount:FloatField currencyIx:Int
+  | Expense description:Description amount:Float_ currencyIx:Int
   | HoleExpense
   | ParseErrExpense error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Currency
-  | Currency name:Description euroRate:FloatField
+  | Currency name:Description euroRate:Float_
   | HoleCurrency
   | ParseErrCurrency error:{(ParseError Document Node ClipDoc UserToken)}
-
-DATA FloatField
-  | FloatField float:Float
-  | HoleFloatField
-  | ParseErrFloatField error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Tasks
   | Tasks showCompleted:Bool tasks:List_Task
@@ -93,9 +88,19 @@ DATA Row
   | ParseErrRow error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Field
-  | Field val:Int
+  | Field val:Int_
   | HoleField
   | ParseErrField error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA Int_
+  | Int_ value:Int
+  | HoleInt_
+  | ParseErrInt_ error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA Float_
+  | Float_ value:Float
+  | HoleFloat_
+  | ParseErrFloat_ error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA List_Expense
   | List_Expense elts:ConsList_Expense
@@ -131,16 +136,16 @@ DATA ConsList_Task
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency FloatField Tasks Task Description Sudoku Row Field List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task Description Sudoku Row Field Int_ Float_ List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency FloatField Tasks Task Description Sudoku Row Field List_Expense List_Currency List_Task
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Task Description Sudoku Row Field Int_ Float_ List_Expense List_Currency List_Task
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
-ATTR ChoiceDoc Form Expense Currency FloatField Tasks Task Description Sudoku Row Field List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
+ATTR ChoiceDoc Form Expense Currency Tasks Task Description Sudoku Row Field Int_ Float_ List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
-ATTR ChoiceDoc Form Expense Currency FloatField Tasks Task Description Sudoku Row Field List_Expense List_Currency List_Task
+ATTR ChoiceDoc Form Expense Currency Tasks Task Description Sudoku Row Field Int_ Float_ List_Expense List_Currency List_Task
      [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
 ATTR List_Expense List_Currency List_Task ConsList_Expense ConsList_Currency ConsList_Task
@@ -275,21 +280,6 @@ SEM Currency
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | ParseErrCurrency
       lhs.pres = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
-      lhs.parseErrors = getErrorMessages @error
-
-SEM FloatField
-  | FloatField 
-      lhs.pIdC = @lhs.pIdC + 0
-  | FloatField
-  | FloatField
-      lhs.pres = loc (Node_FloatField @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
-  | HoleFloatField
-      lhs.pres = presHole @lhs.focusD "FloatField" (Node_HoleFloatField @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
-  | ParseErrFloatField
-      lhs.pres = presParseErr (Node_ParseErrFloatField @self @lhs.path) @error
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
@@ -442,8 +432,11 @@ SEM Row
 
 SEM Field
   | Field 
-      lhs.pIdC = @lhs.pIdC + 0
+      val.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @val.pIdC
+      val.path  = @lhs.path++[0]
   | Field
+    val.ix = 0
   | Field
       lhs.pres = loc (Node_Field @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -452,6 +445,36 @@ SEM Field
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | ParseErrField
       lhs.pres = presParseErr (Node_ParseErrField @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM Int_
+  | Int_ 
+      lhs.pIdC = @lhs.pIdC + 0
+  | Int_
+  | Int_
+      lhs.pres = loc (Node_Int_ @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleInt_
+      lhs.pres = presHole @lhs.focusD "Int_" (Node_HoleInt_ @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrInt_
+      lhs.pres = presParseErr (Node_ParseErrInt_ @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM Float_
+  | Float_ 
+      lhs.pIdC = @lhs.pIdC + 0
+  | Float_
+  | Float_
+      lhs.pres = loc (Node_Float_ @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleFloat_
+      lhs.pres = presHole @lhs.focusD "Float_" (Node_HoleFloat_ @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrFloat_
+      lhs.pres = presParseErr (Node_ParseErrFloat_ @self @lhs.path) @error
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
@@ -578,9 +601,6 @@ SEM Expense
 SEM Currency
   | Currency lhs.path = @lhs.path
 
-SEM FloatField
-  | FloatField lhs.path = @lhs.path
-
 SEM Tasks
   | Tasks lhs.path = @lhs.path
 
@@ -599,6 +619,12 @@ SEM Row
 
 SEM Field
   | Field lhs.path = @lhs.path
+
+SEM Int_
+  | Int_ lhs.path = @lhs.path
+
+SEM Float_
+  | Float_ lhs.path = @lhs.path
 
 SEM List_Expense
   | List_Expense lhs.path = @lhs.path
@@ -644,12 +670,6 @@ SEM Currency
   | HoleCurrency     lhs.presXML = presHole @lhs.focusD "Currency" (Node_HoleCurrency @self @lhs.path) @lhs.path
   | ParseErrCurrency lhs.presXML = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
 
-SEM FloatField
-  | FloatField
-      lhs.presXML = presentElementXML @lhs.focusD (Node_FloatField @self @lhs.path) @lhs.path "FloatField" [ presentPrimXMLFloat @float ] 
-  | HoleFloatField     lhs.presXML = presHole @lhs.focusD "FloatField" (Node_HoleFloatField @self @lhs.path) @lhs.path
-  | ParseErrFloatField lhs.presXML = presParseErr (Node_ParseErrFloatField @self @lhs.path) @error
-
 SEM Tasks
   | Tasks
       lhs.presXML = presentElementXML @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ presentPrimXMLBool @showCompleted, @tasks.presXML ] 
@@ -684,9 +704,21 @@ SEM Row
 
 SEM Field
   | Field
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Field @self @lhs.path) @lhs.path "Field" [ presentPrimXMLInt @val ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Field @self @lhs.path) @lhs.path "Field" [ @val.presXML ] 
   | HoleField     lhs.presXML = presHole @lhs.focusD "Field" (Node_HoleField @self @lhs.path) @lhs.path
   | ParseErrField lhs.presXML = presParseErr (Node_ParseErrField @self @lhs.path) @error
+
+SEM Int_
+  | Int_
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Int_ @self @lhs.path) @lhs.path "Int_" [ presentPrimXMLInt @value ] 
+  | HoleInt_     lhs.presXML = presHole @lhs.focusD "Int_" (Node_HoleInt_ @self @lhs.path) @lhs.path
+  | ParseErrInt_ lhs.presXML = presParseErr (Node_ParseErrInt_ @self @lhs.path) @error
+
+SEM Float_
+  | Float_
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Float_ @self @lhs.path) @lhs.path "Float_" [ presentPrimXMLFloat @value ] 
+  | HoleFloat_     lhs.presXML = presHole @lhs.focusD "Float_" (Node_HoleFloat_ @self @lhs.path) @lhs.path
+  | ParseErrFloat_ lhs.presXML = presParseErr (Node_ParseErrFloat_ @self @lhs.path) @error
 
 SEM List_Expense
   | List_Expense
@@ -768,12 +800,6 @@ SEM Currency
   | HoleCurrency     lhs.presTree = presHole @lhs.focusD "Currency" (Node_HoleCurrency @self @lhs.path) @lhs.path
   | ParseErrCurrency lhs.presTree = presParseErr (Node_ParseErrCurrency @self @lhs.path) @error
 
-SEM FloatField
-  | FloatField
-      lhs.presTree = presentElementTree @lhs.focusD (Node_FloatField @self @lhs.path) @lhs.path "FloatField" [ presentPrimXMLFloat @float ] 
-  | HoleFloatField     lhs.presTree = presHole @lhs.focusD "FloatField" (Node_HoleFloatField @self @lhs.path) @lhs.path
-  | ParseErrFloatField lhs.presTree = presParseErr (Node_ParseErrFloatField @self @lhs.path) @error
-
 SEM Tasks
   | Tasks
       lhs.presTree = presentElementTree @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ presentPrimXMLBool @showCompleted, @tasks.presTree ] 
@@ -808,9 +834,21 @@ SEM Row
 
 SEM Field
   | Field
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Field @self @lhs.path) @lhs.path "Field" [ presentPrimXMLInt @val ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Field @self @lhs.path) @lhs.path "Field" [ @val.presTree ] 
   | HoleField     lhs.presTree = presHole @lhs.focusD "Field" (Node_HoleField @self @lhs.path) @lhs.path
   | ParseErrField lhs.presTree = presParseErr (Node_ParseErrField @self @lhs.path) @error
+
+SEM Int_
+  | Int_
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Int_ @self @lhs.path) @lhs.path "Int_" [ presentPrimXMLInt @value ] 
+  | HoleInt_     lhs.presTree = presHole @lhs.focusD "Int_" (Node_HoleInt_ @self @lhs.path) @lhs.path
+  | ParseErrInt_ lhs.presTree = presParseErr (Node_ParseErrInt_ @self @lhs.path) @error
+
+SEM Float_
+  | Float_
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Float_ @self @lhs.path) @lhs.path "Float_" [ presentPrimXMLFloat @value ] 
+  | HoleFloat_     lhs.presTree = presHole @lhs.focusD "Float_" (Node_HoleFloat_ @self @lhs.path) @lhs.path
+  | ParseErrFloat_ lhs.presTree = presParseErr (Node_ParseErrFloat_ @self @lhs.path) @error
 
 SEM List_Expense
   | List_Expense

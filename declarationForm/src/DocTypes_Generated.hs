@@ -38,20 +38,15 @@ data Form = Form Description Description List_Expense List_Currency
           | ParseErrForm (ParseError Document Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
-data Expense = Expense Description FloatField Int
+data Expense = Expense Description Float_ Int
              | HoleExpense
              | ParseErrExpense (ParseError Document Node ClipDoc UserToken)
                  deriving (Show, Data, Typeable)
 
-data Currency = Currency Description FloatField
+data Currency = Currency Description Float_
               | HoleCurrency
               | ParseErrCurrency (ParseError Document Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
-
-data FloatField = FloatField Float
-                | HoleFloatField
-                | ParseErrFloatField (ParseError Document Node ClipDoc UserToken)
-                    deriving (Show, Data, Typeable)
 
 data Tasks = Tasks Bool List_Task
            | HoleTasks
@@ -79,10 +74,20 @@ data Row = Row Field Field Field Field Field Field Field Field Field
          | ParseErrRow (ParseError Document Node ClipDoc UserToken)
              deriving (Show, Data, Typeable)
 
-data Field = Field Int
+data Field = Field Int_
            | HoleField
            | ParseErrField (ParseError Document Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
+
+data Int_ = Int_ Int
+          | HoleInt_
+          | ParseErrInt_ (ParseError Document Node ClipDoc UserToken)
+              deriving (Show, Data, Typeable)
+
+data Float_ = Float_ Float
+            | HoleFloat_
+            | ParseErrFloat_ (ParseError Document Node ClipDoc UserToken)
+                deriving (Show, Data, Typeable)
 
 data List_Expense = List_Expense ConsList_Expense
                   | HoleList_Expense
@@ -124,13 +129,14 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Form Form
              | Clip_Expense Expense
              | Clip_Currency Currency
-             | Clip_FloatField FloatField
              | Clip_Tasks Tasks
              | Clip_Task Task
              | Clip_Description Description
              | Clip_Sudoku Sudoku
              | Clip_Row Row
              | Clip_Field Field
+             | Clip_Int_ Int_
+             | Clip_Float_ Float_
              | Clip_List_Expense List_Expense
              | Clip_List_Currency List_Currency
              | Clip_List_Task List_Task
@@ -167,9 +173,6 @@ data Node = NoNode
           | Node_Currency Currency Path
           | Node_HoleCurrency Currency Path
           | Node_ParseErrCurrency Currency Path
-          | Node_FloatField FloatField Path
-          | Node_HoleFloatField FloatField Path
-          | Node_ParseErrFloatField FloatField Path
           | Node_Tasks Tasks Path
           | Node_HoleTasks Tasks Path
           | Node_ParseErrTasks Tasks Path
@@ -189,6 +192,12 @@ data Node = NoNode
           | Node_Field Field Path
           | Node_HoleField Field Path
           | Node_ParseErrField Field Path
+          | Node_Int_ Int_ Path
+          | Node_HoleInt_ Int_ Path
+          | Node_ParseErrInt_ Int_ Path
+          | Node_Float_ Float_ Path
+          | Node_HoleFloat_ Float_ Path
+          | Node_ParseErrFloat_ Float_ Path
           | Node_List_Expense List_Expense Path
           | Node_HoleList_Expense List_Expense Path
           | Node_ParseErrList_Expense List_Expense Path
@@ -228,9 +237,6 @@ instance Show Node where
   show (Node_Currency _ _) = "Node_Currency" 
   show (Node_HoleCurrency _ _) = "Node_HoleCurrency" 
   show (Node_ParseErrCurrency _ _) = "Node_ParseErrCurrency" 
-  show (Node_FloatField _ _) = "Node_FloatField" 
-  show (Node_HoleFloatField _ _) = "Node_HoleFloatField" 
-  show (Node_ParseErrFloatField _ _) = "Node_ParseErrFloatField" 
   show (Node_Tasks _ _) = "Node_Tasks" 
   show (Node_HoleTasks _ _) = "Node_HoleTasks" 
   show (Node_ParseErrTasks _ _) = "Node_ParseErrTasks" 
@@ -250,6 +256,12 @@ instance Show Node where
   show (Node_Field _ _) = "Node_Field" 
   show (Node_HoleField _ _) = "Node_HoleField" 
   show (Node_ParseErrField _ _) = "Node_ParseErrField" 
+  show (Node_Int_ _ _) = "Node_Int_" 
+  show (Node_HoleInt_ _ _) = "Node_HoleInt_" 
+  show (Node_ParseErrInt_ _ _) = "Node_ParseErrInt_" 
+  show (Node_Float_ _ _) = "Node_Float_" 
+  show (Node_HoleFloat_ _ _) = "Node_HoleFloat_" 
+  show (Node_ParseErrFloat_ _ _) = "Node_ParseErrFloat_" 
   show (Node_List_Expense _ _) = "Node_List_Expense" 
   show (Node_HoleList_Expense _ _) = "Node_HoleList_Expense" 
   show (Node_ParseErrList_Expense _ _) = "Node_ParseErrList_Expense" 

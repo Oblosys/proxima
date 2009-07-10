@@ -49,8 +49,13 @@ pWord = tokenString <$> pToken WordTk
 
 pFloat = read . tokenString <$> pToken FloatTk
 
-pFloatField :: ProxParser FloatField
-pFloatField = FloatField
+pInt_ :: ProxParser Int_
+pInt_ = toInt_ . round
+  <$> pFloat
+  <|> pSucceed (toInt_ 0)
+  
+pFloat_ :: ProxParser Float_
+pFloat_ = toFloat_
   <$> pFloat
 
 {-

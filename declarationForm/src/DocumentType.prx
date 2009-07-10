@@ -6,11 +6,9 @@ data ChoiceDoc = FormDoc form : Form
 
 data Form = Form name :  Description faculty :  Description expenses : [Expense] currencies : [Currency]
 
-data Expense = Expense description :  Description amount : FloatField currencyIx : Int
+data Expense = Expense description :  Description amount : Float_ currencyIx : Int
 
-data Currency = Currency name : Description euroRate : FloatField
-
-data FloatField = FloatField float : Float
+data Currency = Currency name : Description euroRate : Float_
 
 
 
@@ -29,4 +27,11 @@ data Sudoku = Sudoku r0 : Row r1 : Row r2 : Row r3 : Row r4 : Row
 data Row = Row f0 : Field f1 : Field f2 : Field f3 : Field f4 : Field
      	       f5 : Field f6 : Field f7 : Field f8 : Field
 
-data Field = Field val : Int
+data Field = Field val : Int_
+
+
+
+
+data Int_ = Int_ value : Int
+
+data Float_ = Float_ value : Float
