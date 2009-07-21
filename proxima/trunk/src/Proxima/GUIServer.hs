@@ -103,8 +103,8 @@ server params@(settings,_,_,_) initR menuR =
   simpleHTTP (Conf (serverPort settings) Nothing) (handlers params initR menuR)
 {-
 handle:
-http://<server url>/                    response: <proxima executable dir>/../proxima/scripts/Editor.xml
-http://<server url>/favicon.ico         response: <proxima executable dir>/img/favicon.ico
+http://<server url>/                    response: <proxima executable dir>/src/proxima/scripts/Editor.xml
+http://<server url>/favicon.ico         response: <proxima executable dir>/src/etc/favicon.ico
 http://<server url>/img/<filename>      response: <proxima executable dir>/img/<filename>
 http://<server url>/handle?commands=<commands separated by ;>                    
                                         response: from handleCommands
@@ -156,14 +156,14 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
                                                else id
                                            
                          ; modifyResponseSP (noCache. setTypeToHTML) $
-                              fileServe [] "../proxima/scripts/Editor.xml" 
+                              fileServe [] "src/proxima/scripts/Editor.xml" 
                          })
                  
 
   , dir "img"
         [ fileServe [] "img" ]  
   , dir "favicon.ico"
-        [ methodSP GET $ fileServe ["favicon.ico"] "../proxima/etc"]
+        [ methodSP GET $ fileServe ["favicon.ico"] "src/proxima/etc"]
 
   , dir "handle" 
    [ withData (\cmds -> [ method GET $ 
@@ -197,11 +197,11 @@ server params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
  do { let handler =
             hPathRouter
              [ ("/",            do { liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
-                                   ; hFileResource "../proxima/scripts/Editor.xml"
+                                   ; hFileResource "src/proxima/scripts/Editor.xml"
                                    }
                )
              
-             , ("/favicon.ico", hFileResource "../proxima/etc/favicon.ico")
+             , ("/favicon.ico", hFileResource "src/proxima/etc/favicon.ico")
              ]
              $ hFakeDir "/img"    (hFileSystem "img")
              $ -- hFakeDir "/handle"  -- does not work since command is not "handle/?"
