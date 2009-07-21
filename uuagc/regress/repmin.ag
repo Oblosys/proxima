@@ -1,0 +1,66 @@
+MODULE {Main} {main} {}
+
+
+PRAGMA optimize
+PRAGMA strictdata
+
+
+DATA Root
+  | Root
+      tree : Tree
+
+DATA Tree
+  | Node
+      left  : Tree
+      right : Tree
+  | Leaf
+      val   : Int
+
+DERIVING Root Tree : Show
+
+WRAPPER Root
+
+
+ATTR Tree [ | | gathMin : Int ]
+
+SEM Tree
+  | Node
+      lhs.gathMin = @left.gathMin `min` @right.gathMin
+  | Leaf
+      lhs.gathMin = @val
+
+
+ATTR Tree [ min : Int | | ]
+
+SEM Root
+  | Root
+      tree.min = @tree.gathMin
+
+
+ATTR Root Tree [ | | repl : SELF ]
+
+SEM Tree
+  | Leaf
+      lhs.repl = Tree_Leaf @lhs.min
+
+
+{
+input :: Root
+input =
+  Root_Root
+    $ Tree_Node (Tree_Node (Tree_Leaf 4) (Tree_Leaf 2))
+                (Tree_Node (Tree_Node (Tree_Leaf 5) (Tree_Leaf 1)) (Tree_Leaf 3))
+
+main :: IO ()
+main
+  = putStrLn $ show $ transform $ input
+
+
+transform :: Root -> Root
+transform tree
+  = let inh = Inh_Root
+        sem = sem_Root tree
+        syn = wrap_Root sem inh
+    in repl_Syn_Root syn
+}
+

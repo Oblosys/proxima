@@ -1,0 +1,57 @@
+Please pick the right section in this file for instructions depending on how you optained the uuagc sources.
+
+IMPORTANT: We assume that you have the latest official release of GHC installed together with the accompanying Cabal package. For older GHC installations, rename:
+   uuagc.cabal-for-ghc-6.6      to    uuagc.cabal
+ or upgrade to at least Cabal-1.2.x
+
+
+-------------------------------------------
+Installing uuagc from a source distribution
+-------------------------------------------
+Here we assume that you have downloaded the sources from http://www.cs.uu.nl/wiki/HUT/Download .
+
+    ghc --make Setup.hs -o setup -package Cabal
+    ./setup configure
+    ./setup build
+    ./setup install
+
+  The 1.0 release of Cabal has a bug that prevents
+  the installation step from succeeding.
+  You may prefer to use the following alternative:
+
+    ./configure
+    make build
+    make install
+
+-------------------------------
+Using the user package database
+-------------------------------
+
+  In the case that you registered uulib in your
+  user package database you may install uuagc
+  thusly:
+
+    ghc --make Setup.hs -o setup -package Cabal
+    ./setup configure --user
+    ./setup build
+    ./setup install
+
+  Or, alternatively:
+
+    ./configure --with-user-pckg
+    make build
+    make install
+
+---------------------------------------------------------------
+Installing uuagc after checking out from the svn respository
+---------------------------------------------------------------
+Please note that this is only possible if you alreday have a running version of the uuagc on your system. 
+This can be downloaded from: http://www.cs.uu.nl/wiki/HUT/Download
+
+  First execute the steps below:
+
+    autoconf
+    ./configure
+    make build
+    make install
+

@@ -1,0 +1,266 @@
+MODULE {Main} {main} {}
+
+PRAGMA optimize
+PRAGMA strictdata
+PRAGMA bangpats
+
+
+imports
+{
+import Data.List
+import UU.Pretty
+import Data.Char
+}
+
+
+--
+-- Abstract syntax
+--
+
+-- Give a name to lists such that we can give a semantics (with constructors Cons and Nil)
+TYPE Docs = [Doc]
+
+DATA Doc
+  | Section
+      title : {String}
+      body  : Docs
+  | Paragraph
+      text  : {String}
+  | Toc
+
+DATA Root
+  | Root
+      body : Docs
+
+-- Derive show instances when generating Haskell data types for these data declarations
+DERIVING * : Show
+
+-- Generates an interface to the haskell world:
+--   inh  = Inh_Root { }
+--   syn  = wrap_Root sem inh
+--   code = html_Syn_Root syn
+WRAPPER Root
+
+
+--
+-- Level attribute
+--
+
+
+ATTR Docs Doc [ level : Int | | ]
+
+SEM Root
+  | Root
+      loc.level = 1
+
+SEM Doc
+  | Section
+      loc.level = 1 + @lhs.level
+
+
+--
+-- count attribute
+-- (sibling counter)
+--
+
+ATTR Docs Doc [ | count : Int | ]
+
+SEM Root
+  | Root
+      body.count = 1
+
+SEM Doc
+  | Section
+      lhs.count  = 1 + @lhs.count
+      body.count = 1
+
+
+--
+-- Context attribute
+--   lhs.prefix is the prefix to the current node (i.e. 1.2)
+--   loc.prefix is the prefix containing the current node (i.e. 1.2.5)
+--   loc.context is a string representation of the prefix of the current node
+--
+
+ATTR Docs Doc [ prefix : {[Int]} | | ]
+SEM Root
+  | Root
+      body.prefix = []
+
+SEM Doc
+  | Section
+      loc.prefix  = @lhs.count : @lhs.prefix
+      loc.context = concat . intersperse "." . map show . reverse $ @loc.prefix
+      
+      loc.context : {String}  -- type signature needed because loc.context is needed in more than one visit
+
+
+--
+-- Table of contents attribute
+--
+
+ATTR Docs Doc [ toc : PP_Doc | | gathToc USE {>-<} {empty} : {PP_Doc} ]
+
+SEM Root
+  | Root
+      body.toc = ul @body.gathToc
+
+SEM Doc
+  | Section
+      loc.name    = @loc.context >#< @title
+      loc.tocline = aHref @loc.context @loc.name
+      lhs.gathToc = @loc.tocline >-< ul @body.gathToc
+      
+      loc.name : {PP_Doc}  -- type signature needed because loc.name is needed in more than one visit
+
+
+--
+-- Left attribute
+--
+
+ATTR Docs Doc [ | left : String | ]
+
+SEM Root
+  | Root
+      body.left = ""
+
+SEM Doc
+  | Section
+      body.left = ""
+      lhs.left  = @loc.context
+
+--
+-- Right attribute
+--
+
+ATTR Docs Doc [ | right : String | ]
+
+SEM Root
+  | Root
+      body.right = ""
+
+SEM Doc
+  | Section
+      body.right = ""
+      lhs.right  = @loc.context
+
+-- manually implement right-to-left copy rule
+SEM Docs
+  | Cons
+      tl.right = @lhs.right
+      hd.right  = @tl.right
+      lhs.right = @hd.right
+
+
+--
+-- Add some artificial dependencies to tweak the scheduler
+--
+
+SEM Docs
+  | Cons
+      hd.left < tl.right
+
+SEM Doc
+  | Paragraph
+      lhs.left < lhs.gathToc
+      lhs.prefix < lhs.gathToc
+
+
+--
+-- Html generation
+--
+
+ATTR Root Docs Doc [ | | html USE {>-<} {empty} : PP_Doc ]
+
+SEM Doc
+  | Section
+      lhs.html = aName @loc.context
+                 >-< h @lhs.level @loc.name
+                 >-<     (if null @lhs.left then empty else aHref @lhs.left "left")
+                     >#< (if null @lhs.right then empty else aHref @lhs.right "right")
+                 >-< @body.html
+                 >-< hr
+                  
+  | Paragraph
+      lhs.html = p @text
+  | Toc
+      lhs.html = h @lhs.level "Table Of Contents" >-< @lhs.toc
+
+
+--
+-- Pipeline
+--
+
+{
+docs :: Docs
+docs
+  = [ Doc_Paragraph "bla"
+    , Doc_Toc
+    , Doc_Section "intro"
+        [ Doc_Paragraph "1a"
+        , Doc_Paragraph "1b"
+        ]
+    , Doc_Section "body"
+        [ Doc_Paragraph "2a"
+        , Doc_Section "detail"
+            [ Doc_Paragraph "2b"
+            , Doc_Paragraph "2c"
+            ]
+        ]
+    ]
+
+main :: IO ()
+main
+  = do let sem = sem_Root (Root_Root docs)
+       let output = pretty $ transform $ sem
+       putStrLn output
+
+transform :: T_Root -> PP_Doc
+transform sem
+  = let inh = Inh_Root {}
+        syn = wrap_Root sem inh
+    in html_Syn_Root syn
+
+augment :: PP_Doc -> PP_Doc
+augment doc
+  = "<html lang=\"en\"><head><title>Generated HTML document</title></head><body>" >-< doc >-< "</body></html>"
+
+pretty :: PP_Doc -> String
+pretty doc
+  = disp doc 10000 ""
+}
+
+
+--
+-- Html pretty printing
+--
+
+{
+aHref :: PP a => String -> a -> PP_Doc
+aHref bookmark txt
+  = "<a href=\"#" >|< bookmark >|< "\">" >|< txt >|< "</a>"
+
+aName :: String -> PP_Doc
+aName bookmark
+  = "<a name=\"" >|< bookmark >|< "\"/>"
+
+li :: PP a => a -> PP_Doc
+li txt
+  = "<li>" >|< txt >|< "</li>"
+
+ul :: PP a => a -> PP_Doc
+ul txt
+  = "<ul>" >|< txt >|< "</ul>"
+
+p :: PP a => a -> PP_Doc
+p txt
+  = "<p>" >|< txt >|< "</p>"
+
+h :: PP a => Int -> a -> PP_Doc
+h n title
+  = "<h" >|< show n >|< ">" >|< title >|< "</h" >|< show n >|< ">"
+
+hr :: PP_Doc
+hr = pp "<hr/>"
+}
+

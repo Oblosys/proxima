@@ -1,0 +1,44 @@
+MODULE {Main} {main} {}
+
+optpragmas
+{
+{-# OPTIONS_GHC -fglasgow-exts #-}
+}
+
+PRAGMA strictdata
+
+
+DATA Root a
+  | Root
+
+DATA A b
+  | A
+
+WRAPPER Root
+
+
+ATTR Root [ inp : {@a} | | outp : {@a} ]
+
+SEM Root
+  | Root
+      inst.a : (A {@a})
+      inst.a = A_A
+
+ATTR A [ inp : {@b} | | outp : {@b} ]
+
+SEM A
+  | A  lhs.outp = @lhs.inp
+
+
+
+{
+valRoot :: Root String
+valRoot = Root_Root
+
+main :: IO ()
+main
+  = let inh = Inh_Root { inp_Inh_Root = "input" }
+        sem = sem_Root valRoot
+        syn = wrap_Root sem inh
+    in putStrLn ("outp: " ++ show (outp_Syn_Root syn))
+}

@@ -1,0 +1,24 @@
+MODULE {Main} {} {}
+
+DATA Tree
+  | Node left,right : Tree
+  | Leaf
+
+ATTR Tree INH x : Int
+ATTR Root Tree SYN x : Int
+
+DATA Root
+  | Root  tree : Tree
+
+WRAPPER Root
+
+SEM Root
+  | Root  tree.x = 3
+
+{
+main :: IO ()
+main
+  = let inh = Inh_Root {}
+        syn = wrap_Root (sem_Root $ Root_Root $ Tree_Node (Tree_Leaf) (Tree_Leaf)) inh
+    in putStrLn $ show $ x_Syn_Root syn
+}

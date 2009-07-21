@@ -1,0 +1,64 @@
+--
+-- Tests the unique number generation facility
+--
+
+MODULE {Main} {main} {}
+
+
+PRAGMA optimize
+PRAGMA strictdata
+
+
+DATA Root
+  | Root
+      tree : Tree
+
+DATA Tree
+  | Node
+      left  : Tree
+      right : Tree
+  | Leaf
+
+WRAPPER Root
+
+
+ATTR Tree [ | u : Int | ]
+
+SEM Root
+  | Root
+      tree.u = 1
+
+ATTR Root Tree [ | | gathUniques : {[Int]} ]
+
+SEM Tree
+  | Node
+      loc.n : UNIQUEREF u
+      loc.m : UNIQUEREF u
+      lhs.gathUniques = @loc.n : @loc.m : (@left.gathUniques ++ @right.gathUniques)
+  | Leaf
+      loc.n : UNIQUEREF u
+      lhs.gathUniques = [@loc.n]
+
+{
+nextUnique :: Int -> (Int, Int)
+nextUnique n = (n+1, n)
+
+input :: Root
+input =
+  Root_Root
+    $ Tree_Node (Tree_Node (Tree_Leaf) (Tree_Leaf))
+                (Tree_Node (Tree_Node (Tree_Leaf) (Tree_Leaf)) (Tree_Leaf))
+
+main :: IO ()
+main
+  = putStrLn $ show $ transform $ input
+
+
+transform :: Root -> [Int]
+transform tree
+  = let inh = Inh_Root
+        sem = sem_Root tree
+        syn = wrap_Root sem inh
+    in gathUniques_Syn_Root syn
+}
+

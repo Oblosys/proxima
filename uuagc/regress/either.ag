@@ -1,0 +1,48 @@
+-- Tests the EITHER type synonym
+
+MODULE {Main} {} {}
+
+optpragmas
+{
+{-# OPTIONS_GHC -fglasgow-exts #-}
+}
+
+DATA Root
+  | Root
+      e1 : (E1 Bool)
+      e2 : (E2 Bool)
+      e3 : E3
+
+DATA D1
+  | C1
+
+DATA D2
+  | C2
+
+
+TYPE E1 x = EITHER {@x} D1
+TYPE E2 y = EITHER D2 {@y}
+TYPE E3   = EITHER D1 D2
+
+
+WRAPPER Root
+
+
+
+ATTR Root E1 E2 E3 D1 D2 [ | | x USE {||} {False} : Bool ]
+
+SEM D1
+  | C1  lhs.x = True
+
+SEM D2
+  | C2  lhs.x = False
+
+{
+main :: IO ()
+main
+  = let inh = Inh_Root {}
+        sem = sem_Root (Root_Root (Right $ D1_C1) (Left $ D2_C2) (Left $ D1_C1))
+        syn = wrap_Root sem inh
+    in putStrLn ("x: " ++ show (x_Syn_Root syn))
+}
+

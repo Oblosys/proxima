@@ -1,0 +1,70 @@
+-- Tests the MAP type synonym
+
+MODULE {Main} {} {}
+
+optpragmas
+{
+{-# OPTIONS_GHC -fglasgow-exts #-}
+}
+
+imports
+{
+import Data.Map(Map)
+import qualified Data.Map as Map
+import Data.IntMap(IntMap)
+import qualified Data.IntMap as IntMap
+}
+
+DATA Root
+  | Root
+      m1 : (M1 {String})
+      m2 : (M2 D2)
+      m3 : M3
+      m4 : M4
+
+DATA D1
+  | C1
+
+DATA D2
+  | C2
+
+
+TYPE M1 x = MAP {@x} D1
+TYPE M2 y = MAP {Bool} {@y}
+TYPE M3   = MAP {Int} D2
+TYPE M4   = INTMAP D1
+
+
+WRAPPER Root
+
+
+
+ATTR Root M1 M2 M3 M4 D1 D2 [ | | xs USE {++} {[]} : {[Bool]} ]
+
+SEM D1
+  | C1  lhs.xs = [True]
+
+SEM D2
+  | C2  lhs.xs = [False]
+
+SEM M2
+  | Entry
+      lhs.xs = [@key] ++ @tl.xs
+
+SEM M3
+  | Entry
+      lhs.xs = map (\b -> @key > 3 || b) @val.xs ++ @tl.xs
+
+{
+main :: IO ()
+main
+  = let inh = Inh_Root {}
+        sem = sem_Root (Root_Root m1 m2 m3 m4)
+        syn = wrap_Root sem inh
+        m1 = Map.fromList [("a", D1_C1), ("b", D1_C1)]
+        m2 = Map.fromList [(True, D2_C2), (False, D2_C2)]
+        m3 = Map.fromList [(4, D2_C2)]
+        m4 = IntMap.fromList [(3, D1_C1), (99, D1_C1)]
+    in putStrLn ("xs: " ++ show (xs_Syn_Root syn))
+}
+

@@ -1,0 +1,62 @@
+-- Tests the trace features
+
+MODULE {Main} {main} {}
+
+imports
+{
+import System.IO
+import System.IO.Unsafe
+}
+
+-- Override trace function to write to stdio instead of stderr
+{
+trace :: String -> a -> a
+trace descr v
+  = unit `seq` v
+  where
+    ioAction = putStrLn descr
+    unit = unsafePerformIO ioAction
+}
+
+PRAGMA strictcase
+PRAGMA seq
+PRAGMA strictsem
+PRAGMA strictdata
+PRAGMA optimize
+PRAGMA gentraces
+PRAGMA genusetraces
+
+
+DATA Root
+  | Root
+      prog : Prog
+
+DATA Prog
+  | Prog
+
+WRAPPER Root
+
+
+ATTR Root Prog [ | | z : Int ]
+ATTR Prog [ x : Int | | y : Int ]
+
+SEM Prog
+  | Prog
+      lhs.y = 10
+      lhs.z = 1 + @lhs.x + 2
+
+SEM Root
+  | Root
+      loc.x = 1 + @prog.y + 2
+
+{
+main :: IO ()
+main
+  = let root = Root_Root $ Prog_Prog
+        inh = Inh_Root {}
+        sem = sem_Root root
+        syn = wrap_Root sem inh
+        z = z_Syn_Root syn
+     in putStrLn ("z: " ++ show z)
+}
+

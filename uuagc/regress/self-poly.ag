@@ -1,0 +1,34 @@
+MODULE {Main} {main} {}
+
+optpragmas
+{
+{-# OPTIONS_GHC -fglasgow-exts #-}
+}
+
+PRAGMA strictdata
+
+
+DATA D a
+  | C x : {a}
+
+SEM Show {a} => D
+
+DERIVING D : Show
+
+WRAPPER D
+
+
+SEM D [ | | copy : SELF ]
+
+{
+valD :: D String
+valD
+  = D_C "x"
+
+main :: IO ()
+main
+  = let inh = Inh_D {}
+        sem = sem_D valD
+        syn = wrap_D sem inh
+    in putStrLn ("show: " ++ show (copy_Syn_D syn))
+}

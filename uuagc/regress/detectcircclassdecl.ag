@@ -1,0 +1,91 @@
+MODULE {Main} {main} {}
+
+imports
+{
+import Data.Map (Map)
+import qualified Data.Map as Map
+}
+
+
+PRAGMA strictdata
+
+DATA Prog
+  | Prog
+      cDecls : CDecls
+
+TYPE CDecls = [Class]
+
+DATA Class
+  | Class
+      name : String
+      superClass : {Maybe String}
+
+
+WRAPPER Prog
+
+
+--
+-- gathParentsMap: Construct a map that contains for each class the list of its superclasses
+-- finParentsMap: Push the final constructed map downwards
+--
+-- Note that the the final map is used in the construction of the gath map. Lazyness is essential here.
+-- If the hierarchy is cyclic, then one of the parents-lists will be infinite.
+--
+
+ATTR CDecls Class [ finParentsMap : {Map String [String]} | | gathParentsMap USE {`Map.union`} {Map.empty} : {Map String [String]}  ]
+
+SEM Class
+  | Class
+      loc.parents = maybe [] (\nm -> Map.findWithDefault (error "no such super class") nm @lhs.finParentsMap) @superClass
+      lhs.gathParentsMap = Map.singleton @name (@name : @loc.parents)
+
+SEM Prog
+  | Prog
+      cDecls.finParentsMap = @cDecls.gathParentsMap
+
+
+--
+-- If the class hierarchy is cyclic, then there must be a list of parents that contains a duplicate
+--
+
+ATTR Prog CDecls Class [ | | isCir USE {||} {False} : Bool ]
+
+SEM Class
+  | Class
+      lhs.isCir = containsDuplicates @loc.parents
+
+{
+-- check for duplicates in an infinite list.
+containsDuplicates :: [String] -> Bool
+containsDuplicates chain
+  = hasDup chain []
+  where
+    hasDup (x:xs) enc
+      | x `elem` enc = True
+      | otherwise    = hasDup xs (x:enc)
+    hasDup [] _      = False
+}
+
+
+WRAPPER Prog
+
+{
+testHierarchy :: Prog
+testHierarchy
+  = Prog_Prog
+      [ Class_Class "A" (Just "C")
+      , Class_Class "B" (Just "A")
+      , Class_Class "C" (Just "B")
+      ]
+
+isTestCir :: Bool
+isTestCir
+  = let inh = Inh_Prog {}
+        sem = sem_Prog testHierarchy
+        syn = wrap_Prog sem inh
+    in isCir_Syn_Prog syn
+
+main :: IO ()
+main
+  = putStrLn ("circular: " ++ show isTestCir)
+}

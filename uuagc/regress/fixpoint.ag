@@ -1,0 +1,41 @@
+MODULE {Main} {main} {}
+
+PRAGMA strictdata
+
+
+DATA Root
+  | Root
+      prog : Prog
+
+DATA Prog
+  | Prog
+
+WRAPPER Root
+
+
+ATTR Prog [ | xs : {[Int]} | ]
+
+SEM Prog
+  | Prog
+      lhs.xs = map (\x -> min 10 (x+1)) @lhs.xs
+
+SEM Root
+  | Root
+      loc.xs = 0 : @prog.xs
+      loc.x = snd $ head $ dropWhile (\(x, y) -> x /= y) $ zip @loc.xs (tail @loc.xs)
+
+ATTR Root [ | | x : Int xs : {[Int]} ]
+
+{
+
+main :: IO ()
+main
+  = let root = Root_Root $ Prog_Prog
+        inh = Inh_Root {}
+        sem = sem_Root root
+        syn = wrap_Root sem inh
+        x = x_Syn_Root syn
+        xs = xs_Syn_Root syn
+     in do putStrLn ("x: " ++ show x)
+           putStrLn ("xs: " ++ show (take 20 xs))
+}

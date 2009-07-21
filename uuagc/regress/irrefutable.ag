@@ -1,0 +1,47 @@
+-- Tests irrefutable patterns
+
+MODULE {Main} {} {}
+
+optpragmas
+{
+{-# OPTIONS_GHC -fglasgow-exts #-}
+}
+
+imports
+{
+import System.IO.Unsafe
+}
+
+PRAGMA strictdata
+PRAGMA optimize
+PRAGMA strictcase
+PRAGMA nostrictwrap
+
+DATA D
+  | C
+
+WRAPPER D
+
+ATTR D [ | | res1 : Int res2 : Int ]
+
+SEM D
+  | C
+      loc.dangerous : {Int}
+      loc.~dangerous = myerror "Stay away!"
+      lhs.(~res1, res2) = (@loc.dangerous, 3)
+
+{
+myerror :: String -> a
+myerror msg
+  = unsafePerformIO
+  $ do putStrLn msg
+       return (error msg)
+
+main :: IO ()
+main
+  = let inh = Inh_D {}
+        sem = sem_D D_C
+        syn = wrap_D sem inh
+    in putStrLn ("res: " ++ show (res2_Syn_D syn))
+}
+

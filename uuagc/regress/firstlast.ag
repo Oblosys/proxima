@@ -1,0 +1,35 @@
+-- Tests the FIRST/LAST meta field identifier
+
+MODULE {Main} {} {}
+
+DATA D
+  | C  f1 : D2
+       f2 : D2
+
+DATA D2
+  | C2
+
+WRAPPER D
+
+ATTR D [ | | res : Int ]
+
+SEM D
+  | C
+      f2.x = 4
+      f1.x = 2
+      lhs.res   = @last__.x `div` @first__.x
+
+ATTR D2 [ | x : Int | ]
+
+SEM D2
+  | C2
+
+{
+main :: IO ()
+main
+  = let inh = Inh_D {}
+        sem = sem_D (D_C D2_C2 D2_C2)
+        syn = wrap_D sem inh
+    in putStrLn ("res: " ++ show (res_Syn_D syn))
+}
+

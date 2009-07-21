@@ -1,0 +1,52 @@
+MODULE {Main} {} {}
+
+optpragmas {
+{-# OPTIONS_GHC -fglasgow-exts #-}
+}
+
+-- PRAGMA optimize
+PRAGMA visit
+
+
+DATA D a
+  | C  v : {a}
+
+TYPE L b = [D b]
+
+{-
+DATA L b
+  | Cons hd : (D b)
+         tl : (L b)
+  | Nil
+-}
+
+DATA R c
+  | R  k : (L c)
+
+WRAPPER R
+
+ATTR R [ | | ys : {[@c]} ]
+
+SEM R
+  | R  k.x = head @k.xs
+
+SEM D [ x : {@a} | | xs : {[@a]} ]
+  | C  lhs.xs = [@v]
+
+ATTR L [ x : {@b} | | xs USE {++} {[]} : {[@b]} ]
+
+ATTR L [ | | ys USE {++} {[]} : {[@b]} ]
+
+SEM D [ | | ys : {[@a]} ]
+  | C  lhs.ys = [@lhs.x]
+
+
+{
+main :: IO ()
+main = putStrLn (show n)
+  where
+    n = ys_Syn_R syn
+    syn = wrap_R sem inh
+    inh = Inh_R {}
+    sem = sem_R_R (sem_L_Cons (sem_D_C 42) (sem_L_Nil))
+}

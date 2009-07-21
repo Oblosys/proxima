@@ -1,0 +1,127 @@
+dnl
+dnl UUAG configure script
+dnl
+dnl Parts borrowed from Generic Haskell's configure script
+
+AC_INIT(VERSION)
+
+AC_PREFIX_DEFAULT(/usr/local)
+
+# Safety check: Ensure that we are in the correct source directory.
+AC_CONFIG_SRCDIR([uuagc.cabal.in])
+
+AC_PATH_PROG(SED,sed)
+
+if test "$SED" = ""; then
+  AC_MSG_ERROR([Cannot continue without sed.])
+fi
+
+AC_PATH_PROG(GREP,grep)
+
+if test "$GREP" = ""; then
+  AC_MSG_ERROR([Cannot continue without grep.])
+fi
+
+AC_PATH_PROG(CUT,cut)
+
+if test "$CUT" = ""; then
+  AC_MSG_ERROR([Cannot continue without cut.])
+fi
+
+# other programs
+AC_PATH_PROG(MV,mv)
+AC_PATH_PROG(CP,cp)
+AC_PATH_PROG(RM,rm)
+AC_PATH_PROG(MKDIR,mkdir)
+AC_PATH_PROG(TOUCH,touch)
+AC_PATH_PROG(DIFF,diff)
+AC_PATH_PROG(FIND,find)
+AC_PATH_PROG(SORT,sort)
+AC_PATH_PROG(UNIQ,uniq)
+AC_PATH_PROG(AR,ar)
+AC_PATH_PROG(RANLIB,ranlib)
+AC_PATH_PROG(LD,ld)
+AC_PATH_PROG(GREP,grep)
+AC_PATH_PROG(CHMOD,chmod)
+AC_PATH_PROG(LHS2TEX,lhs2TeX)
+
+# Install program
+AC_PROG_INSTALL
+
+# check for AG system
+AC_PATH_PROG(UUAGC,uuagc)
+
+# allow a different AG compiler to be specified
+AC_ARG_WITH(ag,
+[  --with-ag=<AG compiler>
+       Use a command different from 'ag' to compile attribute grammar code.
+],
+[WithAG="$withval"],
+[WithAG="$UUAGC"]
+)
+
+UUAGC="$WithAG"
+AC_SUBST(UUAGC)
+
+if test "$UUAGC" = ""; then
+  AC_MSG_WARN([AG compiler not found, building from ag sources may fail.])
+fi
+
+# allow registration in user package database
+AC_ARG_WITH(user-pckg,
+[  --with-user-pckg
+       Use user's package database (default system wide)
+],
+[USER_PCKG=--user],
+[USER_PCKG=]
+)
+
+AC_SUBST(USER_PCKG)
+
+# allow a different Cabal build directory to be specified
+AC_ARG_WITH(bdir,
+[  --with-bdir=<Cabal build dir>
+       Use a custom Cabal build directory (default: dist/build).
+],
+[BDir="$withval"],
+[BDir=dist/build]
+)
+
+BUILD_DIR="$BDir"
+AC_SUBST(BUILD_DIR)
+
+# specify which haskell compiler to use
+AC_PATH_PROG(HC,ghc)
+
+AC_ARG_WITH(hc,
+[  --with-hc=<Haskell compiler>
+       Haskell compiler to use (default: ghc).
+],
+[WithRH="$withval"],
+[WithRH="$HC"]
+)
+
+HC="$WithRH"
+
+if test "$HC" = ""; then
+  AC_MSG_ERROR([Cannot continue without a Haskell compiler.])
+fi
+
+AC_PATH_PROG(CHMOD,chmod)
+
+# cheap relative_dir, see GH for proper use
+relative_dir=.
+
+# checking for VERSION file
+if test -r "${relative_dir}/VERSION"; then
+   FULLVERSION=`cat ${relative_dir}/VERSION`
+   VERSION=`echo ${FULLVERSION} | ${CUT} -f1 -d' '`;
+else
+   AC_MSG_ERROR([Cannot find VERSION file.]);
+fi
+AC_SUBST(FULLVERSION)
+AC_SUBST(VERSION)
+
+
+AC_OUTPUT(Makefile uuagc.cabal uuagc.cabal-for-ghc-6.6 scripts/mkAGdepend.sh src/Version.hs)
+${CHMOD} ugo+x scripts/mkAGdepend.sh

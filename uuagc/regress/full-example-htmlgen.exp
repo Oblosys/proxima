@@ -1,0 +1,1 @@
+<p>bla</p><h1>TableOfContents</h1><ul><ahref="#1">1intro</a><ul></ul><ahref="#2">2body</a><ul><ahref="#2.1">2.1detail</a><ul></ul></ul></ul><aname="1"/><h1>1intro</h1><ahref="#2">right</a><p>1a</p><p>1b</p><hr/><aname="2"/><h1>2body</h1><ahref="#1">left</a><p>2a</p><aname="2.1"/><h2>2.1detail</h2><p>2b</p><p>2c</p><hr/><hr/>
