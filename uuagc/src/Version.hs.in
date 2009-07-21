@@ -1,0 +1,4 @@
+module Version where
+
+banner :: String
+banner = "Attribute Grammar compiler / HUT project. Version @FULLVERSION@"
