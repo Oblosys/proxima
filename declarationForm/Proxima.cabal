@@ -54,7 +54,7 @@ Executable DeclarationForm
   includes:
   install-includes:
   include-dirs:
-  hs-source-dirs: src/uuagc/src/ src/proxima/src src
+  hs-source-dirs: src/proxima/src src
   ghc-prof-options:
   ghc-options: -w -fglasgow-exts -fobject-code
   if flag(Server)
