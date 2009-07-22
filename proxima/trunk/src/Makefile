@@ -24,11 +24,9 @@ PROXIMADIR = ../../proxima
 
 PROXIMABINDIR = $(PROXIMADIR)/bin
 PROXIMASRCDIR = $(PROXIMADIR)/src
-UUAGCDIR = $(PROXIMADIR)/../uuagc/src
-UUAGCDERIVEDDIR = $(PROXIMADIR)/../uuagc/src-derived
 GENERATORSRCDIR = $(PROXIMADIR)/../generator/src
 
-AGC             = $(PROXIMABINDIR)/uuagc$(EXE)
+AGC             = uuagc
 GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 
 # Proxima directories
@@ -37,14 +35,14 @@ ARRANGEMENTDIR  = $(PROXIMADIR)/src/Arrangement
 LAYOUTDIR       = $(PROXIMADIR)/src/Layout
 
 
-GENERATORDIRS = $(GENERATORSRCDIR):$(UUAGCDIR)
+GENERATORDIRS = $(GENERATORSRCDIR)
 
 
 # Rules:
 
 default: all
 
-all: agc generator arranger scanner
+all: generator arranger scanner
 
 # The Generator
 generator : $(GEN)
@@ -54,33 +52,23 @@ $(GEN): always
 	@echo ghc: compiling Generator
 	@$(HC) --make -o $(GEN) $(GENERATORSRCDIR)/Main.hs -i$(GENERATORDIRS) -fglasgow-exts
 
-# The AG compiler
-
-agc: $(AGC)
-
-# the phony target always is because we don't want to put all the ag compiler sources here
-$(AGC): always
-	@echo ghc: compiling uuagc compiler with -O2
-	$(HC) --make -o $(AGC) $(UUAGCDIR)/Ag.hs -i$(UUAGCDIR) -i$(UUAGCDERIVEDDIR) -fglasgow-exts -O2 -package mtl
-
 
 # The arranger AG
 
 arranger: $(ARRANGEMENTDIR)/ArrangerAG.hs
 
-$(ARRANGEMENTDIR)/ArrangerAG.hs : $(AGC) $(ARRANGEMENTDIR)/ArrangerAG.ag \
+$(ARRANGEMENTDIR)/ArrangerAG.hs : $(ARRANGEMENTDIR)/ArrangerAG.ag \
 	
 	@echo uuagc: compiling arrangerAG.ag
 	@$(AGC) -scfp --Wmax=12 --genlinepragmas --self --Werrors \
 	$(ARRANGEMENTDIR)/ArrangerAG.ag --module=Arrangement.ArrangerAG -P $(ARRANGEMENTDIR)
 #	--visit --case --strictdata --strictwrap --unbox\
 
-
 # The scanner AG
 
 scanner: $(LAYOUTDIR)/ScannerAG.hs
 
-$(LAYOUTDIR)/ScannerAG.hs : $(AGC) $(LAYOUTDIR)/ScannerAG.ag \
+$(LAYOUTDIR)/ScannerAG.hs : $(LAYOUTDIR)/ScannerAG.ag \
 	
 	@echo uuagc: compiling ScannerAG.ag
 	@$(AGC) -scfp --Wmax=12 --genlinepragmas --self --Werrors \
@@ -95,12 +83,3 @@ clean:
 	$(FIND) $(PROXIMASRCDIR) -name "*.hi" -delete
 	$(FIND) $(PROXIMASRCDIR) -name "*.o" -delete
 	
-
-clean-agc:
-	$(FIND) $(UUAGCDIR) -name "*.hi" -delete
-	$(FIND) $(UUAGCDIR) -name "*.o" -delete
-	$(FIND) $(UUAGCDERIVEDDIR) -name "*.hi" -delete
-	$(FIND) $(UUAGCDERIVEDDIR) -name "*.o" -delete
-	$(FIND) $(PROXIMABINDIR) -name "uuagc.*" -delete
-
-clean-all: clean clean-agc
