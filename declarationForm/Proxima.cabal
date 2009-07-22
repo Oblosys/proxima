@@ -35,7 +35,8 @@ Executable DeclarationForm
                  network >=2.0, parsec -any, time >=1.0, containers >=0.1,
                  array >=0.1, xhtml >=2.0, mtl >=1.1,
                  old-time -any,
-                 ghc-prim -any
+                 ghc-prim -any,
+                 uulib
   if !flag(server)
     build-depends: gtk >=0.9.11, cairo >= 0.9
   else
