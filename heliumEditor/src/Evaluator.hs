@@ -8,8 +8,8 @@ import Evaluation.DocumentEdit
 import DocumentEdit_Generated
 import DocTypes_Generated
 
---import EvaluateTypes
-import EvaluateTypesStubs
+import EvaluateTypes
+--import EvaluateTypesStubs
 
 instance EvaluationSheet Document EnrichedDoc ClipDoc where
   evaluationSheet state oldDocLvl (EnrichedDocLevel oldEnr oldEnrFocus _) 
