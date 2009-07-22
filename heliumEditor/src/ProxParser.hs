@@ -472,7 +472,7 @@ pKey :: DocNode node => String -> ListParser doc node clip UserToken (Token doc 
 pKey str = pSym  (keyTk str)
 
 pKeyC :: DocNode node => Int -> String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
-pKeyC c str = pCSym c (keyTk str)
+pKeyC c str = pSym  (keyTk str) -- pCSym c (keyTk str)
 
 -- expensive, because we want holes to be inserted, not strings
 pLIdent :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
