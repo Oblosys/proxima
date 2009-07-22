@@ -171,7 +171,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
                       
                              ; responseHTML <- 
                                  liftIO $ catchExceptions $ handleCommands params initR menuR
-                                                         cmds
+                                                            cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
                              
