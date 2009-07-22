@@ -21,26 +21,27 @@ extra-source-files: src/proxima/src/Arrangement/ArrangerAG.ag
 extra-tmp-files:
 
 
-Flag server
-  Description: Compile Proxima as a server application without Gtk2Hs
-  Default:     False
-
--- NOTE: After changing this flag, use clean to make sure that dependent modules are recompiled.
--- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
--- (maybe a ghc bug?)
+-------------------------------------------------------------------------------
+-- Instantiation specific fields, do not edit above this line
+-- (except for the name, author, etc. fields)
 
 Executable DeclarationForm
+  build-depends: 
+
+-- do not edit below this line
+-------------------------------------------------------------------------------
+
   build-depends: base >=4.0, haskell98 -any,
                  syb -any,
-                 network >=2.0, parsec -any, time >=1.0, containers >=0.1,
+                 network >=2.0, parsec ==2.1.0.1, time >=1.0, containers >=0.1,
                  array >=0.1, xhtml >=2.0, mtl >=1.1,
                  old-time -any,
-                 ghc-prim -any,
-                 uulib
+                 uulib,
+                 ghc-prim
   if !flag(server)
     build-depends: gtk >=0.9.11, cairo >= 0.9
   else
---    build-depends: salvia -any, salvia-extras -any, stm -any, fclabels -any
+--    build-depends: salvia == 0.0.5, stm -any, fclabels -any
     build-depends: HAppS-State >= 0.9.3, HAppS-Server >= 0.9.3
   main-is: Main.hs
   buildable: True
@@ -56,11 +57,20 @@ Executable DeclarationForm
   include-dirs:
   hs-source-dirs: src/proxima/src src
   ghc-prof-options:
-  ghc-options: -w -fglasgow-exts -fobject-code
+  ghc-options: -w -fglasgow-exts
   if flag(Server)
     cpp-options: -DSERVER
   extensions: UndecidableInstances NoMonomorphismRestriction
-  extensions: IncoherentInstances
   hugs-options:
   jhc-options:
+
+
+Flag server
+  Description: Compile Proxima as a server application without Gtk2Hs
+  Default:     False
+
+-- NOTE: After changing this flag, use clean to make sure that dependent modules are recompiled.
+-- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
+-- (maybe a ghc bug?)
+
 
