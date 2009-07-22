@@ -38,11 +38,13 @@ Executable DeclarationForm
                  old-time -any,
                  uulib,
                  ghc-prim
-  if !flag(server)
+  if flag(Gtk)
     build-depends: gtk >=0.9.11, cairo >= 0.9
   else
---    build-depends: salvia == 0.0.5, stm -any, fclabels -any
     build-depends: HAppS-State >= 0.9.3, HAppS-Server >= 0.9.3
+--    build-depends: salvia == 0.0.5, stm -any, fclabels -any
+    cpp-options: -DSERVER
+
   main-is: Main.hs
   buildable: True
   cc-options:
@@ -58,19 +60,14 @@ Executable DeclarationForm
   hs-source-dirs: src/proxima/src src
   ghc-prof-options:
   ghc-options: -w -fglasgow-exts
-  if flag(Server)
-    cpp-options: -DSERVER
   extensions: UndecidableInstances NoMonomorphismRestriction
   hugs-options:
   jhc-options:
 
-
-Flag server
-  Description: Compile Proxima as a server application without Gtk2Hs
+Flag Gtk
+  Description: Compile Proxima as a server application with Gtk2Hs
   Default:     False
 
 -- NOTE: After changing this flag, use clean to make sure that dependent modules are recompiled.
 -- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
 -- (maybe a ghc bug?)
-
-
