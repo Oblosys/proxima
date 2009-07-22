@@ -8,7 +8,7 @@ PROXIMABINDIR = $(PROXIMADIR)/bin
 
 UUSRCDIR = src/uuagc/src
 
-AGC  = $(PROXIMABINDIR)/uuagc$(EXE)
+AGC  = uuagc
 GEN  = $(PROXIMABINDIR)/generate$(EXE)
 
 EXE            = .exe
