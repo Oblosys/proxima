@@ -1,4 +1,4 @@
-name: DazzleEditor
+name: DeclarationForm
 version: 0.1
 cabal-version: >= 1.2
 build-type: Custom
@@ -29,12 +29,14 @@ Flag server
 -- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
 -- (maybe a ghc bug?)
 
-Executable DazzleEditor
+Executable DeclarationForm
   build-depends: base >=4.0, haskell98 -any,
                  syb -any,
                  network >=2.0, parsec -any, time >=1.0, containers >=0.1,
                  array >=0.1, xhtml >=2.0, mtl >=1.1,
-                 old-time -any
+                 old-time -any,
+                 ghc-prim -any,
+                 uulib
   if !flag(server)
     build-depends: gtk >=0.9.11, cairo >= 0.9
   else
@@ -52,7 +54,7 @@ Executable DazzleEditor
   includes:
   install-includes:
   include-dirs:
-  hs-source-dirs: src/uuagc/src/ src/proxima/src src
+  hs-source-dirs: src/proxima/src src
   ghc-prof-options:
   ghc-options: -w -fglasgow-exts -fobject-code
   if flag(Server)
@@ -61,5 +63,4 @@ Executable DazzleEditor
   extensions: IncoherentInstances
   hugs-options:
   jhc-options:
-
 
