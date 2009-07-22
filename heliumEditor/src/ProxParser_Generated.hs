@@ -13,6 +13,14 @@ import DocUtils_Generated
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 --------------------------------------------------------------------------
+-- ProxParser type synonym                                              --
+--------------------------------------------------------------------------
+
+type ProxParser a = ListParser Document Node ClipDoc UserToken a
+
+
+
+--------------------------------------------------------------------------
 -- Construct instance                                                   --
 --------------------------------------------------------------------------
 
