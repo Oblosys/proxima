@@ -21,21 +21,25 @@ extra-source-files: src/proxima/src/Arrangement/ArrangerAG.ag
 extra-tmp-files:
 
 
-Flag server
-  Description: Compile Proxima as a server application without Gtk2Hs
-  Default:     False
-
--- NOTE: After changing this flag, use clean to make sure that dependent modules are recompiled.
--- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
--- (maybe a ghc bug?)
+-------------------------------------------------------------------------------
+-- Instantiation specific fields, do not edit above this line
+-- (except for the name, author, etc. fields)
 
 Executable HeliumEditor
+  build-depends: directory -any
+
+  hs-source-dirs: src/helium/src/utils src/helium/src/parser src/helium/src/staticanalysis/miscellaneous src/helium/src/staticanalysis/inferencers src/helium/src/staticanalysis/directives src/helium/src/staticanalysis/staticchecks src/helium/src/staticanalysis/heuristics src/helium/src/staticanalysis/messages src/helium/src/syntax src/helium/src/codegeneration src/helium/src/main src/helium/src/modulesystem
+  hs-source-dirs: src/lvm/src/lib/common src/lvm/src/lib/common/ghc src/lvm/src/lib/lvm src/lvm/src/lib/asm src/lvm/src/lib/core
+  hs-source-dirs: src/Top/src
+
+-- do not edit below this line
+-------------------------------------------------------------------------------
+
   build-depends: base >=4.0, haskell98 -any,
                  syb -any,
                  network >=2.0, parsec ==2.1.0.1, time >=1.0, containers >=0.1,
                  array >=0.1, xhtml >=2.0, mtl >=1.1,
                  old-time -any,
-                 directory -any,
                  uulib,
                  ghc-prim
   if !flag(server)
@@ -56,11 +60,6 @@ Executable HeliumEditor
   install-includes:
   include-dirs:
   hs-source-dirs: src/proxima/src src
-  hs-source-dirs: src/helium/src/utils src/helium/src/parser src/helium/src/staticanalysis/miscellaneous src/helium/src/staticanalysis/inferencers src/helium/src/staticanalysis/directives src/helium/src/staticanalysis/staticchecks src/helium/src/staticanalysis/heuristics src/helium/src/staticanalysis/messages src/helium/src/syntax src/helium/src/codegeneration src/helium/src/main src/helium/src/modulesystem
-  hs-source-dirs: src/lvm/src/lib/common src/lvm/src/lib/common/ghc src/lvm/src/lib/lvm src/lvm/src/lib/asm src/lvm/src/lib/core
-  hs-source-dirs: src/Top/src
--- cabal build with helium is probably not possible, top does not compile, Version.hs is in both helium and uuagc, etc.  
-  
   ghc-prof-options:
   ghc-options: -w -fglasgow-exts
   if flag(Server)
@@ -68,5 +67,14 @@ Executable HeliumEditor
   extensions: UndecidableInstances NoMonomorphismRestriction
   hugs-options:
   jhc-options:
+
+
+Flag server
+  Description: Compile Proxima as a server application without Gtk2Hs
+  Default:     False
+
+-- NOTE: After changing this flag, use clean to make sure that dependent modules are recompiled.
+-- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
+-- (maybe a ghc bug?)
 
 
