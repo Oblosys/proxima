@@ -1,21 +1,12 @@
-# make trekt aan helium objecten als ze in $(OBJS) staan en evaluateTypes/compileHelium 
-# in EDITORSRCS zitten. Dit kan ervoor zorgen dat deze makefile helium sources gaat
-# compileren. Zodra er geen cpp dingen meer in lvm zitten kan Helium waarschijnlijk 
-# gecompileerd worden vanuit de Proxima makefile. Tot die tijd misschien even make 
-# op Helium aanroepen wanneer de executable niet bestaat (Helium wordt dan geacht niet te 
-# veranderen.)
-
-# Dit zou ook de oorzaak kunnen zijn van de problemen bij het compileren van Set, nl. dat
-# het vanuit de Proxima makefile gebeurde.
-
-HC   = ghc
-ALEX = alex
-FIND = /usr/bin/find
-
+HC = ghc
 PROXIMADIR = src/proxima
+
+FIND = /usr/bin/find
 
 PROXIMASRCDIR = $(PROXIMADIR)/src
 PROXIMABINDIR = $(PROXIMADIR)/bin
+
+UUSRCDIR = src/uuagc/src
 
 AGC  = uuagc
 GEN  = $(PROXIMABINDIR)/generate$(EXE)
@@ -25,26 +16,24 @@ MAIN           = proxima$(EXE)
 
 SHELL = /bin/sh
 
-
-
+.PHONY: default proxima generate generator presenter lexer
 
 default: $(MAIN)
-.PHONY : default proxima generate presenter lexer
 
 
 LAYOUTDIR       = $(PROXIMADIR)/src/Layout
+
+PROXIMADIRS = $(PROXIMASRCDIR)
 
 # Generation 
 
 generator:
 	cd $(PROXIMASRCDIR); make generator
-	
-$(GEN): 
-	cd $(PROXIMASRCDIR); make generator
 
 generate: src/DocTypes_Generated.hs
-
+	
 src/DocTypes_Generated.hs : src/DocumentType.prx $(GEN)
+	cd $(PROXIMASRCDIR); make generator
 	$(GEN) src src/DocumentType.prx
 
 
@@ -53,39 +42,32 @@ src/DocTypes_Generated.hs : src/DocumentType.prx $(GEN)
 # target for only compiling presentationAG, useful when working with GHCi
 presenter: src/PresentationAG.hs
 	
-$(AGC):
-	cd $(PROXIMASRCDIR); make agc
-
-src/PresentationAG.hs: $(AGC) \
-	src/PresentationAG.ag \
+src/PresentationAG.hs: src/PresentationAG.ag \
 	src/PresentationAG_Generated.ag \
-	src/LambdaReduce.ag \
 	
 	@echo "Compiling presentationAG.ag"
-	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=10 --genlinepragmas --module=PresentationAG src/PresentationAG.ag -P src
+	@$(AGC) -o src/PresentationAG.hs -cfmspw --self --Wmax=12 --genlinepragmas --module=PresentationAG src/PresentationAG.ag -P src
 
 
 lexer: src/ScannerSheetHS.hs
 
 # the -t causes Alex to look for a template file. 
 src/ScannerSheetHS.hs: src/ScannerSheet.x $(LAYOUTDIR)/AlexTemplate-ghc
-	$(ALEX) -t $(LAYOUTDIR) --o src/ScannerSheetHS.hs --ghc src/ScannerSheet.x 
+	alex -t $(LAYOUTDIR) --o src/ScannerSheetHS.hs --ghc src/ScannerSheet.x 
 
 # the generated file is ScannerSheetHS, because if ScannerSheet is listed as a source in the
 # cabal file, setup automatically runs Alex on it, and in cabal it's not possible to specify
 # the extra Alex options we need.
 
-# NOTE: on Windows, alex only works when make is invoked from a bash shell, not the command prompt
-
 
 clean:
-	$(FIND) src -name "*.hi" -delete
-	$(FIND) src -name "*.o" -delete
-	$(FIND) src -name "presentationAG.hs" -delete
+	$(FIND) src -maxdepth 1 -name "*.hi" -delete
+	$(FIND) src -maxdepth 1 -name "*.o" -delete
+	$(FIND) src -maxdepth 1 -name "presentationAG.hs" -delete
 	touch src/DocumentType.prx
-	$(FIND) . -name "proxima.*" -delete
+	$(FIND) . -maxdepth 1 -name "proxima.*" -delete
 
-# cannot delete .._Generated sources, so we touch src/DocumentType.prx, causing them to be
+# cannot delete *_Generated.hs sources, so we touch src/DocumentType.prx, causing them to be
 # recompiled on the next make
 	
 
@@ -96,33 +78,38 @@ clean-proxima: clean
 # also clean uust
 clean-proxima-all: clean
 	cd $(PROXIMASRCDIR); make clean-all
-
-# also clean Helium       Make sure that a bash with the right PATH is used, otherwise 
-#                         Helium does not clean well (use bash from start menu)
-clean-all: clean-proxima-all
-	cd $(HELIUMSRCDIR); make clean
 	
-
-
-
-	
-HELIUMSRCDIR = $(PROXIMADIR)/../helium/src
 #directories
-LVMLIBDIR     = src/lvm/src/lib
-TOPDIR        = src/Top/src/Top
 
-HELIUMDIRS	= $(LVMLIBDIR)/common:$(LVMLIBDIR)/common/ghc:$(LVMLIBDIR)/lvm:$(LVMLIBDIR)/asm:$(LVMLIBDIR)/core:$(HELIUMSRCDIR)/utils:$(HELIUMSRCDIR)/parser:$(HELIUMSRCDIR)/staticanalysis/miscellaneous:$(HELIUMSRCDIR)/staticanalysis/inferencers:$(HELIUMSRCDIR)/staticanalysis/directives:$(HELIUMSRCDIR)/staticanalysis/staticchecks:$(HELIUMSRCDIR)/staticanalysis/heuristics:$(HELIUMSRCDIR)/staticanalysis/messages:$(HELIUMSRCDIR)/syntax:$(HELIUMSRCDIR)/codegeneration:$(HELIUMSRCDIR)/main:$(HELIUMSRCDIR)/modulesystem:$(TOPDIR):$(TOPDIR)/..
 
-ALLSRCDIRS = src:$(PROXIMASRCDIR):$(HELIUMDIRS)
+ALLSRCDIRS = src:$(PROXIMASRCDIR):$(UUSRCDIR)
 
 HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidable-instances \
-		-package gtk -package parsec -package mtl -package time\
-		-package base-3.0.3.0 -hide-package syb -fno-monomorphism-restriction $(EXTRA_OPTS)
-# why do we need to hide syb???
+		-package parsec -package mtl \
+		-fno-monomorphism-restriction  $(EXTRA_OPTS)
+
+# The main target
 
 proxima:
 	cd $(PROXIMASRCDIR); make
-
-# The main target	
+	
 $(MAIN): proxima generate presenter lexer
 	$(HC) --make -o $(MAIN) src/Main.hs -i$(ALLSRCDIRS) $(HC_OPTS)
+
+
+
+# For generating Haddock documentation
+
+GHC_LIB = /usr/local/lib/ghc-6.8.2/
+TARGET = src/Main.hs
+TITLE = "Proxima DazzleEditor"
+
+IMPORTS = --optghc=-i$(PROXIMASRCDIR):src
+GHCOPTS = $(IMPORTS) --optghc=-fglasgow-exts \
+  --optghc=-fallow-undecidable-instances \
+  --optghc=-fno-monomorphism-restriction \
+  --optghc=-w
+
+haddock: 
+	haddock -o doc -h -B $(GHC_LIB) -t $(TITLE) $(GHCOPTS) $(TARGET) 
+
