@@ -170,7 +170,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
                           do { liftIO $ putStrLn $ "Command received " ++ take 10 (show cmds)
                       
                              ; responseHTML <- 
-                                 liftIO $ handleCommands params initR menuR
+                                 liftIO $ catchExceptions $ handleCommands params initR menuR
                                                          cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
@@ -181,11 +181,23 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
                              ; modifyResponseW noCache $
                                 ok $ toResponse responseHTML
                              }
+                          
                         ])
-   ]
+   ] 
   ]
 
-
+catchExceptions io =
+  io `Control.Exception.catch` \(exc :: SomeException) ->
+       do { let exceptionText = 
+                  "\n\n\n\n###########################################\n\n\n" ++
+                  "Exception: " ++ show exc ++ "\n\n\n" ++
+                  "###########################################" 
+          
+          ; putStrLn exceptionText
+          ; let responseHTML = "<div id='updates'><div id='exception' op='exception' text='"++filter (/='\'') exceptionText++"'></div></div>"
+                
+          ; return responseHTML
+          }
 
 instance FromData Commands where
   fromData = liftM Commands (look "commands")
