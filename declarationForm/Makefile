@@ -42,11 +42,7 @@ src/DocTypes_Generated.hs : src/DocumentType.prx $(GEN)
 # target for only compiling presentationAG, useful when working with GHCi
 presenter: src/PresentationAG.hs
 	
-$(AGC):
-	cd $(PROXIMASRCDIR); make agc
-
-src/PresentationAG.hs: $(AGC) \
-	src/PresentationAG.ag \
+src/PresentationAG.hs: src/PresentationAG.ag \
 	src/PresentationAG_Generated.ag \
 	
 	@echo "Compiling presentationAG.ag"
