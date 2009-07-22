@@ -14,9 +14,9 @@ description:
 category:
 tested-with: GHC -any
 data-files:
-extra-source-files: ../proxima/src/Arrangement/ArrangerAG.ag
-                    ../proxima/src/Layout/AlexTemplate-ghc
-                    ../proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
+extra-source-files: src/proxima/src/Arrangement/ArrangerAG.ag
+                    src/proxima/src/Layout/AlexTemplate-ghc
+                    src/proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
                     src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:
 
@@ -35,7 +35,9 @@ Executable HeliumEditor
                  network >=2.0, parsec ==2.1.0.1, time >=1.0, containers >=0.1,
                  array >=0.1, xhtml >=2.0, mtl >=1.1,
                  old-time -any,
-                 directory -any
+                 directory -any,
+                 uulib,
+                 ghc-prim
   if !flag(server)
     build-depends: gtk >=0.9.11, cairo >= 0.9
   else
@@ -53,11 +55,10 @@ Executable HeliumEditor
   includes:
   install-includes:
   include-dirs:
-  hs-source-dirs: ../uuagc/src/ ../proxima/src src
---  hs-source-dirs: ../helium/src/utils ../helium/src/parser ../helium/src/staticanalysis/miscellaneous ../helium/src/staticanalysis/inferencers ../helium/src/staticanalysis/directives ../helium/src/staticanalysis/staticchecks ../helium/src/staticanalysis/heuristics ../helium/src/staticanalysis/messages ../helium/src/syntax ../helium/src/codegeneration ../helium/src/main ../helium/src/modulesystem
---  hs-source-dirs: ../lvm/src/lib/common ../lvm/src/lib/common/ghc ../lvm/src/lib/lvm ../lvm/src/lib/asm ../lvm/src/lib/core
---  hs-source-dirs: ../Top/src
---  hs-source-dirs: ../uuagc/src-derived
+  hs-source-dirs: src/proxima/src src
+  hs-source-dirs: src/helium/src/utils src/helium/src/parser src/helium/src/staticanalysis/miscellaneous src/helium/src/staticanalysis/inferencers src/helium/src/staticanalysis/directives src/helium/src/staticanalysis/staticchecks src/helium/src/staticanalysis/heuristics src/helium/src/staticanalysis/messages src/helium/src/syntax src/helium/src/codegeneration src/helium/src/main src/helium/src/modulesystem
+  hs-source-dirs: src/lvm/src/lib/common src/lvm/src/lib/common/ghc src/lvm/src/lib/lvm src/lvm/src/lib/asm src/lvm/src/lib/core
+  hs-source-dirs: src/Top/src
 -- cabal build with helium is probably not possible, top does not compile, Version.hs is in both helium and uuagc, etc.  
   
   ghc-prof-options:
