@@ -283,7 +283,7 @@ if (xmlhttp.readyState==4)
     
     
     if (commandQueue != '')
-    { debugAdd('sending queue');
+    { //debugAdd('sending queue');
       loadXMLDoc('');
     }
     
@@ -341,7 +341,7 @@ function updateTree(update)
     var newChild = update.firstChild;
     var parent = document.getElementById(parentId);
     parent.appendChild( newChild );
-    debug('add to '+parentId+' '+newChild.getAttribute('Id'));
+//    debug('add to '+parentId+' '+newChild.getAttribute('Id'));
   }    
   else if (op === 'remove')
   { var parentId = update.getAttribute('parentId');
@@ -354,7 +354,7 @@ function updateTree(update)
     
     var target = document.getElementById(targetId);
     parent.removeChild( target );
-    debug('remove '+targetId+' from '+parentId);
+//    debug('remove '+targetId+' from '+parentId);
   } 
   else 
   */
@@ -533,11 +533,12 @@ function ignore(e)
 
 function mouseHandler(str,e) 
 {
-	var coords = getMouseCoordsWithinTarget(e,'proxima');
+  var proxima = document.getElementById('proxima');
+
+  var coords = getMouseCoordsWithinTarget(e,proxima);
   var posx = coords.x;
 	var posy = coords.y;
   
-  var proxima = document.getElementById('proxima');
 
   if ( (posx - proxima.scrollLeft) > proxima.clientWidth || (posy - proxima.scrollTop) > proxima.clientHeight )
     return;  // we're on a scroll bar, so no event.
@@ -554,31 +555,57 @@ function mouseHandler(str,e)
     
   //debugAdd('('+posx +','+posy+')');
   if (str == 'D')
-    startDrag(posx,posy);
-
+    startDrag(e,posx,posy);
+  else if (str == 'U')
+  { dragInProgress = false;
+    draggedElement.parentNode.removeChild(draggedElement);
+  } else if (str == 'M');
+  { draggedElement.style.left = posx-dragOffset.x - proxima.scrollLeft+'px';
+    draggedElement.style.top = posy-dragOffset.y - proxima.scrollTop+'px';
+  }
+/*
   loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
                                    (posy) + ',' +
                                    showModifiers() + ');' );
+*/
+  return false;
 }
 
 var ie=document.all;
 var nn6=document.getElementById&&!document.all;
 
-//var isdrag=false;
-//var x,y;
-//var dobj;
+
+var dragInProgress = false;
+var draggedElement;
+var dragOffset = { x: 0, y: 0 };
 
 /*
 Cannot use element in mouse event because the focus div catches all events
 Cannot use JQuery because it somehow fails for xhtml docs 
 */
-function startDrag(x,y)
+function startDrag(e,x,y)
 { var allDraggables = $(".Vertex");
 
-  var draggedElt = getContainingElement(x,y,allDraggables);
-  if (draggedElt)
-    draggedElt.style.display = 'none';
+  var dragSource = getContainingElement(x,y,allDraggables);
+  if (dragSource)
+  { dragOffset = getMouseCoordsWithinTarget(e,dragSource);
+    
+    draggedElement = cloneObject(dragSource);
+    dragInProgress = true;
+  }
 }
+
+function cloneObject( obj ) {
+    var clone = obj.cloneNode(true);
+    clone.style.position = 'absolute';
+    clone.id = 'draggedObject';
+
+    var parent = document.getElementById('draggedElementParent');
+
+    parent.parentNode.appendChild(clone);
+    return clone;
+}
+
 
 function getContainingElement(x,y,elts)
 {var elt;
@@ -625,9 +652,8 @@ function showElementDimensions( elt )
 }
                 
 
-function getMouseCoordsWithinTarget(event,id)
+function getMouseCoordsWithinTarget(event,Element)
 {
-  var Element = document.getElementById(id);
   var scrollLeft = Element.scrollLeft;
   var scrollTop = Element.scrollTop;
   
@@ -695,7 +721,9 @@ function scrollHandler(event)
      oncontextmenu="return contextHandler(event)"
      onscroll="return scrollHandler(event)"
  ><div id="rendering" 
-     ></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div></div>
+     ></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div>
+     <div id="draggedElementParent" style="position: relative; height: 10000px; width: 10000px;"></div>
+</div>
 <!-- onmousemove="return mouseHandler('M',event)" -->
 
 
