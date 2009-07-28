@@ -549,26 +549,38 @@ function mouseHandler(str,e)
   if (str == 'U') 
     mouseDown = false;
 
-  // only handle mouse move if the mouse button is down and the queue is empty
-  if (str == 'M' && (!mouseDown || commandQueue != ''))
-    return;
-    
+   
   //debugAdd('('+posx +','+posy+')');
   if (str == 'D')
-    startDrag(e,posx,posy);
-  else if (str == 'U')
-  { dragInProgress = false;
-    draggedElement.parentNode.removeChild(draggedElement);
-  } else if (str == 'M');
-  { draggedElement.style.left = posx-dragOffset.x - proxima.scrollLeft+'px';
-    draggedElement.style.top = posy-dragOffset.y - proxima.scrollTop+'px';
+  { startDrag(e,posx,posy);
+    if (! dragInProgress)
+      loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
+                                       (posy) + ',' +
+                                       showModifiers() + ');' );
   }
-/*
-  loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
-                                   (posy) + ',' +
-                                   showModifiers() + ');' );
-*/
-  return false;
+  else if (str == 'U')
+    if (dragInProgress)
+    { dragInProgress = false;
+      draggedElement.parentNode.removeChild(draggedElement);
+      // send drop event
+    }
+    else
+      loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
+                                       (posy) + ',' +
+                                       showModifiers() + ');' );
+  else if (str == 'M');
+    if (dragInProgress)
+    { draggedElement.style.left = posx-dragOffset.x - proxima.scrollLeft+'px';
+      draggedElement.style.top = posy-dragOffset.y - proxima.scrollTop+'px';
+    }
+    else
+  // only handle mouse move if the mouse button is down and the queue is empty
+      if (mouseDown && commandQueue == '')
+        loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
+                                         (posy) + ',' +
+                                         showModifiers() + ');' );
+
+  return false; // don't let browser handle mouse events
 }
 
 var ie=document.all;
