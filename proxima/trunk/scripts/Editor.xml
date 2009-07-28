@@ -568,7 +568,10 @@ var nn6=document.getElementById&&!document.all;
 //var x,y;
 //var dobj;
 
-
+/*
+Cannot use element in mouse event because the focus div catches all events
+Cannot use JQuery because it somehow fails for xhtml docs 
+*/
 function startDrag(x,y)
 { var allDraggables = $(".Vertex");
 
