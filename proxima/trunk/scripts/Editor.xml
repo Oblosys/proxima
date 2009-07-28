@@ -32,6 +32,7 @@ padding-right:10px;
 </style>
 
 
+<script type="text/javascript" src="http://jqueryui.com/latest/jquery-1.3.2.js"></script>
 
 <script type="text/javascript">
 <![CDATA[
@@ -552,17 +553,74 @@ function mouseHandler(str,e)
     return;
     
   //debugAdd('('+posx +','+posy+')');
+  if (str == 'D')
+    startDrag(posx,posy);
 
   loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
                                    (posy) + ',' +
                                    showModifiers() + ');' );
 }
 
-function showModifiers()
-{ return '(' + (shiftDown?'True':'False') + ',' +
-               (ctrlDown?'True':'False') + ',' +
-               (altDown?'True':'False') + ')'
+var ie=document.all;
+var nn6=document.getElementById&&!document.all;
+
+//var isdrag=false;
+//var x,y;
+//var dobj;
+
+
+function startDrag(x,y)
+{ var allDraggables = $(".Vertex");
+
+  var draggedElt = getContainingElement(x,y,allDraggables);
+  if (draggedElt)
+    draggedElt.style.display = 'none';
 }
+
+function getContainingElement(x,y,elts)
+{var elt;
+  for (var i=0; i < elts.length && !elt; i++)
+    if (within(x,y, getElementDimensions(elts[i])))
+      elt=elts[i];
+
+  return elt;
+}
+
+function within(x,y, dims)
+{ return x >= dims.x && y >= dims.y && x < dims.x+dims.w && y < dims.y+dims.h;
+}
+
+function getElementDimensions( elt )
+{ var CalculatedTotalOffsetLeft = 0;
+  var CalculatedTotalOffsetTop = 0 ;
+
+  var Element = elt;
+  while (Element.offsetParent)
+  { CalculatedTotalOffsetLeft += Element.offsetLeft ;     
+    CalculatedTotalOffsetTop += Element.offsetTop ;
+    Element = Element.offsetParent ;
+  }
+  var dimensions = { x: CalculatedTotalOffsetLeft
+                   , y: CalculatedTotalOffsetTop
+                   , w: elt.offsetWidth
+                   , h: elt.offsetHeight
+                   };
+  return dimensions;
+}
+
+function showElementsDimensions( elts )
+{ var str = '';
+  for (var i = 0; i < elts.length; i++)
+  { str += showElementDimensions(elts[i])+'\n'; 
+  }
+  return str;
+}
+
+function showElementDimensions( elt )
+{ var dim = getElementDimensions( elt );
+  return '(('+dim.x+','+dim.y+'):('+dim.w+'x'+dim.h+'))';
+}
+                
 
 function getMouseCoordsWithinTarget(event,id)
 {
@@ -595,6 +653,12 @@ function getMouseCoordsWithinTarget(event,id)
         }
 
         return coords;
+}
+
+function showModifiers()
+{ return '(' + (shiftDown?'True':'False') + ',' +
+               (ctrlDown?'True':'False') + ',' +
+               (altDown?'True':'False') + ')'
 }
 
 
