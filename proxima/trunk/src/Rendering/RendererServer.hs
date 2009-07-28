@@ -162,7 +162,7 @@ renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
 
     (EmptyA  id x' y' w' h' _ _ bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
-        ; divOpen id x' y' w' h' bColor
+        ; divOpen id x' y' w' h' bColor Nothing
         ; divClose
         }
       
@@ -204,7 +204,7 @@ renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
 
-        ; divOpen id x' y' w' h' bColor
+        ; divOpen id x' y' w' h' bColor Nothing
         ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
         ; divClose
         }
@@ -215,7 +215,7 @@ renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
 
-        ; divOpen id x' y' w' h' bColor
+        ; divOpen id x' y' w' h' bColor Nothing
         ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
         ; divClose
         }
@@ -230,7 +230,7 @@ renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                         HeadInFront -> reverse
                         HeadAtBack  -> Prelude.id
               
-        ; divOpen id x' y' w' h' bColor
+        ; divOpen id x' y' w' h' bColor Nothing
         ; sequence_ $ order $
             zipWith (renderArr arrDb scale (x, y) viewedArea Nothing) childDiffTrees arrs
         ; divClose
@@ -249,7 +249,7 @@ renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
         ; let (vertexArrs, edgeArrs) = splitAt nrOfVertices arrs
         
         
-        ; divOpen id x' y' w' h' bColor
+        ; divOpen id x' y' w' h' bColor Nothing
         ; sequence_ $ reverse $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
         
         ; svgStart
@@ -264,7 +264,7 @@ renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
         
-        ; divOpen id x' y' w' h' bColor
+        ; divOpen id x' y' w' h' bColor (Just "Vertex")
         ; renderArr arrDb scale (x, y) viewedArea Nothing (head' "Renderer.renderArr" childDiffTrees) arr
         ; divClose
         }
@@ -322,12 +322,13 @@ renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
 showIDNr (IDA nr) = show nr
 showIDNr NoIDA    = {- debug Err "Renderer.showIDNr: NoIDA " $ -} show (-1)
 
-divOpen id x y w h (r,g,b) = tell $ 
+divOpen id x y w h (r,g,b) mclass = tell $ 
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                 (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
-                           else "")++
-                "'>" 
+                           else "")++"'"++
+                maybe "" (\c -> " class='"++c++"'") mclass ++ 
+                ">" 
 divClose = tell "</div>"
 
  
