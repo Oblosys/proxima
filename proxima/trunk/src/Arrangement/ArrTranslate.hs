@@ -71,7 +71,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
                             
               Nothing  -> SetFocusLay (computeFocus arr pres x y)  
         _ ->  debug Err ("UnArranger.mouseDownDoc: empty path ") $ SkipLay 0   
-      , state { getLastMousePress = Just (x,y)}, arrLvl)
+      , state , arrLvl)
 -- shift mouseDown is handled here
     MouseDownArr x y (Modifiers True False False) i ->  -- shift down 
       case isGraphEdit x y arr pres of
@@ -82,25 +82,25 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     MouseDownArr x y ms@(Modifiers False True False) i -> -- ctrl down 
           mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
     MouseDragArr x y ms@(Modifiers False False False)  ->
-      case getLastMousePress state of -- should not be Nothing, since a mouseDrag is preceded by a mouseDown
-        Just (x',y') -> 
-          case navigateFocus x' y' arr of
-            PathA pth _ ->
-              case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
-                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> (MoveVertexLay (pathPFromPathA' arr pres pth ) (x-x',y-y')
-                                                     , state { getLastMousePress = Just (x, y)}, arrLvl) 
-                (_,_,GraphA _ _ _ _ _ _ _ _ _ _) -> (SkipLay 0
-                                                     , state { getLastMousePress = Just (x, y)}, arrLvl) 
-                (_,_,EdgeA _ _ _ _ _ _ _ _ _) -> (SkipLay 0
-                                                     , state { getLastMousePress = Just (x, y)}, arrLvl) 
-                _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
-                                    , state, arrLvl )
-            _ ->               ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
-                               , state, arrLvl )
-        Nothing -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
-                   , state, arrLvl ) -- does not occur
+      ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
+      , state, arrLvl ) -- does not occur
                             
-    MouseUpArr x y ms     -> (ParseLay,            state { getLastMousePress = Nothing }, arrLvl) 
+    MouseUpArr x y ms     -> (ParseLay, state, arrLvl) 
+    
+    DragStartArr x y -> debug Arr "Drag started" $
+      (SkipLay 0, state { getLastMousePress = Just (x,y)}, arrLvl)
+
+    DropArr x y -> debug Arr "Drag ended" $
+      (case getLastMousePress state of -- should not be Nothing
+         Just (x',y') -> 
+           case navigateFocus x' y' arr of
+             PathA pth _ ->
+               case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
+                 (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> MoveVertexLay (pathPFromPathA' arr pres pth ) (x-x',y-y')
+                 _ -> SkipLay 0
+             _ -> SkipLay 0
+      , state { getLastMousePress = Nothing }, arrLvl) 
+      
     OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
     SaveFileArr str       -> (SaveFileLay str,       state, arrLvl) 
     WrapArr wrapped       -> (unwrap wrapped,        state, arrLvl)

@@ -553,7 +553,11 @@ function mouseHandler(str,e)
   //debugAdd('('+posx +','+posy+')');
   if (str == 'D')
   { startDrag(e,posx,posy);
-    if (! dragInProgress)
+    if (dragInProgress)
+      loadXMLDoc('Mouse' + 'b' + '(' + (posx) + ',' +
+                                       (posy) + ',' +
+                                       showModifiers() + ');' );
+    else
       loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
                                        (posy) + ',' +
                                        showModifiers() + ');' );
@@ -563,6 +567,9 @@ function mouseHandler(str,e)
     { dragInProgress = false;
       draggedElement.parentNode.removeChild(draggedElement);
       // send drop event
+      loadXMLDoc('Mouse' + 'e' + '(' + (posx) + ',' +
+                                       (posy) + ',' +
+                                       showModifiers() + ');' );
     }
     else
       loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +

@@ -41,6 +41,8 @@ data EditArrangement_ wrapped doc enr node clip token =
   | MouseDownArr Int Int Modifiers Int
   | MouseDragArr Int Int Modifiers 
   | MouseUpArr Int Int Modifiers
+  | DragStartArr Int Int
+  | DropArr Int Int
   | OpenFileArr String
   | SaveFileArr String
   | WrapArr wrapped deriving Show

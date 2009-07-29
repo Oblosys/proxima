@@ -89,6 +89,9 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     MouseDragRen x y ms   -> (MouseDragArr (descaleInt scale x) (descaleInt scale y) ms, state, renLvl)
     MouseUpRen x y ms     -> (MouseUpArr (descaleInt scale x) (descaleInt scale y) ms, state, RenderingLevel scale c r fr sz debugging ur False)
     
+    DragStartRen x y      -> (DragStartArr (descaleInt scale x) (descaleInt scale y), state, RenderingLevel scale c r fr sz debugging ur True)
+    DropRen x y           -> (DropArr (descaleInt scale x) (descaleInt scale y), state, RenderingLevel scale c r fr sz debugging ur False)
+
     OpenFileRen filePath  -> (OpenFileArr filePath,  state, renLvl) 
     SaveFileRen filePath  -> (SaveFileArr filePath,  state, renLvl) 
     WrapRen wrapped       -> (unwrap wrapped,        state, renLvl)
