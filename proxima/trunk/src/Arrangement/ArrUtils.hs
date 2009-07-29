@@ -42,6 +42,7 @@ sizeA' x' y' (0:path) (VertexA _ x y w h _ _ _ _ arr)       = sizeA' (x'+x) (y'+
 sizeA' x' y' (0:path) (StructuralA _ arr)               = sizeA' x' y' path arr
 sizeA' x' y' (0:path) (ParsingA _ arr)                  = sizeA' x' y' path arr
 sizeA' x' y' (0:path) (LocatorA location arr)           = sizeA' x' y' path arr
+sizeA' x' y' (0:path) (TagA _ arr)           = sizeA' x' y' path arr
 sizeA' _  _  pth      arr                               = debug Err ("ArrUtils.sizeA': "++show pth++" "++show arr) (0,0,0,0)
 -- what about focus paths in other places than leaf strings?
 
@@ -63,6 +64,7 @@ walk (EdgeA _ x y x' y' hr vr _ c1)         = x+y+x'+y'+hr+vr + walkC c1
 walk (StructuralA _ arr)              = walk arr
 walk (ParsingA _ arr)                 = walk arr
 walk (LocatorA _ arr)                 = walk arr
+walk (TagA _ arr)                 = walk arr
 walk _                                = 0
 
 walkList [] = 0
@@ -132,7 +134,11 @@ diffArr arr                  (ParsingA _ arr')     = diffArr arr arr'
 diffArr (LocatorA l arr)     arr'                   = let childDT = diffArr arr arr'
                                                       in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
 diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
--- StructuralA ParsingA and LocatorA elts
+diffArr (TagA t arr)     arr'                   = let childDT = diffArr arr arr'
+                                                      in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
+diffArr arr                  (TagA t arr')      = diffArr arr arr'
+
+
 
 diffArr (EmptyA _ x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeaf $ x==x' && y==y' && w==w' && h==h' && bc == bc'                                                         
 diffArr (EmptyA _ x y w h hr vr bc)     _                       = DiffLeaf False
@@ -212,6 +218,7 @@ updatedRectArr' x' y' dt arr =
       (StructuralA _ arr)           -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
       (ParsingA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
       (LocatorA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
+      (TagA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
       (RowA id x y w h hr vr bc arrs)     -> updatedRectRow (x'+x) (y'+y) h dts arrs
       (ColA id x y w h hr vr bc f arrs)   -> updatedRectCol (x'+x) (y'+y) w dts arrs 
       (OverlayA id x y w h hr vr bc _ arrs) -> updatedRectArrs (x'+x) (y'+y) dts arrs
@@ -267,6 +274,7 @@ point' x' y' pth loc p@(OverlayA _ x y w h _ _ _ _ arrs@(arr:_)) = point' (clip 
 point' x' y' pth loc p@(StructuralA _ child)              = point' x' y' (pth++[0]) loc child
 point' x' y' pth loc p@(ParsingA _ child)                 = point' x' y' (pth++[0]) loc child
 point' x' y' pth _   p@(LocatorA location child)          = point' x' y' (pth++[0]) location child
+point' x' y' pth loc p@(TagA _ child)                 = point' x' y' (pth++[0]) loc child
 point' x' y' pth loc p@(GraphA _ x y w h _ _ _ _ arrs) =
   pointGraphList (x'-x) (y'-y) pth loc arrs
 point' x' y' pth loc p@(VertexA _ x y w h _ _ _ outline arr) =
@@ -330,6 +338,7 @@ selectTreeA' x' y' (0:path) (VertexA _ x y _ _ _ _ _ _ arr)     = selectTreeA' (
 selectTreeA' x' y' (p:path) (StructuralA _ child)             = selectTreeA' x' y' path child
 selectTreeA' x' y' (p:path) (ParsingA _ child)                = selectTreeA' x' y' path child
 selectTreeA' x' y' (p:path) (LocatorA _ child)                = selectTreeA' x' y' path child
+selectTreeA' x' y' (p:path) (TagA _ child)                = selectTreeA' x' y' path child
 selectTreeA' x' y' (p:path) arr                               = debug Err ("ArrTypes.selectTreeA: unhandled non-empty path: "++show (p:path)++show arr) (x', y', arr)
 
 
@@ -476,6 +485,9 @@ debugArrangement' xOffset yOffset (EdgeA id x y x' y' hr vr lw lc) =
 debugArrangement' xOffset yOffset (LocatorA location arr)              =
   let (arr', wOffset, hOffset) = debugArrangement' (xOffset) (yOffset) arr
   in  (LocatorA location arr', wOffset, hOffset)
+debugArrangement' xOffset yOffset (TagA t arr)              =
+  let (arr', wOffset, hOffset) = debugArrangement' (xOffset) (yOffset) arr
+  in  (TagA t arr', wOffset, hOffset)
 debugArrangement' xOffset yOffset (StructuralA id arr)              =
   let (arr', wOffset, hOffset) = debugArrangement' (xOffset) (yOffset) arr
   in  (StructuralA id arr', wOffset, hOffset)

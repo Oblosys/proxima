@@ -119,6 +119,12 @@ renderArr o s (lux, luy) v m (DiffLeaf d)        (LocatorA _ arr) =
            renderArr o s (lux, luy) v m (DiffLeaf d) arr
 renderArr o s (lux, luy) v m _                   (LocatorA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
+renderArr o s (lux, luy) v m (DiffNode _ _ [dt]) (TagA _ arr) =
+           renderArr o s (lux, luy) v m dt arr
+renderArr o s (lux, luy) v m (DiffLeaf d)        (TagA _ arr) =
+           renderArr o s (lux, luy) v m (DiffLeaf d) arr
+renderArr o s (lux, luy) v m _                   (TagA _ arr) =
+           debug Err "renderArr: difftree does not match arrangement" $ return ()
 renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
  do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
      --if True then return () else    -- uncomment this line to skip rendering
@@ -150,6 +156,7 @@ renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
                     StructuralA _ arr           -> renderChildren 0 0 [arr]
                     ParsingA _ arr              -> renderChildren 0 0 [arr]
                     LocatorA _ arr              -> renderChildren 0 0 [arr]
+                    TagA _ arr              -> renderChildren 0 0 [arr]
                     _ -> return ()
      else -- in this case, all children are also dirty (as enforced by ArrUtils.diffArr)
           --when (overlap ((lux+xA arrangement, luy+yA arrangement),
@@ -302,6 +309,14 @@ renderArr arrDb scale (lux, luy) viewedArea mPth diffTree arrangement =
         }
 
     (LocatorA _ arr) ->
+     do { let childDiffTrees = case diffTree of
+                                 DiffLeaf c     -> repeat $ DiffLeaf c
+                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+        ; renderArr arrDb scale (lux, luy) viewedArea Nothing (head' "Renderer.renderArr" childDiffTrees) arr
+        }
+
+-- TODO: maybe this one is never evaluated due to cases at start of definition. Check this
+    (TagA _ arr) ->
      do { let childDiffTrees = case diffTree of
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)

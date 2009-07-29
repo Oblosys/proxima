@@ -64,7 +64,9 @@ data Arrangement node =
   | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !NrOfVertices ![Arrangement node]
   | VertexA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Outline !(Arrangement node)
   | EdgeA       !IDA  !XCoord !YCoord !XCoord !YCoord !HRef !VRef !Int !LineColor
-  | LocatorA    node !(Arrangement node) deriving (Show) -- do we want a ! for location  ?  
+  | LocatorA    node !(Arrangement node) 
+  | TagA        Tags !(Arrangement node) 
+  deriving (Show) -- do we want a ! for location  ?  
 
 unarrangedA x y w h hrf vrf =
   PolyA (IDA (-10)) x y w h hrf vrf [(0,0),(w',0),(w',h'),(0,h'),(0,0),(w',h'),(w',0),(0,h')] 1 Transparent black white transparent
@@ -161,6 +163,7 @@ shallowShowArr (EdgeA i x y x' y' _ _ _ _)        = "{EdgeA:"++show i++" x="++sh
 shallowShowArr (StructuralA _ child)              = "{StructuralA}"
 shallowShowArr (ParsingA _ child)                 = "{ParsingA}"
 shallowShowArr (LocatorA location child)          = "{LocatorA}"
+shallowShowArr (TagA _ child)                     = "{TagA}"
 shallowShowArr arr                                = "{Arrangement not handled by shallowShowArr: "++show arr++"}"
 
 showTreeArr arr = unlines $ showTreeArr' 0 arr
@@ -183,6 +186,7 @@ xA (EdgeA _ x y x' y' _ _ _ _)        = min x x'
 xA (StructuralA _ child)          = xA child
 xA (ParsingA _ child)             = xA child
 xA (LocatorA location child)      = xA child
+xA (TagA _ child)      = xA child
 xA arr                            = debug Err ("ArrTypes.xA: unhandled arrangement "++show arr) 0
 
 yA (EmptyA _ x y w h _ _ _)           = y
@@ -200,6 +204,7 @@ yA (EdgeA _ x y x' y' _ _ _ _)        = min y y'
 yA (StructuralA _ child)          = yA child
 yA (ParsingA _ child)             = yA child
 yA (LocatorA location child)      = yA child
+yA (TagA _ child)      = yA child
 yA arr                            = debug Err ("ArrTypes.yA: unhandled arrangement "++show arr) 0
 
 widthA (EmptyA _ x y w h _ _ _)           = w
@@ -217,6 +222,7 @@ widthA (EdgeA _ x y x' y' _ _ _ _)        = max x x' - min x x'
 widthA (StructuralA _ child)          = widthA child
 widthA (ParsingA _ child)             = widthA child
 widthA (LocatorA location child)      = widthA child
+widthA (TagA _ child)      = widthA child
 widthA arr                            = debug Err ("ArrTypes.widthA: unhandled arrangement "++show arr) 0
 
 heightA (EmptyA _ x y w h _ _ _)           = h
@@ -234,6 +240,7 @@ heightA (EdgeA _ x y x' y' _ _ _ _)        = max y y' - min y y'
 heightA (StructuralA _ child)          = heightA child
 heightA (ParsingA _ child)             = heightA child
 heightA (LocatorA location child)      = heightA child
+heightA (TagA _ child)      = heightA child
 heightA arr                            = debug Err ("ArrTypes.heightA: unhandled arrangement "++show arr) 0
  
 hRefA (EmptyA _ x y w h hr vr _)           = hr
@@ -251,6 +258,7 @@ hRefA (EdgeA _ x y x' y' hr vr _ _)        = hr
 hRefA (StructuralA _ child)                = hRefA child
 hRefA (ParsingA _ child)                   = hRefA child
 hRefA (LocatorA location child)            = hRefA child
+hRefA (TagA _ child)            = hRefA child
 hRefA arr                                  = debug Err ("ArrTypes.hRefA: unhandled arrangement "++show arr) 0
 
 vRefA (EmptyA _ x y w h hr vr _)           = vr
@@ -268,6 +276,7 @@ vRefA (EdgeA _ x y x' y' hr vr _ _)        = vr
 vRefA (StructuralA _ child)                = vRefA child
 vRefA (ParsingA _ child)                   = vRefA child
 vRefA (LocatorA location child)            = vRefA child
+vRefA (TagA _ child)            = vRefA child
 vRefA arr                                  = debug Err ("ArrTypes.vRefA: unhandled arrangement "++show arr) 0
 
 -- use named fields?
@@ -289,6 +298,7 @@ idA (EdgeA id x y x' y' _ _ _ _)        = id
 idA (StructuralA _ child)          = idA child
 idA (ParsingA _ child)             = idA child
 idA (LocatorA location child)      = idA child
+idA (TagA _ child)      = idA child
 idA arr                            = debug Err ("ArrTypes.idA: unhandled arrangement "++show arr) NoIDA
 
 getChildrenA (RowA     _ _ _ _ _ _ _ _ arrs)   = arrs
@@ -299,6 +309,7 @@ getChildrenA (VertexA  _ _ _ _ _ _ _ _ _ arr)  = [arr]
 getChildrenA (StructuralA _ arr)               = [arr]
 getChildrenA (ParsingA _ arr)                  = [arr]
 getChildrenA (LocatorA _ arr)                  = [arr]
+getChildrenA (TagA _ arr)                  = [arr]
 getChildrenA _                                 = []
 
 getChildA :: Show node => String -> Arrangement node -> Arrangement node
@@ -322,6 +333,7 @@ setXYWHA x y w h (OverlayA id _ _ _ _ hr vr  c d arrs)           = OverlayA id x
 setXYWHA x y w h (GraphA id  _ _ _ _ hr vr c nvs arrs)            = GraphA id x y w h hr vr  c nvs arrs
 setXYWHA x y w h (VertexA id _ _ _ _ hr vr c ol arr)              = VertexA id x y w h hr vr  c ol arr
 setXYWHA x y w h (LocatorA location arr)                = LocatorA location $ setXYWHA x y w h arr
+setXYWHA x y w h (TagA t arr)                = TagA t $ setXYWHA x y w h arr
 setXYWHA x y w h (StructuralA id arr)                   = StructuralA id $ setXYWHA x y w h arr
 setXYWHA x y w h (ParsingA id arr)                      = ParsingA id    $ setXYWHA x y w h arr                         
 setXYWHA _ _ _ _ arr                                    = debug Err ("ArrTypes.setXYWHA: unimplemented arrangement: "++show arr) arr
@@ -338,6 +350,7 @@ setBGColor bc (OverlayA id x y w h hr vr _ d arrs)           = OverlayA id x y w
 setBGColor bc (GraphA id  x y w h hr vr _ nvs arrs)            = GraphA id x y w h hr vr  bc nvs arrs
 setBGColor bc (VertexA id x y w h hr vr _ ol arr)              = VertexA id x y w h hr vr  bc ol arr
 setBGColor bc (LocatorA location arr)                = LocatorA location $ setBGColor bc arr
+setBGColor bc (TagA t arr)                = TagA t $ setBGColor bc arr
 setBGColor bc (StructuralA id arr)                   = StructuralA id $ setBGColor bc arr
 setBGColor bc (ParsingA id arr)                      = ParsingA id    $ setBGColor bc arr                         
 setBGColor _ arr                                    = debug Err ("ArrTypes.setBGColor: unimplemented arrangement: "++show arr) arr

@@ -992,7 +992,7 @@ SEM Layout
   | LocatorP 
       lhs.arrangement = LocatorA @location @child.arrangement
   | TagP 
-      lhs.arrangement = LocatorA undefined @child.arrangement
+      lhs.arrangement = TagA @tags @child.arrangement
   | ArrangedP
       lhs.arrangement = case @lhs.oldArr of
                           Just oldArr -> 
@@ -1248,8 +1248,8 @@ SEM Layout  [ oldArr : {Maybe (Arrangement node)}   | | ]
                        arr                   -> Nothing
   | TagP 
       child.oldArr = case @lhs.oldArr of
-                       Just (LocatorA _ arr) -> Just arr
-                       arr                   -> Nothing
+                       Just (TagA _ arr) -> Just arr
+                       arr               -> Nothing
 {
 -- After encountering an unarranged row, just return Nothings
 retrieveOldArrangements [] = []

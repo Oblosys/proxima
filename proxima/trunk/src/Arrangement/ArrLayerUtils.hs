@@ -41,7 +41,7 @@ pathAFromPathP' arr                             (WithP ar pres)          (0:path
 pathAFromPathP' (StructuralA _ arr)             (StructuralP _ pres)     (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' (ParsingA _ arr)                (ParsingP _ _ _ pres)      (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
-pathAFromPathP' (LocatorA _ arr)                (TagP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
+pathAFromPathP' (TagA _ arr)                    (TagP _ pres)        (0:path) = 0:pathAFromPathP' arr pres path
 pathAFromPathP' arr                             (FormatterP _ press)     path     = pathAFromPathPFormatter arr press path
 pathAFromPathP' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathAFromPathP: can't handle "++show pth++" "++ shallowShowPres pr++"***") []
 
@@ -67,7 +67,7 @@ pathPFromPathA' (VertexA _ _ _ _ _ _ _ _ _ arr) (VertexP _ _ _ _ _ pres) (0:path
 pathPFromPathA' (StructuralA _ arr)             (StructuralP _ pres)     (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' (ParsingA _ arr)                (ParsingP _ _ _ pres)      (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' (LocatorA _ arr)                (LocatorP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
-pathPFromPathA' (LocatorA _ arr)                (TagP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
+pathPFromPathA' (TagA _ arr)                    (TagP _ pres)        (0:path) = 0:pathPFromPathA' arr pres path
 pathPFromPathA' arr                             (FormatterP _ press)     path     = pathPFromPathAFormatter arr press path
 pathPFromPathA' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathPFromPathA': can't handle "++show pth++" "++ shallowShowPres pr++"***") []
 
