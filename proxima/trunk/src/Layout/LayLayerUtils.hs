@@ -30,6 +30,7 @@ cast (WithP ar pres)            = WithP ar $ cast pres
 cast (ParsingP id p l pres)     = ParsingP id p l $ cast pres
 cast (StructuralP id pres)      = StructuralP id $ cast pres
 cast (LocatorP l pres)          = LocatorP l $ cast pres
+cast (TagP t pres)          = TagP t $ cast pres
 cast (GraphP id d w h es press) = GraphP id d w h es $ map cast press
 cast (VertexP id v x y o pres)  = VertexP id v x y o $ cast pres
 cast (FormatterP id press)      = FormatterP id $ map cast press

@@ -121,6 +121,7 @@ DATA Layout doc node clip token
   | StructuralP id : IDP child : (Layout {doc} {node} {clip} {token})
   | ParsingP    id : IDP parser : {Maybe (ClipParser doc node clip token)} lexer : Lexer child : (Layout {doc} {node} {clip} {token})
   | LocatorP location : {node} child : (Layout {doc} {node} {clip} {token})
+  | TagP tags : {Tags} child : (Layout {doc} {node} {clip} {token})
   | ArrangedP
 
 --  | TestPresentation id : IDP  area : Int color : Color
@@ -132,7 +133,7 @@ DATA Layout doc node clip token
 structure of layout tree: no children/one child/list of children
 
   | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
-  | VertexP WithP StructuralP ParsingP LocatorP 
+  | VertexP WithP StructuralP ParsingP LocatorP TagP
       child.
   | RowP ColP OverlayP GraphP FormatterP
       layoutList.
@@ -240,7 +241,7 @@ ATTR Root Layout LayoutList [ | idCounter : Int | ]
 SEM Layout
   | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
       lhs.idCounter = @lhs.idCounter + 1
-  | VertexP WithP StructuralP ParsingP LocatorP 
+  | VertexP WithP StructuralP ParsingP LocatorP TagP 
       child.idCounter = @lhs.idCounter + 1
   | RowP ColP OverlayP GraphP FormatterP
       layoutList.idCounter = @lhs.idCounter + 1
@@ -312,6 +313,7 @@ SEM Layout
 -- | StructuralP copy
 -- | ParsingP    copy
 -- | LocatorP    copy
+-- | TagP    copy
 
 ATTR LayoutList [ | | maxFormatterDepthList : {[Int]} ]
 SEM LayoutList
@@ -989,6 +991,8 @@ SEM Layout
       lhs.arrangement = ParsingA (IDA @lhs.idCounter) {- (idAFromP @id) -} @child.arrangement
   | LocatorP 
       lhs.arrangement = LocatorA @location @child.arrangement
+  | TagP 
+      lhs.arrangement = LocatorA undefined @child.arrangement
   | ArrangedP
       lhs.arrangement = case @lhs.oldArr of
                           Just oldArr -> 
@@ -1134,10 +1138,11 @@ SEM Show {node}, Show {token} =>
                                           getChildrenP @lhs.unprunedLay
                                           ++ repeat (debug Err ("ERROR:unprunedLay list of differing length accessed in" ++ shallowShowPres @self) (EmptyP NoIDP))
 
-  | VertexP WithP StructuralP ParsingP LocatorP 
+  | VertexP WithP StructuralP ParsingP LocatorP TagP 
       child.unprunedLay = {- case (@self, @lhs.unprunedLay) of
                                     (WithP _ _, WithP _ _) -> id
                                     (LocatorP _ _, LocatorP _ _) -> id
+                                    (TagP _ _, TagP _ _) -> id
                                     (StructuralP _ _, StructuralP _ _) -> id
                                     (ParsingP _ _, ParsingP _ _) -> id
                                     (p,upp)            -> debug Arr $ "not the same:" ++ shallowShowPres p ++ shallowShowPres upp
@@ -1238,6 +1243,10 @@ SEM Layout  [ oldArr : {Maybe (Arrangement node)}   | | ]
                        Just (ParsingA _ arr) -> Just arr
                        arr                   -> Nothing
   | LocatorP 
+      child.oldArr = case @lhs.oldArr of
+                       Just (LocatorA _ arr) -> Just arr
+                       arr                   -> Nothing
+  | TagP 
       child.oldArr = case @lhs.oldArr of
                        Just (LocatorA _ arr) -> Just arr
                        arr                   -> Nothing

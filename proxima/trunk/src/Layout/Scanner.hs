@@ -169,6 +169,8 @@ scanStructural sheet foc lx loc pth idpc wm presentation =
                                                       -- position is not used, so set to 0
     LocatorP newLoc pres        -> let (tokens, idpc', wm', pres') = scanStructural sheet foc lx (Just newLoc) (pth++[0]) idpc wm pres
                                    in  (tokens, idpc', wm', LocatorP newLoc pres')
+    TagP t pres                 -> let (tokens, idpc', wm', pres') = scanStructural sheet foc lx loc (pth++[0]) idpc wm pres
+                                   in  (tokens, idpc', wm', TagP t pres')
     pr -> debug Err ("Scanner.scanStructural: can't handle "++ show pr) ([], idpc, wm, castLayToPres pr)
 
 

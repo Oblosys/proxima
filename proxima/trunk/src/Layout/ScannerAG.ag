@@ -38,6 +38,7 @@ DATA Layout doc node clip token
   | StructuralP id : IDP child : (Layout {doc} {node} {clip} {token})
   | ParsingP    id : IDP parser : {Maybe (ClipParser doc node clip token)} lexer : Lexer child : (Layout {doc} {node} {clip} {token})
   | LocatorP location : {node} child : (Layout {doc} {node} {clip} {token})
+  | TagP tags : {Tags} child : (Layout {doc} {node} {clip} {token})
   | ArrangedP
 
 TYPE LayoutList doc node clip token = [(Layout {doc} {node} {clip} {token})]
@@ -73,7 +74,7 @@ SEM Layout
   | RowP ColP OverlayP FormatterP GraphP
       presentationList.path = @lhs.path
       presentationList.index = 0
-  | WithP ParsingP LocatorP StructuralP VertexP
+  | WithP ParsingP LocatorP TagP StructuralP VertexP
       child.path = @lhs.path ++ [0]
       
 SEM LayoutList [ | | ]
@@ -153,6 +154,8 @@ SEM Layout
   | ParsingP
       lhs.scanChars = @child.scanChars
   | LocatorP
+      lhs.scanChars = @child.scanChars
+  | TagP
       lhs.scanChars = @child.scanChars
   | StructuralP
       (lhs.scanChars, lhs.idPCounter, lhs.whitespaceMap) = 

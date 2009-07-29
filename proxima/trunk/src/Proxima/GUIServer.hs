@@ -341,7 +341,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Com
                                        else "")
                                    ++queryHTML++"</div>"            
     }
-    
+
 data Command = Metrics ((String,Int),(Int,Int,[Int]))
              | ContextMenuRequest ((Int,Int),(Int,Int))
              | ContextMenuSelect Int  
@@ -351,6 +351,7 @@ data Command = Metrics ((String,Int),(Int,Int,[Int]))
              | Scroll CommonTypes.Rectangle
              | ClearMetrics 
                deriving (Show, Read)
+                        
 type Modifiers = (Bool,Bool,Bool)
 data MouseCommand = MouseDown | MouseMove | MouseUp | MouseDragStart | MouseDrop
                     deriving (Show, Read)

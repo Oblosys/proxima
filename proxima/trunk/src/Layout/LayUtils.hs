@@ -135,6 +135,7 @@ nearestParsingColumn' colPth nearest (0:pth) (WithP _ lay)          = nearestPar
 nearestParsingColumn' colPth nearest (0:pth) (StructuralP _ lay)    = nearestParsingColumn' (colPth++[0]) nearest pth lay
 nearestParsingColumn' colPth nearest (0:pth) (ParsingP _ _ _ lay)   = nearestParsingColumn' (colPth++[0]) nearest pth lay
 nearestParsingColumn' colPth nearest (0:pth) (LocatorP _ lay)       = nearestParsingColumn' (colPth++[0]) nearest pth lay
+nearestParsingColumn' colPth nearest (0:pth) (TagP _ lay)       = nearestParsingColumn' (colPth++[0]) nearest pth lay
 nearestParsingColumn' colPth nearest pth lay                        = debug Err ("LayUtils.nearestParsingColumn': can't handle "++show pth++" "++ show lay) $ Nothing
                                                   
 
@@ -158,6 +159,7 @@ gatherDocPaths' paths (WithP _ lay)             = gatherDocPaths' paths lay
 gatherDocPaths' paths (StructuralP _ lay)       = paths
 gatherDocPaths' paths (ParsingP _ _ _ lay)      = gatherDocPaths' paths lay
 gatherDocPaths' paths (LocatorP node lay)       = gatherDocPaths' (pathNode node:paths) lay
+gatherDocPaths' paths (TagP _ lay)              = gatherDocPaths' paths lay
 gatherDocPaths' paths lay                       = debug Err ("LayUtils.gatherDocPaths: can't handle "++ show lay) paths
 
 dropLeadingWhitespace lays = dropWhile isWhitespace lays
@@ -175,6 +177,7 @@ isWhitespace (WithP _ lay)             = isWhitespace lay
 isWhitespace (StructuralP _ lay)       = isWhitespace lay
 isWhitespace (ParsingP _ _ _ lay)      = isWhitespace lay
 isWhitespace (LocatorP _ lay)          = isWhitespace lay
+isWhitespace (TagP _ lay)          = isWhitespace lay
 isWhitespace lay                        = debug Err ("LayUtils.isWhitespace: can't handle "++ show lay) False
 
 isWhitespaceLR :: (Show node, Show token) => Path -> Layout doc node clip token -> (Bool,Bool)
@@ -196,4 +199,5 @@ isWhitespaceLR (0:pth) (WithP _ lay)          = isWhitespaceLR pth lay
 isWhitespaceLR (0:pth) (StructuralP _ lay)    = isWhitespaceLR pth lay
 isWhitespaceLR (0:pth) (ParsingP _ _ _ lay)   = isWhitespaceLR pth lay
 isWhitespaceLR (0:pth) (LocatorP _ lay)       = isWhitespaceLR pth lay
+isWhitespaceLR (0:pth) (TagP _ lay)       = isWhitespaceLR pth lay
 isWhitespaceLR pth     lay                    = debug Err ("LayUtils.isWhitespaceLR: can't handle "++ show pth++" " ++show lay) (False,False)

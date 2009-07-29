@@ -49,6 +49,8 @@ detokenize wm (StructuralP idp pres)      = let (pres', f) = detokenize wm pres
                                            in  (StructuralP idp pres', prependToFocus 0 f)
 detokenize wm (LocatorP l pres)          = let (pres', f) = detokenize wm pres
                                            in  (LocatorP l pres', prependToFocus 0 f)
+detokenize wm (TagP t pres)          = let (pres', f) = detokenize wm pres
+                                           in  (TagP t pres', prependToFocus 0 f)
 detokenize wm (GraphP idp d w h es press) = let (press', f) = detokenizeList wm 0 press
                                            in  (GraphP idp d w h es press', f)
 detokenize wm (VertexP idp v x y o pres)  = let (pres', f) = detokenize wm pres
@@ -113,6 +115,7 @@ detokenize' wm (OverlayP idp d (pres:press)) = let (rowss) = detokenize' wm pres
 detokenize' wm (WithP ar pres)            = map (map (\(pres',f) -> (WithP ar pres', prependToFocus 0 f))) (detokenize' wm pres)
 detokenize' wm (ParsingP idp pr l pres)   = map (map (\(pres',f) -> (ParsingP idp pr l pres', prependToFocus 0 f))) (detokenize' wm pres)
 detokenize' wm (LocatorP l pres)          = map (map (\(pres',f) -> (LocatorP l pres', prependToFocus 0 f))) (detokenize' wm pres)
+detokenize' wm (TagP t pres)          = map (map (\(pres',f) -> (TagP t pres', prependToFocus 0 f))) (detokenize' wm pres)
 detokenize' wm (FormatterP idp press)      = case detokenizeList' wm 0 press of
                                                (press, f) -> [[(FormatterP idp press,f)]] 
 --                                               _            -> [[(castPresToLay press, noFocus)]]

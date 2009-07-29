@@ -33,6 +33,10 @@ class (Eq node, Ord node, Show node) => DocNode node where
 -- This class allows us to access NoNode and the (Node_ .. path) in the generic part of Proxima
 -- Eq and Ord are here to reduce the number of constraints in the types
 
+data Tags = Tags { isDragSource :: Bool, isDropTarget :: Bool } deriving Show
+
+emptyTags = Tags False False
+                   
 type XCoord = Int
 type YCoord = Int
 type Width = Int

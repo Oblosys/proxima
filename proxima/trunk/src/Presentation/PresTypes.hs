@@ -240,6 +240,9 @@ data PresentationBase doc node clip userToken level where
                    PresentationBase doc node clip userToken level 
        LocatorP :: node -> !(PresentationBase doc node clip userToken level) ->
                    PresentationBase doc node clip userToken level 
+       TagP :: Tags -> !(PresentationBase doc node clip userToken level) ->
+                   PresentationBase doc node clip userToken level 
+
        GraphP   :: !IDP -> !Dirty -> !Width -> !Height -> ![Edge] -> ![PresentationBase doc node clip userToken level] ->
                    PresentationBase doc node clip userToken level 
        VertexP  :: !IDP -> !VertexID -> !XCoord -> !YCoord -> Outline -> !(PresentationBase doc node clip userToken level) ->
@@ -283,6 +286,7 @@ instance (Show node, Show token) => Show (PresentationBase doc node clip token l
   show (StructuralP id pres) = "StructuralP "++show id++" "++show pres
   show (ParsingP id p l pres)    = "ParsingP "++show l++" "++show pres
   show (LocatorP loc pres)   = "LocatorP "++ {- show loc++ -} " "++show pres
+  show (TagP tags pres)   = "TagP "++ show tags++ " "++show pres
   show (GraphP id _ _ _ edges press) = "GraphP "++ show edges++" ["++concat (intersperse ", " (map show press))++"]"
   show (VertexP id vid x y ol pres)  = "Vertex (#"++show vid++":"++show x++","++show y++")"++show pres
   show (FormatterP id press) = "FormatterP ["++concat (intersperse ", " (map show press))++"]"
@@ -310,6 +314,7 @@ shallowShowPres (WithP ar pres)       = "{WithP}"
 shallowShowPres (StructuralP id pres) = "{"++show id++":StructuralP}"
 shallowShowPres (ParsingP id p l pres)    = "{"++show id++":ParsingP}"
 shallowShowPres (LocatorP loc pres)   = "{LocatorP}"
+shallowShowPres (TagP loc pres)   = "{TagP}"
 shallowShowPres (ArrangedP)           = "ArrangedP" -- ++show pres
 shallowShowPres _                     = "<<<presentation without show>>>"
 
@@ -331,6 +336,7 @@ getChildrenP (WithP ar pres)       = [pres]
 getChildrenP (StructuralP id pres) = [pres]
 getChildrenP (ParsingP id p l pres)    = [pres]
 getChildrenP (LocatorP loc pres)   = [pres]
+getChildrenP (TagP _ pres)   = [pres]
 getChildrenP (ArrangedP)           = []
 getChildrenP pres                  = debug Err ("PresTypes.getChildren: unhandled presentation: "++shallowShowPres pres) []
 
@@ -357,6 +363,7 @@ setChildrenP [pres'] (WithP ar _)       = WithP ar pres'
 setChildrenP [pres'] (StructuralP id _) = StructuralP id pres'
 setChildrenP [pres'] (ParsingP id p l _)    = ParsingP id p l pres'
 setChildrenP [pres'] (LocatorP loc _)   = LocatorP loc pres'
+setChildrenP [pres'] (TagP tag _)   = TagP tag pres'
 setChildrenP []      (ArrangedP)        = ArrangedP
 setChildrenP press'  pres                  = debug Err ("PresTypes.setChildrenP: unhandled case " ++ show (length press') ++ ", " ++ shallowShowPres pres) pres
 
@@ -416,6 +423,7 @@ idP (WithP ar pres)       = idP pres
 idP (StructuralP id pres) = id
 idP (ParsingP id p l pres)    = id
 idP (LocatorP loc pres)   = idP pres
+idP (TagP _ pres)   = idP pres
 idP (GraphP id _ _ _ _ _)  = id
 idP (VertexP id _ _ _ _ _) = id
 idP (FormatterP id _)     = id
