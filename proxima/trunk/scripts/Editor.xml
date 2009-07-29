@@ -425,19 +425,6 @@ function debugAdd(message)
     debug (message + '<br></br>' + document.getElementById('debugMessage').innerHTML);
 }
 
-/*
-function setRefreshTimer(ms)
-{  
-    setTimeout('refresh()',ms);
-}
-
-function refresh()
-{
-    loadXMLDoc('SpecialRefresh;');
-    setRefreshTimer(200);
-}
-*/
-
 function refresh()
 { removeChildren('rendering');
   removeChildren('focus');
@@ -554,11 +541,11 @@ function mouseHandler(str,e)
   if (str == 'D')
   { startDrag(e,posx,posy);
     if (dragInProgress)
-      loadXMLDoc('Mouse' + 'b' + '(' + (posx) + ',' +
+      loadXMLDoc('Mouse ' + 'MouseDragStart' + '(' + (posx) + ',' +
                                        (posy) + ',' +
                                        showModifiers() + ');' );
     else
-      loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
+      loadXMLDoc('Mouse ' + 'MouseDown' + '(' + (posx) + ',' +
                                        (posy) + ',' +
                                        showModifiers() + ');' );
   }
@@ -567,12 +554,12 @@ function mouseHandler(str,e)
     { dragInProgress = false;
       draggedElement.parentNode.removeChild(draggedElement);
       // send drop event
-      loadXMLDoc('Mouse' + 'e' + '(' + (posx) + ',' +
+      loadXMLDoc('Mouse ' + 'MouseDrop' + '(' + (posx) + ',' +
                                        (posy) + ',' +
                                        showModifiers() + ');' );
     }
     else
-      loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
+      loadXMLDoc('Mouse ' + 'MouseUp' + '(' + (posx) + ',' +
                                        (posy) + ',' +
                                        showModifiers() + ');' );
   else if (str == 'M');
@@ -583,7 +570,7 @@ function mouseHandler(str,e)
     else
   // only handle mouse move if the mouse button is down and the queue is empty
       if (mouseDown && commandQueue == '')
-        loadXMLDoc('Mouse' + str + '(' + (posx) + ',' +
+        loadXMLDoc('Mouse ' + 'MouseMove' + '(' + (posx) + ',' +
                                          (posy) + ',' +
                                          showModifiers() + ');' );
 
@@ -716,7 +703,7 @@ function scrollHandler(event)
     
 //    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
   if (commandQueue == '')
-    loadXMLDoc('SpecialScroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
+    loadXMLDoc('Scroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
                '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
 }
 
@@ -797,7 +784,7 @@ function scrollHandler(event)
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id='font' style='visibility:hidden;white-space: pre'></div>
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
-<button onclick="loadXMLDoc('SpecialClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
+<button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
 <div id="debugMessage"></div>
 <!-- <div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
 -->

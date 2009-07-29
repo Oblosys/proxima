@@ -305,7 +305,7 @@ data Commands = Commands String deriving Show
 splitCommands commandStr =
   case break (==';') commandStr of
     ([],[])             -> []
-    (_, [])              -> error "Syntax error in commands"
+    (_, [])              -> error $ "Syntax error in commands: " ++ commandStr
     (command, (_:commandStr')) -> command : splitCommands commandStr'
         
 -- handle each command in commands and send the updates back
@@ -314,7 +314,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Com
    -- ; putStrLn $ "Received commands:"++ show commands
     
     ; renderingHTMLss <-
-        mapM (handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR)
+        mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR)
              commands
  
     ; let renderingHTML = concat . concat $ renderingHTMLss
@@ -342,151 +342,131 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Com
                                    ++queryHTML++"</div>"            
     }
     
-    
-handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR event =
- do { -- putStrLn $ "Handling: " ++ take 70 event
-     if "Metrics" `isPrefixOf` event  -- is not handled by genericHandler
-      then handleMetrics event
-      else if "ContextRequest" `isPrefixOf` event  -- is not handled by genericHandler
-      then handleContextMenuRequest renderingLvlVar menuR event
-      else do { (event) <-
-                  if "Key" `isPrefixOf` event || "Chr" `isPrefixOf` event 
-                    then handleKey event "" 0
-                    else if "Mouse" `isPrefixOf` event
-                    then handleMouse event "" 0
-                    else if "ContextSelect" `isPrefixOf` event
-                    then handleContextMenuSelect menuR event
-                    else if "Special" `isPrefixOf` event
-                    then handleSpecial viewedAreaRef event "" 0
-                    else do { putStrLn $ "Event not recognized: "++event
-                            ; return $ SkipRen 0
-                            }
-              --; print event               
-              ; genericHandler settings handler renderingLvlVar viewedAreaRef () event
-              }
-    }
+data Command = Metrics ((String,Int),(Int,Int,[Int]))
+             | ContextMenuRequest ((Int,Int),(Int,Int))
+             | ContextMenuSelect Int  
+             | Key (Int,Modifiers)
+             | Chr (Int,Modifiers)
+             | Mouse MouseCommand (Int,Int, Modifiers)
+             | Scroll CommonTypes.Rectangle
+             | ClearMetrics 
+               deriving (Show, Read)
+type Modifiers = (Bool,Bool,Bool)
+data MouseCommand = MouseDown | MouseMove | MouseUp | MouseDragStart | MouseDrop
+                    deriving (Show, Read)
 
-handleMetrics ('M':'e':'t':'r':'i':'c':'s':event) =
- do { let receivedMetrics@(font,_) :: ((String,Int),(Int,Int,[Int])) = read $ event
-    ; putStrLn $ "Received metrics for: "++show font
-    ; fh' <- openFile "queriedMetrics.txt" AppendMode
-    ; hPutStrLn fh' $ show receivedMetrics
-    ; hClose fh'
-    ; return [""]
-    }
-    
--- Current structure of handlers causes focus to be repainted after context request
--- this is not really a problem though
-handleContextMenuRequest renderingLvlVar menuR ('C':'o':'n':'t':'e':'x':'t':'R':'e':'q':'u':'e':'s':'t':event) =
- do { let ((proxX,proxY),(screenX,screenY)) :: ((Int,Int),(Int,Int)) = read event
+handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR eventStr =
+  case safeRead eventStr of
+    Just cmd -> handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR cmd
+    Nothing  -> error ("Syntax error in command: "++eventStr) 
 
-    ; (RenderingLevel _ makePopupMenuHTML _ _ _ _ _ _)  <- readIORef renderingLvlVar
-    ; let (itemStrs,upds) = unzip $ makePopupMenuHTML proxX proxY
-          itemsHTML = concat 
-                        [ "<div class='menuItem' item='"++show i++"'>"++item++"</div>"
-                        | (i,item) <- zip [0..] itemStrs
-                        ]
-      -- for separator lines: "<hr></hr>"
-    
-    ; writeIORef menuR $ upds
-                            
-    ; return [ "<div op='contextMenu' screenX='"++show screenX++"' screenY='"++show screenY++"'>" ++
-               itemsHTML ++
-               "</div>"
-             ]
-    }
- 
-handleContextMenuSelect :: forall doc enr clip node token .
-                           IORef [UpdateDoc doc clip] -> String -> IO (EditRendering doc enr node clip token)
-handleContextMenuSelect menuR ('C':'o':'n':'t':'e':'x':'t':'S':'e':'l':'e':'c':'t':event) =
- do { menuItems <- readIORef menuR
-    ; let selectedItemNr :: Int = read event
-          editDoc = index "GUI.handleContextMenuSelect" menuItems selectedItemNr
-    ; return $ cast (UpdateDoc' editDoc :: EditDocument' doc enr node clip token)
-    }
-    
-handleKey ('K':'e':'y':event) editStr focus = return $
- let (keyCode,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event
-     key = 
-       case keyCode of
-        46 -> KeySpecialRen CommonTypes.DeleteKey ms
-        8  -> KeySpecialRen CommonTypes.BackspaceKey ms
-        37 -> KeySpecialRen CommonTypes.LeftKey  ms
-        39 -> KeySpecialRen CommonTypes.RightKey  ms
-        38 -> KeySpecialRen CommonTypes.UpKey  ms
-        40 -> KeySpecialRen CommonTypes.DownKey  ms
-        13 -> KeySpecialRen CommonTypes.EnterKey  ms
-        112 -> KeySpecialRen CommonTypes.F1Key  ms
-        113 -> KeySpecialRen CommonTypes.F2Key  ms
-        114 -> KeySpecialRen CommonTypes.F3Key  ms
-        115 -> KeySpecialRen CommonTypes.F4Key  ms
-        116 -> KeySpecialRen CommonTypes.F5Key  ms
-        117 -> KeySpecialRen CommonTypes.F6Key  ms
-        118 -> KeySpecialRen CommonTypes.F7Key  ms
-        119 -> KeySpecialRen CommonTypes.F8Key  ms
-        120 -> KeySpecialRen CommonTypes.F9Key  ms
-        121 -> KeySpecialRen CommonTypes.F10Key  ms
-        122 -> KeySpecialRen CommonTypes.F11Key  ms
-        123 -> KeySpecialRen CommonTypes.F12Key  ms
-        _  -> SkipRen 0
-     ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
-  in key 
-handleKey ('C':'h':'r':event) editStr focus = return $
- let (keyChar,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read $ takeWhile (/='?') event
-     ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
-  in if not ctrlDown && not altDown 
-     then KeyCharRen (chr keyChar)
-     else KeySpecialRen (CommonTypes.CharKey (chr keyChar)) ms
-handleKey malEvent editStr focus =
- do { putStrLn $ "Internal error: malformed key event: " ++ malEvent
-    ; return $ SkipRen 0
-    }
-    
-insertChar c editStr focus = (take focus editStr ++ [c] ++ drop focus editStr, focus +1)
 
-handleMouse ('M':'o':'u':'s':'e':event) editStr focus = 
- do { putStrLn $ "Mouse event: " ++ event
-    ; let action:args = event
-    ; let (x:: Int, y :: Int,(shiftDown :: Bool, ctrlDown :: Bool, altDown :: Bool)) = read args
-          
-    ; return $ case action of
-                     'D' -> MouseDownRen x y (CommonTypes.Modifiers shiftDown ctrlDown altDown) 1
-                     'U' -> MouseUpRen x y (CommonTypes.Modifiers shiftDown ctrlDown altDown)
-                     'C' -> SkipRen 0
-                     'M' -> MouseDragRen x y  (CommonTypes.Modifiers shiftDown ctrlDown altDown)
-                     'b' -> DragStartRen x y 
-                     'e' -> DropRen x y
-                     _   -> SkipRen 0
-    -- move events are only sent when button is down, to prevent flooding    
-    }
-handleMouse malEvent editStr focus =
- do { putStrLn $ "Internal error: malformed mouse event: " ++ malEvent
-    ; return $ SkipRen 0
-    }
+-- sig is necessary to scope type vars in cast    
+handleCommand :: forall doc enr clip node token .
+               (Show token, Show node, Show enr, Show doc) => 
+               (Settings
+               ,((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token]))
+               , IORef (RenderingLevel doc enr node clip token) 
+               , IORef CommonTypes.Rectangle 
+               ) -> IORef Bool -> IORef [UpdateDoc doc clip] -> Command -> IO [String]
+handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR command =
+  case command of
+    Metrics receivedMetrics@(font,_) ->
+     do { putStrLn $ "Received metrics for: "++show font
+        ; fh' <- openFile "queriedMetrics.txt" AppendMode
+        ; hPutStrLn fh' $ show receivedMetrics
+        ; hClose fh'
+        ; return [""]
+        }
+    
+    -- Current structure of handlers causes focus to be repainted after context request
+    -- this is not really a problem though
+    ContextMenuRequest ((proxX,proxY),(screenX,screenY)) ->
+     do { (RenderingLevel _ makePopupMenuHTML _ _ _ _ _ _)  <- readIORef renderingLvlVar
+        ; let (itemStrs,upds) = unzip $ makePopupMenuHTML proxX proxY
+              itemsHTML = concat 
+                            [ "<div class='menuItem' item='"++show i++"'>"++item++"</div>"
+                            | (i,item) <- zip [0..] itemStrs
+                            ]
+          -- for separator lines: "<hr></hr>"
+        
+        ; writeIORef menuR $ upds
+                                
+        ; return [ "<div op='contextMenu' screenX='"++show screenX++"' screenY='"++show screenY++"'>" ++
+                   itemsHTML ++ "</div>" ]
+        }
+    
+    ContextMenuSelect selectedItemNr ->
+     do { menuItems <- readIORef menuR
+        ; let editDoc = index "GUI.handleContextMenuSelect" menuItems selectedItemNr
+        ; genericHandler settings handler renderingLvlVar viewedAreaRef () $
+            cast (UpdateDoc' editDoc :: EditDocument' doc enr node clip token)
+        }
 
--- sig is necessary to scope type vars in cast
-handleSpecial ::forall a doc enr node clip token .
-                Read a => IORef a -> String -> String -> Int -> IO (EditRendering doc enr node clip token)
-handleSpecial viewedAreaRef ('S':'p':'e':'c':'i':'a':'l':event) editStr focus = 
- do { putStrLn $ "Special event: " ++ event
-    ; if "Scroll" `isPrefixOf` event
-      then do { writeIORef viewedAreaRef $ read $ drop 6 event
-              
-              ; return $ SkipRen (-2)
-              }
-      else if "ClearMetrics" `isPrefixOf` event
-      then do { fh <- openFile "queriedMetrics.txt" WriteMode -- TODO: clearing this file should be done after Metrics are read in FontLib.hs
-              ; hClose fh
-              ; return $ cast (ClearMetricsArr :: EditArrangement doc enr node clip token)
-              }
-      else do { putStrLn $ "Unrecognized special event: "++event
-              ; return $ SkipRen 0
-              } 
-    }            
-handleSpecial viewedAreaRef malEvent editStr focus =
- do { putStrLn $ "Internal error: malformed special event: " ++ malEvent
-    ; return $ SkipRen 0
-    }
+    Key (keyCode,(shiftDown, ctrlDown, altDown)) ->
+      let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
+          evt = case keyCode of
+                  46 -> KeySpecialRen CommonTypes.DeleteKey ms
+                  8  -> KeySpecialRen CommonTypes.BackspaceKey ms
+                  37 -> KeySpecialRen CommonTypes.LeftKey  ms
+                  39 -> KeySpecialRen CommonTypes.RightKey  ms
+                  38 -> KeySpecialRen CommonTypes.UpKey  ms
+                  40 -> KeySpecialRen CommonTypes.DownKey  ms
+                  13 -> KeySpecialRen CommonTypes.EnterKey  ms
+                  112 -> KeySpecialRen CommonTypes.F1Key  ms
+                  113 -> KeySpecialRen CommonTypes.F2Key  ms
+                  114 -> KeySpecialRen CommonTypes.F3Key  ms
+                  115 -> KeySpecialRen CommonTypes.F4Key  ms
+                  116 -> KeySpecialRen CommonTypes.F5Key  ms
+                  117 -> KeySpecialRen CommonTypes.F6Key  ms
+                  118 -> KeySpecialRen CommonTypes.F7Key  ms
+                  119 -> KeySpecialRen CommonTypes.F8Key  ms
+                  120 -> KeySpecialRen CommonTypes.F9Key  ms
+                  121 -> KeySpecialRen CommonTypes.F10Key  ms
+                  122 -> KeySpecialRen CommonTypes.F11Key  ms
+                  123 -> KeySpecialRen CommonTypes.F12Key  ms
+                  _  -> SkipRen 0
+      in  genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+    
+    
+    Chr (keyChar,(shiftDown, ctrlDown, altDown)) ->
+      let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
+          evt = if not ctrlDown && not altDown 
+                then KeyCharRen (chr keyChar)
+                else KeySpecialRen (CommonTypes.CharKey (chr keyChar)) ms
+
+      in  genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+    
+
+    Mouse mouseCommand (x, y, (shiftDown, ctrlDown, altDown)) ->
+      let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
+          evt = case mouseCommand of
+                     MouseDown -> MouseDownRen x y ms 1
+                     MouseUp -> MouseUpRen x y ms
+                     MouseMove -> MouseDragRen x y ms
+                     -- move events are only sent when button is down, to prevent flooding    
+                     MouseDragStart -> DragStartRen x y 
+                     MouseDrop -> DropRen x y
+                     
+      in  genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+
+
+    Scroll newViewedArea ->
+     do { writeIORef viewedAreaRef newViewedArea
+        ; genericHandler settings handler renderingLvlVar viewedAreaRef () $
+            SkipRen (-2)
+        }
+     
+
+    ClearMetrics ->
+     do { putStrLn "\n\n\n\n\n\n\nClear\n\n\n\n\n\n\n"
+        ; fh <- openFile "queriedMetrics.txt" WriteMode -- TODO: clearing this file should be done after Metrics are read in FontLib.hs
+        ; hClose fh
+        ; genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
+            cast (ClearMetricsArr :: EditArrangement doc enr node clip token)
+        }
+    
+
 
 genericHandler :: (Show token, Show node, Show enr, Show doc) => Settings ->
                ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
