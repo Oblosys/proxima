@@ -61,6 +61,7 @@ parsingWithParser :: (Editable a doc node clip token, DocNode node, Ord token, S
                      Presentation doc node clip token
 parsingWithParser parser self pres = ParsingP NoIDP (Just $ mkClipParser $ parser) LexInherited pres
 loc l xp  = LocatorP l xp
+tag t xp = TagP t xp
 
 graph :: Int -> Int -> [(Int,Int)] -> [Xprez doc node clip token] -> Xprez doc node clip token
 graph width height edges vertexPress = 
