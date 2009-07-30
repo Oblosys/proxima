@@ -320,19 +320,21 @@ pointGraphList x' y' pth loc arrs =
     ((pth', loc'):_) -> Just (pth', loc')
                                           
 
--- returns a list of all nodes on the path, starting with the root
-getPathNodesA :: Show node => [Int] -> Arrangement node -> [Arrangement node]
-getPathNodesA []       arr                                = [arr]
-getPathNodesA (p:path) arr@(RowA _ _ _ _ _ _ _ _ arrs)           = arr:getPathNodesA path (index "ArrUtils.getPathNodesA.1" arrs p)
-getPathNodesA (p:path) arr@(ColA _ _ _ _ _ _ _ _ _ arrs)         = arr:getPathNodesA path (index "ArrUtils.getPathNodesA.2" arrs p)
-getPathNodesA (p:path) arr@(OverlayA _ _ _ _ _ _ _ _ _ arrs)       = arr:getPathNodesA path  (index "ArrUtils.getPathNodesA.3" arrs p)
-getPathNodesA (p:path) arr@(GraphA _ _ _ _ _ _ _ _ _ arrs)           = arr:getPathNodesA path (index "ArrUtils.getPathNodesA.4" arrs p)
-getPathNodesA (0:path) arr@(VertexA _ _ _ _ _ _ _ _ _ child)     = arr:getPathNodesA path child
-getPathNodesA (p:path) arr@(StructuralA _ child)             = arr:getPathNodesA path child
-getPathNodesA (p:path) arr@(ParsingA _ child)                = arr:getPathNodesA path child
-getPathNodesA (p:path) arr@(LocatorA _ child)                = arr:getPathNodesA path child
-getPathNodesA (p:path) arr@(TagA _ child)                = arr:getPathNodesA path child
-getPathNodesA (p:path) arr                               = debug Err ("ArrTypes.getPathNodesA: unhandled non-empty path: "++show (p:path)++show arr) []
+-- returns a list of all nodes on the path together with their path, starting with the root
+getPathNodesPathsA = getPathNodesPathsA' []    
+
+getPathNodesPathsA' :: Show node => Path -> Path -> Arrangement node -> [(Arrangement node, Path)]
+getPathNodesPathsA' rootPath []       arr                                = [(arr,rootPath)]
+getPathNodesPathsA' rootPath (p:path) arr@(RowA _ _ _ _ _ _ _ _ arrs)           = (arr,rootPath):getPathNodesPathsA' (rootPath++[p]) path (index "ArrUtils.getPathNodesPathsA'.1" arrs p)
+getPathNodesPathsA' rootPath (p:path) arr@(ColA _ _ _ _ _ _ _ _ _ arrs)         = (arr,rootPath):getPathNodesPathsA' (rootPath++[p]) path (index "ArrUtils.getPathNodesPathsA'.2" arrs p)
+getPathNodesPathsA' rootPath (p:path) arr@(OverlayA _ _ _ _ _ _ _ _ _ arrs)       = (arr,rootPath):getPathNodesPathsA' (rootPath++[p]) path (index "ArrUtils.getPathNodesPathsA'.3" arrs p)
+getPathNodesPathsA' rootPath (p:path) arr@(GraphA _ _ _ _ _ _ _ _ _ arrs)           = (arr,rootPath):getPathNodesPathsA' (rootPath++[p]) path (index "ArrUtils.getPathNodesPathsA'.4" arrs p)
+getPathNodesPathsA' rootPath (0:path) arr@(VertexA _ _ _ _ _ _ _ _ _ child)     = (arr,rootPath):getPathNodesPathsA' (rootPath++[0]) path child
+getPathNodesPathsA' rootPath (p:path) arr@(StructuralA _ child)             = (arr,rootPath):getPathNodesPathsA' (rootPath++[p]) path child
+getPathNodesPathsA' rootPath (p:path) arr@(ParsingA _ child)                = (arr,rootPath):getPathNodesPathsA' (rootPath++[p]) path child
+getPathNodesPathsA' rootPath (p:path) arr@(LocatorA _ child)                = (arr,rootPath):getPathNodesPathsA' (rootPath++[p]) path child
+getPathNodesPathsA' rootPath (p:path) arr@(TagA _ child)                = (arr,rootPath):getPathNodesPathsA' (rootPath++[p]) path child
+getPathNodesPathsA' rootPath (p:path) arr                               = debug Err ("ArrTypes.getPathNodesPathsA': unhandled non-empty path: "++show (p:path)++show arr) []
 
 
  

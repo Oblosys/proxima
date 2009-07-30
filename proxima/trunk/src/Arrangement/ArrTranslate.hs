@@ -34,7 +34,7 @@ unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pre
     }
     
 unArrange :: forall doc enr node clip token state .
-             (Show doc, Show enr, Show token, Show node, DocNode node, Clip clip
+             (Show doc, Show enr, Show token, Show node, DocNode node, Clip clip, Show clip
              ,Editable doc doc node clip token) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
              EditArrangement doc enr node clip token ->
              (EditLayout doc enr node clip token, LocalStateArr, ArrangementLevel doc node clip token)
@@ -100,7 +100,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
            PathA pth _ ->
              case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> MoveVertexLay (pathPFromPathA' arr pres pth ) (dstX-srcX,dstY-srcY)
-               _ -> docEditDrop arr srcX srcY dstX dstY 
+               _ -> cast (docEditDrop arr srcX srcY dstX dstY :: EditDocument' doc enr node clip token)  
            _ -> SkipLay 0
      {- 
       (case getLastMousePress state of
@@ -132,12 +132,23 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     _                     -> (SkipLay 0,             state, arrLvl) 
   
 docEditDrop arr srcX srcY dstX dstY = 
-  SkipLay 0
+  let (sourceEltDocPath, sourceEltArrPath) = last $ getDragSourceLocators arr srcX srcY
+      (orientation, targetListDocPath, targetListArrPath) = last $ getDropTargetLocators arr dstX dstY
+      (targetListEltDocPath, targetListEltArrPath) = last $ getDragSourceLocators arr dstX dstY
+      (PathD sourceEltDPath,PathD targetListDPath, PathD targetListEltDPath) = (sourceEltDocPath,targetListDocPath,targetListEltDocPath)
+  in  debug Arr ("\n\n\nDrop of "++show sourceEltDocPath++show targetListDocPath++show targetListEltDocPath) $
+      UpdateDoc' (\(DocumentLevel d p cl) -> 
+                    DocumentLevel (moveDocPathD sourceEltDPath targetListDPath (last targetListEltDPath) d) p cl)
+
 {-
-     (_, sourceEltDocPath, sourceEltArrPath) = srcX srcY
-     (tag, targetListDocPath, targetListArrPath) = .. dstX dstY 
-     (_, targetListEltDocPath, targetListEltArrPath) = dstX dstY
-   if length deepestDropTargetPath > deepestDragSourcePath 
+TODO: fix path when removing source affects it  (if src prefix dst then if last src < dst[i] dst [i]--)
+implement before or after
+make more robust
+
+Maybe add type check
+
+
+if length deepestDropTargetPath > deepestDragSourcePath 
    then  -- there is an empty droptarget deeper than the deepest destination dragsource
      edit doc Move sourceEltDocPath deepestDropTargetDocPath at 0
    else -- we are dropping on an element in the deepestDropTarget
@@ -148,25 +159,48 @@ docEditDrop arr srcX srcY dstX dstY =
 -}
 
 
-getDragSourceLocators = []
+getDragSourceLocators arr x y =
+  let pathNodesPaths = getPathNodesPathsXY arr x y
+      taggedDocPathsWithArrPaths = getTaggedDocPaths Nothing pathNodesPaths 
+  in  [ (docPath,arrPath) 
+      | (tag,docPath,arrPath) <- taggedDocPathsWithArrPaths
+      , isDragSourceTag tag
+      ]
 
 -- for drop targets, the tag is inside (..(Loc l (Tag ..))..), so we reverse twice
-getDropTargetLocators = []
+getDropTargetLocators arr x y =   
+  let pathNodesPaths = getPathNodesPathsXY arr x y
+      taggedDocPathsWithArrPaths = reverse $ getTaggedDocPaths Nothing (reverse pathNodesPaths)
+  in  [ (getDropTargetOrientation tag, docPath,arrPath) 
+      | (tag,docPath,arrPath) <- taggedDocPathsWithArrPaths
+      , isDropTargetTag tag
+      ]
 
-getTaggedLocators = []
+isDragSourceTag DragSourceTag = True
+isDragSourceTag _             = False
+
+isDropTargetTag (DropTargetTag _) = True
+isDragTargetTag _                 = False
+
+getDropTargetOrientation (DropTargetTag orientation) = orientation
+getDropTargetOrientation _ = error ""
+
+
+getTaggedDocPaths _ [] = []
+getTaggedDocPaths _ ((TagA tag _,_): arrs) = getTaggedDocPaths (Just tag) arrs 
+getTaggedDocPaths Nothing (_: arrs) = getTaggedDocPaths Nothing arrs 
+getTaggedDocPaths (Just tag) ((LocatorA node _,pth) : arrs) = (tag, pathNode node, pth) : getTaggedDocPaths Nothing arrs 
+getTaggedDocPaths (Just tag) (_ : arrs) = getTaggedDocPaths (Just tag) arrs 
+
+getPathNodesPathsXY arr x y =
+  case point x y arr of
+    Nothing -> debug Err ("No path for dragSource or dropTarget at "++show (x,y)) $ [] 
+    Just path -> getPathNodesPathsA path arr
 
 indexOfDragSourceTag i [] = Nothing
 indexOfDragSourceTag i (TagA DragSourceTag _:arrs) = Just i
 indexOfDragSourceTag i (_:arrs) = indexOfDragSourceTag (i+1) arrs
 
-getPathToDraggable completeDragPath arr = 
-  case indexOfDragSourceTag 0 $ reverse (getPathNodesA completeDragPath arr) of
-    Nothing -> error "no drag source on path"
-    Just reverseIndexDeepestDragSourceTag ->
-      let indexDeepestDragSourceTag = length completeDragPath - reverseIndexDeepestDragSourceTag
-      in  take (indexDeepestDragSourceTag+1) completeDragPath            
-          -- +1: return path to actual drag source, not to tag
-              
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
 mouseDownDoc :: forall doc enr node clip token state .
                 (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->

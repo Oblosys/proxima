@@ -134,3 +134,9 @@ alternativesD :: (Editable doc doc node clip token, Clip clip) => Path -> doc ->
 alternativesD p d = alternativesClip (select p d)
 
  
+moveDocPathD :: (Editable doc doc node clip token, Clip clip, Show clip) => Path -> Path -> Int -> doc -> doc
+moveDocPathD sourcePath targetListPath index doc =
+  let source = selectD sourcePath doc
+      (doc',_) = deleteD sourcePath doc
+      (doc'') = insertListD targetListPath index source doc'
+  in  doc''

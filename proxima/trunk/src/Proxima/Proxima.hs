@@ -64,7 +64,7 @@ import Data.Map (Map)
 -- initial system local state in Main is not nice
 
 
-proxima :: ( DocNode node, Show token, Ord token, Show enr, Doc doc, Clip clip
+proxima :: ( DocNode node, Show token, Ord token, Show enr, Doc doc, Clip clip, Show clip
            , EvaluationSheet doc enr clip, ReductionSheet doc enr clip
            , Editable doc doc node clip token) =>
            Settings ->
