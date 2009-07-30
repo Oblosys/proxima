@@ -12,7 +12,9 @@ data Currency = Currency name : Description euroRate : Float_
 
 
 
-data Tasks = Tasks showCompleted : Bool tasks : [Task]
+data Tasks = Tasks things : [Thing] showCompleted : Bool tasks : [Task]
+
+data Thing = Thing
 
 data Task = BasicTask description : Description completed : Bool 
           | CompositeTask expanded : Bool description : Description subtasks : [Task]

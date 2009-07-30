@@ -206,13 +206,20 @@ SEM Description [ | | strVal : String ]
 
 
 
+SEM List_Thing
+  | List_Thing
+      loc.pres = structural $ dropTarget $ row $
+                   map dragSource @elts.press
 
-
+SEM Thing
+  | Thing
+      loc.pres = structural $ row [ img "img/add.png" `withSize` (23,20) `withRef` (0,0) ]
 
 SEM Tasks
   | Tasks
       loc.pres = structural $ row [ hSpace 4
-      	       	 	      	  , col [ text "Tasks:"
+      	       	 	      	  , col [ text "kut", @things.pres
+				        , text "Tasks:"
       	       	 	      	    	`addPopupItems` 
                                         ([ ("Insert task", insertElementAtEnd (toClip newTask) (@lhs.path++[1]))
                                          ] ++ showHideCompletedItem @lhs.path @self)
@@ -281,11 +288,11 @@ SEM Task
 showHideCompleted showCompleted completed pres = 
   if showCompleted || not completed then pres else empty
 
-showHideCompletedItem path (Tasks showCompleted _) = 
+showHideCompletedItem path (Tasks _ showCompleted _) = 
   [ ((if showCompleted then "Hide " else "Show ") ++ " completed tasks"
     , updateAt path $ \clip ->
         case clip of
-          Clip_Tasks (Tasks _ tasks) -> toClip $ Tasks (not showCompleted) tasks
+          Clip_Tasks (Tasks things _ tasks) -> toClip $ Tasks things (not showCompleted) tasks
           clip -> clip
     )
   ]

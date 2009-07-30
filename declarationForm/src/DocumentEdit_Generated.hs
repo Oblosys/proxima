@@ -23,6 +23,7 @@ instance Clip ClipDoc where
   arityClip (Clip_Expense x) = arity x
   arityClip (Clip_Currency x) = arity x
   arityClip (Clip_Tasks x) = arity x
+  arityClip (Clip_Thing x) = arity x
   arityClip (Clip_Task x) = arity x
   arityClip (Clip_Description x) = arity x
   arityClip (Clip_Sudoku x) = arity x
@@ -32,6 +33,7 @@ instance Clip ClipDoc where
   arityClip (Clip_Float_ x) = arity x
   arityClip (Clip_List_Expense x) = arity x
   arityClip (Clip_List_Currency x) = arity x
+  arityClip (Clip_List_Thing x) = arity x
   arityClip (Clip_List_Task x) = arity x
   arityClip (Clip_Bool x) = arity x
   arityClip (Clip_Int x) = arity x
@@ -46,6 +48,7 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Expense x) = alternatives x
   alternativesClip (Clip_Currency x) = alternatives x
   alternativesClip (Clip_Tasks x) = alternatives x
+  alternativesClip (Clip_Thing x) = alternatives x
   alternativesClip (Clip_Task x) = alternatives x
   alternativesClip (Clip_Description x) = alternatives x
   alternativesClip (Clip_Sudoku x) = alternatives x
@@ -55,6 +58,7 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Float_ x) = alternatives x
   alternativesClip (Clip_List_Expense x) = alternatives x
   alternativesClip (Clip_List_Currency x) = alternatives x
+  alternativesClip (Clip_List_Thing x) = alternatives x
   alternativesClip (Clip_List_Task x) = alternatives x
   alternativesClip (Clip_Bool x) = alternatives x
   alternativesClip (Clip_Int x) = alternatives x
@@ -69,6 +73,7 @@ instance Clip ClipDoc where
   holeClip (Clip_Expense x) = Clip_Expense hole
   holeClip (Clip_Currency x) = Clip_Currency hole
   holeClip (Clip_Tasks x) = Clip_Tasks hole
+  holeClip (Clip_Thing x) = Clip_Thing hole
   holeClip (Clip_Task x) = Clip_Task hole
   holeClip (Clip_Description x) = Clip_Description hole
   holeClip (Clip_Sudoku x) = Clip_Sudoku hole
@@ -78,6 +83,7 @@ instance Clip ClipDoc where
   holeClip (Clip_Float_ x) = Clip_Float_ hole
   holeClip (Clip_List_Expense x) = Clip_List_Expense hole
   holeClip (Clip_List_Currency x) = Clip_List_Currency hole
+  holeClip (Clip_List_Thing x) = Clip_List_Thing hole
   holeClip (Clip_List_Task x) = Clip_List_Task hole
   holeClip (Clip_Bool x) = Clip_Bool hole
   holeClip (Clip_Int x) = Clip_Int hole
@@ -92,6 +98,7 @@ instance Clip ClipDoc where
   isListClip (Clip_Expense x) = isList x
   isListClip (Clip_Currency x) = isList x
   isListClip (Clip_Tasks x) = isList x
+  isListClip (Clip_Thing x) = isList x
   isListClip (Clip_Task x) = isList x
   isListClip (Clip_Description x) = isList x
   isListClip (Clip_Sudoku x) = isList x
@@ -101,6 +108,7 @@ instance Clip ClipDoc where
   isListClip (Clip_Float_ x) = isList x
   isListClip (Clip_List_Expense x) = isList x
   isListClip (Clip_List_Currency x) = isList x
+  isListClip (Clip_List_Thing x) = isList x
   isListClip (Clip_List_Task x) = isList x
   isListClip (Clip_Bool x) = isList x
   isListClip (Clip_Int x) = isList x
@@ -115,6 +123,7 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Expense x) = insertList i c x
   insertListClip i c (Clip_Currency x) = insertList i c x
   insertListClip i c (Clip_Tasks x) = insertList i c x
+  insertListClip i c (Clip_Thing x) = insertList i c x
   insertListClip i c (Clip_Task x) = insertList i c x
   insertListClip i c (Clip_Description x) = insertList i c x
   insertListClip i c (Clip_Sudoku x) = insertList i c x
@@ -124,6 +133,7 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Float_ x) = insertList i c x
   insertListClip i c (Clip_List_Expense x) = insertList i c x
   insertListClip i c (Clip_List_Currency x) = insertList i c x
+  insertListClip i c (Clip_List_Thing x) = insertList i c x
   insertListClip i c (Clip_List_Task x) = insertList i c x
   insertListClip i c (Clip_Bool x) = insertList i c x
   insertListClip i c (Clip_Int x) = insertList i c x
@@ -138,6 +148,7 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Expense x) = removeList i x
   removeListClip i (Clip_Currency x) = removeList i x
   removeListClip i (Clip_Tasks x) = removeList i x
+  removeListClip i (Clip_Thing x) = removeList i x
   removeListClip i (Clip_Task x) = removeList i x
   removeListClip i (Clip_Description x) = removeList i x
   removeListClip i (Clip_Sudoku x) = removeList i x
@@ -147,6 +158,7 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Float_ x) = removeList i x
   removeListClip i (Clip_List_Expense x) = removeList i x
   removeListClip i (Clip_List_Currency x) = removeList i x
+  removeListClip i (Clip_List_Thing x) = removeList i x
   removeListClip i (Clip_List_Task x) = removeList i x
   removeListClip i (Clip_Bool x) = removeList i x
   removeListClip i (Clip_Int x) = removeList i x
@@ -374,21 +386,23 @@ instance Editable Currency Document Node ClipDoc UserToken where
 
 instance Editable Tasks Document Node ClipDoc UserToken where
   select [] x = Clip_Tasks x
-  select (0:p) (Tasks x0 x1) = select p x0
-  select (1:p) (Tasks x0 x1) = select p x1
+  select (0:p) (Tasks x0 x1 x2) = select p x0
+  select (1:p) (Tasks x0 x1 x2) = select p x1
+  select (2:p) (Tasks x0 x1 x2) = select p x2
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Tasks c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Tasks") x
-  paste (0:p) c (Tasks x0 x1) = Tasks (paste p c x0) x1
-  paste (1:p) c (Tasks x0 x1) = Tasks x0 (paste p c x1)
+  paste (0:p) c (Tasks x0 x1 x2) = Tasks (paste p c x0) x1 x2
+  paste (1:p) c (Tasks x0 x1 x2) = Tasks x0 (paste p c x1) x2
+  paste (2:p) c (Tasks x0 x1 x2) = Tasks x0 x1 (paste p c x2)
   paste _ _ x = x
 
-  alternatives _ = [ ("Tasks {Bool} {List_Task} "  , Clip_Tasks $ Tasks hole hole)
+  alternatives _ = [ ("Tasks {List_Thing} {Bool} {List_Task} "  , Clip_Tasks $ Tasks hole hole hole)
                    ,("{Tasks}", Clip_Tasks hole)
                    ]
 
-  arity (Tasks x0 x1) = 2
+  arity (Tasks x0 x1 x2) = 3
   arity _                        = 0
 
   toClip t = Clip_Tasks t
@@ -401,6 +415,36 @@ instance Editable Tasks Document Node ClipDoc UserToken where
   hole = HoleTasks
 
   holeNodeConstr = Node_HoleTasks
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable Thing Document Node ClipDoc UserToken where
+  select [] x = Clip_Thing x
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_Thing c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Thing") x
+  paste _ _ x = x
+
+  alternatives _ = [ ("Thing "  , Clip_Thing $ Thing)
+                   ,("{Thing}", Clip_Thing hole)
+                   ]
+
+  arity (Thing) = 0
+  arity _                        = 0
+
+  toClip t = Clip_Thing t
+
+  fromClip (Clip_Thing t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrThing
+
+  hole = HoleThing
+
+  holeNodeConstr = Node_HoleThing
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -763,6 +807,52 @@ instance Editable List_Currency Document Node ClipDoc UserToken where
 
   removeList n (List_Currency cxs) = Clip_List_Currency $ List_Currency (removeList_Currency n cxs)
   removeList _ xs = Clip_List_Currency $ xs
+
+instance Editable List_Thing Document Node ClipDoc UserToken where
+  select [] x = Clip_List_Thing x
+  select (n:p) (List_Thing cxs) =
+    let xs = fromConsList_Thing cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_List_Thing c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Thing")   x
+  paste (n:p) c (List_Thing cxs) =
+    let xs = fromConsList_Thing cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_Thing (replaceList_Thing n x' cxs)
+        else List_Thing cxs -- paste beyond end of list
+  paste _ _ x = x
+
+  alternatives _ = [("{List_Thing}", Clip_List_Thing hole)
+                   ]
+
+  arity (List_Thing x1) = length (fromConsList_Thing x1)
+  arity _ = 0
+
+  toClip t = Clip_List_Thing t
+
+  fromClip (Clip_List_Thing t) = Just t
+  fromClip _ = Nothing
+
+  parseErr = ParseErrList_Thing
+
+  hole = List_Thing Nil_Thing
+
+  holeNodeConstr = Node_HoleList_Thing
+
+  isList _ = True
+
+  insertList n (Clip_Thing c) (List_Thing cxs) = Clip_List_Thing $ List_Thing (insertList_Thing n c cxs)
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Thing xs
+  insertList _ c xs = Clip_List_Thing xs
+
+  removeList n (List_Thing cxs) = Clip_List_Thing $ List_Thing (removeList_Thing n cxs)
+  removeList _ xs = Clip_List_Thing $ xs
 
 instance Editable List_Task Document Node ClipDoc UserToken where
   select [] x = Clip_List_Task x
