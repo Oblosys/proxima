@@ -58,6 +58,9 @@ parse _ state layLvl prsLvl CutLay   = editLay editCut state layLvl prsLvl
 parse _ state layLvl prsLvl CopyLay   = editCopy state layLvl prsLvl
 parse _ state layLvl prsLvl PasteLay  = editLay editPaste state layLvl prsLvl
 parse _ state layLvl prsLvl DeleteLay = editLay editDelete state layLvl prsLvl 
+parse _ state layLvl prsLvl (MoveLay src dst) = (SkipPres 0, state, layLvl) 
+-- requires tree algorithms that work regardles of structural/parsing and on paths instead of focus
+
 parse _ state layLvl prsLvl SplitLay  = editLay editSplit state layLvl prsLvl
 parse scannerSheet state layLvl@(LayoutLevel pres f _) prsLvl LeftDeleteLay = 
   if focusIsOnGraph f pres -- if the from path is in a graph, this is a graph edit

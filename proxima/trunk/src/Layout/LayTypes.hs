@@ -31,6 +31,7 @@ data EditLayout_ wrapped doc enr node clip token =
   | CopyLay
   | PasteLay
   | DeleteLay
+  | MoveLay Path Path -- not yet implemented, probably requires overhaul of presentation edit algorithms
   | SplitLay
   | LeftDeleteLay
   | RightDeleteLay
