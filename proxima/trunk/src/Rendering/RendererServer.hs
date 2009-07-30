@@ -273,7 +273,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
         
-        ; divOpen id x' y' w' h' bColor (Just "Draggable")
+        ; divOpen id x' y' w' h' bColor (mkClass mt)
         ; renderArr arrDb scale (x, y) viewedArea Nothing Nothing (head' "Renderer.renderArr" childDiffTrees) arr
         ; divClose
         }

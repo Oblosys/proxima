@@ -68,7 +68,7 @@ dropTarget p = tag DropTargetTag p
 
 graph :: Int -> Int -> [(Int,Int)] -> [Xprez doc node clip token] -> Xprez doc node clip token
 graph width height edges vertexPress = 
-  GraphP NoIDP Clean width height edges vertexPress
+  GraphP NoIDP Clean width height edges (map dragSource vertexPress)
  
 vertex :: Int -> Int -> Int -> Outline -> Xprez doc node clip token -> Xprez doc node clip token
 vertex id x y outline pres = VertexP NoIDP id x y outline pres
