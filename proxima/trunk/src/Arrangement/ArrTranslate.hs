@@ -15,6 +15,8 @@ import Data.IORef
 import qualified Data.Map as Map
 import Data.Map (Map)
 
+import Evaluation.DocumentEdit
+
 translateIO state low high =  castRemainingEditOps $ \editLow ->
  do { (editHigh, state', low') <- unArrangeIO state low high editLow
     ; return ([editHigh], state', low')
@@ -32,7 +34,8 @@ unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pre
     }
     
 unArrange :: forall doc enr node clip token state .
-             (Show doc, Show enr, Show token, Show node, DocNode node) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
+             (Show doc, Show enr, Show token, Show node, DocNode node, Clip clip
+             ,Editable doc doc node clip token) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
              EditArrangement doc enr node clip token ->
              (EditLayout doc enr node clip token, LocalStateArr, ArrangementLevel doc node clip token)
 unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) editArr = 
@@ -102,8 +105,14 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
                    VertexA _ _ _ _ _ _ _ _ _ _ -> MoveVertexLay (pathPFromPathA' arr pres pathToDraggable ) (x-x',y-y')
                    -- for vertex we don't want the tag included, for others maybe we do
                    -- figure out how to do this
-                   a -> debug Arr ("dragging"++shallowShowArr a) $ 
-                     MoveLay (pathPFromPathA' arr pres pathToDraggable) []
+                   (LocatorA n a) -> debug Arr ("dragging"++shallowShowArr a) $ 
+                     case pathNode n of
+                       PathD srcPath ->
+                         cast ( UpdateDoc' (\(DocumentLevel d p cl) -> 
+                                         DocumentLevel (fst $ deleteD srcPath d) p cl)
+                          :: EditDocument' doc enr node clip token)        
+                       NoPathD -> SkipLay 0
+                   _ -> SkipLay 0
         _ -> SkipLay 0 -- no last mouse press, does not occur
       , state { getLastMousePress = Nothing }, arrLvl) 
       
