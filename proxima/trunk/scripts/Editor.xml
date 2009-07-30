@@ -590,8 +590,8 @@ Cannot use element in mouse event because the focus div catches all events
 Cannot use JQuery because it somehow fails for xhtml docs 
 */
 function startDrag(e,x,y)
-{ var allDraggables = $(".Vertex");
-
+{ var allDraggables = $(".Draggable");
+//  alert("draggables "+showElementsDimensions(allDraggables));
   var dragSource = getContainingElement(x,y,allDraggables);
   if (dragSource)
   { dragOffset = getMouseCoordsWithinTarget(e,dragSource);
@@ -647,7 +647,7 @@ function getElementDimensions( elt )
 function showElementsDimensions( elts )
 { var str = '';
   for (var i = 0; i < elts.length; i++)
-  { str += showElementDimensions(elts[i])+'\n'; 
+  { str += elts[i] + showElementDimensions(elts[i])+'\n'; 
   }
   return str;
 }
