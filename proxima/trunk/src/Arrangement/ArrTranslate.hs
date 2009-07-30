@@ -90,15 +90,21 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     DragStartArr x y -> debug Arr "Drag started" $
       (SkipLay 0, state { getLastMousePress = Just (x,y)}, arrLvl)
 
-    DropArr x y -> debug Arr "Drag ended" $
-      (case getLastMousePress state of -- should not be Nothing
-         Just (x',y') -> 
-           case navigateFocus x' y' arr of
-             PathA pth _ ->
-               case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
-                 (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> MoveVertexLay (pathPFromPathA' arr pres pth ) (x-x',y-y')
-                 _ -> SkipLay 0
-             _ -> SkipLay 0
+    DropArr x y -> 
+      (case getLastMousePress state of
+        Just (x',y') -> 
+         case point x' y' arr of
+          Nothing -> debug Err ("No path for drag source at "++show (x',y')) $ SkipLay 0 
+          Just completeDragPath ->
+           let pathToDraggable = getPathToDraggable completeDragPath arr
+           in  debug Arr ("Drag ended " ++ show (selectTreeA pathToDraggable arr)) $
+             case (\(_,_,x)->x) $ selectTreeA pathToDraggable arr of 
+                   VertexA _ _ _ _ _ _ _ _ _ _ -> MoveVertexLay (pathPFromPathA' arr pres pathToDraggable ) (x-x',y-y')
+                   -- for vertex we don't want the tag included, for others maybe we do
+                   -- figure out how to do this
+                   a -> debug Arr ("dragging"++shallowShowArr a) $ 
+                     MoveLay (pathPFromPathA' arr pres pathToDraggable) []
+        _ -> SkipLay 0 -- no last mouse press, does not occur
       , state { getLastMousePress = Nothing }, arrLvl) 
       
     OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
@@ -106,7 +112,30 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     WrapArr wrapped       -> (unwrap wrapped,        state, arrLvl)
     _                     -> (SkipLay 0,             state, arrLvl) 
   
+{- old drop for vertices
+           case getLastMousePress state of -- should not be Nothing
+            Just (x',y') -> 
+             case navigateFocus x' y' arr of
+               PathA pth _ ->
+                 case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
+                   (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> MoveVertexLay (pathPFromPathA' arr pres pth ) (x-x',y-y')
+                   _ -> SkipLay 0
+               _ -> SkipLay 0
 
+-}
+
+indexOfDragSourceTag i [] = Nothing
+indexOfDragSourceTag i (TagA DragSourceTag _:arrs) = Just i
+indexOfDragSourceTag i (_:arrs) = indexOfDragSourceTag (i+1) arrs
+
+getPathToDraggable completeDragPath arr = 
+  case indexOfDragSourceTag 0 $ reverse (getPathNodesA completeDragPath arr) of
+    Nothing -> error "no drag source on path"
+    Just reverseIndexDeepestDragSourceTag ->
+      let indexDeepestDragSourceTag = length completeDragPath - reverseIndexDeepestDragSourceTag
+      in  take (indexDeepestDragSourceTag+1) completeDragPath            
+          -- +1: return path to actual drag source, not to tag
+              
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
 mouseDownDoc :: forall doc enr node clip token state .
                 (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->

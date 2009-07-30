@@ -320,7 +320,19 @@ pointGraphList x' y' pth loc arrs =
     ((pth', loc'):_) -> Just (pth', loc')
                                           
 
-
+-- returns a list of all nodes on the path, starting with the root
+getPathNodesA :: Show node => [Int] -> Arrangement node -> [Arrangement node]
+getPathNodesA []       arr                                = [arr]
+getPathNodesA (p:path) arr@(RowA _ _ _ _ _ _ _ _ arrs)           = arr:getPathNodesA path (index "ArrUtils.getPathNodesA.1" arrs p)
+getPathNodesA (p:path) arr@(ColA _ _ _ _ _ _ _ _ _ arrs)         = arr:getPathNodesA path (index "ArrUtils.getPathNodesA.2" arrs p)
+getPathNodesA (p:path) arr@(OverlayA _ _ _ _ _ _ _ _ _ arrs)       = arr:getPathNodesA path  (index "ArrUtils.getPathNodesA.3" arrs p)
+getPathNodesA (p:path) arr@(GraphA _ _ _ _ _ _ _ _ _ arrs)           = arr:getPathNodesA path (index "ArrUtils.getPathNodesA.4" arrs p)
+getPathNodesA (0:path) arr@(VertexA _ _ _ _ _ _ _ _ _ child)     = arr:getPathNodesA path child
+getPathNodesA (p:path) arr@(StructuralA _ child)             = arr:getPathNodesA path child
+getPathNodesA (p:path) arr@(ParsingA _ child)                = arr:getPathNodesA path child
+getPathNodesA (p:path) arr@(LocatorA _ child)                = arr:getPathNodesA path child
+getPathNodesA (p:path) arr@(TagA _ child)                = arr:getPathNodesA path child
+getPathNodesA (p:path) arr                               = debug Err ("ArrTypes.getPathNodesA: unhandled non-empty path: "++show (p:path)++show arr) []
 
 
  
@@ -328,12 +340,11 @@ pointGraphList x' y' pth loc arrs =
 selectTreeA :: Show node => [Int] -> Arrangement node -> (Int, Int, Arrangement node)
 selectTreeA path arr = selectTreeA' 0 0 path arr
 
-selectTreeA' x' y' []       tr                                = (x', y', tr)
+selectTreeA' x' y' []       arr                                = (x', y', arr)
 selectTreeA' x' y' (p:path) (RowA _ x y _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.1" arrs p)
 selectTreeA' x' y' (p:path) (ColA _ x y _ _ _ _ _ _ arrs)         = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.2" arrs p)
---selectTreeA' x' y' (0:path) (OverlayA _ x y _ _ _ _ _ arrs@(arr:_)) = selectTreeA' (x'+x) (y'+y) path (last arrs)
-selectTreeA' x' y' (0:path) (OverlayA _ x y _ _ _ _ _ _ arrs@(arr:_)) = selectTreeA' (x'+x) (y'+y) path arr
-selectTreeA' x' y' (p:path) (GraphA _ x y _ _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.3" arrs p)
+selectTreeA' x' y' (p:path) (OverlayA _ x y _ _ _ _ _ _ arrs)     = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.3" arrs p)
+selectTreeA' x' y' (p:path) (GraphA _ x y _ _ _ _ _ _ arrs)           = selectTreeA' (x'+x) (y'+y) path (index "ArrUtils.selectTreeA'.4" arrs p)
 selectTreeA' x' y' (0:path) (VertexA _ x y _ _ _ _ _ _ arr)     = selectTreeA' (x'+x) (y'+y) path arr
 selectTreeA' x' y' (p:path) (StructuralA _ child)             = selectTreeA' x' y' path child
 selectTreeA' x' y' (p:path) (ParsingA _ child)                = selectTreeA' x' y' path child

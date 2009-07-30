@@ -163,7 +163,7 @@ shallowShowArr (EdgeA i x y x' y' _ _ _ _)        = "{EdgeA:"++show i++" x="++sh
 shallowShowArr (StructuralA _ child)              = "{StructuralA}"
 shallowShowArr (ParsingA _ child)                 = "{ParsingA}"
 shallowShowArr (LocatorA location child)          = "{LocatorA}"
-shallowShowArr (TagA _ child)                     = "{TagA}"
+shallowShowArr (TagA tag child)                   = "{TagA: "++show tag++"}"
 shallowShowArr arr                                = "{Arrangement not handled by shallowShowArr: "++show arr++"}"
 
 showTreeArr arr = unlines $ showTreeArr' 0 arr
