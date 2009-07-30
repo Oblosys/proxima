@@ -93,7 +93,16 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     DragStartArr x y -> debug Arr "Drag started" $
       (SkipLay 0, state { getLastMousePress = Just (x,y)}, arrLvl)
 
-    DropArr x y -> 
+    DropArr dstX dstY -> 
+      (case getLastMousePress state of -- should not be Nothing
+        Just (srcX,srcY) -> 
+         case navigateFocus srcX srcY arr of
+           PathA pth _ ->
+             case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
+               (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> MoveVertexLay (pathPFromPathA' arr pres pth ) (dstX-srcX,dstY-srcY)
+               _ -> docEditDrop arr srcX srcY dstX dstY 
+           _ -> SkipLay 0
+     {- 
       (case getLastMousePress state of
         Just (x',y') -> 
          case point x' y' arr of
@@ -114,24 +123,37 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
                        NoPathD -> SkipLay 0
                    _ -> SkipLay 0
         _ -> SkipLay 0 -- no last mouse press, does not occur
-      , state { getLastMousePress = Nothing }, arrLvl) 
+-}      
+     , state { getLastMousePress = Nothing }, arrLvl) 
       
     OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
     SaveFileArr str       -> (SaveFileLay str,       state, arrLvl) 
     WrapArr wrapped       -> (unwrap wrapped,        state, arrLvl)
     _                     -> (SkipLay 0,             state, arrLvl) 
   
-{- old drop for vertices
-           case getLastMousePress state of -- should not be Nothing
-            Just (x',y') -> 
-             case navigateFocus x' y' arr of
-               PathA pth _ ->
-                 case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
-                   (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> MoveVertexLay (pathPFromPathA' arr pres pth ) (x-x',y-y')
-                   _ -> SkipLay 0
-               _ -> SkipLay 0
+docEditDrop arr srcX srcY dstX dstY = 
+  SkipLay 0
+{-
+     (_, sourceEltDocPath, sourceEltArrPath) = srcX srcY
+     (tag, targetListDocPath, targetListArrPath) = .. dstX dstY 
+     (_, targetListEltDocPath, targetListEltArrPath) = dstX dstY
+   if length deepestDropTargetPath > deepestDragSourcePath 
+   then  -- there is an empty droptarget deeper than the deepest destination dragsource
+     edit doc Move sourceEltDocPath deepestDropTargetDocPath at 0
+   else -- we are dropping on an element in the deepestDropTarget
+     simple edit doc Move sourceEltDocPath deepestDropTargetDocPath at position 
+              (last deepestDragSourceDocPath)
+            now we should have targetListDocPath == init targetListEltDocPath
 
 -}
+
+
+getDragSourceLocators = []
+
+-- for drop targets, the tag is inside (..(Loc l (Tag ..))..), so we reverse twice
+getDropTargetLocators = []
+
+getTaggedLocators = []
 
 indexOfDragSourceTag i [] = Nothing
 indexOfDragSourceTag i (TagA DragSourceTag _:arrs) = Just i
