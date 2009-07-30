@@ -171,28 +171,28 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
 
     (EmptyA  id x' y' w' h' _ _ bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
-        ; divOpen id x' y' w' h' bColor Nothing
+        ; divOpen id x' y' w' h' bColor (mkClass mt)
         ; divClose
         }
       
     (StringA id x' y' w' h' _ vRef' str fColor bColor fnt _) ->
      do { let (x,y,w,h, vRef)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h', scaleInt scale vRef')
-        ; stringHTML id str x' y' w' h' fnt fColor bColor
+        ; stringHTML id str x' y' w' h' fnt fColor bColor (mkClass mt)
         }
 
     (ImageA id x' y' w' h' _ _ src style lColor bColor) ->
-     do { imageHTML id src x' y' w' h' lColor bColor
+     do { imageHTML id src x' y' w' h' lColor bColor (mkClass mt)
         }
 
     (RectangleA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { let pts = [(0,0),(w',0),(w',h'),(0,h')]
-        ; polyHTML id x' y' w' h' pts (scaleInt scale lw' `max` 1) lColor fColor
+        ; polyHTML id x' y' w' h' pts (scaleInt scale lw' `max` 1) lColor fColor (mkClass mt)
         }
 
     (EllipseA id x' y' w' h' _ _ lw' style lColor fColor bColor) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')       
         ; -- todo: take style into account
-        ; ellipseHTML id x' y' w h (scaleInt scale lw' `max` 1) lColor fColor
+        ; ellipseHTML id x' y' w h (scaleInt scale lw' `max` 1) lColor fColor (mkClass mt)
         }
 
     (PolyA id x' y' w' h' _ _ pts' lw' style lColor fColor bColor) ->
@@ -202,7 +202,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
        
         
         ; -- todo: take style into account & clip
-        ; polyHTML id x' y' w' h' pts' (scaleInt scale lw' `max` 1) lColor fColor
+        ; polyHTML id x' y' w' h' pts' (scaleInt scale lw' `max` 1) lColor fColor (mkClass mt)
         
         }
 
@@ -224,7 +224,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
 
-        ; divOpen id x' y' w' h' bColor Nothing
+        ; divOpen id x' y' w' h' bColor (mkClass mt)
         ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing Nothing) childDiffTrees arrs
         ; divClose
         }
@@ -239,7 +239,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
                         HeadInFront -> reverse
                         HeadAtBack  -> Prelude.id
               
-        ; divOpen id x' y' w' h' bColor Nothing
+        ; divOpen id x' y' w' h' bColor (mkClass mt)
         ; sequence_ $ order $
             zipWith (renderArr arrDb scale (x, y) viewedArea Nothing Nothing) childDiffTrees arrs
         ; divClose
@@ -258,7 +258,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
         ; let (vertexArrs, edgeArrs) = splitAt nrOfVertices arrs
         
         
-        ; divOpen id x' y' w' h' bColor Nothing
+        ; divOpen id x' y' w' h' bColor (mkClass mt)
         ; sequence_ $ reverse $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing Nothing) vertexDiffTrees vertexArrs -- reverse so first is drawn in front
         
         ; svgStart
@@ -273,7 +273,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
         
-        ; divOpen id x' y' w' h' bColor (Just "Vertex")
+        ; divOpen id x' y' w' h' bColor (Just "Draggable")
         ; renderArr arrDb scale (x, y) viewedArea Nothing Nothing (head' "Renderer.renderArr" childDiffTrees) arr
         ; divClose
         }
@@ -287,7 +287,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
         
               ptHTML1 = (rlx' - round (arrowHeadSize * sin (angleFromEnd + arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd + arrowHeadHalfAngle))) 
               ptHTML2 = (rlx' - round (arrowHeadSize * sin (angleFromEnd - arrowHeadHalfAngle)), rly' - round (arrowHeadSize * cos (angleFromEnd - arrowHeadHalfAngle))) 
-        
+        -- edge will never have tag draggable
         ; edgeHTML id (lux',luy') (rlx',rly') (scaleInt scale lw' `max` 1) lColor
         ; polyHTML' id 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
         }
@@ -340,7 +340,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
 showIDNr (IDA nr) = show nr
 showIDNr NoIDA    = {- debug Err "Renderer.showIDNr: NoIDA " $ -} show (-1)
 
-mkClass (Just (Tags {isDragSource = True})) = Just "Vertex"
+mkClass (Just (Tags {isDragSource = True})) = Just "Draggable"
 mkClass _                                   = Nothing
 
 showMClass Nothing      = ""
@@ -356,11 +356,11 @@ divOpen id x y w h (r,g,b) mClass = tell $
 divClose = tell "</div>"
 
  
-stringHTML id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) = tell $ 
+stringHTML id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) mClass = tell $ 
   "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                  (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
-                           else "")   ++ "'>"++
+                           else "") ++ "'" ++ showMClass mClass ++ ">"++
                                 
   "<div style='position:absolute;left:0px;top:"++show (h `div` 2)++"px;"++
                 "width:"++show (w*2)++"px;"++
@@ -380,13 +380,14 @@ toHTML str = concatMap htmlChar str
        htmlChar '>'  = "&gt;"
        htmlChar c    = [c]
 
-imageHTML id src x y w h lColor (br,bg,bb) = tell $
+imageHTML id src x y w h lColor (br,bg,bb) mClass = tell $
   "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                  (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
                            else "") ++
-                 "background-image:url(\"/"++src++"\");" ++
-                 "'>"++
+                 "background-image:url(\"/"++src++"\");'"++
+                 showMClass mClass ++                  
+                 ">"++
   "</div>"                           
 
 svgStart = tell $ 
@@ -399,10 +400,10 @@ edgeHTML id (fromX,fromY) (toX, toY) lw (lr,lg,lb) = tell $
   "style='stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>"
   
   
-ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) = tell $
+ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) mClass = tell $
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show (h+2)++"px;"++
-                "'>" ++
+                "'"++ showMClass mClass ++ ">" ++
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
   "<ellipse cx='"++show ((w `div` 2)+1)++"' cy='"++show ((h `div` 2)+1)++"' rx='"++show (w `div` 2)++"' ry='"++show (h `div` 2)++"' "++
   "style='fill:rgb("++show fr++","++show fg++","++show fb++");"++
@@ -410,10 +411,10 @@ ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) = tell $
   "</svg></div>"
 -- TODO: why this max 4?
 
-polyHTML id x y w h pts lw (lr,lg,lb) (fr,fg,fb) = tell $  
+polyHTML id x y w h pts lw (lr,lg,lb) (fr,fg,fb) mClass = tell $  
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show ((h+2)`max` 4)++"px;"++
-                "'>" ++
+                "'"++ showMClass mClass ++ ">" ++
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
   "<polygon points='"++pointsStr++"' "++
   "style='fill:"++(if fr == -1 then "none; "
