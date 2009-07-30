@@ -16,7 +16,7 @@ import Common.CommonTypes hiding (Clean, Dirty)
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
   TaskDoc $
-    Tasks (toList_Thing [Thing, Thing, Thing]) True $ toList_Task
+    Tasks (toList_Thing [Thing 1, Thing 2, Thing 3]) True $ toList_Task
       [ BasicTask (Description "Pinpas bestellen") True
       , CompositeTask True (Description "Declaratie editor bouwen") $ toList_Task
           [ CompositeTask True (Description "Upgrade Proxima") $ toList_Task
@@ -226,7 +226,7 @@ toXMLCurrency (ParseErrCurrency error) = EmptyElt "ParseErrCurrency" []
 toXMLTasks (Tasks things showCompleted tasks) = Elt "Tasks" [] $ toXMLList_Thing things ++ [toXMLBool showCompleted] ++ toXMLList_Task tasks
 toXMLTasks (HoleTasks) = EmptyElt "HoleTasks" [] 
 toXMLTasks (ParseErrTasks error) = EmptyElt "ParseErrTasks" []
-toXMLThing (Thing) = EmptyElt "Thing" [] 
+toXMLThing (Thing nr) = Elt "Thing" [] $ [toXMLInt nr]
 toXMLThing (HoleThing) = EmptyElt "HoleThing" [] 
 toXMLThing (ParseErrThing error) = EmptyElt "ParseErrThing" []
 toXMLTask (BasicTask description completed) = Elt "BasicTask" [] $ [toXMLDescription description] ++ [toXMLBool completed]
@@ -295,7 +295,7 @@ parseXMLCns_Currency = Currency <$ startTag "Currency" <*> parseXML_Description 
 parseXML_Tasks = parseXMLCns_Tasks <|> parseHoleAndParseErr "Tasks" HoleTasks
 parseXMLCns_Tasks = Tasks <$ startTag "Tasks" <*> parseXML_List_Thing <*> parseXML_Bool <*> parseXML_List_Task<* endTag "Tasks"
 parseXML_Thing = parseXMLCns_Thing <|> parseHoleAndParseErr "Thing" HoleThing
-parseXMLCns_Thing = Thing <$ emptyTag "Thing"
+parseXMLCns_Thing = Thing <$ startTag "Thing" <*> parseXML_Int<* endTag "Thing"
 parseXML_Task = parseXMLCns_BasicTask <|> parseXMLCns_CompositeTask <|> parseHoleAndParseErr "Task" HoleTask
 parseXMLCns_BasicTask = BasicTask <$ startTag "BasicTask" <*> parseXML_Description <*> parseXML_Bool<* endTag "BasicTask"
 parseXMLCns_CompositeTask = CompositeTask <$ startTag "CompositeTask" <*> parseXML_Bool <*> parseXML_Description <*> parseXML_List_Task<* endTag "CompositeTask"

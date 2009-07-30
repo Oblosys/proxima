@@ -53,7 +53,7 @@ data Tasks = Tasks List_Thing Bool List_Task
            | ParseErrTasks (ParseError Document Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
-data Thing = Thing
+data Thing = Thing Int
            | HoleThing
            | ParseErrThing (ParseError Document Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)

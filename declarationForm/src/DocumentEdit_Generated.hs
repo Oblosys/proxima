@@ -422,17 +422,19 @@ instance Editable Tasks Document Node ClipDoc UserToken where
 
 instance Editable Thing Document Node ClipDoc UserToken where
   select [] x = Clip_Thing x
+  select (0:p) (Thing x0) = select p x0
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Thing c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Thing") x
+  paste (0:p) c (Thing x0) = Thing (paste p c x0)
   paste _ _ x = x
 
-  alternatives _ = [ ("Thing "  , Clip_Thing $ Thing)
+  alternatives _ = [ ("Thing {Int} "  , Clip_Thing $ Thing hole)
                    ,("{Thing}", Clip_Thing hole)
                    ]
 
-  arity (Thing) = 0
+  arity (Thing x0) = 1
   arity _                        = 0
 
   toClip t = Clip_Thing t

@@ -111,7 +111,7 @@ construct_ParseErrCurrency (StructuralTk _ _ pres _ _) ~[] = Clip_Currency $ par
 construct_Tasks tk ~[mClip0,mClip1,mClip2] = Clip_Tasks $ reuseTasks [tk]  (retrieveArg "Tasks" "things::List_Thing" mClip0) (retrieveArg "Tasks" "showCompleted::Bool" mClip1) (retrieveArg "Tasks" "tasks::List_Task" mClip2)
 construct_HoleTasks tk ~[] = Clip_Tasks $ hole
 construct_ParseErrTasks (StructuralTk _ _ pres _ _) ~[] = Clip_Tasks $ parseErr (StructuralParseErr pres)
-construct_Thing tk ~[] = Clip_Thing $ reuseThing [tk] 
+construct_Thing tk ~[mClip0] = Clip_Thing $ reuseThing [tk]  (retrieveArg "Thing" "nr::Int" mClip0)
 construct_HoleThing tk ~[] = Clip_Thing $ hole
 construct_ParseErrThing (StructuralTk _ _ pres _ _) ~[] = Clip_Thing $ parseErr (StructuralParseErr pres)
 construct_BasicTask tk ~[mClip0,mClip1] = Clip_Task $ reuseBasicTask [tk]  (retrieveArg "BasicTask" "description::Description" mClip0) (retrieveArg "BasicTask" "completed::Bool" mClip1)
@@ -209,10 +209,10 @@ reuseTasks nodes ma0 ma1 ma2
            (Tasks a0 a1 a2) -> genericReuse3 Tasks a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseTasks"
 
-reuseThing :: [Token doc Node clip token] -> Thing
-reuseThing nodes
+reuseThing :: [Token doc Node clip token] -> Maybe Int -> Thing
+reuseThing nodes ma0
   = case extractFromTokens extractThing defaultThing nodes of
-           (Thing) -> genericReuse0 Thing
+           (Thing a0) -> genericReuse1 Thing a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseThing"
 
 reuseBasicTask :: [Token doc Node clip token] -> Maybe Description -> Maybe Bool -> Task
@@ -331,7 +331,7 @@ extractTasks (Just (Node_Tasks x@(Tasks _ _ _) _)) = Just x
 extractTasks _ = Nothing
 
 extractThing :: Maybe Node -> Maybe Thing
-extractThing (Just (Node_Thing x@(Thing) _)) = Just x
+extractThing (Just (Node_Thing x@(Thing _) _)) = Just x
 extractThing _ = Nothing
 
 extractBasicTask :: Maybe Node -> Maybe Task
@@ -417,7 +417,7 @@ defaultTasks :: Tasks
 defaultTasks = Tasks hole hole hole
 
 defaultThing :: Thing
-defaultThing = Thing
+defaultThing = Thing hole
 
 defaultBasicTask :: Task
 defaultBasicTask = BasicTask hole hole

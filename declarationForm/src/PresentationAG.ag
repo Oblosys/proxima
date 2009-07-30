@@ -208,17 +208,17 @@ SEM Description [ | | strVal : String ]
 
 SEM List_Thing
   | List_Thing
-      loc.pres = structural $ dropTarget $ row $
+      loc.pres = structural $ dropTarget $ col $
                    map dragSource @elts.press
 
 SEM Thing
   | Thing
-      loc.pres = structural $ row [ img "img/add.png" `withSize` (23,20) `withRef` (0,0) ]
+      loc.pres = structural $ row [ img "img/add.png" `withSize` (23,20) `withRef` (0,16), text (" "++show @nr) ]
 
 SEM Tasks
   | Tasks
       loc.pres = structural $ row [ hSpace 4
-      	       	 	      	  , col [ text "kut", @things.pres
+      	       	 	      	  , col [ @things.pres
 				        , text "Tasks:"
       	       	 	      	    	`addPopupItems` 
                                         ([ ("Insert task", insertElementAtEnd (toClip newTask) (@lhs.path++[1]))

@@ -67,7 +67,7 @@ DATA Tasks
   | ParseErrTasks error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Thing
-  | Thing
+  | Thing nr:Int
   | HoleThing
   | ParseErrThing error:{(ParseError Document Node ClipDoc UserToken)}
 
@@ -750,7 +750,7 @@ SEM Tasks
 
 SEM Thing
   | Thing
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Thing @self @lhs.path) @lhs.path "Thing" [  ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Thing @self @lhs.path) @lhs.path "Thing" [ presentPrimXMLInt @nr ] 
   | HoleThing     lhs.presXML = presHole @lhs.focusD "Thing" (Node_HoleThing @self @lhs.path) @lhs.path
   | ParseErrThing lhs.presXML = presParseErr (Node_ParseErrThing @self @lhs.path) @error
 
@@ -901,7 +901,7 @@ SEM Tasks
 
 SEM Thing
   | Thing
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Thing @self @lhs.path) @lhs.path "Thing" [  ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Thing @self @lhs.path) @lhs.path "Thing" [ presentPrimXMLInt @nr ] 
   | HoleThing     lhs.presTree = presHole @lhs.focusD "Thing" (Node_HoleThing @self @lhs.path) @lhs.path
   | ParseErrThing lhs.presTree = presParseErr (Node_ParseErrThing @self @lhs.path) @error
 
