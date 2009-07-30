@@ -340,8 +340,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
 showIDNr (IDA nr) = show nr
 showIDNr NoIDA    = {- debug Err "Renderer.showIDNr: NoIDA " $ -} show (-1)
 
-mkClass (Just (Tags {isDragSource = True})) = Just "Draggable"
-mkClass _                                   = Nothing
+mkClass (Just DragSourceTag) = Just "Draggable"
+mkClass _                    = Nothing
 
 showMClass Nothing      = ""
 showMClass (Just c) = " class='"++c++"'"
