@@ -30,7 +30,7 @@ showPathNodesA (p:pth) arr = shallowShowArr arr ++ "\n" ++
                                    then showPathNodesA pth (index "ArrUtils.showPathNodesA" children p)
                                    else "ArrUtils.showPathNodesA: index out of bounds"
 
-
+sizeA :: Show node => Path -> Arrangement node -> (Int, Int, Int, Int)
 sizeA path arr = sizeA' 0 0 path arr
 sizeA' x' y' []       arr                               = (x' + xA arr, y' + yA arr, widthA arr, heightA arr)
 sizeA' x' y' [p]      (StringA _ x y w h _ _ _ _ _ _ cxs)   = (x' + x + (index "ArrUtils.sizeA'" cxs p), y'+y, (index "ArrUtils.sizeA'" cxs p+1)-(index "ArrUtils.sizeA'" cxs p+1), h)

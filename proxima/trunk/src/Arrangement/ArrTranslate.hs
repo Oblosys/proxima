@@ -135,10 +135,19 @@ docEditDrop arr srcX srcY dstX dstY =
   let (sourceEltDocPath, sourceEltArrPath) = last $ getDragSourceLocators arr srcX srcY
       (orientation, targetListDocPath, targetListArrPath) = last $ getDropTargetLocators arr dstX dstY
       (targetListEltDocPath, targetListEltArrPath) = last $ getDragSourceLocators arr dstX dstY
+      (tleX, tleY, tleW, tleH) = sizeA targetListEltArrPath arr
+      (offsetX, offsetY) = (dstX - tleX, dstY -tleY)
+      isInFront = case orientation of
+                    Horizontal -> offsetX <= tleW `div` 2
+                    Vertical -> offsetY <= tleH `div` 2
       (PathD sourceEltDPath,PathD targetListDPath, PathD targetListEltDPath) = (sourceEltDocPath,targetListDocPath,targetListEltDocPath)
-  in  debug Arr ("\n\n\nDrop of "++show sourceEltDocPath++show targetListDocPath++show targetListEltDocPath) $
+  in  debug Arr ("\n\n\nDrop of "++show sourceEltDocPath++show targetListDocPath++show targetListEltDocPath++
+                 "\n"++show (tleX, tleY, tleW, tleH) ++ show (offsetX, offsetY) ++ show isInFront) $
       UpdateDoc' (\(DocumentLevel d p cl) -> 
-                    DocumentLevel (moveDocPathD sourceEltDPath targetListDPath (last targetListEltDPath) d) p cl)
+                    DocumentLevel (moveDocPathD sourceEltDPath targetListDPath 
+                                                (last targetListEltDPath + 
+                                                 if isInFront then 0 else 1) d) 
+                                  p cl)
 
 {-
 TODO: fix path when removing source affects it  (if src prefix dst then if last src < dst[i] dst [i]--)
