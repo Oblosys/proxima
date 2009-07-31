@@ -63,8 +63,11 @@ parsingWithParser parser self pres = ParsingP NoIDP (Just $ mkClipParser $ parse
 loc l xp  = LocatorP l xp
 tag t xp = TagP t xp
 
-dragSource p = tag DragSourceTag p
-dropTarget or p = tag (DropTargetTag or) p
+dragSource xp = tag DragSourceTag xp
+dropTarget or xp = tag (DropTargetTag or) xp
+
+draggableCol xps = dropTarget Vertical $ col $ map dragSource xps
+draggableRow xps = dropTarget Horizontal $ row $ map dragSource xps
 
 graph :: Int -> Int -> [(Int,Int)] -> [Xprez doc node clip token] -> Xprez doc node clip token
 graph width height edges vertexPress = 
