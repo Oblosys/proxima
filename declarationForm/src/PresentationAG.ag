@@ -208,8 +208,7 @@ SEM Description [ | | strVal : String ]
 
 SEM List_Thing
   | List_Thing
-      loc.pres = structural $ (dropTarget Vertical) $ col $
-                   map dragSource @elts.press
+      loc.pres = structural $ draggableCol @elts.press
 
 SEM Thing
   | Thing
@@ -230,7 +229,7 @@ SEM Tasks
 SEM List_Task
   | List_Task
       loc.pres = structural $ 
-                   col @elts.press
+                   draggableCol @elts.press
 
 SEM Task
   | BasicTask
