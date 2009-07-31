@@ -613,9 +613,11 @@ function cloneObject( obj ) {
 }
 
 
+/* Precondition: elts are given depth first, so by going from n-1 to 0, we get the deepest
+*/
 function getContainingElement(x,y,elts)
 {var elt;
-  for (var i=0; i < elts.length && !elt; i++)
+  for (var i=elts.length-1; i >= 0 && !elt; i--)
     if (within(x,y, getElementDimensions(elts[i])))
       elt=elts[i];
 
