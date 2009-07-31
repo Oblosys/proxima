@@ -136,14 +136,22 @@ alternativesD p d = alternativesClip (select p d)
  
 moveDocPathD :: (Editable doc doc node clip token, Clip clip, Show clip) => Path -> Path -> Int -> doc -> doc
 moveDocPathD sourcePath targetListPath index doc =
-  let adjustment = if init sourcePath `isPrefixOf` targetListPath
-                   then if last sourcePath < index then 1 else 0 
-                   else 0
+  let (tgtPath,tgtIx) = 
+        if not $ init sourcePath `isPrefixOf` targetListPath
+        then (targetListPath, index)
+        else if length sourcePath - 1 == length targetListPath -- src & tgt in same list
+             then (targetListPath, if last sourcePath < index then index-1 else index) 
+             else let (pref, p: suffix)  = splitAt (length sourcePath - 1) targetListPath 
+                  in  debug Arr (show (pref, p, suffix) ++ show sourcePath) $
+                      if last sourcePath == p then error "cyclic move"          
+                      else if last sourcePath < p then (pref ++ [p-1] ++ suffix, index)
+                                                  else (pref ++ [p]   ++ suffix, index)
       -- adjust the index if the source is in front of the target
       -- TODO: now we assume target and source in the same list, this can be made more general
       -- TODO: error handling
       
       source = selectD sourcePath doc
       (doc',_) = deleteD sourcePath doc
-      (doc'') = insertListD targetListPath (index-adjustment) source doc'
+      (doc'') = debug Arr ("move to " ++ show (tgtPath, tgtIx)) $
+                insertListD tgtPath tgtIx source doc'
   in  doc''
