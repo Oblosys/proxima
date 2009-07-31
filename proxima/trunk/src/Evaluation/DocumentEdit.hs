@@ -136,7 +136,14 @@ alternativesD p d = alternativesClip (select p d)
  
 moveDocPathD :: (Editable doc doc node clip token, Clip clip, Show clip) => Path -> Path -> Int -> doc -> doc
 moveDocPathD sourcePath targetListPath index doc =
-  let source = selectD sourcePath doc
+  let adjustment = if init sourcePath `isPrefixOf` targetListPath
+                   then if last sourcePath < index then 1 else 0 
+                   else 0
+      -- adjust the index if the source is in front of the target
+      -- TODO: now we assume target and source in the same list, this can be made more general
+      -- TODO: error handling
+      
+      source = selectD sourcePath doc
       (doc',_) = deleteD sourcePath doc
-      (doc'') = insertListD targetListPath index source doc'
+      (doc'') = insertListD targetListPath (index-adjustment) source doc'
   in  doc''

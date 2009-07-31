@@ -150,8 +150,7 @@ docEditDrop arr srcX srcY dstX dstY =
                                   p cl)
 
 {-
-TODO: fix path when removing source affects it  (if src prefix dst then if last src < dst[i] dst [i]--)
-implement before or after
+TODO: 
 make more robust
 check graphs (fix incrementality bug)
 
