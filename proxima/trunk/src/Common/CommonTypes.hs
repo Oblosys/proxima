@@ -29,7 +29,11 @@ data PathDoc = PathD Path
 class (Eq node, Ord node, Show node) => DocNode node where
   noNode :: node
   pathNode :: node -> PathDoc
+  typeOfNode :: node -> NodeType
   
+data NodeType = BasicType String
+              | ListType String deriving (Show, Eq)
+                
 -- This class allows us to access NoNode and the (Node_ .. path) in the generic part of Proxima
 -- Eq and Ord are here to reduce the number of constraints in the types
 

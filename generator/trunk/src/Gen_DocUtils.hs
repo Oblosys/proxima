@@ -35,11 +35,24 @@ genRankNode decls = genBanner "rankNode" $
 genDocNode decls = genBanner "DocNode instance for Node" $
   [ "instance DocNode Node where"
   , "  noNode = NoNode"
+  , ""
   , "  pathNode NoNode            = NoPathD" 
   ] ++
   [ "  pathNode (Node_%1 _ pth) = PathD pth" <~ [cnstrName] 
   | cnstrName <-  getAllConstructorNames decls 
-  ]
+  ] ++
+  [ "" ] ++
+  [ "  typeOfNode (Node_%1 _ _) = %2" <~ 
+    [ cnstrName
+    , case lhsType of
+             LHSBasicType typeName -> "BasicType \"" ++ typeName ++ "\""
+             LHSListType  typeName -> "ListType \"" ++ typeName ++ "\""
+             -- no Conslists
+    ] 
+  | Decl lhsType prods <- decls
+  , Prod _ cnstrName _ _ <- prods
+  ]        
+  
 
 genToXML decls = genBanner "toXML functions" $ concatMap genToXMLDecl decls
   where genToXMLDecl (Decl (LHSBasicType typeName) prods) = 

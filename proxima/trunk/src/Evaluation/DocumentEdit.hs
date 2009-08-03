@@ -147,7 +147,6 @@ moveDocPathD sourcePath targetListPath index doc =
                       else if last sourcePath < p then (pref ++ [p-1] ++ suffix, index)
                                                   else (pref ++ [p]   ++ suffix, index)
       -- adjust the index if the source is in front of the target
-      -- TODO: now we assume target and source in the same list, this can be made more general
       -- TODO: error handling
       
       source = selectD sourcePath doc
