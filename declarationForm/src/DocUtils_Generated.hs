@@ -135,6 +135,7 @@ rankNode (Node_ParseErrList_Task _ _) = 60
 
 instance DocNode Node where
   noNode = NoNode
+
   pathNode NoNode            = NoPathD
   pathNode (Node_RootEnr _ pth) = PathD pth
   pathNode (Node_HoleEnrichedDoc _ pth) = PathD pth
@@ -196,6 +197,67 @@ instance DocNode Node where
   pathNode (Node_List_Task _ pth) = PathD pth
   pathNode (Node_HoleList_Task _ pth) = PathD pth
   pathNode (Node_ParseErrList_Task _ pth) = PathD pth
+
+  typeOfNode (Node_RootEnr _ _) = BasicType "EnrichedDoc"
+  typeOfNode (Node_HoleEnrichedDoc _ _) = BasicType "EnrichedDoc"
+  typeOfNode (Node_ParseErrEnrichedDoc _ _) = BasicType "EnrichedDoc"
+  typeOfNode (Node_RootDoc _ _) = BasicType "Document"
+  typeOfNode (Node_HoleDocument _ _) = BasicType "Document"
+  typeOfNode (Node_ParseErrDocument _ _) = BasicType "Document"
+  typeOfNode (Node_FormDoc _ _) = BasicType "ChoiceDoc"
+  typeOfNode (Node_TaskDoc _ _) = BasicType "ChoiceDoc"
+  typeOfNode (Node_SudokuDoc _ _) = BasicType "ChoiceDoc"
+  typeOfNode (Node_HoleChoiceDoc _ _) = BasicType "ChoiceDoc"
+  typeOfNode (Node_ParseErrChoiceDoc _ _) = BasicType "ChoiceDoc"
+  typeOfNode (Node_Form _ _) = BasicType "Form"
+  typeOfNode (Node_HoleForm _ _) = BasicType "Form"
+  typeOfNode (Node_ParseErrForm _ _) = BasicType "Form"
+  typeOfNode (Node_Expense _ _) = BasicType "Expense"
+  typeOfNode (Node_HoleExpense _ _) = BasicType "Expense"
+  typeOfNode (Node_ParseErrExpense _ _) = BasicType "Expense"
+  typeOfNode (Node_Currency _ _) = BasicType "Currency"
+  typeOfNode (Node_HoleCurrency _ _) = BasicType "Currency"
+  typeOfNode (Node_ParseErrCurrency _ _) = BasicType "Currency"
+  typeOfNode (Node_Tasks _ _) = BasicType "Tasks"
+  typeOfNode (Node_HoleTasks _ _) = BasicType "Tasks"
+  typeOfNode (Node_ParseErrTasks _ _) = BasicType "Tasks"
+  typeOfNode (Node_Thing _ _) = BasicType "Thing"
+  typeOfNode (Node_HoleThing _ _) = BasicType "Thing"
+  typeOfNode (Node_ParseErrThing _ _) = BasicType "Thing"
+  typeOfNode (Node_BasicTask _ _) = BasicType "Task"
+  typeOfNode (Node_CompositeTask _ _) = BasicType "Task"
+  typeOfNode (Node_HoleTask _ _) = BasicType "Task"
+  typeOfNode (Node_ParseErrTask _ _) = BasicType "Task"
+  typeOfNode (Node_Description _ _) = BasicType "Description"
+  typeOfNode (Node_HoleDescription _ _) = BasicType "Description"
+  typeOfNode (Node_ParseErrDescription _ _) = BasicType "Description"
+  typeOfNode (Node_Sudoku _ _) = BasicType "Sudoku"
+  typeOfNode (Node_HoleSudoku _ _) = BasicType "Sudoku"
+  typeOfNode (Node_ParseErrSudoku _ _) = BasicType "Sudoku"
+  typeOfNode (Node_Row _ _) = BasicType "Row"
+  typeOfNode (Node_HoleRow _ _) = BasicType "Row"
+  typeOfNode (Node_ParseErrRow _ _) = BasicType "Row"
+  typeOfNode (Node_Field _ _) = BasicType "Field"
+  typeOfNode (Node_HoleField _ _) = BasicType "Field"
+  typeOfNode (Node_ParseErrField _ _) = BasicType "Field"
+  typeOfNode (Node_Int_ _ _) = BasicType "Int_"
+  typeOfNode (Node_HoleInt_ _ _) = BasicType "Int_"
+  typeOfNode (Node_ParseErrInt_ _ _) = BasicType "Int_"
+  typeOfNode (Node_Float_ _ _) = BasicType "Float_"
+  typeOfNode (Node_HoleFloat_ _ _) = BasicType "Float_"
+  typeOfNode (Node_ParseErrFloat_ _ _) = BasicType "Float_"
+  typeOfNode (Node_List_Expense _ _) = ListType "Expense"
+  typeOfNode (Node_HoleList_Expense _ _) = ListType "Expense"
+  typeOfNode (Node_ParseErrList_Expense _ _) = ListType "Expense"
+  typeOfNode (Node_List_Currency _ _) = ListType "Currency"
+  typeOfNode (Node_HoleList_Currency _ _) = ListType "Currency"
+  typeOfNode (Node_ParseErrList_Currency _ _) = ListType "Currency"
+  typeOfNode (Node_List_Thing _ _) = ListType "Thing"
+  typeOfNode (Node_HoleList_Thing _ _) = ListType "Thing"
+  typeOfNode (Node_ParseErrList_Thing _ _) = ListType "Thing"
+  typeOfNode (Node_List_Task _ _) = ListType "Task"
+  typeOfNode (Node_HoleList_Task _ _) = ListType "Task"
+  typeOfNode (Node_ParseErrList_Task _ _) = ListType "Task"
 
 
 
