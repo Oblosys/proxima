@@ -132,9 +132,15 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     _                     -> (SkipLay 0,             state, arrLvl) 
   
 docEditDrop arr srcX srcY dstX dstY = 
-  let (sourceEltDocPath, sourceEltArrPath) = last $ getDragSourceLocators arr srcX srcY
-      (orientation, targetListDocPath, targetListArrPath) = last $ getDropTargetLocators arr dstX dstY
-      (targetListEltDocPath, targetListEltArrPath) = last $ getDragSourceLocators arr dstX dstY
+  let (sourceEltDocPath, sourceEltArrPath, BasicType dragType) = last $ getDragSourceLocators arr srcX srcY
+                                          -- unsafe
+      (orientation, targetListDocPath, targetListArrPath) = last $ 
+        [ (o,dp,ap) 
+        | (o,dp,ap,tp) <- getDropTargetLocators arr dstX dstY 
+        , tp == ListType dragType
+        ]
+      (targetListEltDocPath, targetListEltArrPath,_) = last $ 
+        filter ((==BasicType dragType) . thd3) $ getDragSourceLocators arr dstX dstY
       (tleX, tleY, tleW, tleH) = sizeA targetListEltArrPath arr
       (offsetX, offsetY) = (dstX - tleX, dstY -tleY)
       isInFront = case orientation of
@@ -142,12 +148,14 @@ docEditDrop arr srcX srcY dstX dstY =
                     Vertical -> offsetY <= tleH `div` 2
       (PathD sourceEltDPath,PathD targetListDPath, PathD targetListEltDPath) = (sourceEltDocPath,targetListDocPath,targetListEltDocPath)
   in  debug Arr ("\n\n\nDrop of "++show sourceEltDocPath++show targetListDocPath++show targetListEltDocPath++
-                 "\n"++show (tleX, tleY, tleW, tleH) ++ show (offsetX, offsetY) ++ show isInFront) $
+                 "\n"++show (tleX, tleY, tleW, tleH) ++ show (offsetX, offsetY) ++ show isInFront++
+                 "\n") $
       UpdateDoc' (\(DocumentLevel d p cl) -> 
                     DocumentLevel (moveDocPathD sourceEltDPath targetListDPath 
                                                 (last targetListEltDPath + 
                                                  if isInFront then 0 else 1) d) 
                                   p cl)
+thd3 (_,_,x) = x
 
 {-
 TODO: 
@@ -171,8 +179,8 @@ if length deepestDropTargetPath > deepestDragSourcePath
 getDragSourceLocators arr x y =
   let pathNodesPaths = getPathNodesPathsXY arr x y
       taggedDocPathsWithArrPaths = getTaggedDocPaths Nothing pathNodesPaths 
-  in  [ (docPath,arrPath) 
-      | (tag,docPath,arrPath) <- taggedDocPathsWithArrPaths
+  in  [ (docPath,arrPath,nodeType) 
+      | (tag,docPath,nodeType,arrPath) <- taggedDocPathsWithArrPaths
       , isDragSourceTag tag
       ]
 
@@ -180,8 +188,8 @@ getDragSourceLocators arr x y =
 getDropTargetLocators arr x y =   
   let pathNodesPaths = getPathNodesPathsXY arr x y
       taggedDocPathsWithArrPaths = reverse $ getTaggedDocPaths Nothing (reverse pathNodesPaths)
-  in  [ (getDropTargetOrientation tag, docPath,arrPath) 
-      | (tag,docPath,arrPath) <- taggedDocPathsWithArrPaths
+  in  [ (getDropTargetOrientation tag, docPath,arrPath,nodeType) 
+      | (tag,docPath,nodeType,arrPath) <- taggedDocPathsWithArrPaths
       , isDropTargetTag tag
       ]
 
@@ -198,7 +206,7 @@ getDropTargetOrientation _ = error ""
 getTaggedDocPaths _ [] = []
 getTaggedDocPaths _ ((TagA tag _,_): arrs) = getTaggedDocPaths (Just tag) arrs 
 getTaggedDocPaths Nothing (_: arrs) = getTaggedDocPaths Nothing arrs 
-getTaggedDocPaths (Just tag) ((LocatorA node _,pth) : arrs) = (tag, pathNode node, pth) : getTaggedDocPaths Nothing arrs 
+getTaggedDocPaths (Just tag) ((LocatorA node _,pth) : arrs) = (tag, pathNode node, typeOfNode node, pth) : getTaggedDocPaths Nothing arrs 
 getTaggedDocPaths (Just tag) (_ : arrs) = getTaggedDocPaths (Just tag) arrs 
 
 getPathNodesPathsXY arr x y =
