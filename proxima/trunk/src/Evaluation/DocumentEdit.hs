@@ -135,19 +135,19 @@ alternativesD p d = alternativesClip (select p d)
 
  
 moveDocPathD :: (Editable doc doc node clip token, Clip clip, Show clip) => Path -> Path -> Int -> doc -> doc
+moveDocPathD [] targetListPath index doc = error "Move with empty source path."
 moveDocPathD sourcePath targetListPath index doc =
-  let (tgtPath,tgtIx) = 
-        if not $ init sourcePath `isPrefixOf` targetListPath
+  let (tgtPath,tgtIx) =
+        if not $ init sourcePath `isPrefixOf` targetListPath 
         then (targetListPath, index)
         else if length sourcePath - 1 == length targetListPath -- src & tgt in same list
              then (targetListPath, if last sourcePath < index then index-1 else index) 
-             else let (pref, p: suffix)  = splitAt (length sourcePath - 1) targetListPath 
+             else -- we now have: length targetListPath > length sourcePath - 1
+                  let (pref, p: suffix)  = splitAt (length sourcePath - 1) targetListPath 
                   in  debug Arr (show (pref, p, suffix) ++ show sourcePath) $
-                      if last sourcePath == p then error "cyclic move"          
+                      if last sourcePath == p then error "Cyclic move."          
                       else if last sourcePath < p then (pref ++ [p-1] ++ suffix, index)
                                                   else (pref ++ [p]   ++ suffix, index)
-      -- adjust the index if the source is in front of the target
-      -- TODO: error handling
       
       source = selectD sourcePath doc
       (doc',_) = deleteD sourcePath doc
