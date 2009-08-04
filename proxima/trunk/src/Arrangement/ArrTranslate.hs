@@ -136,37 +136,39 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
 
     
 docEditDrop arr srcX srcY dstX dstY = 
-  case showDebug' Arr "\n\ndragsource" $ 
+  case -- showDebug' Arr "\n\ndragsource" $ 
        mLast $ getDragSourceLocators arr srcX srcY of 
-    Nothing -> error "no drag source" -- internal error
-    Just (source, sourceEltArrPath, ListType dragType) -> error "drag on list type not allowed"
-    Just (NoPathD, sourceEltArrPath, ListType dragType) -> error "dragsource has no document path"
+    Nothing -> error "No drag source." -- internal error
+    Just (source, sourceEltArrPath, ListType dragType) -> error "Drag on list type not allowed."
+    Just (NoPathD, sourceEltArrPath, ListType dragType) -> error "Dragsource has no document path."
     Just (PathD sourceEltDocPath, sourceEltArrPath, BasicType dragType) ->
                                           -- unsafe
-      case showDebug' Arr "\n\ndroptargets" $ mLast $ 
-        [ (o,dp,ap) 
-        | (o,dp,ap,tp) <- getDropTargetLocators arr dstX dstY 
-        , tp == ListType dragType
-        ] of
-        Nothing -> debug Arr ("No correctly-typed drop target") Nothing
-        Just (orientation, NoPathD, targetListArrPath) -> error "drop destination has no document path"
+      case -- showDebug' Arr "\n\ndroptargets" $ 
+        mLast $ [ (o,dp,ap) 
+                | (o,dp,ap,tp) <- getDropTargetLocators arr dstX dstY 
+                , tp == ListType dragType
+                ] of
+        Nothing -> debug Arr ("No correctly-typed drop target.") Nothing
+        Just (orientation, NoPathD, targetListArrPath) -> error "Drop destination has no document path."
         Just (orientation, PathD targetListDocPath, targetListArrPath) -> 
          
           case mLast $ filter ((==BasicType dragType) . thd3) $ getDragSourceLocators arr dstX dstY of               
-            Just (NoPathD, targetListEltArrPath,_) -> error "dropped on dragsource has no document path"
-            Just (PathD targetListEltDocPath, targetListEltArrPath,_) | targetListEltArrPath > targetListArrPath ->
+            Just (NoPathD, targetListEltArrPath,_) -> error "Dropped-on dragsource has no document path."
+            Just (PathD targetListEltDocPath, targetListEltArrPath,_) 
+                 | targetListEltArrPath > targetListArrPath ->
+                -- to make sure there isn't an empty droptarget deeper than the deepest destination dragsource
               let (tleX, tleY, tleW, tleH) = sizeA targetListEltArrPath arr
                   (offsetX, offsetY) = (dstX - tleX, dstY -tleY)
                   isInFront = case orientation of
                                 Horizontal -> offsetX <= tleW `div` 2
                                 Vertical -> offsetY <= tleH `div` 2
-              in  debug Arr ("\n\n\nDrop of "++show sourceEltDocPath++show targetListDocPath++show targetListEltDocPath++
-                             "\n"++show (tleX, tleY, tleW, tleH) ++ show (offsetX, offsetY) ++ show isInFront++
-                             "\n") $
+              in  --debug Arr ("\n\n\nDrop of "++show sourceEltDocPath++show targetListDocPath++show targetListEltDocPath++
+                  --           "\n"++show (tleX, tleY, tleW, tleH) ++ show (offsetX, offsetY) ++ show isInFront++
+                  --           "\n") $
                   Just $ UpdateDoc' (\(DocumentLevel d p cl) -> 
-                                DocumentLevel (moveDocPathD sourceEltDocPath targetListDocPath 
-                                                            (last targetListEltDocPath + 
-                                                             if isInFront then 0 else 1) d) 
+                                       DocumentLevel (moveDocPathD sourceEltDocPath targetListDocPath 
+                                                       (last targetListEltDocPath + 
+                                                        if isInFront then 0 else 1) d) 
                                               p cl)
             _ -> 
               Just $ UpdateDoc' (\(DocumentLevel d p cl) -> 
@@ -179,20 +181,7 @@ mLast [] = Nothing
 mLast xs = Just $ last xs
 {-
 TODO: 
-make more robust
 check graphs (fix incrementality bug)
-
-Maybe add type check
-
-
-if length deepestDropTargetPath > deepestDragSourcePath 
-   then  -- there is an empty droptarget deeper than the deepest destination dragsource
-     edit doc Move sourceEltDocPath deepestDropTargetDocPath at 0
-   else -- we are dropping on an element in the deepestDropTarget
-     simple edit doc Move sourceEltDocPath deepestDropTargetDocPath at position 
-              (last deepestDragSourceDocPath)
-            now we should have targetListDocPath == init targetListEltDocPath
-
 -}
 
 
