@@ -208,7 +208,10 @@ SEM Description [ | | strVal : String ]
 
 SEM List_Thing
   | List_Thing
-      loc.pres = structural $ draggableCol @elts.press
+      loc.pres = structural $ dropTarget Vertical $
+                   row [ text "Things:"
+                       , col $ map dragSource @elts.press
+                       ]
 
 SEM Thing
   | Thing
@@ -217,7 +220,9 @@ SEM Thing
 SEM Tasks
   | Tasks
       loc.pres = structural $ row [ hSpace 4
-      	       	 	      	  , col [ @things.pres
+      	       	 	      	  , col [ @things1.pres
+				        , vSpace 20
+					, @things2.pres
 				        , text "Tasks:"
       	       	 	      	    	`addPopupItems` 
                                         ([ ("Insert task", insertElementAtEnd (toClip newTask) (@lhs.path++[1]))
@@ -228,8 +233,12 @@ SEM Tasks
 
 SEM List_Task
   | List_Task
-      loc.pres = structural $ 
-                   draggableCol @elts.press
+      loc.pres = structural $ dropTarget Vertical $
+                   row [ text "subtasks:"
+                       , col $ map dragSource @elts.press
+                       ]
+--      loc.pres = structural $ draggableCol @elts.press
+		      
 
 SEM Task
   | BasicTask
@@ -287,11 +296,11 @@ SEM Task
 showHideCompleted showCompleted completed pres = 
   if showCompleted || not completed then pres else empty
 
-showHideCompletedItem path (Tasks _ showCompleted _) = 
+showHideCompletedItem path (Tasks _ _ showCompleted _) = 
   [ ((if showCompleted then "Hide " else "Show ") ++ " completed tasks"
     , updateAt path $ \clip ->
         case clip of
-          Clip_Tasks (Tasks things _ tasks) -> toClip $ Tasks things (not showCompleted) tasks
+          Clip_Tasks (Tasks things1 things2 _ tasks) -> toClip $ Tasks things1 things2 (not showCompleted) tasks
           clip -> clip
     )
   ]

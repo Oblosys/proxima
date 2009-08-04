@@ -62,7 +62,7 @@ DATA Currency
   | ParseErrCurrency error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA Tasks
-  | Tasks things:List_Thing showCompleted:Bool tasks:List_Task
+  | Tasks things1:List_Thing things2:List_Thing showCompleted:Bool tasks:List_Task
   | HoleTasks
   | ParseErrTasks error:{(ParseError Document Node ClipDoc UserToken)}
 
@@ -299,14 +299,17 @@ SEM Currency
 
 SEM Tasks
   | Tasks 
-      things.pIdC = @lhs.pIdC + 0
-      tasks.pIdC = @things.pIdC
+      things1.pIdC = @lhs.pIdC + 0
+      things2.pIdC = @things1.pIdC
+      tasks.pIdC = @things2.pIdC
       lhs.pIdC = @tasks.pIdC
-      things.path  = @lhs.path++[0]
-      tasks.path  = @lhs.path++[2]
+      things1.path  = @lhs.path++[0]
+      things2.path  = @lhs.path++[1]
+      tasks.path  = @lhs.path++[3]
   | Tasks
-    things.ix = 0
-    tasks.ix = 2
+    things1.ix = 0
+    things2.ix = 1
+    tasks.ix = 3
   | Tasks
       lhs.pres = loc (Node_Tasks @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -744,7 +747,7 @@ SEM Currency
 
 SEM Tasks
   | Tasks
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ @things.presXML, presentPrimXMLBool @showCompleted, @tasks.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ @things1.presXML, @things2.presXML, presentPrimXMLBool @showCompleted, @tasks.presXML ] 
   | HoleTasks     lhs.presXML = presHole @lhs.focusD "Tasks" (Node_HoleTasks @self @lhs.path) @lhs.path
   | ParseErrTasks lhs.presXML = presParseErr (Node_ParseErrTasks @self @lhs.path) @error
 
@@ -895,7 +898,7 @@ SEM Currency
 
 SEM Tasks
   | Tasks
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ @things.presTree, presentPrimXMLBool @showCompleted, @tasks.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Tasks @self @lhs.path) @lhs.path "Tasks" [ @things1.presTree, @things2.presTree, presentPrimXMLBool @showCompleted, @tasks.presTree ] 
   | HoleTasks     lhs.presTree = presHole @lhs.focusD "Tasks" (Node_HoleTasks @self @lhs.path) @lhs.path
   | ParseErrTasks lhs.presTree = presParseErr (Node_ParseErrTasks @self @lhs.path) @error
 

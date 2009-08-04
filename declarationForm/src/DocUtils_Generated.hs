@@ -16,7 +16,7 @@ import Common.CommonTypes hiding (Clean, Dirty)
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
   TaskDoc $
-    Tasks (toList_Thing [Thing 1, Thing 2, Thing 3]) True $ toList_Task
+    Tasks (toList_Thing [Thing 1, Thing 2, Thing 3]) (toList_Thing [])True $ toList_Task
       [ BasicTask (Description "Pinpas bestellen") True
       , CompositeTask True (Description "Declaratie editor bouwen") $ toList_Task
           [ CompositeTask True (Description "Upgrade Proxima") $ toList_Task
@@ -285,7 +285,7 @@ toXMLExpense (ParseErrExpense error) = EmptyElt "ParseErrExpense" []
 toXMLCurrency (Currency name euroRate) = Elt "Currency" [] $ [toXMLDescription name] ++ [toXMLFloat_ euroRate]
 toXMLCurrency (HoleCurrency) = EmptyElt "HoleCurrency" [] 
 toXMLCurrency (ParseErrCurrency error) = EmptyElt "ParseErrCurrency" []
-toXMLTasks (Tasks things showCompleted tasks) = Elt "Tasks" [] $ toXMLList_Thing things ++ [toXMLBool showCompleted] ++ toXMLList_Task tasks
+toXMLTasks (Tasks things1 things2 showCompleted tasks) = Elt "Tasks" [] $ toXMLList_Thing things1 ++ toXMLList_Thing things2 ++ [toXMLBool showCompleted] ++ toXMLList_Task tasks
 toXMLTasks (HoleTasks) = EmptyElt "HoleTasks" [] 
 toXMLTasks (ParseErrTasks error) = EmptyElt "ParseErrTasks" []
 toXMLThing (Thing nr) = Elt "Thing" [] $ [toXMLInt nr]
@@ -355,7 +355,7 @@ parseXMLCns_Expense = Expense <$ startTag "Expense" <*> parseXML_Description <*>
 parseXML_Currency = parseXMLCns_Currency <|> parseHoleAndParseErr "Currency" HoleCurrency
 parseXMLCns_Currency = Currency <$ startTag "Currency" <*> parseXML_Description <*> parseXML_Float_<* endTag "Currency"
 parseXML_Tasks = parseXMLCns_Tasks <|> parseHoleAndParseErr "Tasks" HoleTasks
-parseXMLCns_Tasks = Tasks <$ startTag "Tasks" <*> parseXML_List_Thing <*> parseXML_Bool <*> parseXML_List_Task<* endTag "Tasks"
+parseXMLCns_Tasks = Tasks <$ startTag "Tasks" <*> parseXML_List_Thing <*> parseXML_List_Thing <*> parseXML_Bool <*> parseXML_List_Task<* endTag "Tasks"
 parseXML_Thing = parseXMLCns_Thing <|> parseHoleAndParseErr "Thing" HoleThing
 parseXMLCns_Thing = Thing <$ startTag "Thing" <*> parseXML_Int<* endTag "Thing"
 parseXML_Task = parseXMLCns_BasicTask <|> parseXMLCns_CompositeTask <|> parseHoleAndParseErr "Task" HoleTask

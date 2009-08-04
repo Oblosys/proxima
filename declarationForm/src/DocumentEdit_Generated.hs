@@ -386,23 +386,25 @@ instance Editable Currency Document Node ClipDoc UserToken where
 
 instance Editable Tasks Document Node ClipDoc UserToken where
   select [] x = Clip_Tasks x
-  select (0:p) (Tasks x0 x1 x2) = select p x0
-  select (1:p) (Tasks x0 x1 x2) = select p x1
-  select (2:p) (Tasks x0 x1 x2) = select p x2
+  select (0:p) (Tasks x0 x1 x2 x3) = select p x0
+  select (1:p) (Tasks x0 x1 x2 x3) = select p x1
+  select (2:p) (Tasks x0 x1 x2 x3) = select p x2
+  select (3:p) (Tasks x0 x1 x2 x3) = select p x3
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Tasks c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Tasks") x
-  paste (0:p) c (Tasks x0 x1 x2) = Tasks (paste p c x0) x1 x2
-  paste (1:p) c (Tasks x0 x1 x2) = Tasks x0 (paste p c x1) x2
-  paste (2:p) c (Tasks x0 x1 x2) = Tasks x0 x1 (paste p c x2)
+  paste (0:p) c (Tasks x0 x1 x2 x3) = Tasks (paste p c x0) x1 x2 x3
+  paste (1:p) c (Tasks x0 x1 x2 x3) = Tasks x0 (paste p c x1) x2 x3
+  paste (2:p) c (Tasks x0 x1 x2 x3) = Tasks x0 x1 (paste p c x2) x3
+  paste (3:p) c (Tasks x0 x1 x2 x3) = Tasks x0 x1 x2 (paste p c x3)
   paste _ _ x = x
 
-  alternatives _ = [ ("Tasks {List_Thing} {Bool} {List_Task} "  , Clip_Tasks $ Tasks hole hole hole)
+  alternatives _ = [ ("Tasks {List_Thing} {List_Thing} {Bool} {List_Task} "  , Clip_Tasks $ Tasks hole hole hole hole)
                    ,("{Tasks}", Clip_Tasks hole)
                    ]
 
-  arity (Tasks x0 x1 x2) = 3
+  arity (Tasks x0 x1 x2 x3) = 4
   arity _                        = 0
 
   toClip t = Clip_Tasks t

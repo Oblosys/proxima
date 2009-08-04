@@ -108,7 +108,7 @@ construct_ParseErrExpense (StructuralTk _ _ pres _ _) ~[] = Clip_Expense $ parse
 construct_Currency tk ~[mClip0,mClip1] = Clip_Currency $ reuseCurrency [tk]  (retrieveArg "Currency" "name::Description" mClip0) (retrieveArg "Currency" "euroRate::Float_" mClip1)
 construct_HoleCurrency tk ~[] = Clip_Currency $ hole
 construct_ParseErrCurrency (StructuralTk _ _ pres _ _) ~[] = Clip_Currency $ parseErr (StructuralParseErr pres)
-construct_Tasks tk ~[mClip0,mClip1,mClip2] = Clip_Tasks $ reuseTasks [tk]  (retrieveArg "Tasks" "things::List_Thing" mClip0) (retrieveArg "Tasks" "showCompleted::Bool" mClip1) (retrieveArg "Tasks" "tasks::List_Task" mClip2)
+construct_Tasks tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Tasks $ reuseTasks [tk]  (retrieveArg "Tasks" "things1::List_Thing" mClip0) (retrieveArg "Tasks" "things2::List_Thing" mClip1) (retrieveArg "Tasks" "showCompleted::Bool" mClip2) (retrieveArg "Tasks" "tasks::List_Task" mClip3)
 construct_HoleTasks tk ~[] = Clip_Tasks $ hole
 construct_ParseErrTasks (StructuralTk _ _ pres _ _) ~[] = Clip_Tasks $ parseErr (StructuralParseErr pres)
 construct_Thing tk ~[mClip0] = Clip_Thing $ reuseThing [tk]  (retrieveArg "Thing" "nr::Int" mClip0)
@@ -203,10 +203,10 @@ reuseCurrency nodes ma0 ma1
            (Currency a0 a1) -> genericReuse2 Currency a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseCurrency"
 
-reuseTasks :: [Token doc Node clip token] -> Maybe List_Thing -> Maybe Bool -> Maybe List_Task -> Tasks
-reuseTasks nodes ma0 ma1 ma2
+reuseTasks :: [Token doc Node clip token] -> Maybe List_Thing -> Maybe List_Thing -> Maybe Bool -> Maybe List_Task -> Tasks
+reuseTasks nodes ma0 ma1 ma2 ma3
   = case extractFromTokens extractTasks defaultTasks nodes of
-           (Tasks a0 a1 a2) -> genericReuse3 Tasks a0 a1 a2 ma0 ma1 ma2
+           (Tasks a0 a1 a2 a3) -> genericReuse4 Tasks a0 a1 a2 a3 ma0 ma1 ma2 ma3
            _ -> error "Internal error:ProxParser_Generated.reuseTasks"
 
 reuseThing :: [Token doc Node clip token] -> Maybe Int -> Thing
@@ -327,7 +327,7 @@ extractCurrency (Just (Node_Currency x@(Currency _ _) _)) = Just x
 extractCurrency _ = Nothing
 
 extractTasks :: Maybe Node -> Maybe Tasks
-extractTasks (Just (Node_Tasks x@(Tasks _ _ _) _)) = Just x
+extractTasks (Just (Node_Tasks x@(Tasks _ _ _ _) _)) = Just x
 extractTasks _ = Nothing
 
 extractThing :: Maybe Node -> Maybe Thing
@@ -414,7 +414,7 @@ defaultCurrency :: Currency
 defaultCurrency = Currency hole hole
 
 defaultTasks :: Tasks
-defaultTasks = Tasks hole hole hole
+defaultTasks = Tasks hole hole hole hole
 
 defaultThing :: Thing
 defaultThing = Thing hole

@@ -48,7 +48,7 @@ data Currency = Currency Description Float_
               | ParseErrCurrency (ParseError Document Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
-data Tasks = Tasks List_Thing Bool List_Task
+data Tasks = Tasks List_Thing List_Thing Bool List_Task
            | HoleTasks
            | ParseErrTasks (ParseError Document Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
