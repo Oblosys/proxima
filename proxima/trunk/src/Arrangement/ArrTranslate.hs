@@ -132,31 +132,44 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     _                     -> (SkipLay 0,             state, arrLvl) 
   
 docEditDrop arr srcX srcY dstX dstY = 
-  let (sourceEltDocPath, sourceEltArrPath, BasicType dragType) = last $ getDragSourceLocators arr srcX srcY
+  case showDebug' Arr "\n\ndragsource" $ 
+       mLast $ getDragSourceLocators arr srcX srcY of 
+    Nothing -> error "no drag source" -- internal error
+    Just (sourceEltDocPath, sourceEltArrPath, BasicType dragType) ->
                                           -- unsafe
-      (orientation, targetListDocPath, targetListArrPath) = last $ 
+      case showDebug' Arr "\n\ndroptargets" $ mLast $ 
         [ (o,dp,ap) 
         | (o,dp,ap,tp) <- getDropTargetLocators arr dstX dstY 
         , tp == ListType dragType
-        ]
-      (targetListEltDocPath, targetListEltArrPath,_) = last $ 
-        filter ((==BasicType dragType) . thd3) $ getDragSourceLocators arr dstX dstY
-      (tleX, tleY, tleW, tleH) = sizeA targetListEltArrPath arr
-      (offsetX, offsetY) = (dstX - tleX, dstY -tleY)
-      isInFront = case orientation of
-                    Horizontal -> offsetX <= tleW `div` 2
-                    Vertical -> offsetY <= tleH `div` 2
-      (PathD sourceEltDPath,PathD targetListDPath, PathD targetListEltDPath) = (sourceEltDocPath,targetListDocPath,targetListEltDocPath)
-  in  debug Arr ("\n\n\nDrop of "++show sourceEltDocPath++show targetListDocPath++show targetListEltDocPath++
-                 "\n"++show (tleX, tleY, tleW, tleH) ++ show (offsetX, offsetY) ++ show isInFront++
-                 "\n") $
-      UpdateDoc' (\(DocumentLevel d p cl) -> 
-                    DocumentLevel (moveDocPathD sourceEltDPath targetListDPath 
-                                                (last targetListEltDPath + 
-                                                 if isInFront then 0 else 1) d) 
-                                  p cl)
+        ] of
+        Nothing -> error "no correctly typed drop target"
+        Just (orientation, targetListDocPath, targetListArrPath) -> 
+         
+          case mLast $ filter ((==BasicType dragType) . thd3) $ getDragSourceLocators arr dstX dstY of               
+            Just (targetListEltDocPath, targetListEltArrPath,_) | targetListEltArrPath > targetListArrPath ->
+              let (tleX, tleY, tleW, tleH) = sizeA targetListEltArrPath arr
+                  (offsetX, offsetY) = (dstX - tleX, dstY -tleY)
+                  isInFront = case orientation of
+                                Horizontal -> offsetX <= tleW `div` 2
+                                Vertical -> offsetY <= tleH `div` 2
+                  (PathD sourceEltDPath,PathD targetListDPath, PathD targetListEltDPath) = (sourceEltDocPath,targetListDocPath,targetListEltDocPath)
+              in  debug Arr ("\n\n\nDrop of "++show sourceEltDocPath++show targetListDocPath++show targetListEltDocPath++
+                             "\n"++show (tleX, tleY, tleW, tleH) ++ show (offsetX, offsetY) ++ show isInFront++
+                             "\n") $
+                  UpdateDoc' (\(DocumentLevel d p cl) -> 
+                                DocumentLevel (moveDocPathD sourceEltDPath targetListDPath 
+                                                            (last targetListEltDPath + 
+                                                             if isInFront then 0 else 1) d) 
+                                              p cl)
+            _ -> 
+              let (PathD sourceEltDPath,PathD targetListDPath) = (sourceEltDocPath,targetListDocPath)
+              in  UpdateDoc' (\(DocumentLevel d p cl) -> 
+                                DocumentLevel (moveDocPathD sourceEltDPath targetListDPath 0 d) p cl) 
+
 thd3 (_,_,x) = x
 
+mLast [] = Nothing
+mLast xs = Just $ last xs
 {-
 TODO: 
 make more robust
@@ -188,7 +201,8 @@ getDragSourceLocators arr x y =
 getDropTargetLocators arr x y =   
   let pathNodesPaths = getPathNodesPathsXY arr x y
       taggedDocPathsWithArrPaths = reverse $ getTaggedDocPaths Nothing (reverse pathNodesPaths)
-  in  [ (getDropTargetOrientation tag, docPath,arrPath,nodeType) 
+  in  -- debug Arr ("droptargetpaths" ++ show (map (shallowShowArr . fst) pathNodesPaths)) $
+      [ (getDropTargetOrientation tag, docPath,arrPath,nodeType) 
       | (tag,docPath,nodeType,arrPath) <- taggedDocPathsWithArrPaths
       , isDropTargetTag tag
       ]
