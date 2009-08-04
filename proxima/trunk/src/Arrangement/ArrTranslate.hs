@@ -100,7 +100,9 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
            PathA pth _ ->
              case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
                (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> MoveVertexLay (pathPFromPathA' arr pres pth ) (dstX-srcX,dstY-srcY)
-               _ -> cast (docEditDrop arr srcX srcY dstX dstY :: EditDocument' doc enr node clip token)  
+               _ -> case docEditDrop arr srcX srcY dstX dstY :: Maybe (EditDocument' doc enr node clip token) of
+                      Nothing -> SkipLay 0
+                      Just upd -> cast upd
            _ -> SkipLay 0
      {- 
       (case getLastMousePress state of
@@ -130,41 +132,46 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     SaveFileArr str       -> (SaveFileLay str,       state, arrLvl) 
     WrapArr wrapped       -> (unwrap wrapped,        state, arrLvl)
     _                     -> (SkipLay 0,             state, arrLvl) 
-  
+
+
+    
 docEditDrop arr srcX srcY dstX dstY = 
   case showDebug' Arr "\n\ndragsource" $ 
        mLast $ getDragSourceLocators arr srcX srcY of 
     Nothing -> error "no drag source" -- internal error
-    Just (sourceEltDocPath, sourceEltArrPath, BasicType dragType) ->
+    Just (source, sourceEltArrPath, ListType dragType) -> error "drag on list type not allowed"
+    Just (NoPathD, sourceEltArrPath, ListType dragType) -> error "dragsource has no document path"
+    Just (PathD sourceEltDocPath, sourceEltArrPath, BasicType dragType) ->
                                           -- unsafe
       case showDebug' Arr "\n\ndroptargets" $ mLast $ 
         [ (o,dp,ap) 
         | (o,dp,ap,tp) <- getDropTargetLocators arr dstX dstY 
         , tp == ListType dragType
         ] of
-        Nothing -> error "no correctly typed drop target"
-        Just (orientation, targetListDocPath, targetListArrPath) -> 
+        Nothing -> debug Arr ("No correctly-typed drop target") Nothing
+        Just (orientation, NoPathD, targetListArrPath) -> error "drop destination has no document path"
+        Just (orientation, PathD targetListDocPath, targetListArrPath) -> 
          
           case mLast $ filter ((==BasicType dragType) . thd3) $ getDragSourceLocators arr dstX dstY of               
-            Just (targetListEltDocPath, targetListEltArrPath,_) | targetListEltArrPath > targetListArrPath ->
+            Just (NoPathD, targetListEltArrPath,_) -> error "dropped on dragsource has no document path"
+            Just (PathD targetListEltDocPath, targetListEltArrPath,_) | targetListEltArrPath > targetListArrPath ->
               let (tleX, tleY, tleW, tleH) = sizeA targetListEltArrPath arr
                   (offsetX, offsetY) = (dstX - tleX, dstY -tleY)
                   isInFront = case orientation of
                                 Horizontal -> offsetX <= tleW `div` 2
                                 Vertical -> offsetY <= tleH `div` 2
-                  (PathD sourceEltDPath,PathD targetListDPath, PathD targetListEltDPath) = (sourceEltDocPath,targetListDocPath,targetListEltDocPath)
               in  debug Arr ("\n\n\nDrop of "++show sourceEltDocPath++show targetListDocPath++show targetListEltDocPath++
                              "\n"++show (tleX, tleY, tleW, tleH) ++ show (offsetX, offsetY) ++ show isInFront++
                              "\n") $
-                  UpdateDoc' (\(DocumentLevel d p cl) -> 
-                                DocumentLevel (moveDocPathD sourceEltDPath targetListDPath 
-                                                            (last targetListEltDPath + 
+                  Just $ UpdateDoc' (\(DocumentLevel d p cl) -> 
+                                DocumentLevel (moveDocPathD sourceEltDocPath targetListDocPath 
+                                                            (last targetListEltDocPath + 
                                                              if isInFront then 0 else 1) d) 
                                               p cl)
             _ -> 
-              let (PathD sourceEltDPath,PathD targetListDPath) = (sourceEltDocPath,targetListDocPath)
-              in  UpdateDoc' (\(DocumentLevel d p cl) -> 
-                                DocumentLevel (moveDocPathD sourceEltDPath targetListDPath 0 d) p cl) 
+              Just $ UpdateDoc' (\(DocumentLevel d p cl) -> 
+                                   DocumentLevel (moveDocPathD sourceEltDocPath targetListDocPath 0 d) p cl) 
+
 
 thd3 (_,_,x) = x
 
