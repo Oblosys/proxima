@@ -148,12 +148,13 @@ function contextHandler(e)
                     : e.clientX;
   var screenY = ie5 ? event.clientY
                     : e.clientY;
-  var coords = getMouseCoordsWithinTarget(e,'proxima'); 
+
+  var coords = getMouseCoordsWithinTarget(e, document.getElementById('proxima')); 
 
   // menu is not on proxima element, so position is absolute to window
   // however, proxima needs the position relative to the proxima element
   
-  loadXMLDoc('ContextRequest(('+coords.x+','+coords.y+'),('+screenX+','+screenY+'));');
+  loadXMLDoc('ContextMenuRequest(('+coords.x+','+coords.y+'),('+screenX+','+screenY+'));');
   return false; // disable normal context menu
 }
 
@@ -188,7 +189,7 @@ function jumptoie5(e)
       firingobj=firingobj.parentNode;
     else
     { var selectedItemNr = firingobj.getAttribute("item");
-      loadXMLDoc('ContextSelect('+selectedItemNr+');');     
+      loadXMLDoc('ContextMenuSelect('+selectedItemNr+');');     
       menuobj.style.visibility="hidden";
     }
   }
@@ -519,7 +520,8 @@ function ignore(e)
 
 
 function mouseHandler(str,e) 
-{
+{ if (e.button != 0) return true;  // only handle left button here
+
   var proxima = document.getElementById('proxima');
 
   var coords = getMouseCoordsWithinTarget(e,proxima);
