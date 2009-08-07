@@ -18,80 +18,80 @@ import Data.Map (Map)
 import Evaluation.DocumentEdit
 
 translateIO state low high =  castRemainingEditOps $ \editLow ->
- do { (editHigh, state', low') <- unArrangeIO state low high editLow
-    ; return ([editHigh], state', low')
+ do { (editsHigh, state', low') <- unArrangeIO state low high editLow
+    ; return (editsHigh, state', low')
     }
 
 
     
 unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) ClearMetricsArr = 
  do { writeIORef (getFontMetricsRef state) Map.empty -- TODO: put Map.empty as a function in FontLib
-    ; return (SkipLay 0,             state, (ArrangementLevel emptyA focus p))
+    ; return ([SkipLay 0],             state, (ArrangementLevel emptyA focus p))
     }
 unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) editArr = 
- do { let (editHigh, state', low') = unArrange state arrLvl layLvl editArr
-    ; return (editHigh, state', low')
+ do { let (editsHigh, state', low') = unArrange state arrLvl layLvl editArr
+    ; return (editsHigh, state', low')
     }
     
 unArrange :: forall doc enr node clip token state .
              (Show doc, Show enr, Show token, Show node, DocNode node, Clip clip, Show clip
              ,Editable doc doc node clip token) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
              EditArrangement doc enr node clip token ->
-             (EditLayout doc enr node clip token, LocalStateArr, ArrangementLevel doc node clip token)
+             ([EditLayout doc enr node clip token], LocalStateArr, ArrangementLevel doc node clip token)
 unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) editArr = 
   debug Arr ("Edit arr is "++show editArr) $
   case editArr of
-    SkipArr i             -> (SkipLay (i+1),         state, arrLvl) 
-    SetFocusArr focus'     -> ( SetFocusLay (focusPFromFocusA focus' arr pres)
+    SkipArr i             -> ([SkipLay (i+1)],         state, arrLvl) 
+    SetFocusArr focus'     -> ([SetFocusLay (focusPFromFocusA focus' arr pres)]
                              , state, ArrangementLevel arr focus p) -- new focus is not set on arr level
                                                                     -- this is done on presentation, so we
                                                                     -- still have the old focus for incrementality
-    InitArr               -> (InitLay,               state, arrLvl) 
-    CloseArr              -> (CloseLay,              state, arrLvl) 
-    CutArr                -> (CutLay,                state, arrLvl)
-    CopyArr               -> (CopyLay,               state, arrLvl)
-    PasteArr              -> (PasteLay,              state, arrLvl)
-    DeleteArr             -> (DeleteLay,             state, arrLvl)
-    SplitArr              -> (SplitLay,              state, arrLvl)
-    LeftDeleteArr         -> (LeftDeleteLay,         state, arrLvl)
-    RightDeleteArr        -> (RightDeleteLay,        state, arrLvl)
-    LeftArr               -> (LeftLay,               state, arrLvl)
-    RightArr              -> (RightLay,              state, arrLvl)
-    EnlargeLeftArr        -> (EnlargeLeftLay,        state, arrLvl)
-    EnlargeRightArr       -> (EnlargeRightLay,       state, arrLvl)
-    NormalizeArr          -> (NormalizeLay,          state, arrLvl)
-    ParseArr              -> (ParseLay,              state, arrLvl)
-    RedrawArr             -> (SkipLay 0,             state, (ArrangementLevel emptyA focus p))
-    Test2Arr              -> (Test2Lay,              state, arrLvl)
-    KeyCharArr c          -> (InsertLay c,           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
-    KeySpecialArr c ms    -> (SkipLay 0,             state, arrLvl) 
+    InitArr               -> ([InitLay],               state, arrLvl) 
+    CloseArr              -> ([CloseLay],              state, arrLvl) 
+    CutArr                -> ([CutLay],                state, arrLvl)
+    CopyArr               -> ([CopyLay],               state, arrLvl)
+    PasteArr              -> ([PasteLay],              state, arrLvl)
+    DeleteArr             -> ([DeleteLay],             state, arrLvl)
+    SplitArr              -> ([SplitLay],              state, arrLvl)
+    LeftDeleteArr         -> ([LeftDeleteLay],         state, arrLvl)
+    RightDeleteArr        -> ([RightDeleteLay],        state, arrLvl)
+    LeftArr               -> ([LeftLay],               state, arrLvl)
+    RightArr              -> ([RightLay],              state, arrLvl)
+    EnlargeLeftArr        -> ([EnlargeLeftLay],        state, arrLvl)
+    EnlargeRightArr       -> ([EnlargeRightLay],       state, arrLvl)
+    NormalizeArr          -> ([NormalizeLay],          state, arrLvl)
+    ParseArr              -> ([ParseLay],              state, arrLvl)
+    RedrawArr             -> ([SkipLay 0],             state, (ArrangementLevel emptyA focus p))
+    Test2Arr              -> ([Test2Lay],              state, arrLvl)
+    KeyCharArr c          -> ([InsertLay c],           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
+    KeySpecialArr c ms    -> ([SkipLay 0],             state, arrLvl) 
     MouseDownArr x y (Modifiers False False False) i ->
       (case navigateFocus x y arr of
         PathA pthA _ ->
           case mouseDownDocPres (pathPFromPathA' arr pres pthA) pres of
               Just upd -> debug UnA ("mouseDownDoc EVENT: Something") 
-                            cast (UpdateDoc' upd :: EditDocument' doc enr node clip token)
+                            [cast (UpdateDoc' upd :: EditDocument' doc enr node clip token)]
                             
-              Nothing  -> SetFocusLay (computeFocus arr pres x y)  
-        _ ->  debug Err ("UnArranger.mouseDownDoc: empty path ") $ SkipLay 0   
+              Nothing  -> [ SetFocusLay (computeFocus arr pres x y) ] 
+        _ ->  debug Err ("UnArranger.mouseDownDoc: empty path ") $ [SkipLay 0]   
       , state , arrLvl)
 -- shift mouseDown is handled here
     MouseDownArr x y (Modifiers True False False) i ->  -- shift down 
       case isGraphEdit x y arr pres of
-        Just addVertex    -> ( addVertex, state, arrLvl )
-        Nothing           -> ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
+        Just addVertex    -> ( [addVertex], state, arrLvl )
+        Nothing           -> ( [SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)]
                        , state, arrLvl )
 --    MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
     MouseDownArr x y ms@(Modifiers False True False) i -> -- ctrl down 
           mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
     MouseDragArr x y ms@(Modifiers False False False)  ->
-      ( SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)
+      ( [SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)]
       , state, arrLvl ) -- does not occur
                             
-    MouseUpArr x y ms     -> (ParseLay, state, arrLvl) 
+    MouseUpArr x y ms     -> ([ParseLay], state, arrLvl) 
     
     DragStartArr x y -> debug Arr "Drag started" $
-      (SkipLay 0, state { getLastMousePress = Just (x,y)}, arrLvl)
+      ([SkipLay 0], state { getLastMousePress = Just (x,y)}, arrLvl)
 
     DropArr dstX dstY -> 
       (case getLastMousePress state of -- should not be Nothing
@@ -99,11 +99,13 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
          case navigateFocus srcX srcY arr of
            PathA pth _ ->
              case selectTreeA pth arr of -- for Vertex, we drag, for graph and edge, drag is ignored
-               (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> MoveVertexLay (pathPFromPathA' arr pres pth ) (dstX-srcX,dstY-srcY)
+               (_,_,VertexA _ _ _ _ _ _ _ _ _ _) -> [ MoveVertexLay (pathPFromPathA' arr pres pth ) (dstX-srcX,dstY-srcY)
+                                                    , ParseLay
+                                                    ]
                _ -> case docEditDrop arr srcX srcY dstX dstY :: Maybe (EditDocument' doc enr node clip token) of
-                      Nothing -> SkipLay 0
-                      Just upd -> cast upd
-           _ -> SkipLay 0
+                      Nothing -> [SkipLay 0]
+                      Just upd -> [cast upd]
+           _ -> [SkipLay 0]
      {- 
       (case getLastMousePress state of
         Just (x',y') -> 
@@ -119,19 +121,19 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
                    (LocatorA n a) -> debug Arr ("dragging"++shallowShowArr a) $ 
                      case pathNode n of
                        PathD srcPath ->
-                         cast ( UpdateDoc' (\(DocumentLevel d p cl) -> 
+                         [cast ( UpdateDoc' (\(DocumentLevel d p cl) -> 
                                          DocumentLevel (fst $ deleteD srcPath d) p cl)
-                          :: EditDocument' doc enr node clip token)        
-                       NoPathD -> SkipLay 0
-                   _ -> SkipLay 0
-        _ -> SkipLay 0 -- no last mouse press, does not occur
+                          :: EditDocument' doc enr node clip token)]        
+                       NoPathD -> [SkipLay 0]
+                   _ -> [SkipLay 0]
+        _ -> [SkipLay 0] -- no last mouse press, does not occur
 -}      
      , state { getLastMousePress = Nothing }, arrLvl) 
       
-    OpenFileArr str       -> (OpenFileLay str,       state, arrLvl) 
-    SaveFileArr str       -> (SaveFileLay str,       state, arrLvl) 
-    WrapArr wrapped       -> (unwrap wrapped,        state, arrLvl)
-    _                     -> (SkipLay 0,             state, arrLvl) 
+    OpenFileArr str       -> ([OpenFileLay str],       state, arrLvl) 
+    SaveFileArr str       -> ([SaveFileLay str],       state, arrLvl) 
+    WrapArr wrapped       -> ([unwrap wrapped],        state, arrLvl)
+    _                     -> ([SkipLay 0],             state, arrLvl) 
 
 
     
@@ -232,18 +234,18 @@ indexOfDragSourceTag i (_:arrs) = indexOfDragSourceTag (i+1) arrs
 mouseDownDoc :: forall doc enr node clip token state .
                 (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->
                 Layout doc node clip token -> PathArr -> Int ->
-                (EditLayout doc enr node clip token, state, ArrangementLevel doc node clip token)  
+                ([EditLayout doc enr node clip token], state, ArrangementLevel doc node clip token)  
 mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
   let pthP = pathPFromPathA' arr layout pthA
   in  case locateTreePres (PathP pthP 0) layout of -- set the document focus
         Just node -> case pathNode node of
-                       (PathD pth) -> ( cast ( UpdateDoc' (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)
-                                                :: EditDocument' doc enr node clip token)
+                       (PathD pth) -> ( [cast ( UpdateDoc' (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)
+                                                :: EditDocument' doc enr node clip token)]
                                       , state, arrLvl)
-                       _                -> (SkipLay 0, state, arrLvl) -- node has no path
-        _         -> (SkipLay 0, state, arrLvl) -- no locator
+                       _                -> ([SkipLay 0], state, arrLvl) -- node has no path
+        _         -> ([SkipLay 0], state, arrLvl) -- no locator
 mouseDownDoc state arrLvl layout pathA i =
-  debug Err ("UnArranger.mouseDownDoc: empty path ") (SkipLay 0, state, arrLvl)                                                 
+  debug Err ("UnArranger.mouseDownDoc: empty path ") ([SkipLay 0], state, arrLvl)                                                 
 
 isGraphEdit :: (Show node, Show token) => Int -> Int -> Arrangement node -> Layout doc node clip token ->
                Maybe (EditLayout doc enr node clip token)
