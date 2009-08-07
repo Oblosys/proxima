@@ -556,7 +556,8 @@ function mouseHandler(str,e)
 
     case 1: // button down, no drag
       if (str =='U')
-      { loadXMLDoc( mkMouseCommand('MouseDown', posx, posy) + // equal to mouseDownPos
+      { loadXMLDoc( (draggable ? mkMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y) : '') +
+                    // if there's a draggable, the mouse down was not yet sent
                     mkMouseCommand('MouseUp', posx, posy)   );
         draggable = null;
         dragState = 0;
