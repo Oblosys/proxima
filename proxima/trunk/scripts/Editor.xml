@@ -426,6 +426,12 @@ function debugAdd(message)
     debug (message + '<br></br>' + document.getElementById('debugMessage').innerHTML);
 }
 
+function setStatus(message)
+{
+    document.getElementById('status').innerHTML=message;
+}
+
+
 function refresh()
 { removeChildren('rendering');
   removeChildren('focus');
@@ -526,12 +532,74 @@ function mouseHandler(str,e)
 
   var coords = getMouseCoordsWithinTarget(e,proxima);
   var posx = coords.x;
-	var posy = coords.y;
+  var posy = coords.y;
   
 
   if ( (posx - proxima.scrollLeft) > proxima.clientWidth || (posy - proxima.scrollTop) > proxima.clientHeight )
     return;  // we're on a scroll bar, so no event.
-    	
+
+
+  setStatus( 'dragState is '+dragState + ' origin(' + mouseDownPos.x + ',' + mouseDownPos.y + ') offset(' + dragOffset.x + ',' + dragOffset.y + ')' );
+  switch(dragState)
+  { case 0: // no button down
+      if (str == 'D')
+      { dragState = 1;
+        mouseDownPos = { x: posx, y: posy };
+      } // all other mouse actions are ignored when button was not down
+      break;
+
+    case 1: // button down, no drag
+      if (str =='U')
+      { loadXMLDoc( mkMouseCommand('MouseDown', posx, posy) +
+                    mkMouseCommand('MouseUp', posx, posy)   );
+        dragState = 0;
+      }
+      else if (str == 'M')
+      { var draggable = getDraggable(mouseDownPos.x, mouseDownPos.y);
+        if ( draggable )
+        { draggedElement = cloneObject(draggable);
+          // compute offset
+          draggedElementDims = getElementDimensions( draggable );
+          dragOffset = { x: mouseDownPos.x - draggedElementDims.x
+                       , y: mouseDownPos.y - draggedElementDims.y
+                       }
+          draggedElement.style.left = posx-dragOffset.x +'px';
+          draggedElement.style.top = posy-dragOffset.y +'px';
+
+          sendMouseCommand('MouseDragStart', posx, posy);
+          dragState = 2;
+        }
+        else
+        { sendMouseCommand('MouseDown', posx, posy);
+          dragState = 3;
+        }
+      } // ignore mouse down (should not occur)
+      break;
+
+    case 2: // drag in progress
+      if ( str == 'U' )
+      { sendMouseCommand('MouseDrop', posx, posy);
+        draggedElement.parentNode.removeChild(draggedElement);
+        draggedElement = null;
+        dragState = 0;
+      }
+      else if ( str == 'M' )
+      { draggedElement.style.left = posx-dragOffset.x +'px';
+        draggedElement.style.top = posy-dragOffset.y +'px';
+      } // ignore mouse down (should not occur)
+      break;
+
+    case 3: // dragging on non-dragsource (e.g. extending focus)
+      if ( str == 'U' )
+      { sendMouseCommand('MouseUp', posx, posy);
+        dragState = 0;
+      }
+      else if ( str == 'M' )
+      { sendMouseCommand('MouseMove', posx, posy);
+      } // ignore mouse down (should not occur)
+      break;
+  }
+/*
   // does not take into account mouse button
   if (str == 'D') 
     mouseDown = true;
@@ -543,9 +611,7 @@ function mouseHandler(str,e)
   if (str == 'D')
   { startDrag(e,posx,posy);
     if (dragInProgress)
-      loadXMLDoc('Mouse ' + 'MouseDragStart' + '(' + (posx) + ',' +
-                                       (posy) + ',' +
-                                       showModifiers() + ');' );
+      loadXMLDoc('Mouse MouseDragStart(' + posx + ',' + posy + ',' + showModifiers() + ');' );
     else
       loadXMLDoc('Mouse ' + 'MouseDown' + '(' + (posx) + ',' +
                                        (posy) + ',' +
@@ -575,13 +641,25 @@ function mouseHandler(str,e)
         loadXMLDoc('Mouse ' + 'MouseMove' + '(' + (posx) + ',' +
                                          (posy) + ',' +
                                          showModifiers() + ');' );
+*/
 
   return false; // don't let browser handle mouse events
 }
 
+function sendMouseCommand(mouseCommand, x, y)
+{ loadXMLDoc( mkMouseCommand(mouseCommand,x,y) );
+}
+
+function mkMouseCommand(mouseCommand, x, y)
+{ return 'Mouse '+mouseCommand+'(' + x + ',' + y + ',' + showModifiers() + ');';
+}
+
 var ie=document.all;
 var nn6=document.getElementById&&!document.all;
+var dragState = 0;
 
+var mouseDownPos = { x:0, y: 0};
+var mouseIsDown = false;
 
 var dragInProgress = false;
 var draggedElement;
@@ -591,6 +669,14 @@ var dragOffset = { x: 0, y: 0 };
 Cannot use element in mouse event because the focus div catches all events
 Cannot use JQuery because it somehow fails for xhtml docs 
 */
+function getDraggable(x,y)
+{ var allDraggables = $(".Draggable");
+//  alert("draggables "+showElementsDimensions(allDraggables));
+  return getContainingElement(x,y,allDraggables);
+}
+
+
+// obsolete
 function startDrag(e,x,y)
 { var allDraggables = $(".Draggable");
 //  alert("draggables "+showElementsDimensions(allDraggables));
@@ -723,7 +809,8 @@ function scrollHandler(event)
 </head>
 <body onload="init()">
 <!-- size of Proxima window is currently hard coded in server; it should be passed with init event -->
-<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 800px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
+
+<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 600px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
      onclick="return mouseHandler('C',event)"
@@ -734,6 +821,8 @@ function scrollHandler(event)
      ></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div>
      <div id="draggedElementParent" style="position: relative; height: 10000px; width: 10000px;"></div>
 </div>
+
+<div id="status" style="border: 1px solid black; height: 22px; width: 1000px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
 <!-- onmousemove="return mouseHandler('M',event)" -->
 
 
@@ -790,8 +879,6 @@ function scrollHandler(event)
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 <button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
 <div id="debugMessage"></div>
-<!-- <div id="status" style="border: 1px solid black; height: 22px; width: 400px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
--->
 </body></html>
 
 
