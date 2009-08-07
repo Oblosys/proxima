@@ -540,11 +540,18 @@ function mouseHandler(str,e)
 
 
   setStatus( 'dragState is '+dragState + ' origin(' + mouseDownPos.x + ',' + mouseDownPos.y + ') offset(' + dragOffset.x + ',' + dragOffset.y + ')' );
+
+  
   switch(dragState)
   { case 0: // no button down
       if (str == 'D')
       { dragState = 1;
         mouseDownPos = { x: posx, y: posy };
+
+        draggable = getDraggable(mouseDownPos.x, mouseDownPos.y);
+        if ( !draggable )
+        { sendMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y);                     
+        }
       } // all other mouse actions are ignored when button was not down
       break;
 
@@ -552,13 +559,13 @@ function mouseHandler(str,e)
       if (str =='U')
       { loadXMLDoc( mkMouseCommand('MouseDown', posx, posy) + // equal to mouseDownPos
                     mkMouseCommand('MouseUp', posx, posy)   );
+        draggable = null;
         dragState = 0;
       }
       else if (str == 'M')
-      { var draggable = getDraggable(mouseDownPos.x, mouseDownPos.y);
-        if ( draggable )
+      { if ( draggable )
         { draggedElementClone = cloneObject(draggable);
-          // compute offset
+
           draggableDims = getElementDimensions( draggable );
           var proximaDims = getElementDimensions( proxima );
 
@@ -572,8 +579,7 @@ function mouseHandler(str,e)
           dragState = 2;
         }
         else
-        { loadXMLDoc( mkMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y) +
-                      mkMouseCommand('MouseMove', posx, posy)   );
+        { sendMouseCommand('MouseMove', posx, posy);
           dragState = 3;
         }
       } // ignore mouse down (should not occur)
@@ -584,6 +590,7 @@ function mouseHandler(str,e)
       { sendMouseCommand('MouseDrop', posx, posy);
         draggedElementClone.parentNode.removeChild(draggedElementClone);
         draggedElementClone = null;
+        draggable = null;
         dragState = 0;
       }
       else if ( str == 'M' )
@@ -620,6 +627,7 @@ var dragState = 0;
 
 var mouseDownPos = { x:0, y: 0};
 var dragOffset = { x: 0, y: 0 };
+var draggable;
 var draggedElementClone; // the clone that is moved on drag
 
 /*
