@@ -550,27 +550,30 @@ function mouseHandler(str,e)
 
     case 1: // button down, no drag
       if (str =='U')
-      { loadXMLDoc( mkMouseCommand('MouseDown', posx, posy) +
+      { loadXMLDoc( mkMouseCommand('MouseDown', posx, posy) + // equal to mouseDownPos
                     mkMouseCommand('MouseUp', posx, posy)   );
         dragState = 0;
       }
       else if (str == 'M')
       { var draggable = getDraggable(mouseDownPos.x, mouseDownPos.y);
         if ( draggable )
-        { draggedElement = cloneObject(draggable);
+        { draggedElementClone = cloneObject(draggable);
           // compute offset
-          draggedElementDims = getElementDimensions( draggable );
-          dragOffset = { x: mouseDownPos.x - draggedElementDims.x
-                       , y: mouseDownPos.y - draggedElementDims.y
+          draggableDims = getElementDimensions( draggable );
+          var proximaDims = getElementDimensions( proxima );
+
+          dragOffset = { x: mouseDownPos.x + proximaDims.x - draggableDims.x
+                       , y: mouseDownPos.y + proximaDims.y - draggableDims.y
                        }
-          draggedElement.style.left = posx-dragOffset.x +'px';
-          draggedElement.style.top = posy-dragOffset.y +'px';
+          draggedElementClone.style.left = posx-dragOffset.x +'px';
+          draggedElementClone.style.top = posy-dragOffset.y +'px';
 
           sendMouseCommand('MouseDragStart', posx, posy);
           dragState = 2;
         }
         else
-        { sendMouseCommand('MouseDown', posx, posy);
+        { loadXMLDoc( mkMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y) +
+                      mkMouseCommand('MouseMove', posx, posy)   );
           dragState = 3;
         }
       } // ignore mouse down (should not occur)
@@ -579,13 +582,13 @@ function mouseHandler(str,e)
     case 2: // drag in progress
       if ( str == 'U' )
       { sendMouseCommand('MouseDrop', posx, posy);
-        draggedElement.parentNode.removeChild(draggedElement);
-        draggedElement = null;
+        draggedElementClone.parentNode.removeChild(draggedElementClone);
+        draggedElementClone = null;
         dragState = 0;
       }
       else if ( str == 'M' )
-      { draggedElement.style.left = posx-dragOffset.x +'px';
-        draggedElement.style.top = posy-dragOffset.y +'px';
+      { draggedElementClone.style.left = posx-dragOffset.x +'px';
+        draggedElementClone.style.top = posy-dragOffset.y +'px';
       } // ignore mouse down (should not occur)
       break;
 
@@ -599,49 +602,6 @@ function mouseHandler(str,e)
       } // ignore mouse down (should not occur)
       break;
   }
-/*
-  // does not take into account mouse button
-  if (str == 'D') 
-    mouseDown = true;
-  if (str == 'U') 
-    mouseDown = false;
-
-   
-  //debugAdd('('+posx +','+posy+')');
-  if (str == 'D')
-  { startDrag(e,posx,posy);
-    if (dragInProgress)
-      loadXMLDoc('Mouse MouseDragStart(' + posx + ',' + posy + ',' + showModifiers() + ');' );
-    else
-      loadXMLDoc('Mouse ' + 'MouseDown' + '(' + (posx) + ',' +
-                                       (posy) + ',' +
-                                       showModifiers() + ');' );
-  }
-  else if (str == 'U')
-    if (dragInProgress)
-    { dragInProgress = false;
-      draggedElement.parentNode.removeChild(draggedElement);
-      // send drop event
-      loadXMLDoc('Mouse ' + 'MouseDrop' + '(' + (posx) + ',' +
-                                       (posy) + ',' +
-                                       showModifiers() + ');' );
-    }
-    else
-      loadXMLDoc('Mouse ' + 'MouseUp' + '(' + (posx) + ',' +
-                                       (posy) + ',' +
-                                       showModifiers() + ');' );
-  else if (str == 'M');
-    if (dragInProgress)
-    { draggedElement.style.left = posx-dragOffset.x - proxima.scrollLeft+'px';
-      draggedElement.style.top = posy-dragOffset.y - proxima.scrollTop+'px';
-    }
-    else
-  // only handle mouse move if the mouse button is down and the queue is empty
-      if (mouseDown && commandQueue == '')
-        loadXMLDoc('Mouse ' + 'MouseMove' + '(' + (posx) + ',' +
-                                         (posy) + ',' +
-                                         showModifiers() + ');' );
-*/
 
   return false; // don't let browser handle mouse events
 }
@@ -659,16 +619,14 @@ var nn6=document.getElementById&&!document.all;
 var dragState = 0;
 
 var mouseDownPos = { x:0, y: 0};
-var mouseIsDown = false;
-
-var dragInProgress = false;
-var draggedElement;
 var dragOffset = { x: 0, y: 0 };
+var draggedElementClone; // the clone that is moved on drag
 
 /*
 Cannot use element in mouse event because the focus div catches all events
 Cannot use JQuery because it somehow fails for xhtml docs 
 */
+
 function getDraggable(x,y)
 { var allDraggables = $(".Draggable");
 //  alert("draggables "+showElementsDimensions(allDraggables));
@@ -676,25 +634,12 @@ function getDraggable(x,y)
 }
 
 
-// obsolete
-function startDrag(e,x,y)
-{ var allDraggables = $(".Draggable");
-//  alert("draggables "+showElementsDimensions(allDraggables));
-  var dragSource = getContainingElement(x,y,allDraggables);
-  if (dragSource)
-  { dragOffset = getMouseCoordsWithinTarget(e,dragSource);
-    
-    draggedElement = cloneObject(dragSource);
-    dragInProgress = true;
-  }
-}
-
 function cloneObject( obj ) {
     var clone = obj.cloneNode(true);
     clone.style.position = 'absolute';
     clone.id = 'draggedObject';
 
-    var parent = document.getElementById('draggedElementParent');
+    var parent = document.getElementById('draggedElementCloneParent');
 
     parent.parentNode.appendChild(clone);
     return clone;
@@ -704,9 +649,12 @@ function cloneObject( obj ) {
 /* Precondition: elts are given depth first, so by going from n-1 to 0, we get the deepest
 */
 function getContainingElement(x,y,elts)
-{var elt;
+{ var proxima = document.getElementById('proxima');
+  var proximaDims = getElementDimensions( proxima );
+
+  var elt;
   for (var i=elts.length-1; i >= 0 && !elt; i--)
-    if (within(x,y, getElementDimensions(elts[i])))
+    if (within(x + proximaDims.x, y + proximaDims.y, getElementDimensions(elts[i])))
       elt=elts[i];
 
   return elt;
@@ -809,6 +757,7 @@ function scrollHandler(event)
 </head>
 <body onload="init()">
 <!-- size of Proxima window is currently hard coded in server; it should be passed with init event -->
+<div id="status" style="border: 1px solid black; height: 22px; width: 1000px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
 
 <div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 600px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
@@ -819,11 +768,9 @@ function scrollHandler(event)
      onscroll="return scrollHandler(event)"
  ><div id="rendering" 
      ></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div>
-     <div id="draggedElementParent" style="position: relative; height: 10000px; width: 10000px;"></div>
+     <div id="draggedElementCloneParent" style="position: relative; height: 10000px; width: 10000px;"></div>
 </div>
 
-<div id="status" style="border: 1px solid black; height: 22px; width: 1000px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
-<!-- onmousemove="return mouseHandler('M',event)" -->
 
 
 <!-- font positioning goes wrong: text is drawn at half-height ref at top of div box
