@@ -524,7 +524,6 @@ function ignore(e)
    return false;
 }
 
-
 function mouseHandler(str,e) 
 { if (e.button != 0) return true;  // only handle left button here
 
@@ -539,7 +538,7 @@ function mouseHandler(str,e)
     return;  // we're on a scroll bar, so no event.
 
 
-  setStatus( 'dragState is '+dragState + ' origin(' + mouseDownPos.x + ',' + mouseDownPos.y + ') offset(' + dragOffset.x + ',' + dragOffset.y + ')' );
+//  setStatus( 'dragState is '+dragState + ' origin(' + mouseDownPos.x + ',' + mouseDownPos.y + ') offset(' + dragOffset.x + ',' + dragOffset.y + ')' );
 
   
   switch(dragState)
@@ -664,6 +663,8 @@ function getContainingElement(x,y,elts)
   for (var i=elts.length-1; i >= 0 && !elt; i--)
     if (within(x + proximaDims.x, y + proximaDims.y, getElementDimensions(elts[i])))
       elt=elts[i];
+    // x & y are relative to Proxima element and dimensions of the elements are not, so we add
+    // the proxima x & y
 
   return elt;
 }
@@ -764,9 +765,9 @@ function scrollHandler(event)
 ]]></script>
 </head>
 <body onload="init()">
-<!-- size of Proxima window is currently hard coded in server; it should be passed with init event -->
-<div id="status" style="border: 1px solid black; height: 22px; width: 1000px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div>
+<!-- <div id="status" style="border: 1px solid black; height: 22px; width: 1000px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div> -->
 
+<!-- size of Proxima window is currently hard coded in server; it should be passed with init event -->
 <div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 600px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
