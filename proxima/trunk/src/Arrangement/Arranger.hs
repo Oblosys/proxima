@@ -36,8 +36,8 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
 --          prunedPres = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres -- old prune
 
           prunedPres = if arrangerIncrementality settings 
-                       then prunePresentation viewedArea oldViewedArea dt pres  -- uncomment this line for incremental arrangement
-                       else prunePresentation viewedArea oldViewedArea (DiffLeaf False) pres -- and this one for non-incremental
+                       then prunePresentation viewedArea oldViewedArea dt pres
+                       else prunePresentation viewedArea oldViewedArea (DiffLeaf False) pres
           
 --    ; debugLnIO Err $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show oldViewedArea
 --    ; debugLnIO Err ("Diff tree"++show dt)
