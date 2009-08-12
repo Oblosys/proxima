@@ -439,8 +439,10 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
                 then KeyCharRen (chr keyChar)
                 else KeySpecialRen (CommonTypes.CharKey (chr keyChar)) ms
 
-      in  genericHandler settings handler renderingLvlVar viewedAreaRef () evt
-    
+      in  do { html1 <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+             ; html2 <- genericHandler settings handler renderingLvlVar viewedAreaRef () GuaranteeFocusInViewRen
+             ; return $ html1 ++ html2
+             }
 
     Mouse mouseCommand (x, y, (shiftDown, ctrlDown, altDown)) ->
       let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
@@ -524,6 +526,7 @@ mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef =
     ; ((x,y),(_,_)) <- readIORef viewedAreaRef
     ; let ((x',y'),(w',h')) = if reducedViewedArea settings
                               then ((x- w `div` 4,y - h `div` 4),(w,h))
-                              else ((x,y),(w,h))
+                              else ((x,y),(w',h'))
+    --; putStr $ "set client viewed area: " ++ show (x,y)
     ; return $ "<div op='setViewedArea' x='"++show x'++"' y='"++show y'++"' w='"++show w'++"' h='"++show h'++"'></div>"
     }

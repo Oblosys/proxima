@@ -94,5 +94,6 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
 
     OpenFileRen filePath  -> ([OpenFileArr filePath],  state, renLvl) 
     SaveFileRen filePath  -> ([SaveFileArr filePath],  state, renLvl) 
+    GuaranteeFocusInViewRen -> ([GuaranteeFocusInViewArr], state, renLvl)
     WrapRen wrapped       -> ([unwrap wrapped],        state, renLvl)
     _                     -> ([SkipArr 0],             state, renLvl)

@@ -24,6 +24,34 @@ translateIO state low high =  castRemainingEditOps $ \editLow ->
 
 
     
+unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) GuaranteeFocusInViewArr = 
+ do { case focus of
+              NoFocusA -> return ()
+              FocusA NoPathA NoPathA -> return ()
+              _ -> let focusEnd = case focus of
+                                    FocusA (PathA pth i) NoPathA -> pth ++ [i]
+                                    FocusA _  (PathA pth i)      -> pth ++ [i]
+                       (fx,fy,fw,fh) = sizeA focusEnd arr
+                   in  do { ((x,y),(w,h)) <- readIORef $ getViewedAreaRef state 
+                          ; putStrLn $ "\n\n\nFocus:\n"++show (fx,fy,fw,fh) ++ "\n"
+                          ; print (x,y,w,h)
+                          ; writeIORef (getViewedAreaRef state) $
+                              ( ( if fx < x 
+                                  then fx 
+                                  else if fx + fw > x + w
+                                       then fx + fw - w
+                                       else x
+                                , if fy < y 
+                                  then fy 
+                                  else if fy + fh > y + h
+                                       then fy + fh - h
+                                       else y
+                                )
+                              , (w, h)
+                              )
+                          }
+    ; return ([SkipLay 0],             state, arrLvl)
+    }
 unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) ClearMetricsArr = 
  do { writeIORef (getFontMetricsRef state) Map.empty -- TODO: put Map.empty as a function in FontLib
     ; return ([SkipLay 0],             state, (ArrangementLevel emptyA focus p))

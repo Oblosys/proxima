@@ -42,6 +42,7 @@ data EditRendering_ wrapped doc enr node clip token =
   | DropRen Int Int
   | OpenFileRen String
   | SaveFileRen String
+  | GuaranteeFocusInViewRen
   | WrapRen wrapped deriving Show
 
 
