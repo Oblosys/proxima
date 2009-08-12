@@ -32,7 +32,7 @@ Executable DazzleEditor
 -------------------------------------------------------------------------------
 
   build-depends: base >=4.0, haskell98 -any,
-                 syb -any,
+                 syb -any, directory >=1.0,
                  network >=2.0, parsec ==2.1.0.1, time >=1.0, containers >=0.1,
                  array >=0.1, xhtml >=2.0, mtl >=1.1,
                  old-time -any,
