@@ -553,11 +553,11 @@ function mouseHandler(str,e)
       setViewedAreaServer();
       return true;
     }
-    /*else if (str == 'M')
+    else if (str == 'M')
     { if (commandQueue == "")
         setViewedAreaServer(); // during scroll, only update if no other commands in queue, to prevent flooding
       return true;
-    }*/
+    }
     // mouse down cannot occur
   }
 
