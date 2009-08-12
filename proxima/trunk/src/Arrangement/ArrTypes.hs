@@ -45,6 +45,7 @@ data EditArrangement_ wrapped doc enr node clip token =
   | DropArr Int Int
   | OpenFileArr String
   | SaveFileArr String
+  | GuaranteeFocusInViewArr
   | WrapArr wrapped deriving Show
 
 
