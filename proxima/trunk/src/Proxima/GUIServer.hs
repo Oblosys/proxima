@@ -13,7 +13,7 @@ import Proxima.Wrap
 import Data.Time.Clock
 import Control.Exception
 import Data.Char
-
+import System.Directory
 {- HAppS -}
 import HAppS.Server
 import HAppS.Server.SimpleHTTP
@@ -155,8 +155,12 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
                                                then setHeader "Content-Type" "text/html"
                                                else id
                                            
+                         ; let filePath = "src/proxima/scripts/Editor.xml"
+                         ; exist <- liftIO $ doesFileExist filePath
+                         ; if exist then return () else error $ "File not found: " ++ filePath  
+                                    
                          ; modifyResponseSP (noCache. setTypeToHTML) $
-                              fileServe [] "src/proxima/scripts/Editor.xml" 
+                              fileServe [] filePath
                          })
                  
 
