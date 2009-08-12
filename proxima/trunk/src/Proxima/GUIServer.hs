@@ -529,9 +529,9 @@ reduceViewedArea settings viewedAreaRef =
 mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef =
  do { ((_,_),(w,h)) <- readIORef actualViewedAreaRef
     ; ((x,y),(_,_)) <- readIORef viewedAreaRef
-    ; let ((x',y'),(w',h')) = if reducedViewedArea settings
-                              then ((x- w `div` 4,y - h `div` 4),(w,h))
-                              else ((x,y),(w',h'))
+    ; let (x',y') = if reducedViewedArea settings
+                    then (x- w `div` 4,y - h `div` 4)
+                    else (x,y)
     --; putStr $ "set client viewed area: " ++ show (x,y)
-    ; return $ "<div op='setViewedArea' x='"++show x'++"' y='"++show y'++"' w='"++show w'++"' h='"++show h'++"'></div>"
+    ; return $ "<div op='setViewedArea' x='"++show x'++"' y='"++show y'++"' w='"++show w++"' h='"++show h++"'></div>"
     }
