@@ -33,7 +33,6 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
  do { viewedArea <- readIORef $ getViewedAreaRef state
     ; let oldViewedArea = getLastViewedArea state
           state' = state { getLastViewedArea = viewedArea }
---          prunedPres = prunePres viewedArea lastViewedArea (0,0) dt oldArrangement pres -- old prune
 
           prunedPres = if arrangerIncrementality settings 
                        then prunePresentation viewedArea oldViewedArea dt pres
