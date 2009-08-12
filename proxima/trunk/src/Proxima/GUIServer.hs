@@ -150,6 +150,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
   [ withAgentIsMIE $ \agentIsMIE ->
       (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
                            liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
+                         ; liftIO $ reduceViewedArea settings viewedAreaRef
                            -- todo: take this from an init event
                          ; let setTypeToHTML = if agentIsMIE 
                                                then setHeader "Content-Type" "text/html"
@@ -454,6 +455,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR comma
 
     Scroll newViewedArea ->
      do { writeIORef viewedAreaRef newViewedArea
+        ; reduceViewedArea settings viewedAreaRef
         ; genericHandler settings handler renderingLvlVar viewedAreaRef () $
             SkipRen (-2)
         }
@@ -478,7 +480,7 @@ genericHandler settings handler renderingLvlVar viewedAreaRef () evt =
  do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
     ; putStrLn $ "Generic handler server started for edit op: " ++ show evt
     ; viewedArea <- readIORef viewedAreaRef
---    ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
+    ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
           
     ; (renderingLvl', editsRendering) <- handler (renderingLvl,evt)
     ; htmlRenderings <- mapM process editsRendering
@@ -502,4 +504,13 @@ drawFocusHTML settings renderingLvlVar viewedAreaRef =
     ; let htmlFocusRendering = execWriter $ focusRenderingHTML viewedArea
     ; return htmlFocusRendering
     }
-
+ 
+reduceViewedArea :: Settings -> IORef CommonTypes.Rectangle -> IO ()
+reduceViewedArea settings viewedAreaRef =
+ do { ((x,y),(w,h)) <- readIORef viewedAreaRef
+    ; if reducedViewedArea settings -- return a smaller viewed area, for testing incrementality algorithms.
+      then writeIORef viewedAreaRef $ 
+             ((x+ (w `div` 4),y + (h `div` 4)),(w `div` 2,h `div` 2))
+      else return ()
+    }                     
+    
