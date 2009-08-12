@@ -37,14 +37,22 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
           prunedPres = if arrangerIncrementality settings 
                        then prunePresentation viewedArea oldViewedArea dt pres
                        else prunePresentation viewedArea oldViewedArea (DiffLeaf False) pres
-          
+                       -- viewedArea is only passed to check if it changed, it is not
+                       -- actually used in the pruning algorithm (since the presentation has no 
+                       -- position & size information)
+                            
+                            
+    ; let ((x,y),(w,h)) = viewedArea
+          extendedViewedArea = ( (clip 0 10000 (x- w `div` 4), clip 0 10000 (y- h `div` 4))
+                               , (w+ w `div` 2, h + h `div` 2)
+                               )           
 --    ; debugLnIO Err $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show oldViewedArea
 --    ; debugLnIO Err ("Diff tree"++show dt)
 --    ; debugLnIO Err ("Presentation"++show pres)
 --    ; debugLnIO Err ("Pruned Presentation"++show prunedPres)
 --    ; debugLnIO Arr ("Old arrangement "++ show oldArrangement)
 
-    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef (getIDACounter state') focus prunedPres pres viewedArea oldViewedArea oldArrangement
+    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef (getIDACounter state') focus prunedPres pres extendedViewedArea oldViewedArea oldArrangement
 
     ; let state'' = state' { getIDACounter = idCounter' }
     ; when (maxFDepth > 1) $
