@@ -149,9 +149,8 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
   -- debugFilter $
   [ withAgentIsMIE $ \agentIsMIE ->
       (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
-                           liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
-                         ; liftIO $ reduceViewedArea settings viewedAreaRef
-                           -- todo: take this from an init event
+                           liftIO $ writeIORef viewedAreaRef ((0,0),(0,0)) 
+                           -- will be set on client init
                          ; let setTypeToHTML = if agentIsMIE 
                                                then setHeader "Content-Type" "text/html"
                                                else id
@@ -209,7 +208,9 @@ instance FromData Commands where
 server params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
  do { let handler =
             hPathRouter
-             [ ("/",            do { liftIO $ writeIORef viewedAreaRef ((0,0),(1000,800)) 
+             [ ("/",            do { liftIO $ writeIORef viewedAreaRef ((0,0),(0,0)) 
+                                     -- will be set on client init
+
                                    ; hFileResource "src/proxima/scripts/Editor.xml"
                                    }
                )
@@ -349,7 +350,7 @@ data Command = Metrics ((String,Int),(Int,Int,[Int]))
              | Key (Int,Modifiers)
              | Chr (Int,Modifiers)
              | Mouse MouseCommand (Int,Int, Modifiers)
-             | Scroll CommonTypes.Rectangle
+             | SetViewedArea CommonTypes.Rectangle
              | ClearMetrics 
                deriving (Show, Read)
                         
@@ -453,7 +454,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR comma
       in  genericHandler settings handler renderingLvlVar viewedAreaRef () evt
 
 
-    Scroll newViewedArea ->
+    SetViewedArea newViewedArea ->
      do { writeIORef viewedAreaRef newViewedArea
         ; reduceViewedArea settings viewedAreaRef
         ; genericHandler settings handler renderingLvlVar viewedAreaRef () $

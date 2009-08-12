@@ -758,7 +758,7 @@ function scrollHandler(event)
 function setViewedArea()
 { var proxima = document.getElementById('proxima');
 //    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
-  loadXMLDoc('Scroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
+  loadXMLDoc('SetViewedArea((' + proxima.scrollLeft + ',' + proxima.scrollTop +
             '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
 }
 
