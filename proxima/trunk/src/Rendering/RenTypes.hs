@@ -23,10 +23,7 @@ data RenderingLevel_ wrapped doc enr node clip token =
                       Rendering -- rendering
                       Rendering -- focus rendering
                       Size Debugging UpdatedRegions LeftButtonDown
-                  
-type LocalStateRen = ()
-                                   
-
+                                                   
 data EditRendering'_ wrapped doc enr node clip token =
     SetRen' (RenderingLevel_ wrapped doc enr node clip token)
   | SkipRen' Int
