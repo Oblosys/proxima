@@ -80,6 +80,7 @@ function init()
 //    alert('before');
 //    debugAdd('Metrics: '+queryFont("Times New Roman", 12));
 //    alert('after');
+    setViewedArea();
     loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
 }
 
@@ -747,15 +748,19 @@ function showModifiers()
 
 function scrollHandler(event)
 {
-    var proxima = document.getElementById('proxima');
     
-//    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
-  if (commandQueue == '')
-    loadXMLDoc('Scroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
-               '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
+ if (commandQueue == '')
+    setViewedArea();
 }
 
-
+// set the viewed area at server side according to size and scroll position of proxima
+// element
+function setViewedArea()
+{ var proxima = document.getElementById('proxima');
+//    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
+  loadXMLDoc('Scroll((' + proxima.scrollLeft + ',' + proxima.scrollTop +
+            '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
+}
 
 
 
