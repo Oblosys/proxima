@@ -80,7 +80,7 @@ function init()
 //    alert('before');
 //    debugAdd('Metrics: '+queryFont("Times New Roman", 12));
 //    alert('after');
-    setViewedArea();
+    setViewedAreaServer();
     loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
 }
 
@@ -395,6 +395,15 @@ function updateTree(update)
     //debugAdd('query is Metrics'+metrics+';');
     loadXMLDoc('Metrics'+metrics+';');
   }
+  else if (op == 'setViewedArea')
+  { var x = update.getAttribute('x');
+    var y = update.getAttribute('y');
+    var w = update.getAttribute('w');
+    var h = update.getAttribute('h');
+
+    setViewedAreaClient(x,y,w,h);    
+  }
+  
   else if (op == 'refresh')
   { refresh();
     loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
@@ -750,20 +759,31 @@ function scrollHandler(event)
 {
     
  if (commandQueue == '')
-    setViewedArea();
+    setViewedAreaServer();
 }
+
+var internalScrollEvent = false;
 
 // set the viewed area at server side according to size and scroll position of proxima
 // element
-function setViewedArea()
-{ var proxima = document.getElementById('proxima');
+function setViewedAreaServer()
+{ if (!internalScrollEvent)
+  { var proxima = document.getElementById('proxima');
 //    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
-  loadXMLDoc('SetViewedArea((' + proxima.scrollLeft + ',' + proxima.scrollTop +
-            '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
+    loadXMLDoc('SetViewedArea((' + proxima.scrollLeft + ',' + proxima.scrollTop +
+              '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
+  }
+  else internalScrollEvent = false;
 }
 
+// scroll proxima element to show the viewed area
+function setViewedAreaClient(x,y,w,h)
+{ var proxima = document.getElementById('proxima');
 
-
+  proxima.scrollLeft = x;
+  proxima.scrollTop = y;
+  internalScrollEvent = true
+}
 
 
 

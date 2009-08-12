@@ -65,11 +65,12 @@ initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize) =
 -- withCatch is identity in GUIServer, it is defined only in the GUIGtk module.
 withCatch io = io
 
-startEventLoop params@(settings,_,_,_) = withProgName "proxima" $
+startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
  do { initR <- newIORef (True)
     ; menuR <- newIORef []
-
-    ; tId <- forkIO $ server params initR menuR
+    ; actualViewedAreaRef <- newIORef ((0,0),(0,0))
+                             
+    ; tId <- forkIO $ server params initR menuR actualViewedAreaRef
     ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
     ; putStrLn "Press <Enter> to terminate server"
     ; getLine `Control.Exception.catch` exceptionHandler
@@ -99,8 +100,9 @@ the monad, but it will only do something if the header is not set in the out par
 Header modifications must therefore be applied to out rather than be fmapped to the monad.
 -}
 
-server params@(settings,_,_,_) initR menuR =
-  simpleHTTP (Conf (serverPort settings) Nothing) (handlers params initR menuR)
+server params@(settings,_,_,_) initR menuR actualViewedAreaRef =
+  
+  simpleHTTP (Conf (serverPort settings) Nothing) (handlers params initR menuR actualViewedAreaRef)
 {-
 handle:
 http://<server url>/                    response: <proxima executable dir>/src/proxima/scripts/Editor.xml
@@ -145,13 +147,11 @@ withAgentIsMIE f = withRequest $ \rq ->
                      -- cannot handle large queries with GET
                      
 -- handlers :: [ServerPartT IO Response]
-handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR = 
+handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef = 
   -- debugFilter $
   [ withAgentIsMIE $ \agentIsMIE ->
       (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
-                           liftIO $ writeIORef viewedAreaRef ((0,0),(0,0)) 
-                           -- will be set on client init
-                         ; let setTypeToHTML = if agentIsMIE 
+                           let setTypeToHTML = if agentIsMIE 
                                                then setHeader "Content-Type" "text/html"
                                                else id
                                            
@@ -170,7 +170,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
                           do { liftIO $ putStrLn $ "Command received " ++ take 10 (show cmds)
                       
                              ; responseHTML <- 
-                                 liftIO $ catchExceptions $ handleCommands params initR menuR
+                                 liftIO $ catchExceptions $ handleCommands params initR menuR actualViewedAreaRef
                                                             cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
@@ -205,14 +205,10 @@ instance FromData Commands where
 
 
 {- Salvia -} {-
-server params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
+server params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef =
  do { let handler =
             hPathRouter
-             [ ("/",            do { liftIO $ writeIORef viewedAreaRef ((0,0),(0,0)) 
-                                     -- will be set on client init
-
-                                   ; hFileResource "src/proxima/scripts/Editor.xml"
-                                   }
+             [ ("/",            hFileResource "src/proxima/scripts/Editor.xml"
                )
              
              , ("/favicon.ico", hFileResource "src/proxima/etc/favicon.ico")
@@ -228,7 +224,7 @@ server params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR =
                               _                       -> ""
                     
                     ; responseHTML <- 
-                        liftIO $ handleCommands params initR menuR 
+                        liftIO $ handleCommands params initR menuR actualViewedAreaRef
                                    (Commands commandsStr)
 --                    ; liftIO $ putStrLn $ "response" ++ responseHTML    
                     ; enterM response $ do
@@ -311,12 +307,12 @@ splitCommands commandStr =
     (command, (_:commandStr')) -> command : splitCommands commandStr'
         
 -- handle each command in commands and send the updates back
-handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Commands commandStr) =
+handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef (Commands commandStr) =
  do { let commands = splitCommands commandStr
    -- ; putStrLn $ "Received commands:"++ show commands
     
     ; renderingHTMLss <-
-        mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR)
+        mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef)
              commands
  
     ; let renderingHTML = concat . concat $ renderingHTMLss
@@ -328,22 +324,23 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR (Com
     ; pendingQueriesTxt <-  readFile "metricsQueries.txt"
     ; seq (length pendingQueriesTxt) $ return ()
     ; let pendingQueries = map read $ lines pendingQueriesTxt :: [(String, Int)]
-          queryHTML = concat [ "<div id='metricsQuery' op='metricsQuery' family='"++fam++"' size='"++show sz++"'></div>" 
+          queryHTML = concat [ "<div op='metricsQuery' family='"++fam++"' size='"++show sz++"'></div>" 
                              | (fam,sz) <- pendingQueries]
-                      ++ if null pendingQueries then "" else "<div id='refresh' op='refresh'></div>"
+                      ++ if null pendingQueries then "" else "<div op='refresh'></div>"
 
     
     ; fh <- openFile "metricsQueries.txt" WriteMode
     ; hClose fh
     
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
-    ; if null pendingQueries then putStrLn "Sending rendering and focus" else return ()
+--    ; if null pendingQueries then putStrLn "Sending rendering and focus" else return ()
+    ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
     ; return $ "<div id='updates'>"++ (if null pendingQueries 
-                                       then renderingHTML++focusRenderingHTML
+                                       then renderingHTML++focusRenderingHTML++setViewedAreaHtml
                                        else "")
                                    ++queryHTML++"</div>"            
     }
-
+        
 data Command = Metrics ((String,Int),(Int,Int,[Int]))
              | ContextMenuRequest ((Int,Int),(Int,Int))
              | ContextMenuSelect Int  
@@ -358,9 +355,9 @@ type Modifiers = (Bool,Bool,Bool)
 data MouseCommand = MouseDown | MouseMove | MouseUp | MouseDragStart | MouseDrop
                     deriving (Show, Read)
 
-handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR eventStr =
+handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef eventStr =
   case safeRead eventStr of
-    Just cmd -> handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR cmd
+    Just cmd -> handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef cmd
     Nothing  -> error ("Syntax error in command: "++eventStr) 
 
 
@@ -371,8 +368,8 @@ handleCommand :: forall doc enr clip node token .
                ,((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token]))
                , IORef (RenderingLevel doc enr node clip token) 
                , IORef CommonTypes.Rectangle 
-               ) -> IORef Bool -> IORef [UpdateDoc doc clip] -> Command -> IO [String]
-handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR command =
+               ) -> IORef Bool -> IORef [UpdateDoc doc clip] -> IORef CommonTypes.Rectangle -> Command -> IO [String]
+handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef command =
   case command of
     Metrics receivedMetrics@(font,_) ->
      do { putStrLn $ "Received metrics for: "++show font
@@ -456,6 +453,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR comma
 
     SetViewedArea newViewedArea ->
      do { writeIORef viewedAreaRef newViewedArea
+        ; writeIORef actualViewedAreaRef newViewedArea
         ; reduceViewedArea settings viewedAreaRef
         ; genericHandler settings handler renderingLvlVar viewedAreaRef () $
             SkipRen (-2)
@@ -514,4 +512,14 @@ reduceViewedArea settings viewedAreaRef =
              ((x+ (w `div` 4),y + (h `div` 4)),(w `div` 2,h `div` 2))
       else return ()
     }                     
-    
+
+-- the actualViewedArea contains the viewedArea from the client. We need it because undoing the reduction is not possible
+-- with only the viewedArea, as the div on the width and height is not invertible for uneven numbers.
+mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef =
+ do { ((_,_),(w,h)) <- readIORef actualViewedAreaRef
+    ; ((x,y),(_,_)) <- readIORef viewedAreaRef
+    ; let ((x',y'),(w',h')) = if reducedViewedArea settings
+                              then ((x- w `div` 4,y - h `div` 4),(w,h))
+                              else ((x,y),(w,h))
+    ; return $ "<div op='setViewedArea' x='"++show x'++"' y='"++show y'++"' w='"++show w'++"' h='"++show h'++"'></div>"
+    }
