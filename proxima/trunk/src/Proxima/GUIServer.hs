@@ -338,9 +338,8 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actu
     
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
 --    ; if null pendingQueries then putStrLn "Sending rendering and focus" else return ()
-    ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
     ; return $ "<div id='updates'>"++ (if null pendingQueries 
-                                       then renderingHTML++focusRenderingHTML++setViewedAreaHtml
+                                       then renderingHTML++focusRenderingHTML
                                        else "")
                                    ++queryHTML++"</div>"            
     }
@@ -430,7 +429,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
                   122 -> KeySpecialRen CommonTypes.F11Key  ms
                   123 -> KeySpecialRen CommonTypes.F12Key  ms
                   _  -> SkipRen 0
-      in  genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+      in  genericHandler2 settings handler renderingLvlVar viewedAreaRef actualViewedAreaRef () (evt, GuaranteeFocusInViewRen)
     
     
     Chr (keyChar,(shiftDown, ctrlDown, altDown)) ->
@@ -439,10 +438,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
                 then KeyCharRen (chr keyChar)
                 else KeySpecialRen (CommonTypes.CharKey (chr keyChar)) ms
 
-      in  do { html1 <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt
-             ; html2 <- genericHandler settings handler renderingLvlVar viewedAreaRef () GuaranteeFocusInViewRen
-             ; return $ html1 ++ html2
-             }
+      in  genericHandler2 settings handler renderingLvlVar viewedAreaRef actualViewedAreaRef () (evt,GuaranteeFocusInViewRen)
 
     Mouse mouseCommand (x, y, (shiftDown, ctrlDown, altDown)) ->
       let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
@@ -454,7 +450,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
                      MouseDragStart -> DragStartRen x y 
                      MouseDrop -> DropRen x y
                      
-      in  genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+      in  genericHandler2 settings handler renderingLvlVar viewedAreaRef actualViewedAreaRef () (evt, GuaranteeFocusInViewRen)
 
 
     SetViewedArea newViewedArea ->
@@ -474,8 +470,15 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
             cast (ClearMetricsArr :: EditArrangement doc enr node clip token)
         }
     
-
-
+-- TODO: make this one for lists
+genericHandler2 settings handler renderingLvlVar viewedAreaRef actualViewedAreaRef () (evt1, evt2) =
+ do { html1 <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt1
+    ; html2 <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt2
+    ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+    ; return $ html1 ++ html2 ++ [setViewedAreaHtml]
+    }
+ 
+-- TODO: handle wrapped renderingEdits
 genericHandler :: (Show token, Show node, Show enr, Show doc) => Settings ->
                ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                IORef (RenderingLevel doc enr node clip token) -> IORef CommonTypes.Rectangle -> 
