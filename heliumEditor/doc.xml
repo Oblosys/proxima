@@ -1,0 +1,47 @@
+<RootDoc>
+<Root>
+  <Decl>
+    <Bool val="True"/>
+    <Bool val="False"/>
+    <Ident>
+      <String>inc</String>
+    </Ident>
+    <PlusExp>
+      <IntExp>
+        <Integer val="1"/>
+      </IntExp>
+      <IntExp>
+        <Integer val="3"/>
+      </IntExp>
+    </PlusExp>
+  </Decl>
+  <Decl>
+    <Bool val="True"/>
+    <Bool val="False"/>
+    <Ident>
+      <String>f</String>
+    </Ident>
+    <IntExp>
+      <Integer val="2"/>
+    </IntExp>
+  </Decl>
+  <Decl>
+    <Bool val="True"/>
+    <Bool val="False"/>
+    <Ident>
+      <String>list</String>
+    </Ident>
+    <ListExp>
+      <IntExp>
+        <Integer val="1"/>
+      </IntExp>
+      <IntExp>
+        <Integer val="2"/>
+      </IntExp>
+      <IntExp>
+        <Integer val="3"/>
+      </IntExp>
+    </ListExp>
+  </Decl>
+</Root>
+</RootDoc>

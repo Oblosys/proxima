@@ -1,0 +1,32 @@
+<Root>
+  <Decl>
+    <Bool_>
+      <Bool val="True"/>
+    </Bool_>
+    <HoleBool_/>
+    <Ident>
+      <String_>
+        <String>saved</String>
+      </String_>
+    </Ident>
+    <HoleExp/>
+  </Decl>
+  <Decl>
+    <Bool_>
+      <Bool val="True"/>
+    </Bool_>
+    <HoleBool_/>
+    <Ident>
+      <String_>
+        <String>inc</String>
+      </String_>
+    </Ident>
+    <IdentExp>
+          <Ident>
+            <String_>
+              <String>x</String>
+            </String_>
+          </Ident>
+     </IdentExp>
+  </Decl>
+</Root>

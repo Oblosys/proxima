@@ -1,0 +1,231 @@
+<RootDoc>
+  <Root>
+    <Decl>
+      <Bool val="True"/>
+      <Bool val="False"/>
+      <Ident>
+        <String>list</String>
+      </Ident>
+      <ListExp>
+        <PlusExp>
+          <IntExp>
+            <Integer val="1"/>
+          </IntExp>
+          <IntExp>
+            <Integer val="2"/>
+          </IntExp>
+        </PlusExp>
+        <IntExp>
+          <Integer val="27"/>
+        </IntExp>
+        <TimesExp>
+          <IntExp>
+            <Integer val="3"/>
+          </IntExp>
+          <IntExp>
+            <Integer val="5"/>
+          </IntExp>
+        </TimesExp>
+      </ListExp>
+    </Decl>
+    <Decl>
+      <Bool val="True"/>
+      <Bool val="False"/>
+      <Ident>
+        <String>large</String>
+      </Ident>
+      <LamExp>
+        <Ident>
+          <String>x</String>
+        </Ident>
+        <LamExp>
+          <Ident>
+            <String>y</String>
+          </Ident>
+          <LamExp>
+            <Ident>
+              <String>z</String>
+            </Ident>
+            <PlusExp>
+              <IdentExp>
+                <Ident>
+                  <String>x</String>
+                </Ident>
+              </IdentExp>
+              <PlusExp>
+                <IdentExp>
+                  <Ident>
+                    <String>y</String>
+                  </Ident>
+                </IdentExp>
+                <PlusExp>
+                  <IdentExp>
+                    <Ident>
+                      <String>z</String>
+                    </Ident>
+                  </IdentExp>
+                  <IntExp>
+                    <Integer val="1"/>
+                  </IntExp>
+                </PlusExp>
+              </PlusExp>
+            </PlusExp>
+          </LamExp>
+        </LamExp>
+      </LamExp>
+    </Decl>
+    <Decl>
+      <Bool val="True"/>
+      <Bool val="False"/>
+      <Ident>
+        <String>s</String>
+      </Ident>
+      <LamExp>
+        <Ident>
+          <String>f</String>
+        </Ident>
+        <LamExp>
+          <Ident>
+            <String>g</String>
+          </Ident>
+          <LamExp>
+            <Ident>
+              <String>x</String>
+            </Ident>
+            <AppExp>
+              <IdentExp>
+                <Ident>
+                  <String>f</String>
+                </Ident>
+              </IdentExp>
+              <AppExp>
+                <IdentExp>
+                  <Ident>
+                    <String>x</String>
+                  </Ident>
+                </IdentExp>
+                <ParenExp>
+                  <AppExp>
+                    <IdentExp>
+                      <Ident>
+                        <String>g</String>
+                      </Ident>
+                    </IdentExp>
+                    <IdentExp>
+                      <Ident>
+                        <String>x</String>
+                      </Ident>
+                    </IdentExp>
+                  </AppExp>
+                </ParenExp>
+              </AppExp>
+            </AppExp>
+          </LamExp>
+        </LamExp>
+      </LamExp>
+    </Decl>
+    <Decl>
+      <Bool val="True"/>
+      <Bool val="False"/>
+      <Ident>
+        <String>f</String>
+      </Ident>
+      <LamExp>
+        <Ident>
+          <String>x</String>
+        </Ident>
+        <PlusExp>
+          <PowerExp>
+            <IdentExp>
+              <Ident>
+                <String>x</String>
+              </Ident>
+            </IdentExp>
+            <IntExp>
+              <Integer val="2"/>
+            </IntExp>
+          </PowerExp>
+          <PlusExp>
+            <TimesExp>
+              <IntExp>
+                <Integer val="2"/>
+              </IntExp>
+              <IdentExp>
+                <Ident>
+                  <String>x</String>
+                </Ident>
+              </IdentExp>
+            </TimesExp>
+            <DivExp>
+              <TimesExp>
+                <ParenExp>
+                  <PlusExp>
+                    <IntExp>
+                      <Integer val="3"/>
+                    </IntExp>
+                    <IdentExp>
+                      <Ident>
+                        <String>x</String>
+                      </Ident>
+                    </IdentExp>
+                  </PlusExp>
+                </ParenExp>
+                <TimesExp>
+                  <ParenExp>
+                    <PlusExp>
+                      <IntExp>
+                        <Integer val="2"/>
+                      </IntExp>
+                      <IdentExp>
+                        <Ident>
+                          <String>x</String>
+                        </Ident>
+                      </IdentExp>
+                    </PlusExp>
+                  </ParenExp>
+                  <IntExp>
+                    <Integer val="1"/>
+                  </IntExp>
+                </TimesExp>
+              </TimesExp>
+              <PowerExp>
+                <ParenExp>
+                  <PlusExp>
+                    <IdentExp>
+                      <Ident>
+                        <String>x</String>
+                      </Ident>
+                    </IdentExp>
+                    <IntExp>
+                      <Integer val="1"/>
+                    </IntExp>
+                  </PlusExp>
+                </ParenExp>
+                <IntExp>
+                  <Integer val="2"/>
+                </IntExp>
+              </PowerExp>
+            </DivExp>
+          </PlusExp>
+        </PlusExp>
+      </LamExp>
+    </Decl>
+    <Decl>
+      <Bool val="True"/>
+      <Bool val="False"/>
+      <Ident>
+        <String>c</String>
+      </Ident>
+      <AppExp>
+        <IdentExp>
+          <Ident>
+            <String>f</String>
+          </Ident>
+        </IdentExp>
+        <IntExp>
+          <Integer val="3"/>
+        </IntExp>
+      </AppExp>
+    </Decl>
+  </Root>
+</RootDoc>
