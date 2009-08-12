@@ -534,6 +534,8 @@ function ignore(e)
    return false;
 }
 
+var scrollInProgress = false;
+
 function mouseHandler(str,e) 
 { if (e.button != 0) return true;  // only handle left button here
 
@@ -543,10 +545,28 @@ function mouseHandler(str,e)
   var posx = coords.x;
   var posy = coords.y;
   
+  /* We don't use scroll events, because setting scrollLeft and scrollTop also fires these events, and
+     it does not seem possible to disable the handler temporarily */
+  if (scrollInProgress)
+  { if (str == 'U')
+    { scrollInProgress = false;
+      setViewedAreaServer();
+      return true;
+    }
+    /*else if (str == 'M')
+    { if (commandQueue == "")
+        setViewedAreaServer(); // during scroll, only update if no other commands in queue, to prevent flooding
+      return true;
+    }*/
+    // mouse down cannot occur
+  }
 
   if ( (posx - proxima.scrollLeft) > proxima.clientWidth || (posy - proxima.scrollTop) > proxima.clientHeight )
-    return;  // we're on a scroll bar, so no event.
-
+    // we're on a scroll bar (either dragging or on a button), so set viewed area on mouse up.
+  { if (str == 'D')
+      scrollInProgress = true;
+    return true;
+  }
 
 //  setStatus( 'dragState is '+dragState + ' origin(' + mouseDownPos.x + ',' + mouseDownPos.y + ') offset(' + dragOffset.x + ',' + dragOffset.y + ')' );
 
@@ -754,26 +774,13 @@ function showModifiers()
                (altDown?'True':'False') + ')'
 }
 
-
-function scrollHandler(event)
-{
-    
- if (commandQueue == '')
-    setViewedAreaServer();
-}
-
-var internalScrollEvent = false;
-
 // set the viewed area at server side according to size and scroll position of proxima
 // element
 function setViewedAreaServer()
-{ if (!internalScrollEvent)
-  { var proxima = document.getElementById('proxima');
+{ var proxima = document.getElementById('proxima');
 //    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
-    loadXMLDoc('SetViewedArea((' + proxima.scrollLeft + ',' + proxima.scrollTop +
+  loadXMLDoc('SetViewedArea((' + proxima.scrollLeft + ',' + proxima.scrollTop +
               '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
-  }
-  else internalScrollEvent = false;
 }
 
 // scroll proxima element to show the viewed area
@@ -802,8 +809,7 @@ function setViewedAreaClient(x,y,w,h)
      onclick="return mouseHandler('C',event)"
      onmousemove="return mouseHandler('M',event)"
      oncontextmenu="return contextHandler(event)"
-     onscroll="return scrollHandler(event)"
- ><div id="rendering" 
+><div id="rendering" 
      ></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div>
      <div id="draggedElementCloneParent" style="position: relative; height: 10000px; width: 10000px;"></div>
 </div>
