@@ -28,6 +28,9 @@ extra-tmp-files:
 Executable HeliumEditor
   build-depends: directory -any
 
+  hs-source-dirs: src 
+-- needs to be here, because otherwise the Main from the helium source dirs is used.
+
   hs-source-dirs: src/helium/src/utils src/helium/src/parser src/helium/src/staticanalysis/miscellaneous src/helium/src/staticanalysis/inferencers src/helium/src/staticanalysis/directives src/helium/src/staticanalysis/staticchecks src/helium/src/staticanalysis/heuristics src/helium/src/staticanalysis/messages src/helium/src/syntax src/helium/src/codegeneration src/helium/src/main src/helium/src/modulesystem
   hs-source-dirs: src/lvm/src/lib/common src/lvm/src/lib/common/ghc src/lvm/src/lib/lvm src/lvm/src/lib/asm src/lvm/src/lib/core
   hs-source-dirs: src/Top/src
