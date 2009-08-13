@@ -32,24 +32,26 @@ unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pre
                                     FocusA (PathA pth i) NoPathA -> pth ++ [i]
                                     FocusA _  (PathA pth i)      -> pth ++ [i]
                        (fx,fy,fw,fh) = sizeA focusEnd arr
-                   in  do { ((x,y),(w,h)) <- readIORef $ getViewedAreaRef state 
-                          ; putStrLn $ "\n\n\nFocus:\n"++show (fx,fy,fw,fh) ++ "\n"
-                          ; print (x,y,w,h)
-                          ; writeIORef (getViewedAreaRef state) $
-                              ( ( if fx < x 
-                                  then fx 
-                                  else if fx + fw > x + w
-                                       then fx + fw - w
-                                       else x
-                                , if fy < y 
-                                  then fy 
-                                  else if fy + fh > y + h
-                                       then fy + fh - h
-                                       else y
-                                )
-                              , (w, h)
-                              )
-                          }
+                   in  if fw == 0 || fh == 0 
+                       then return ()
+                       else do { ((x,y),(w,h)) <- readIORef $ getViewedAreaRef state 
+                               ; putStrLn $ "\n\n\nFocus:\n"++show (fx,fy,fw,fh) ++ "\n"
+                               ; print (x,y,w,h)
+                               ; writeIORef (getViewedAreaRef state) $
+                                   ( ( if fx < x 
+                                       then fx 
+                                       else if fx + fw > x + w
+                                            then fx + fw - w
+                                            else x
+                                     , if fy < y 
+                                       then fy 
+                                       else if fy + fh > y + h
+                                            then fy + fh - h
+                                            else y
+                                     )
+                                   , (w, h)
+                                   )
+                               }
     ; return ([SkipLay 0],             state, arrLvl)
     }
 unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) ClearMetricsArr = 
@@ -167,22 +169,22 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     
 docEditDrop arr srcX srcY dstX dstY = 
   case -- showDebug' Arr "\n\ndragsource" $ 
-       mLast $ getDragSourceLocators arr srcX srcY of 
+       safeLast $ getDragSourceLocators arr srcX srcY of 
     Nothing -> error "No drag source." -- internal error
     Just (source, sourceEltArrPath, ListType dragType) -> error "Drag on list type not allowed."
     Just (NoPathD, sourceEltArrPath, ListType dragType) -> error "Dragsource has no document path."
     Just (PathD sourceEltDocPath, sourceEltArrPath, BasicType dragType) ->
                                           -- unsafe
       case -- showDebug' Arr "\n\ndroptargets" $ 
-        mLast $ [ (o,dp,ap) 
-                | (o,dp,ap,tp) <- getDropTargetLocators arr dstX dstY 
-                , tp == ListType dragType
-                ] of
+        safeLast $ [ (o,dp,ap) 
+                   | (o,dp,ap,tp) <- getDropTargetLocators arr dstX dstY 
+                   , tp == ListType dragType
+                   ] of
         Nothing -> debug Arr ("No correctly-typed drop target.") Nothing
         Just (orientation, NoPathD, targetListArrPath) -> error "Drop destination has no document path."
         Just (orientation, PathD targetListDocPath, targetListArrPath) -> 
          
-          case mLast $ filter ((==BasicType dragType) . thd3) $ getDragSourceLocators arr dstX dstY of               
+          case safeLast $ filter ((==BasicType dragType) . thd3) $ getDragSourceLocators arr dstX dstY of               
             Just (NoPathD, targetListEltArrPath,_) -> error "Dropped-on dragsource has no document path."
             Just (PathD targetListEltDocPath, targetListEltArrPath,_) 
                  | targetListEltArrPath > targetListArrPath ->
@@ -203,17 +205,6 @@ docEditDrop arr srcX srcY dstX dstY =
             _ -> 
               Just $ UpdateDoc' (\(DocumentLevel d p cl) -> 
                                    DocumentLevel (moveDocPathD sourceEltDocPath targetListDocPath 0 d) p cl) 
-
-
-thd3 (_,_,x) = x
-
-mLast [] = Nothing
-mLast xs = Just $ last xs
-{-
-TODO: 
-check graphs (fix incrementality bug)
--}
-
 
 getDragSourceLocators arr x y =
   let pathNodesPaths = getPathNodesPathsXY arr x y
