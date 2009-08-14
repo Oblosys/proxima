@@ -382,11 +382,11 @@ centerXCoords xcoords = let widths = zipWith (-) (tail xcoords) xcoords
 -- don't want cumulative character widths
 
 setFocus x y arr     = showDebug' GI "focus set to " $
-                       let f = navigateFocus x y arr in showDebug GI (FocusA f f)
+                       let f = navigateFocus x y arr in {- showDebug GI -} (FocusA f f)
 
 enlargeFocusXY focus x y arr = enlargeFocus focus (navigateFocus x y arr)
 
-enlargeFocus (FocusA f@(PathA _ _) t) pth = showDebug Ren $ (FocusA f pth)
+enlargeFocus (FocusA f@(PathA _ _) t) pth = {- showDebug Ren -} $ (FocusA f pth)
 enlargeFocus f                        pth = debug Err "ArrUtils.enlargeFocus: selection without focus set" $ (FocusA pth pth)
 
 -- this works but is it a general solution? No, can't go up from:                 col
@@ -396,7 +396,7 @@ enlargeFocus f                        pth = debug Err "ArrUtils.enlargeFocus: se
 upFocus (FocusA f  t) arr = let pth' = upPath f arr in FocusA pth' pth'
 upFocus _             _   = NoFocusA
 
-upPath (PathA pth i) arr = let (x,y,w,h) = showDebug Ren $ sizeA (pth++[i]) arr
+upPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
                                focused   = selectTreeA pth arr
                            in  navigateFocus x (y-2) arr
 upPath _             _   = NoPathA
@@ -405,7 +405,7 @@ upPath _             _   = NoPathA
 downFocus (FocusA f t) arr = let pth' = downPath f arr in FocusA pth' pth'
 downFocus _            _   = NoFocusA
 
-downPath (PathA pth i) arr = let (x,y,w,h) = showDebug Ren $ sizeA (pth++[i]) arr
+downPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
                                  focused   = selectTreeA pth arr
                              in  navigateFocus x (y+h) arr
 downPath _             _   = NoPathA
