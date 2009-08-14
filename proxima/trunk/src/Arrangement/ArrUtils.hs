@@ -435,7 +435,8 @@ downPath _             _   = NoPathA
 
 navigateFocusUp x pth arr = 
   let arrsAndPaths = getArrsAndPaths pth arr 
-  in  firstJust $ map (navigateFocusXFromBottom x) arrsAndPaths
+  in  debug Arr ("ArrsandPaths "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++"\n" |(p,x,y,a) <- arrsAndPaths]) $
+      firstJust $ map (navigateFocusXFromBottom x) arrsAndPaths
       
       
 {-
@@ -453,8 +454,9 @@ col [ bla
 getArrsAndPaths pth arr =  
   let pathNodesCoordsAndPaths = getPathNodesCoordsPathsA pth arr
       pathNodesCoordsPathsAndChildIndex = zip (init pathNodesCoordsAndPaths) pth -- this gives us the index in each arrangement on the path
-  in  concatMap getUpperColumnChildren pathNodesCoordsPathsAndChildIndex
- where getUpperColumnChildren ((ColA _ x y w h hr vr c1 f arrs,x',y',pth),i) = reverse $ take i 
+  in  debug Arr ("PathNodesCoordsAndPathsIndex "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++ " "++show i++"\n" |((a,x,y,p),i) <- pathNodesCoordsPathsAndChildIndex]) $
+      reverse $ concatMap getUpperColumnChildren pathNodesCoordsPathsAndChildIndex
+ where getUpperColumnChildren ((ColA _ x y w h hr vr c1 f arrs,x',y',pth),i) = take i 
                                                                              [ (pth++[j],x'+x,y'+y, arr) | (arr,j) <- zip arrs [0..] ]
        getUpperColumnChildren _ = []
 
@@ -476,8 +478,8 @@ navigateFocusXFromBottom fx (rootPath,x',y', ParsingA _ arr)    = navigateFocusX
 navigateFocusXFromBottom fx (rootPath,x',y', LocatorA _ arr)    = navigateFocusXFromBottom fx (rootPath++[0],x',y', arr)
 navigateFocusXFromBottom fx (rootPath,x',y', TagA _ arr)        = navigateFocusXFromBottom fx (rootPath++[0],x',y', arr)
 navigateFocusXFromBottom fx (rootPath,x',y', ColA _ x y w h hr vr c1 f arrs) = 
-  firstJust [ navigateFocusXFromBottom x (rootPath ++ [i], x'+x, y'+y, arr)
-            | (i,arr) <- zip [0..] arrs
+  firstJust [ navigateFocusXFromBottom fx (rootPath ++ [i], x'+x, y'+y, arr)
+            | (i,arr) <- reverse $ zip [0..] arrs
             ]
 navigateFocusXFromBottom fx (rootPath,x',y', RowA _ x y w h hr vr c1 arrs) = 
   let arrsWithPaths = [ (rootPath ++ [i], x'+x, y'+y, arr) | (i,arr) <- zip [0..] arrs ]
