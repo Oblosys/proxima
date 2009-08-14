@@ -436,16 +436,17 @@ downPath _             _   = Nothing
 
 navigateFocusUp x pth arr = 
   let arrsAndPaths = getArrsAndPathsUp pth arr 
-  in  debug Arr ("ArrsandPaths "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++"\n" |(p,x,y,a) <- arrsAndPaths]) $
+  in  -- debug Arr ("ArrsandPaths "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++"\n" |(p,x,y,a) <- arrsAndPaths]) $
       firstJust $ map (navigateFocusXFromBottom x) arrsAndPaths
       
       
 navigateFocusDown x pth arr = 
   let arrsAndPaths = getArrsAndPathsDown pth arr 
-  in  debug Arr ("ArrsandPaths "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++"\n" |(p,x,y,a) <- arrsAndPaths]) $
+  in  -- debug Arr ("ArrsandPaths "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++"\n" |(p,x,y,a) <- arrsAndPaths]) $
       firstJust $ map (navigateFocusXFromTop x) arrsAndPaths
 
 {-
+TODO explain algorithm, maybe combine up/down functions. Fix focus in unarranged arrangements.
 
 arrsAndPaths = [row,  col,  elt]
 
@@ -460,7 +461,7 @@ col [ bla
 getArrsAndPathsUp pth arr =  
   let pathNodesCoordsAndPaths = getPathNodesCoordsPathsA pth arr
       pathNodesCoordsPathsAndChildIndex = zip (init pathNodesCoordsAndPaths) pth -- this gives us the index in each arrangement on the path
-  in  debug Arr ("PathNodesCoordsAndPathsIndex "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++ " "++show i++"\n" |((a,x,y,p),i) <- pathNodesCoordsPathsAndChildIndex]) $
+  in  -- debug Arr ("PathNodesCoordsAndPathsIndex "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++ " "++show i++"\n" |((a,x,y,p),i) <- pathNodesCoordsPathsAndChildIndex]) $
       reverse $ concatMap getUpperColumnChildren pathNodesCoordsPathsAndChildIndex
  where getUpperColumnChildren ((ColA _ x y w h hr vr c1 f arrs,x',y',pth),i) = take i 
                                                                              [ (pth++[j],x'+x,y'+y, arr) | (arr,j) <- zip arrs [0..] ]
@@ -469,7 +470,7 @@ getArrsAndPathsUp pth arr =
 getArrsAndPathsDown pth arr =  
   let pathNodesCoordsAndPaths = getPathNodesCoordsPathsA pth arr
       pathNodesCoordsPathsAndChildIndex = zip (init pathNodesCoordsAndPaths) pth -- this gives us the index in each arrangement on the path
-  in  debug Arr ("PathNodesCoordsAndPathsIndex "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++ " "++show i++"\n" |((a,x,y,p),i) <- pathNodesCoordsPathsAndChildIndex]) $
+  in  -- debug Arr ("PathNodesCoordsAndPathsIndex "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++ " "++show i++"\n" |((a,x,y,p),i) <- pathNodesCoordsPathsAndChildIndex]) $
       concat $ reverse $ map getLowerColumnChildren pathNodesCoordsPathsAndChildIndex
  where getLowerColumnChildren ((ColA _ x y w h hr vr c1 f arrs,x',y',pth),i) = drop (i+1) 
                                                                              [ (pth++[j],x'+x,y'+y, arr) | (arr,j) <- zip arrs [0..] ]
@@ -508,7 +509,7 @@ navigateFocusXFromTop :: Show node => Int -> (Path, Int, Int, Arrangement node) 
 navigateFocusXFromTop fx (rootPath,x',y', EmptyA _ x y w h hr vr c) = Nothing
 navigateFocusXFromTop fx (rootPath,x',y', StringA _ x y w h hr vr str c bc f cxs) =
   let pos = fx - x - x'         
-  in  debug Arr "ja" $ Just $ PathA rootPath $ (length (takeWhile (<=pos) (centerXCoords cxs)))-1
+  in  Just $ PathA rootPath $ (length (takeWhile (<=pos) (centerXCoords cxs)))-1
 navigateFocusXFromTop fx (rootPath,x',y', ImageA _ x y w h hr vr _ _ c1 c2) = Nothing
 navigateFocusXFromTop fx (rootPath,x',y', PolyA _ x y w h hr vr _ _ _ c1 c2 c3) = Nothing   
 navigateFocusXFromTop fx (rootPath,x',y', RectangleA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
