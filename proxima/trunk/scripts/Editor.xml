@@ -800,8 +800,7 @@ function setViewedAreaClient(x,y,w,h)
 <body onload="init()">
 <!-- <div id="status" style="border: 1px solid black; height: 22px; width: 1000px; font-size : 18px; font-family: monospace; line-height: 20px;" ></div> -->
 
-<!-- size of Proxima window is currently hard coded in server; it should be passed with init event -->
-<div style="position: absolute; border: 1px solid red; left:254px; top: 154px; width: 492px; height: 292px;"></div>
+<!-- <div style="position: absolute; border: 1px solid red; left:254px; top: 154px; width: 492px; height: 292px;"></div> -->
 <!-- to show reduced viewed area 1000x600 with scrolling leaves a viewed area of ((246,146),(492,292)) to this we add 8 is added to left and top to account for margin above and left of proxima elt -->
 <div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 600px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
