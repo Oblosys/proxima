@@ -405,8 +405,8 @@ enlargeFocusUp focus arr = case upPath (toA focus) arr of
                              Just pth -> enlargeFocus focus pth 
 
 enlargeFocusDown focus arr = case downPath (toA focus) arr of
-                               {- Nothing  -> focus
-                               Just -} pth -> enlargeFocus focus pth 
+                               Nothing  -> focus
+                               Just pth -> enlargeFocus focus pth 
 
 enlargeFocus (FocusA f@(PathA _ _) t) pth = {- showDebug Ren $ -} (FocusA f pth)
 enlargeFocus f                        pth = debug Err "ArrUtils.enlargeFocus: selection without focus set" $ (FocusA pth pth)
@@ -425,20 +425,26 @@ upPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]
 upPath _             _   = Nothing
 
 
-downFocus (FocusA f t) arr = let pth' = downPath f arr in FocusA pth' pth'
-downFocus _            _   = NoFocusA
+downFocus (FocusA f  t) arr = case downPath f arr of
+                                Just pth' -> FocusA pth' pth'
+                                Nothing   -> FocusA f t
 
 downPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
-                             in  navigateFocus x (y+h) arr
-downPath _             _   = NoPathA
+                             in  navigateFocusDown (x+w `div` 2) pth arr -- use the horizontal center of currently focused item
+downPath _             _   = Nothing
 
 
 navigateFocusUp x pth arr = 
-  let arrsAndPaths = getArrsAndPaths pth arr 
+  let arrsAndPaths = getArrsAndPathsUp pth arr 
   in  debug Arr ("ArrsandPaths "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++"\n" |(p,x,y,a) <- arrsAndPaths]) $
       firstJust $ map (navigateFocusXFromBottom x) arrsAndPaths
       
       
+navigateFocusDown x pth arr = 
+  let arrsAndPaths = getArrsAndPathsDown pth arr 
+  in  debug Arr ("ArrsandPaths "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++"\n" |(p,x,y,a) <- arrsAndPaths]) $
+      firstJust $ map (navigateFocusXFromTop x) arrsAndPaths
+
 {-
 
 arrsAndPaths = [row,  col,  elt]
@@ -451,7 +457,7 @@ col [ bla
 
 
 -}
-getArrsAndPaths pth arr =  
+getArrsAndPathsUp pth arr =  
   let pathNodesCoordsAndPaths = getPathNodesCoordsPathsA pth arr
       pathNodesCoordsPathsAndChildIndex = zip (init pathNodesCoordsAndPaths) pth -- this gives us the index in each arrangement on the path
   in  debug Arr ("PathNodesCoordsAndPathsIndex "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++ " "++show i++"\n" |((a,x,y,p),i) <- pathNodesCoordsPathsAndChildIndex]) $
@@ -459,6 +465,15 @@ getArrsAndPaths pth arr =
  where getUpperColumnChildren ((ColA _ x y w h hr vr c1 f arrs,x',y',pth),i) = take i 
                                                                              [ (pth++[j],x'+x,y'+y, arr) | (arr,j) <- zip arrs [0..] ]
        getUpperColumnChildren _ = []
+
+getArrsAndPathsDown pth arr =  
+  let pathNodesCoordsAndPaths = getPathNodesCoordsPathsA pth arr
+      pathNodesCoordsPathsAndChildIndex = zip (init pathNodesCoordsAndPaths) pth -- this gives us the index in each arrangement on the path
+  in  debug Arr ("PathNodesCoordsAndPathsIndex "++concat [ shallowShowArr a ++ show (x,y) ++ show p ++ " "++show i++"\n" |((a,x,y,p),i) <- pathNodesCoordsPathsAndChildIndex]) $
+      concat $ reverse $ map getLowerColumnChildren pathNodesCoordsPathsAndChildIndex
+ where getLowerColumnChildren ((ColA _ x y w h hr vr c1 f arrs,x',y',pth),i) = drop (i+1) 
+                                                                             [ (pth++[j],x'+x,y'+y, arr) | (arr,j) <- zip arrs [0..] ]
+       getLowerColumnChildren _ = []
 
 navigateFocusXFromBottom :: Show node => Int -> (Path, Int, Int, Arrangement node) -> Maybe PathArr
 navigateFocusXFromBottom fx (rootPath,x',y', EmptyA _ x y w h hr vr c) = Nothing
@@ -486,6 +501,35 @@ navigateFocusXFromBottom fx (rootPath,x',y', RowA _ x y w h hr vr c1 arrs) =
       (left,right) = break (\(_,_,_,arr) -> x' + x + xA arr > fx ) arrsWithPaths -- if fx lies inside a child, this child will be included in left
   in  firstJust $ map (navigateFocusXFromBottom fx) $ reverse left ++ right
 -- first we try to find the focus to the left, if not there we go right. An improvement would be to try both and take the closest. (
+
+
+
+navigateFocusXFromTop :: Show node => Int -> (Path, Int, Int, Arrangement node) -> Maybe PathArr
+navigateFocusXFromTop fx (rootPath,x',y', EmptyA _ x y w h hr vr c) = Nothing
+navigateFocusXFromTop fx (rootPath,x',y', StringA _ x y w h hr vr str c bc f cxs) =
+  let pos = fx - x - x'         
+  in  debug Arr "ja" $ Just $ PathA rootPath $ (length (takeWhile (<=pos) (centerXCoords cxs)))-1
+navigateFocusXFromTop fx (rootPath,x',y', ImageA _ x y w h hr vr _ _ c1 c2) = Nothing
+navigateFocusXFromTop fx (rootPath,x',y', PolyA _ x y w h hr vr _ _ _ c1 c2 c3) = Nothing   
+navigateFocusXFromTop fx (rootPath,x',y', RectangleA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
+navigateFocusXFromTop fx (rootPath,x',y', EllipseA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
+navigateFocusXFromTop fx (rootPath,x',y', OverlayA _ x y w h hr vr c1 _ arrs) = Nothing     
+navigateFocusXFromTop fx (rootPath,x',y', GraphA _ x y w h hr vr c1 nvs arrs) = Nothing  
+navigateFocusXFromTop fx (rootPath,x',y', VertexA _ x y w h hr vr c1 ol arr)  = Nothing
+navigateFocusXFromTop fx (rootPath,x',y', EdgeA _ x y _ _ hr vr _ c1)       = Nothing     
+navigateFocusXFromTop fx (rootPath,x',y', StructuralA _ arr) = navigateFocusXFromTop fx (rootPath++[0],x',y', arr)
+navigateFocusXFromTop fx (rootPath,x',y', ParsingA _ arr)    = navigateFocusXFromTop fx (rootPath++[0],x',y', arr)
+navigateFocusXFromTop fx (rootPath,x',y', LocatorA _ arr)    = navigateFocusXFromTop fx (rootPath++[0],x',y', arr)
+navigateFocusXFromTop fx (rootPath,x',y', TagA _ arr)        = navigateFocusXFromTop fx (rootPath++[0],x',y', arr)
+navigateFocusXFromTop fx (rootPath,x',y', ColA _ x y w h hr vr c1 f arrs) = 
+  firstJust [ navigateFocusXFromTop fx (rootPath ++ [i], x'+x, y'+y, arr)
+            | (i,arr) <- zip [0..] arrs
+            ]
+navigateFocusXFromTop fx (rootPath,x',y', RowA _ x y w h hr vr c1 arrs) = 
+  let arrsWithPaths = [ (rootPath ++ [i], x'+x, y'+y, arr) | (i,arr) <- zip [0..] arrs ]
+      (left,right) = break (\(_,_,_,arr) -> x' + x + xA arr > fx ) arrsWithPaths -- if fx lies inside a child, this child will be included in left
+  in  firstJust $ map (navigateFocusXFromTop fx) $ reverse left ++ right
+
 
 {-
 EmptyA _ x y w h hr vr c)               
