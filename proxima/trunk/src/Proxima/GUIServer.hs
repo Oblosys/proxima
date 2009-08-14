@@ -441,6 +441,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
       in  genericHandler2 settings handler renderingLvlVar viewedAreaRef actualViewedAreaRef () (evt,GuaranteeFocusInViewRen)
 -- TODO: add guaranteeFocusInView edit op at ArrTranslate, so we can take into account the kind of edit operation.
 --       Now, it can go wrong if the focus is extended to the left or up.
+    -- (note: maybe not, focus is always from to.)    
     
     Mouse mouseCommand (x, y, (shiftDown, ctrlDown, altDown)) ->
       let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
