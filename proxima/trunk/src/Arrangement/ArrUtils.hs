@@ -454,7 +454,7 @@ getArrsAndPaths pth arr =
   let pathNodesCoordsAndPaths = getPathNodesCoordsPathsA pth arr
       pathNodesCoordsPathsAndChildIndex = zip (init pathNodesCoordsAndPaths) pth -- this gives us the index in each arrangement on the path
   in  concatMap getUpperColumnChildren pathNodesCoordsPathsAndChildIndex
- where getUpperColumnChildren ((ColA _ x y w h hr vr c1 f arrs,x',y',pth),i) = reverse $ take (i-1) 
+ where getUpperColumnChildren ((ColA _ x y w h hr vr c1 f arrs,x',y',pth),i) = reverse $ take i 
                                                                              [ (pth++[j],x'+x,y'+y, arr) | (arr,j) <- zip arrs [0..] ]
        getUpperColumnChildren _ = []
 
