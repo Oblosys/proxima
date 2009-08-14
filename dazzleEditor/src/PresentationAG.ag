@@ -46,13 +46,15 @@ SEM Root
   | Root
       loc.pres = structural $
                    row [ text "   "
-                       , col $ [ col [ text "focus navigation test focus navigation test focus navigation test"
-                                     , text "focus navigation test focus navigation test focus navigation test"
-                                     , text "focus navigation test focus navigation test focus navigation test"
-                                     , row [text "focus navigation test", colR 1 [ text "bla", text "bla", text "bla"], text "focus navigation test"]
-                                     , text "focus navigation test focus navigation test focus navigation test"
-                                     , text "focus navigation test focus navigation test focus navigation test"
-                                     , text "focus navigation test focus navigation test focus navigation test"
+                       , col $ [ col [ text "1focus navigation test"
+                                     , text "2focus navigation test"
+                                     , text "3focus navigation test"
+                                     , text "4focus navigation test"
+                                     , row [text "5a test", colR 1 [ text "bla", text "bla", text "bla"], text "5b test"]
+                                     , text "6focus navigation test"
+                                     , text "7focus navigation test"
+                                     , text "8focus navigation test"
+                                     , text "9focus navigation test"
                                      ]
                                , row [ parsing $ text @title, empty `withHStretch` True ]
                                        `withFontSize_` (percent 160) 
