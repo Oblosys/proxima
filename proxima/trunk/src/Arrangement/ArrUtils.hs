@@ -336,6 +336,20 @@ getPathNodesPathsA' rootPath (p:path) arr@(LocatorA _ child)                = (a
 getPathNodesPathsA' rootPath (p:path) arr@(TagA _ child)                = (arr,rootPath):getPathNodesPathsA' (rootPath++[p]) path child
 getPathNodesPathsA' rootPath (p:path) arr                               = debug Err ("ArrTypes.getPathNodesPathsA': unhandled non-empty path: "++show (p:path)++show arr) []
 
+getPathNodesCoordsPathsA = getPathNodesCoordsPathsA' 0 0 []
+getPathNodesCoordsPathsA' :: Show node => Int -> Int -> Path -> Path -> Arrangement node -> [(Arrangement node, Int, Int, Path)]
+getPathNodesCoordsPathsA' x' y' rootPath []       arr                                = [(arr,x',y',rootPath)]
+getPathNodesCoordsPathsA' x' y' rootPath (p:path) arr@(RowA _ x y _ _ _ _ _ arrs)           = (arr,x',y',rootPath):getPathNodesCoordsPathsA' (x'+x) (y'+y) (rootPath++[p]) path (index "ArrUtils.getPathNodesCoordsPathsA'.1" arrs p)
+getPathNodesCoordsPathsA' x' y' rootPath (p:path) arr@(ColA _ x y _ _ _ _ _ _ arrs)         = (arr,x',y',rootPath):getPathNodesCoordsPathsA' (x'+x) (y'+y) (rootPath++[p]) path (index "ArrUtils.getPathNodesCoordsPathsA'.2" arrs p)
+getPathNodesCoordsPathsA' x' y' rootPath (p:path) arr@(OverlayA _ x y _ _ _ _ _ _ arrs)       = (arr,x',y',rootPath):getPathNodesCoordsPathsA' (x'+x) (y'+y) (rootPath++[p]) path (index "ArrUtils.getPathNodesCoordsPathsA'.3" arrs p)
+getPathNodesCoordsPathsA' x' y' rootPath (p:path) arr@(GraphA _ x y _ _ _ _ _ _ arrs)           = (arr,x',y',rootPath):getPathNodesCoordsPathsA' (x'+x) (y'+y) (rootPath++[p]) path (index "ArrUtils.getPathNodesCoordsPathsA'.4" arrs p)
+getPathNodesCoordsPathsA' x' y' rootPath (0:path) arr@(VertexA _ x y _ _ _ _ _ _ child)     = (arr,x',y',rootPath):getPathNodesCoordsPathsA' (x'+x) (y'+y) (rootPath++[0]) path child
+getPathNodesCoordsPathsA' x' y' rootPath (p:path) arr@(StructuralA _ child)             = (arr,x',y',rootPath):getPathNodesCoordsPathsA' x' y' (rootPath++[p]) path child
+getPathNodesCoordsPathsA' x' y' rootPath (p:path) arr@(ParsingA _ child)                = (arr,x',y',rootPath):getPathNodesCoordsPathsA' x' y' (rootPath++[p]) path child
+getPathNodesCoordsPathsA' x' y' rootPath (p:path) arr@(LocatorA _ child)                = (arr,x',y',rootPath):getPathNodesCoordsPathsA' x' y' (rootPath++[p]) path child
+getPathNodesCoordsPathsA' x' y' rootPath (p:path) arr@(TagA _ child)                = (arr,x',y',rootPath):getPathNodesCoordsPathsA' x' y' (rootPath++[p]) path child
+getPathNodesCoordsPathsA' x' y' rootPath (p:path) arr                               = debug Err ("ArrTypes.getPathNodesCoordsPathsA': unhandled non-empty path: "++show (p:path)++show arr) []
+
 
  
 -- Returns the subtree rooted at path, together with the coordinates of its upper left corner                                                        
@@ -370,7 +384,7 @@ navigateFocus x y arr = case point x y arr of
  where getOffset ps mx a =
          case selectTreeA ps a of 
            (x',y', StringA _ x y w h _ _ _ _ _ _ cxs) ->
-             let pos = mx - (clip 0 x x) - x'        -- in case x is negative (point' takes care of clipping itself)
+             let pos = mx - (clip 0 x x) - x'        -- TODO: can x even be negative here? old commment was "in case x is negative (point' takes care of clipping itself)"
              in  (length (takeWhile (<=pos) (centerXCoords cxs)))-1
            _                                                            -> 0
 
@@ -386,32 +400,116 @@ setFocus x y arr     = showDebug' GI "focus set to " $
 
 enlargeFocusXY focus x y arr = enlargeFocus focus (navigateFocus x y arr)
 
-enlargeFocus (FocusA f@(PathA _ _) t) pth = {- showDebug Ren -} $ (FocusA f pth)
+enlargeFocusUp focus arr = case upPath (toA focus) arr of
+                             Nothing  -> focus
+                             Just pth -> enlargeFocus focus pth 
+
+enlargeFocusDown focus arr = case downPath (toA focus) arr of
+                               {- Nothing  -> focus
+                               Just -} pth -> enlargeFocus focus pth 
+
+enlargeFocus (FocusA f@(PathA _ _) t) pth = {- showDebug Ren $ -} (FocusA f pth)
 enlargeFocus f                        pth = debug Err "ArrUtils.enlargeFocus: selection without focus set" $ (FocusA pth pth)
 
 -- this works but is it a general solution? No, can't go up from:                 col
 --                                                                        bla|bla col
 -- probably we should get out of enclosing rows and into preceding/following elt of column
 
-upFocus (FocusA f  t) arr = let pth' = upPath f arr in FocusA pth' pth'
+upFocus (FocusA f  t) arr = case upPath f arr of
+                              Just pth' -> FocusA pth' pth'
+                              Nothing   -> FocusA f t
 upFocus _             _   = NoFocusA
 
 upPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
-                               focused   = selectTreeA pth arr
-                           in  navigateFocus x (y-2) arr
-upPath _             _   = NoPathA
+                           in  navigateFocusUp (x+w `div` 2) pth arr -- use the horizontal center of currently focused item
+upPath _             _   = Nothing
 
 
 downFocus (FocusA f t) arr = let pth' = downPath f arr in FocusA pth' pth'
 downFocus _            _   = NoFocusA
 
 downPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
-                                 focused   = selectTreeA pth arr
                              in  navigateFocus x (y+h) arr
 downPath _             _   = NoPathA
 
 
+navigateFocusUp x pth arr = 
+  let arrsAndPaths = getArrsAndPaths pth arr 
+  in  firstJust $ map (navigateFocusXFromBottom x) arrsAndPaths
+      
+      
+{-
 
+arrsAndPaths = [row,  col,  elt]
+
+path = [2,3]
+
+col [ bla
+    , row [ bla, col [ bla
+                       bla
+
+
+-}
+getArrsAndPaths pth arr =  
+  let pathNodesCoordsAndPaths = getPathNodesCoordsPathsA pth arr
+      pathNodesCoordsPathsAndChildIndex = zip (init pathNodesCoordsAndPaths) pth -- this gives us the index in each arrangement on the path
+  in  concatMap getUpperColumnChildren pathNodesCoordsPathsAndChildIndex
+ where getUpperColumnChildren ((ColA _ x y w h hr vr c1 f arrs,x',y',pth),i) = reverse $ take (i-1) 
+                                                                             [ (pth++[j],x'+x,y'+y, arr) | (arr,j) <- zip arrs [0..] ]
+       getUpperColumnChildren _ = []
+
+navigateFocusXFromBottom :: Show node => Int -> (Path, Int, Int, Arrangement node) -> Maybe PathArr
+navigateFocusXFromBottom fx (rootPath,x',y', EmptyA _ x y w h hr vr c) = Nothing
+navigateFocusXFromBottom fx (rootPath,x',y', StringA _ x y w h hr vr str c bc f cxs) =
+  let pos = fx - x - x'         
+  in  Just $ PathA rootPath $ (length (takeWhile (<=pos) (centerXCoords cxs)))-1
+navigateFocusXFromBottom fx (rootPath,x',y', ImageA _ x y w h hr vr _ _ c1 c2) = Nothing
+navigateFocusXFromBottom fx (rootPath,x',y', PolyA _ x y w h hr vr _ _ _ c1 c2 c3) = Nothing   
+navigateFocusXFromBottom fx (rootPath,x',y', RectangleA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
+navigateFocusXFromBottom fx (rootPath,x',y', EllipseA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
+navigateFocusXFromBottom fx (rootPath,x',y', OverlayA _ x y w h hr vr c1 _ arrs) = Nothing     
+navigateFocusXFromBottom fx (rootPath,x',y', GraphA _ x y w h hr vr c1 nvs arrs) = Nothing  
+navigateFocusXFromBottom fx (rootPath,x',y', VertexA _ x y w h hr vr c1 ol arr)  = Nothing
+navigateFocusXFromBottom fx (rootPath,x',y', EdgeA _ x y _ _ hr vr _ c1)       = Nothing     
+navigateFocusXFromBottom fx (rootPath,x',y', StructuralA _ arr) = navigateFocusXFromBottom fx (rootPath++[0],x',y', arr)
+navigateFocusXFromBottom fx (rootPath,x',y', ParsingA _ arr)    = navigateFocusXFromBottom fx (rootPath++[0],x',y', arr)
+navigateFocusXFromBottom fx (rootPath,x',y', LocatorA _ arr)    = navigateFocusXFromBottom fx (rootPath++[0],x',y', arr)
+navigateFocusXFromBottom fx (rootPath,x',y', TagA _ arr)        = navigateFocusXFromBottom fx (rootPath++[0],x',y', arr)
+navigateFocusXFromBottom fx (rootPath,x',y', ColA _ x y w h hr vr c1 f arrs) = 
+  firstJust [ navigateFocusXFromBottom x (rootPath ++ [i], x'+x, y'+y, arr)
+            | (i,arr) <- zip [0..] arrs
+            ]
+navigateFocusXFromBottom fx (rootPath,x',y', RowA _ x y w h hr vr c1 arrs) = 
+  let arrsWithPaths = [ (rootPath ++ [i], x'+x, y'+y, arr) | (i,arr) <- zip [0..] arrs ]
+      (left,right) = break (\(_,_,_,arr) -> x' + x + xA arr > fx ) arrsWithPaths -- if fx lies inside a child, this child will be included in left
+  in  firstJust $ map (navigateFocusXFromBottom fx) $ reverse left ++ right
+-- first we try to find the focus to the left, if not there we go right. An improvement would be to try both and take the closest. (
+
+{-
+EmptyA _ x y w h hr vr c)               
+StringA _ x y w h hr vr str c bc f _)   
+ImageA _ x y w h hr vr _ _ c1 c2)       
+PolyA _ x y w h hr vr _ _ _ c1 c2 c3)   
+RectangleA _ x y w h hr vr _ _ c1 c2 c3)
+EllipseA _ x y w h hr vr _ _ c1 c2 c3)  
+RowA _ x y w h hr vr c1 arrs)           
+ColA _ x y w h hr vr c1 f arrs)         
+OverlayA _ x y w h hr vr c1 _ arrs)     
+GraphA _ x y w h hr vr c1 nvs arrs)     
+VertexA _ x y w h hr vr c1 ol arr)      
+EdgeA _ x y x' y' hr vr _ c1)           
+StructuralA _ arr)                      
+ParsingA _ arr)                         
+LocatorA _ arr)                         
+TagA _ arr)                             
+
+-}
+
+
+-- return first element that is not Nothing
+firstJust mxs = case filter isJust mxs of
+                  []         -> Nothing
+                  Just x : _ -> Just x
 
 
 

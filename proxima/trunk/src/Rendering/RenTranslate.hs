@@ -71,10 +71,10 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
 
 
     KeySpecialRen UpKey (Modifiers True False False)   -> -- shift down
-      ( [SetFocusArr (enlargeFocus focus (upPath (toA focus) (if debugging then debugArrangement arr else arr)))]
+      ( [SetFocusArr (enlargeFocusUp focus (if debugging then debugArrangement arr else arr))]
       , state, renLvl )
     KeySpecialRen DownKey (Modifiers True False False) -> -- shift down
-      ( [SetFocusArr  (enlargeFocus focus (downPath (toA focus) (if debugging then debugArrangement arr else arr)))]
+      ( [SetFocusArr  (enlargeFocusDown focus (if debugging then debugArrangement arr else arr))]
       , state, renLvl )
     KeySpecialRen UpKey ms        ->
       ( [SetFocusArr (upFocus focus (if debugging then debugArrangement arr else arr))]
