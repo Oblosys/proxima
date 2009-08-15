@@ -499,7 +499,7 @@ genericHandler settings handler renderingLvlVar viewedAreaRef () evt =
     }
  where process (SkipRen' _) = return [""]
        process (WrapRen' w) = do { htmlRenderings <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ Proxima.Wrap.unwrap w
-                                 ; ret urn $ htmlRenderings
+                                 ; return $ htmlRenderings
                                  }
        process (SetRen' renderingLvl''@(RenderingLevel scale _ renderingHTML _ (newW,newH) _ updRegions _)) =
          do { (RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
