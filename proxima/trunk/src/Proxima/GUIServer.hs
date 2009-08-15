@@ -495,9 +495,12 @@ genericHandler settings handler renderingLvlVar viewedAreaRef () evt =
           
     ; (renderingLvl', editsRendering) <- handler (renderingLvl,evt)
     ; htmlRenderings <- mapM process editsRendering
-    ; return $ htmlRenderings
+    ; return $ concat htmlRenderings
     }
- where process (SkipRen' _) = return "" -- set the renderingLvlVar ??
+ where process (SkipRen' _) = return [""]
+       process (WrapRen' w) = do { htmlRenderings <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ Proxima.Wrap.unwrap w
+                                 ; ret urn $ htmlRenderings
+                                 }
        process (SetRen' renderingLvl''@(RenderingLevel scale _ renderingHTML _ (newW,newH) _ updRegions _)) =
          do { (RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
             ; writeIORef renderingLvlVar renderingLvl''
@@ -505,7 +508,7 @@ genericHandler settings handler renderingLvlVar viewedAreaRef () evt =
             
             ; viewedArea <- readIORef viewedAreaRef
             ; let htmlRendering = execWriter $ renderingHTML viewedArea
-            ; return htmlRendering
+            ; return [htmlRendering]
             }
     
 
