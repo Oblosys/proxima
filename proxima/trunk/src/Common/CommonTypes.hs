@@ -39,7 +39,10 @@ data NodeType = BasicType String
 
 data Tags = DragSourceTag | DropTargetTag Orientation deriving Show
                    
+                                                               
 data Orientation = Horizontal | Vertical deriving Show                                                               
+
+data Direction_ = Up | Down | Leftward | Rightward deriving Show
 
 type XCoord = Int
 type YCoord = Int

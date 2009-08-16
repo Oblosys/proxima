@@ -54,6 +54,17 @@ unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pre
                                }
     ; return ([SkipLay 0],             state, arrLvl)
     }
+unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) (ScrollViewedAreaArr dir) = 
+ do { ((x,y),(w,h)) <- readIORef $ getViewedAreaRef state 
+    ; writeIORef (getViewedAreaRef state) $
+             ( case dir of
+                 Up   -> (x, 0 `max` (y- h `div` 2))
+                 Down -> (x, (y + h `div` 2)) -- TODO get arr height
+                 _    -> (x,y)
+             , (w,h)
+             )
+    ; return ([SkipLay 0],             state, arrLvl)
+    }
 unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) ClearMetricsArr = 
  do { writeIORef (getFontMetricsRef state) Map.empty -- TODO: put Map.empty as a function in FontLib
     ; return ([SkipLay 0],             state, (ArrangementLevel emptyA focus p))
