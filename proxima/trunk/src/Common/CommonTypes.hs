@@ -42,7 +42,7 @@ data Tags = DragSourceTag | DropTargetTag Orientation deriving Show
                                                                
 data Orientation = Horizontal | Vertical deriving Show                                                               
 
-data Direction_ = Up | Down | Leftward | Rightward deriving (Show, Eq)
+data Direction = Up | Down | Leftward | Rightward deriving (Show, Eq)
 
 type XCoord = Int
 type YCoord = Int
@@ -61,7 +61,7 @@ type Color = (Int,Int,Int)
 
 type Rectangle = ((Int,Int),(Int,Int))
 
-data Direction = HeadInFront | HeadAtBack deriving (Show, Eq)
+data Order = HeadInFront | HeadAtBack deriving (Show, Eq)
 
 -- transparent only works for background color
 transparent :: Color

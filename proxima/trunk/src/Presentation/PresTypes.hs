@@ -230,7 +230,7 @@ data PresentationBase doc node clip userToken level where
                    PresentationBase doc node clip userToken level 
        ColP     :: !IDP -> !VRefNr -> !Formatted -> ![PresentationBase doc node clip userToken level] ->
                    PresentationBase doc node clip userToken level 
-       OverlayP :: !IDP -> !Direction -> ![ (PresentationBase doc node clip userToken level) ] ->
+       OverlayP :: !IDP -> !Order -> ![ (PresentationBase doc node clip userToken level) ] ->
                    PresentationBase doc node clip userToken level 
        WithP    :: !(AttrRule doc clip) -> !(PresentationBase doc node clip userToken level) ->
                    PresentationBase doc node clip userToken level 

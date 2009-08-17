@@ -48,7 +48,7 @@ data EditArrangement_ wrapped doc enr node clip token =
   | OpenFileArr String
   | SaveFileArr String
   | GuaranteeFocusInViewArr
-  | ScrollViewedAreaArr Direction_
+  | ScrollViewedAreaArr Direction
   | WrapArr wrapped deriving Show
 
 
@@ -62,7 +62,7 @@ data Arrangement node =
   | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !LineColor !FillColor !BGColor
   | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor ![Arrangement node]
   | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Formatted ![Arrangement node]
-  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Direction ![Arrangement node]
+  | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Order ![Arrangement node]
   | StructuralA !IDA  !(Arrangement node)
   | ParsingA    !IDA  !(Arrangement node)
   | GraphA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !NrOfVertices ![Arrangement node]

@@ -399,7 +399,7 @@ centerXCoords xcoords = let widths = zipWith (-) (tail xcoords) xcoords
 -- don't want cumulative character widths
 
 
-tryFocus :: Show node => (FocusArr -> Arrangement node -> Maybe FocusArr) -> Direction_ -> IORef Rectangle -> FocusArr -> Arrangement node -> 
+tryFocus :: Show node => (FocusArr -> Arrangement node -> Maybe FocusArr) -> Direction -> IORef Rectangle -> FocusArr -> Arrangement node -> 
             EditArrangement doc enr node clip token -> IO [EditArrangement doc enr node clip token]
 tryFocus computeFocus dir viewedAreaRef focus arr editop = 
   do { let mFocus = computeFocus focus arr
