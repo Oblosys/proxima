@@ -35,23 +35,23 @@ interpretIO state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
   case editRen of
     KeySpecialRen UpKey ms        ->
-     do { editArr <- tryFocus upFocus Up focus (if debugging then debugArrangement arr else arr) $ 
+     do { editArr <- tryFocus upFocus Up (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
                        cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
         ; return (editArr, state, renLvl)
         }
     KeySpecialRen DownKey ms        ->
-     do { editArr <- tryFocus downFocus Down focus (if debugging then debugArrangement arr else arr) $ 
-                       cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
+     do { editArr <- tryFocus downFocus Down (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
+                       cast (KeySpecialRen DownKey ms :: EditRendering doc enr node clip token) 
         ; return (editArr, state, renLvl)
         }
     KeySpecialRen UpKey ms@(Modifiers True False False)   -> -- shift down
-     do { editArr <- tryFocus enlargeFocusUp Up focus (if debugging then debugArrangement arr else arr) $ 
+     do { editArr <- tryFocus enlargeFocusUp Up (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
                        cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
         ; return (editArr, state, renLvl)
         }
     KeySpecialRen DownKey ms@(Modifiers True False False) -> -- shift down
-     do { editArr <- tryFocus enlargeFocusDown Down focus (if debugging then debugArrangement arr else arr) $ 
-                       cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
+     do { editArr <- tryFocus enlargeFocusDown Down (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
+                       cast (KeySpecialRen DownKey ms :: EditRendering doc enr node clip token) 
         ; return (editArr, state, renLvl)
         }
     _ -> return $ interpret state renLvl arrLvl editRen
