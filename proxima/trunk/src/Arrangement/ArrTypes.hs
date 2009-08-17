@@ -4,7 +4,9 @@ import Common.CommonTypes
 import Evaluation.DocTypes (DocumentLevel) -- for Locations
 
 import Layout.LayTypes
-                  
+import Data.Typeable
+import Control.Exception
+
 data IDA = NoIDA | IDA !Int deriving (Show, Read, Eq, Ord)
                
                                                               -- ugly hack for popups, need pres to get items
@@ -149,6 +151,10 @@ fromA NoFocusA        = NoPathA
 
 toA (FocusA _ to) = to
 toA NoFocusA        = NoPathA
+
+data UnarrangedException = UnarrangedException deriving (Show, Typeable)
+
+instance Exception UnarrangedException
 
 shallowShowArr (EmptyA i x y w h _ _ _)           = "{EmptyA:"++show i++" x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
 shallowShowArr (StringA i x y w h _ _ str _ _ _ _)= "{StringA:"++show i++" \""++str++"\": x="++show x++", y="++show y++", w="++show w++", h="++show h++"}"
