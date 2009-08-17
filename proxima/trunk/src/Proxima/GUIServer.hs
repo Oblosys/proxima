@@ -429,8 +429,10 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
                   122 -> KeySpecialRen CommonTypes.F11Key  ms
                   123 -> KeySpecialRen CommonTypes.F12Key  ms
                   _  -> SkipRen 0
-      in  genericHandler2 settings handler renderingLvlVar viewedAreaRef actualViewedAreaRef () (evt, GuaranteeFocusInViewRen)
-    
+      in  do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+             ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+             ; return $ html ++ [setViewedAreaHtml]
+             }
     
     Chr (keyChar,(shiftDown, ctrlDown, altDown)) ->
       let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
@@ -438,7 +440,11 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
                 then KeyCharRen (chr keyChar)
                 else KeySpecialRen (CommonTypes.CharKey (chr keyChar)) ms
 
-      in  genericHandler2 settings handler renderingLvlVar viewedAreaRef actualViewedAreaRef () (evt,GuaranteeFocusInViewRen)
+      in  do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+             ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+             ; return $ html ++ [setViewedAreaHtml]
+             }
+
 -- TODO: add guaranteeFocusInView edit op at ArrTranslate, so we can take into account the kind of edit operation.
 --       Now, it can go wrong if the focus is extended to the left or up.
     -- (note: maybe not, focus is always from to.)    
@@ -453,7 +459,10 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
                      MouseDragStart -> DragStartRen x y 
                      MouseDrop -> DropRen x y
                      
-      in  genericHandler2 settings handler renderingLvlVar viewedAreaRef actualViewedAreaRef () (evt, GuaranteeFocusInViewRen)
+      in  do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+             ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+             ; return $ html ++ [setViewedAreaHtml]
+             }
 
 
     SetViewedArea newViewedArea ->
@@ -472,16 +481,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
         ; genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
             cast (ClearMetricsArr :: EditArrangement doc enr node clip token)
         }
-    
--- TODO: make this one for lists
-genericHandler2 settings handler renderingLvlVar viewedAreaRef actualViewedAreaRef () (evt1, evt2) =
- do { html1 <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt1
-    ; html2 <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt2
-    ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
-    ; return $ html1 ++ html2 ++ [setViewedAreaHtml]
-    }
- 
--- TODO: handle wrapped renderingEdits
+     
 genericHandler :: (Show token, Show node, Show enr, Show doc) => Settings ->
                ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                IORef (RenderingLevel doc enr node clip token) -> IORef CommonTypes.Rectangle -> 

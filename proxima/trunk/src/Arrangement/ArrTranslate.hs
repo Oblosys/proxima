@@ -83,28 +83,28 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
   debug Arr ("Edit arr is "++show editArr) $
   case editArr of
     SkipArr i             -> ([SkipLay (i+1)],         state, arrLvl) 
-    SetFocusArr focus'     -> ([SetFocusLay (focusPFromFocusA focus' arr pres)]
+    SetFocusArr focus'     -> ([SetFocusLay (focusPFromFocusA focus' arr pres), guaranteeFocusInView]
                              , state, ArrangementLevel arr focus p) -- new focus is not set on arr level
                                                                     -- this is done on presentation, so we
                                                                     -- still have the old focus for incrementality
     InitArr               -> ([InitLay],               state, arrLvl) 
     CloseArr              -> ([CloseLay],              state, arrLvl) 
-    CutArr                -> ([CutLay],                state, arrLvl)
+    CutArr                -> ([CutLay, guaranteeFocusInView],                state, arrLvl)
     CopyArr               -> ([CopyLay],               state, arrLvl)
-    PasteArr              -> ([PasteLay],              state, arrLvl)
-    DeleteArr             -> ([DeleteLay],             state, arrLvl)
-    SplitArr              -> ([SplitLay],              state, arrLvl)
-    LeftDeleteArr         -> ([LeftDeleteLay],         state, arrLvl)
-    RightDeleteArr        -> ([RightDeleteLay],        state, arrLvl)
-    LeftArr               -> ([LeftLay],               state, arrLvl)
-    RightArr              -> ([RightLay],              state, arrLvl)
-    EnlargeLeftArr        -> ([EnlargeLeftLay],        state, arrLvl)
-    EnlargeRightArr       -> ([EnlargeRightLay],       state, arrLvl)
+    PasteArr              -> ([PasteLay, guaranteeFocusInView],              state, arrLvl)
+    DeleteArr             -> ([DeleteLay, guaranteeFocusInView],             state, arrLvl)
+    SplitArr              -> ([SplitLay, guaranteeFocusInView],              state, arrLvl)
+    LeftDeleteArr         -> ([LeftDeleteLay, guaranteeFocusInView],         state, arrLvl)
+    RightDeleteArr        -> ([RightDeleteLay, guaranteeFocusInView],        state, arrLvl)
+    LeftArr               -> ([LeftLay, guaranteeFocusInView],               state, arrLvl)
+    RightArr              -> ([RightLay, guaranteeFocusInView],              state, arrLvl)
+    EnlargeLeftArr        -> ([EnlargeLeftLay, guaranteeFocusInView],        state, arrLvl)
+    EnlargeRightArr       -> ([EnlargeRightLay, guaranteeFocusInView],       state, arrLvl)
     NormalizeArr          -> ([NormalizeLay],          state, arrLvl)
-    ParseArr              -> ([ParseLay],              state, arrLvl)
+    ParseArr              -> ([ParseLay, guaranteeFocusInView],              state, arrLvl)
     RedrawArr             -> ([SkipLay 0],             state, (ArrangementLevel emptyA focus p))
     Test2Arr              -> ([Test2Lay],              state, arrLvl)
-    KeyCharArr c          -> ([InsertLay c],           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
+    KeyCharArr c          -> ([InsertLay c, guaranteeFocusInView],           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
     KeySpecialArr c ms    -> ([SkipLay 0],             state, arrLvl) 
     MouseDownArr x y (Modifiers False False False) i ->
       (case navigateFocus x y arr of
@@ -113,20 +113,20 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
               Just upd -> debug UnA ("mouseDownDoc EVENT: Something") 
                             [cast (UpdateDoc' upd :: EditDocument' doc enr node clip token)]
                             
-              Nothing  -> [ SetFocusLay (computeFocus arr pres x y) ] 
+              Nothing  -> [ SetFocusLay (computeFocus arr pres x y), guaranteeFocusInView] 
         _ ->  debug Err ("UnArranger.mouseDownDoc: empty path ") $ [SkipLay 0]   
       , state , arrLvl)
 -- shift mouseDown is handled here
     MouseDownArr x y (Modifiers True False False) i ->  -- shift down 
       case isGraphEdit x y arr pres of
         Just addVertex    -> ( [addVertex], state, arrLvl )
-        Nothing           -> ( [SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)]
+        Nothing           -> ( [SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres), guaranteeFocusInView]
                        , state, arrLvl )
 --    MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
     MouseDownArr x y ms@(Modifiers False True False) i -> -- ctrl down 
           mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
     MouseDragArr x y ms@(Modifiers False False False)  ->
-      ( [SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres)]
+      ( [SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres), guaranteeFocusInView]
       , state, arrLvl ) -- does not occur
                             
     MouseUpArr x y ms     -> ([ParseLay], state, arrLvl) 
@@ -176,7 +176,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     WrapArr wrapped       -> ([unwrap wrapped],        state, arrLvl)
     _                     -> ([SkipLay 0],             state, arrLvl) 
 
-
+guaranteeFocusInView = cast $ (GuaranteeFocusInViewArr :: EditArrangement doc enr node clip token)
     
 docEditDrop arr srcX srcY dstX dstY = 
   case -- showDebug' Arr "\n\ndragsource" $ 
