@@ -59,7 +59,7 @@ unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pre
     ; writeIORef (getViewedAreaRef state) $
              ( case dir of
                  Up   -> (x, 0 `max` (y- h `div` 2))
-                 Down -> (x, (y + h `div` 2)) -- TODO get arr height
+                 Down -> (x, (y + h `div` 2) `min` heightA arr - h)
                  _    -> (x,y)
              , (w,h)
              )
