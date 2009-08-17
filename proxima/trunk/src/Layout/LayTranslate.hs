@@ -89,9 +89,9 @@ parse scannerSheet state layLvl prsLvl NormalizeLay       = editLay editNormaliz
 parse scannerSheet state layLvl prsLvl ParseLay = tokenizeLay scannerSheet state layLvl prsLvl
 parse  scannerSheet state layLvl@( LayoutLevel pres focus dt) prsLvl (FindLay str) = 
   debug Prs ("\n\n\n\nFinding "++str) $
-  case findLay str pres of
+  case findLay focus str pres of
     Nothing     -> ([SkipPres 0], state,  layLvl)
-    Just focus' -> ([SkipPres 0, cast (GuaranteeFocusInViewArr :: EditArrangement doc enr node clip token)], state,  LayoutLevel pres focus' dt)
+    Just focus' -> debug Prs (show focus') $ ([SkipPres 0, cast (GuaranteeFocusInViewArr :: EditArrangement doc enr node clip token)], state,  LayoutLevel pres focus' dt)
 
 
 parse _ state layLvl prsLvl Test2Lay           = ([Test2Pres], state, layLvl)
