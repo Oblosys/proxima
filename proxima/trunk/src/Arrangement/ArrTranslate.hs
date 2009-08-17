@@ -176,7 +176,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     WrapArr wrapped       -> ([unwrap wrapped],        state, arrLvl)
     _                     -> ([SkipLay 0],             state, arrLvl) 
 
-guaranteeFocusInView = cast $ (GuaranteeFocusInViewArr :: EditArrangement doc enr node clip token)
+guaranteeFocusInView = cast (GuaranteeFocusInViewArr :: EditArrangement doc enr node clip token)
     
 docEditDrop arr srcX srcY dstX dstY = 
   case -- showDebug' Arr "\n\ndragsource" $ 
