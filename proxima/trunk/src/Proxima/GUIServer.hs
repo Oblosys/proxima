@@ -6,6 +6,7 @@ import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debug
 import qualified Common.CommonTypes as CommonTypes
 import Common.CommonUtils
 import Rendering.RenTypes
+import Layout.LayTypes
 import System.IO
 import Data.IORef
 import Proxima.Wrap
@@ -350,6 +351,7 @@ data Command = Metrics ((String,Int),(Int,Int,[Int]))
              | Key (Int,Modifiers)
              | Chr (Int,Modifiers)
              | Mouse MouseCommand (Int,Int, Modifiers)
+             | Find String
              | SetViewedArea CommonTypes.Rectangle
              | ClearMetrics 
                deriving (Show, Read)
@@ -438,7 +440,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
       let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
           evt = if not ctrlDown && not altDown 
                 then KeyCharRen (chr keyChar)
-                else KeySpecialRen (CommonTypes.CharKey (chr keyChar)) ms
+                else KeySpecialRen (CommonTypes.CharKey (toLower $ chr keyChar)) ms
 
       in  do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt
              ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
@@ -464,6 +466,11 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
              ; return $ html ++ [setViewedAreaHtml]
              }
 
+    Find str ->
+      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ cast (FindLay str :: EditLayout doc enr node clip token)
+         ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+         ; return $ html ++ [setViewedAreaHtml]
+         }
 
     SetViewedArea newViewedArea ->
      do { writeIORef viewedAreaRef newViewedArea

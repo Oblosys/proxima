@@ -462,9 +462,14 @@ function keypress(e)
    var keyCode =  (e.keyCode != 0) ? e.keyCode : e.charCode
    // keyCode is 0 on Firefox
    
-//   debug('Key is '+keyCode +',' + e.charCode);
-//   loadXMLDoc('Chr'+String.fromCharCode(keyCode)+';');
-   if (e.which != 0 && keyCode != 8 && keyCode != 13) 
+ //  debug('Key is '+keyCode +',' + e.charCode);
+  if (keyCode==102 && ctrlDown)
+  { var answer=prompt("Enter search term.");
+// todo: escape answer string
+    if (answer) loadXMLDoc('Find "'+answer+'";');
+    return true;
+  }
+  if (e.which != 0 && keyCode != 8 && keyCode != 13) 
      loadXMLDoc('Chr('+keyCode+','+showModifiers()+');');
 // ? is to prevent caching by IE 
 // maybe also check alt, ctrl and  other keys, they seem to generate press events now
@@ -505,7 +510,7 @@ function keydown(e)
    if (e.keyCode==116)
      refresh();
    recordModifiersDown(e.keyCode);
-   
+  
    if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
      loadXMLDoc('Key('+e.keyCode+','+showModifiers()+');');
