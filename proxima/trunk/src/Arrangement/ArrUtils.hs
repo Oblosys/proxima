@@ -468,7 +468,8 @@ navigateFocusDown x pth arr =
       firstJust $ map (navigateFocusXFromTop x) arrsAndPaths
 
 {-
-TODO explain algorithm, maybe combine up/down functions. Fix focus in unarranged arrangements.
+TODO explain algorithm.
+TODO overlay focus
 
 arrsAndPaths = [row,  col,  elt]
 
@@ -508,7 +509,7 @@ navigateFocusXFromBottom fx (rootPath,x',y', PolyA (IDA (-10)) x y w h hr vr _ _
 navigateFocusXFromBottom fx (rootPath,x',y', PolyA _ x y w h hr vr _ _ _ c1 c2 c3) = Nothing   
 navigateFocusXFromBottom fx (rootPath,x',y', RectangleA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
 navigateFocusXFromBottom fx (rootPath,x',y', EllipseA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
-navigateFocusXFromBottom fx (rootPath,x',y', OverlayA _ x y w h hr vr c1 _ arrs) = Nothing     
+navigateFocusXFromBottom fx (rootPath,x',y', OverlayA _ x y w h hr vr c1 _ (arr:_)) = navigateFocusXFromBottom fx (rootPath++[0],x'+x,y'+y, arr)
 navigateFocusXFromBottom fx (rootPath,x',y', GraphA _ x y w h hr vr c1 nvs arrs) = Nothing  
 navigateFocusXFromBottom fx (rootPath,x',y', VertexA _ x y w h hr vr c1 ol arr)  = Nothing
 navigateFocusXFromBottom fx (rootPath,x',y', EdgeA _ x y _ _ hr vr _ c1)       = Nothing     
@@ -538,7 +539,7 @@ navigateFocusXFromTop fx (rootPath,x',y', PolyA (IDA (-10)) x y w h hr vr _ _ _ 
 navigateFocusXFromTop fx (rootPath,x',y', PolyA _ x y w h hr vr _ _ _ c1 c2 c3) = Nothing   
 navigateFocusXFromTop fx (rootPath,x',y', RectangleA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
 navigateFocusXFromTop fx (rootPath,x',y', EllipseA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
-navigateFocusXFromTop fx (rootPath,x',y', OverlayA _ x y w h hr vr c1 _ arrs) = Nothing     
+navigateFocusXFromTop fx (rootPath,x',y', OverlayA _ x y w h hr vr c1 _ (arr:_)) = navigateFocusXFromBottom fx (rootPath++[0],x'+x,y'+y, arr)
 navigateFocusXFromTop fx (rootPath,x',y', GraphA _ x y w h hr vr c1 nvs arrs) = Nothing  
 navigateFocusXFromTop fx (rootPath,x',y', VertexA _ x y w h hr vr c1 ol arr)  = Nothing
 navigateFocusXFromTop fx (rootPath,x',y', EdgeA _ x y _ _ hr vr _ c1)       = Nothing     
