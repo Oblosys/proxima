@@ -578,11 +578,6 @@ TagA _ arr)
 -}
 
 
--- return first element that is not Nothing
-firstJust mxs = case filter isJust mxs of
-                  []         -> Nothing
-                  Just x : _ -> Just x
-
 
 
 -- Debugging

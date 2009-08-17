@@ -166,9 +166,8 @@ dropLeadingWhitespace lays = dropWhile isWhitespace lays
 
 isWhitespace :: (Show node, Show token) => Layout doc node clip token -> Bool
 isWhitespace (EmptyP _)                = True
+isWhitespace (EmptyP _)                = True
 isWhitespace (StringP _ str)           = all isSpace str
-isWhitespace (ImageP _ _ _)            = False
-isWhitespace (PolyP _ _ _ _)           = False
 isWhitespace (RowP _ _ lays)           = all isWhitespace lays
 isWhitespace (ColP _ _ _ lays)         = all isWhitespace lays
 isWhitespace (FormatterP _ lays)         = all isWhitespace lays
@@ -201,3 +200,50 @@ isWhitespaceLR (0:pth) (ParsingP _ _ _ lay)   = isWhitespaceLR pth lay
 isWhitespaceLR (0:pth) (LocatorP _ lay)       = isWhitespaceLR pth lay
 isWhitespaceLR (0:pth) (TagP _ lay)       = isWhitespaceLR pth lay
 isWhitespaceLR pth     lay                    = debug Err ("LayUtils.isWhitespaceLR: can't handle "++ show pth++" " ++show lay) (False,False)
+
+findLay str = findLay' str []
+
+findLay' :: (Show node, Show token) => String -> Path -> Layout doc node clip token -> Maybe FocusPres
+findLay' str rootPath (StringP id str')          = case str' `containsStr` str of 
+                                                     Just pos -> Just $ FocusP (PathP rootPath pos) (PathP rootPath $ pos + length str)
+                                                     Nothing -> Nothing
+findLay' str rootPath (RowP id rf press)        = firstJust $ [ findLay' str (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+findLay' str rootPath (ColP id rf f press)      = firstJust $ [ findLay' str (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+findLay' str rootPath (OverlayP d id press)     = firstJust $ [ findLay' str (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+findLay' str rootPath (FormatterP  id press)    = firstJust $ [ findLay' str (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+findLay' str rootPath (GraphP id _ _ _ _ press) = firstJust $ [ findLay' str (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+findLay' str rootPath (VertexP _ _ x y _  pres) = findLay' str (rootPath ++ [0]) pres
+findLay' str rootPath (WithP ar pres)           = findLay' str (rootPath ++ [0]) pres
+findLay' str rootPath (StructuralP id pres)     = findLay' str (rootPath ++ [0]) pres
+findLay' str rootPath (ParsingP id p l pres)    = findLay' str (rootPath ++ [0]) pres
+findLay' str rootPath (LocatorP loc pres)       = findLay' str (rootPath ++ [0]) pres
+findLay' str rootPath (TagP loc pres)           = findLay' str (rootPath ++ [0]) pres
+findLay' str rootPath _                         = Nothing -- all atomic presentations other than string
+
+containsStr str substr = contains' 0 str substr
+ where contains' pos []           _      = Nothing
+       contains' pos str@(_:rest) substr = if substr `isPrefixOf` str 
+                                           then Just pos 
+                                           else contains' (pos+1) rest substr 
+
+{-
+findLay :: (Show node, Show token) => PresentationBase doc node clip token level -> FocusPres
+findLay (EmptyP id)               = 
+findLay (StringP id str)          = 
+findLay (TokenP id t)             = 
+findLay (ImageP id str _)         = 
+findLay (PolyP id _ _ _)          = 
+findLay (RectangleP id _ _ _ _)   = 
+findLay (EllipseP id _ _ _ _)     = 
+findLay (RowP id rf press)        = 
+findLay (ColP id rf f press)      = 
+findLay (OverlayP d id press)     = 
+findLay (FormatterP  id press)    = 
+findLay (GraphP id _ _ _ _ press) =
+findLay (VertexP _ _ x y _  pres) =
+findLay (WithP ar pres)           =
+findLay (StructuralP id pres)     =
+findLay (ParsingP id p l pres)    =
+findLay (LocatorP loc pres)       =
+findLay (TagP loc pres)           =
+-}

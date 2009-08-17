@@ -4,6 +4,7 @@ import Common.CommonTypes
 import qualified Common.CommonTypes as CommonTypes
 import Data.Time.Clock
 import Data.IORef
+import Data.Maybe
 -- is exported (and imported) by all ...Utils modules
 
 
@@ -19,6 +20,10 @@ fst3 (x,_,_) = x
 snd3 (_,x,_) = x
 thd3 (_,_,x) = x
 
+-- return first element that is not Nothing
+firstJust mxs = case filter isJust mxs of
+                  []         -> Nothing
+                  Just x : _ -> Just x
 
 -- safer version of !! that can report the origin of the index call
 -- non-crashing functions are desirable, because at a crash in a program with a GUI, ghci crashes as well
