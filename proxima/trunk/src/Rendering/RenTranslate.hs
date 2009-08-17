@@ -6,11 +6,12 @@ import Rendering.RenLayerUtils
 import Proxima.Wrap
 import Evaluation.DocTypes 
 
-import Char
+import Data.Char
+import Control.Exception
 -- import IOExts
 
 translateIO state low high = castRemainingEditOps $ \editLow -> 
- do { let (editHigh, state', low') = interpret state low high editLow
+ do { (editHigh, state', low') <- interpretIO state low high editLow
     ; return (editHigh, state', low')
     }
 
@@ -26,9 +27,36 @@ translateIO state low high = castRemainingEditOps $ \editLow ->
 -- focus is passed all the time, which is a hint that the current focus model is no good
 -- also focus behaviour (e.g. what to do when navigating with a nonempty focus) is split over layers
 
+interpretIO :: (Show doc, Show enr, Show token, Show node) =>
+             LocalStateRen -> RenderingLevel doc enr node clip token ->
+             ArrangementLevel doc node clip token -> EditRendering doc enr node clip token ->
+             IO ([EditArrangement doc enr node clip token], LocalStateRen, RenderingLevel doc enr node clip token)
+interpretIO state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
+                arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
+  case editRen of
+    KeySpecialRen UpKey ms        ->
+     do { editArr <- tryFocus upFocus Up focus (if debugging then debugArrangement arr else arr) $ 
+                       cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
+        ; return (editArr, state, renLvl)
+        }
+    KeySpecialRen DownKey ms        ->
+     do { editArr <- tryFocus downFocus Down focus (if debugging then debugArrangement arr else arr) $ 
+                       cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
+        ; return (editArr, state, renLvl)
+        }
+    KeySpecialRen UpKey ms@(Modifiers True False False)   -> -- shift down
+     do { editArr <- tryFocus enlargeFocusUp Up focus (if debugging then debugArrangement arr else arr) $ 
+                       cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
+        ; return (editArr, state, renLvl)
+        }
+    KeySpecialRen DownKey ms@(Modifiers True False False) -> -- shift down
+     do { editArr <- tryFocus enlargeFocusDown Down focus (if debugging then debugArrangement arr else arr) $ 
+                       cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
+        ; return (editArr, state, renLvl)
+        }
+    _ -> return $ interpret state renLvl arrLvl editRen
 
-
-
+ 
 interpret :: (Show doc, Show enr, Show token, Show node) =>
              LocalStateRen -> RenderingLevel doc enr node clip token ->
              ArrangementLevel doc node clip token -> EditRendering doc enr node clip token ->
@@ -70,18 +98,6 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen F5Key ms        -> ([RedrawArr], state, renLvl)
 
 
-    KeySpecialRen UpKey (Modifiers True False False)   -> -- shift down
-      ( [SetFocusArr (enlargeFocusUp focus (if debugging then debugArrangement arr else arr))]
-      , state, renLvl )
-    KeySpecialRen DownKey (Modifiers True False False) -> -- shift down
-      ( [SetFocusArr  (enlargeFocusDown focus (if debugging then debugArrangement arr else arr))]
-      , state, renLvl )
-    KeySpecialRen UpKey ms        ->
-      ( [SetFocusArr (upFocus focus (if debugging then debugArrangement arr else arr))]
-      , state, renLvl )
-    KeySpecialRen DownKey ms      ->
-      ( [SetFocusArr (downFocus focus (if debugging then debugArrangement arr else arr))]
-      , state, renLvl )
 
     KeyCharRen c          -> ([KeyCharArr c], state, renLvl)
     KeySpecialRen c ms    -> ([KeySpecialArr c ms], state, renLvl)

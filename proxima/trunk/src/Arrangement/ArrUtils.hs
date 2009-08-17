@@ -3,8 +3,10 @@ module Arrangement.ArrUtils where
 import Common.CommonTypes
 import Arrangement.ArrTypes
 import Common.CommonUtils
+import Proxima.Wrap
 
-import Maybe 
+import Control.Exception
+import Data.Maybe 
 
 -- utils
 
@@ -395,30 +397,43 @@ centerXCoords xcoords = let widths = zipWith (-) (tail xcoords) xcoords
                         in  head' "ArrUtils.centerXCoords" xcoords : zipWith (+) xcoords halfwidths
 -- don't want cumulative character widths
 
+
+tryFocus :: (FocusArr -> Arrangement node -> Maybe FocusArr) -> Direction_ -> FocusArr -> Arrangement node -> 
+            EditArrangement doc enr node clip token -> IO [EditArrangement doc enr node clip token]
+tryFocus computeFocus dir focus arr editop = 
+  do { let mFocus = computeFocus focus arr
+     ; seq mFocus $ return ()
+     ; return $ case mFocus of
+         Just f  -> [SetFocusArr f] 
+         Nothing -> [ cast (ScrollViewedAreaArr dir :: EditArrangement doc enr node clip token)
+                    , editop ]
+     } `Control.Exception.catch` \UnarrangedException -> 
+         return [ cast (ScrollViewedAreaArr dir :: EditArrangement doc enr node clip token)
+                , editop ] 
+
+
 setFocus x y arr     = showDebug' GI "focus set to " $
                        let f = navigateFocus x y arr in {- showDebug GI -} (FocusA f f)
 
 enlargeFocusXY focus x y arr = enlargeFocus focus (navigateFocus x y arr)
 
 enlargeFocusUp focus arr = case upPath (toA focus) arr of
-                             Nothing  -> focus
-                             Just pth -> enlargeFocus focus pth 
+                             Nothing  -> Nothing
+                             Just pth -> Just $ enlargeFocus focus pth 
 
 enlargeFocusDown focus arr = case downPath (toA focus) arr of
-                               Nothing  -> focus
-                               Just pth -> enlargeFocus focus pth 
+                               Nothing  -> Nothing
+                               Just pth -> Just $ enlargeFocus focus pth 
 
 enlargeFocus (FocusA f@(PathA _ _) t) pth = {- showDebug Ren $ -} (FocusA f pth)
 enlargeFocus f                        pth = debug Err "ArrUtils.enlargeFocus: selection without focus set" $ (FocusA pth pth)
 
--- this works but is it a general solution? No, can't go up from:                 col
---                                                                        bla|bla col
--- probably we should get out of enclosing rows and into preceding/following elt of column
+
 
 upFocus (FocusA f  t) arr = case upPath f arr of
-                              Just pth' -> FocusA pth' pth'
-                              Nothing   -> FocusA f t
-upFocus _             _   = NoFocusA
+                              Just pth' -> Just $ FocusA pth' pth'
+                              Nothing   -> Nothing
+upFocus _             _   = Just $ NoFocusA
 
 upPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
                            in  navigateFocusUp (x+w `div` 2) pth arr -- use the horizontal center of currently focused item
@@ -426,8 +441,9 @@ upPath _             _   = Nothing
 
 
 downFocus (FocusA f  t) arr = case downPath f arr of
-                                Just pth' -> FocusA pth' pth'
-                                Nothing   -> FocusA f t
+                                Just pth' -> Just $ FocusA pth' pth'
+                                Nothing   -> Nothing
+downFocus _             _   = Just $ NoFocusA
 
 downPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
                              in  navigateFocusDown (x+w `div` 2) pth arr -- use the horizontal center of currently focused item
@@ -482,6 +498,7 @@ navigateFocusXFromBottom fx (rootPath,x',y', StringA _ x y w h hr vr str c bc f 
   let pos = fx - x - x'         
   in  Just $ PathA rootPath $ (length (takeWhile (<=pos) (centerXCoords cxs)))-1
 navigateFocusXFromBottom fx (rootPath,x',y', ImageA _ x y w h hr vr _ _ c1 c2) = Nothing
+navigateFocusXFromBottom fx (rootPath,x',y', PolyA (IDA (-10)) x y w h hr vr _ _ _ c1 c2 c3) = throw UnarrangedException   
 navigateFocusXFromBottom fx (rootPath,x',y', PolyA _ x y w h hr vr _ _ _ c1 c2 c3) = Nothing   
 navigateFocusXFromBottom fx (rootPath,x',y', RectangleA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
 navigateFocusXFromBottom fx (rootPath,x',y', EllipseA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
@@ -511,6 +528,7 @@ navigateFocusXFromTop fx (rootPath,x',y', StringA _ x y w h hr vr str c bc f cxs
   let pos = fx - x - x'         
   in  Just $ PathA rootPath $ (length (takeWhile (<=pos) (centerXCoords cxs)))-1
 navigateFocusXFromTop fx (rootPath,x',y', ImageA _ x y w h hr vr _ _ c1 c2) = Nothing
+navigateFocusXFromTop fx (rootPath,x',y', PolyA (IDA (-10)) x y w h hr vr _ _ _ c1 c2 c3) = throw UnarrangedException   
 navigateFocusXFromTop fx (rootPath,x',y', PolyA _ x y w h hr vr _ _ _ c1 c2 c3) = Nothing   
 navigateFocusXFromTop fx (rootPath,x',y', RectangleA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
 navigateFocusXFromTop fx (rootPath,x',y', EllipseA _ x y w h hr vr _ _ c1 c2 c3) = Nothing
