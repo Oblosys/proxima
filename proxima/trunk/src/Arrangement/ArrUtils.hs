@@ -404,9 +404,8 @@ tryFocus computeFocus dir focus arr editop =
   do { let mFocus = computeFocus focus arr
      ; seq mFocus $ return ()
      ; return $ case mFocus of
-         Just f  -> [SetFocusArr f] 
-         Nothing -> [ cast (ScrollViewedAreaArr dir :: EditArrangement doc enr node clip token)
-                    , editop ]
+         Just f  -> [ SetFocusArr f ] 
+         Nothing -> [ SkipArr 0, editop ]
      } `Control.Exception.catch` \UnarrangedException -> 
          return [ cast (ScrollViewedAreaArr dir :: EditArrangement doc enr node clip token)
                 , editop ] 
@@ -433,7 +432,7 @@ enlargeFocus f                        pth = debug Err "ArrUtils.enlargeFocus: se
 upFocus (FocusA f  t) arr = case upPath f arr of
                               Just pth' -> Just $ FocusA pth' pth'
                               Nothing   -> Nothing
-upFocus _             _   = Just $ NoFocusA
+upFocus _             _   = Nothing
 
 upPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
                            in  navigateFocusUp (x+w `div` 2) pth arr -- use the horizontal center of currently focused item
@@ -443,7 +442,7 @@ upPath _             _   = Nothing
 downFocus (FocusA f  t) arr = case downPath f arr of
                                 Just pth' -> Just $ FocusA pth' pth'
                                 Nothing   -> Nothing
-downFocus _             _   = Just $ NoFocusA
+downFocus _             _   = Nothing
 
 downPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
                              in  navigateFocusDown (x+w `div` 2) pth arr -- use the horizontal center of currently focused item
