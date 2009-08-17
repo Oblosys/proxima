@@ -84,7 +84,8 @@ parse scannerSheet state layLvl@(LayoutLevel pres f dt) prsLvl (MoveVertexLay pt
 parse scannerSheet state layLvl prsLvl NormalizeLay       = editLay editNormalize state layLvl prsLvl
 
 parse scannerSheet state layLvl prsLvl ParseLay = tokenizeLay scannerSheet state layLvl prsLvl
-parse _ state layLvl prsLvl Test2Lay           = (Test2Pres, state, layLvl)
+parse  scannerSheet state layLvl@(LayoutLevel pres f _) prsLvl (FindLay str) = 
+  debug Prs ("\n\n\n\nFinding "++str++ show pres) $ (SkipPres 0, state, layLvl)
 
 
 parse _ state layLvl prsLvl Test2Lay           = (Test2Pres, state, layLvl)

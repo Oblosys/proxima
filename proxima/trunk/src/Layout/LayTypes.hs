@@ -47,6 +47,7 @@ data EditLayout_ wrapped doc enr node clip token =
   | OpenFileLay String
   | SaveFileLay String
   | ParseLay
+  | FindLay String
   | Test2Lay
   
   | WrapLay wrapped deriving Show
