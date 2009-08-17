@@ -467,7 +467,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
              }
 
     Find str ->
-      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ cast (FindLay str :: EditLayout doc enr node clip token)
+      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ cast (FindLay (Just str) :: EditLayout doc enr node clip token)
          ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
          ; return $ html ++ [setViewedAreaHtml]
          }

@@ -69,7 +69,7 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     CloseRen            -> ([CloseArr],      state, renLvl)
     SkipRen i           -> ([SkipArr (i+1)], state, renLvl)
 -- TODO: make selectors scaleR and debuggingR for RenderingLevel
-    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> ([cast (FindLay "een" :: EditLayout doc enr node clip token)],       state, renLvl) -- Ctrl-c
+    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> ([cast (FindLay Nothing :: EditLayout doc enr node clip token)],       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'c') (Modifiers False True False) -> ([CopyArr],       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'v') (Modifiers False True False) -> ([PasteArr],      state, renLvl) -- Ctrl-v
     KeySpecialRen (CharKey 'x') (Modifiers False True False) -> ([CutArr],        state, renLvl) -- Ctrl-x
