@@ -69,13 +69,13 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     CloseRen            -> ([CloseArr],      state, renLvl)
     SkipRen i           -> ([SkipArr (i+1)], state, renLvl)
 -- TODO: make selectors scaleR and debuggingR for RenderingLevel
-    KeySpecialRen (CharKey 'f') (Modifiers False True False) -> ([cast (FindLay "een" :: EditLayout doc enr node clip token)],       state, renLvl) -- Ctrl-c
+    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> ([cast (FindLay "een" :: EditLayout doc enr node clip token)],       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'c') (Modifiers False True False) -> ([CopyArr],       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'v') (Modifiers False True False) -> ([PasteArr],      state, renLvl) -- Ctrl-v
     KeySpecialRen (CharKey 'x') (Modifiers False True False) -> ([CutArr],        state, renLvl) -- Ctrl-x
-    KeySpecialRen (CharKey 'C') (Modifiers True True False) -> ([cast (CopyDoc' :: EditDocument' doc enr node clip token)],    state, renLvl) -- Ctrl-f
-    KeySpecialRen (CharKey 'V') (Modifiers True True False) -> ([cast (PasteDoc' :: EditDocument' doc enr node clip token)],   state, renLvl) -- Ctrl-g
-    KeySpecialRen (CharKey 'X') (Modifiers True True False) -> ([cast (CutDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'c') (Modifiers True True False) -> ([cast (CopyDoc' :: EditDocument' doc enr node clip token)],    state, renLvl) -- Ctrl-f
+    KeySpecialRen (CharKey 'v') (Modifiers True True False) -> ([cast (PasteDoc' :: EditDocument' doc enr node clip token)],   state, renLvl) -- Ctrl-g
+    KeySpecialRen (CharKey 'x') (Modifiers True True False) -> ([cast (CutDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-d
     KeySpecialRen (CharKey 'z') (Modifiers False True False) -> ([cast (UndoDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-d
     KeySpecialRen (CharKey 'y') (Modifiers False True False) -> ([cast (RedoDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-d
     KeySpecialRen UpKey   (Modifiers False False True) -> ([SkipArr 0], state, RenderingLevel (scale*2) c r fr sz debugging ur lmd)
