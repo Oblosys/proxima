@@ -9,4 +9,5 @@ import Arrangement.ArrTypes
 import Rendering.RenTypes
 import Data.IORef
 
-data LocalStateRen = LocalStateRen
+data LocalStateRen = LocalStateRen { getViewedAreaRefRen :: IORef Rectangle
+                                   }
