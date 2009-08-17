@@ -7,6 +7,7 @@ import Proxima.Wrap
 
 import Control.Exception
 import Data.Maybe 
+import Data.IORef
 
 -- utils
 
@@ -398,17 +399,23 @@ centerXCoords xcoords = let widths = zipWith (-) (tail xcoords) xcoords
 -- don't want cumulative character widths
 
 
-tryFocus :: (FocusArr -> Arrangement node -> Maybe FocusArr) -> Direction_ -> FocusArr -> Arrangement node -> 
+tryFocus :: Show node => (FocusArr -> Arrangement node -> Maybe FocusArr) -> Direction_ -> IORef Rectangle -> FocusArr -> Arrangement node -> 
             EditArrangement doc enr node clip token -> IO [EditArrangement doc enr node clip token]
-tryFocus computeFocus dir focus arr editop = 
+tryFocus computeFocus dir viewedAreaRef focus arr editop = 
   do { let mFocus = computeFocus focus arr
      ; seq mFocus $ return ()
      ; return $ case mFocus of
          Just f  -> [ SetFocusArr f ] 
-         Nothing -> [ SkipArr 0, editop ]
+         Nothing -> [ SkipArr 0 ]
      } `Control.Exception.catch` \UnarrangedException -> 
-         return [ cast (ScrollViewedAreaArr dir :: EditArrangement doc enr node clip token)
-                , editop ] 
+         do { ((x,y),(w,h)) <- readIORef viewedAreaRef
+            ; return $ if (dir == Up && y > 0) ||
+                          (dir == Down && y+h < heightA arr) then 
+                         [ cast (ScrollViewedAreaArr dir :: EditArrangement doc enr node clip token)
+                         , editop
+                         ]
+                       else [ SkipArr 0 ]
+            }
 
 
 setFocus x y arr     = showDebug' GI "focus set to " $
