@@ -203,6 +203,8 @@ isWhitespaceLR pth     lay                    = debug Err ("LayUtils.isWhitespac
 
 -- TODO can be improved by stopping when begin point is reached
 --      and by alert when not found
+-- Bug: guaranteefocusinview fails if focus is in unarranged
+-- Bug: control gets stuck after find
 findLay (FocusP from@(PathP _ _) to@(PathP _ _)) str lay = let PathP pth i = from `min` to
                                                            in  firstJust [ findLay' str pth i [maxBound] 0 [] lay, findLay' str [] 0 pth i [] lay ]
 findLay (FocusP from@(PathP pth i) _)            str lay = firstJust [ findLay' str pth i [maxBound] 0 [] lay, findLay' str [] 0 pth i [] lay ]
