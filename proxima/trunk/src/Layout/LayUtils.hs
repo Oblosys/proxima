@@ -201,34 +201,39 @@ isWhitespaceLR (0:pth) (LocatorP _ lay)       = isWhitespaceLR pth lay
 isWhitespaceLR (0:pth) (TagP _ lay)       = isWhitespaceLR pth lay
 isWhitespaceLR pth     lay                    = debug Err ("LayUtils.isWhitespaceLR: can't handle "++ show pth++" " ++show lay) (False,False)
 
+-- TODO can be improved by stopping when begin point is reached
+--      and by alert when not found
 findLay (FocusP from@(PathP _ _) to@(PathP _ _)) str lay = let PathP pth i = from `min` to
-                                                           in  findLay' str pth i [] lay
-findLay (FocusP from@(PathP pth i) _)            str lay = findLay' str pth i [] lay
-findLay _ str lay = findLay' str [] (-1) [] lay
--- todo sort focus path?
+                                                           in  firstJust [ findLay' str pth i [maxBound] 0 [] lay, findLay' str [] 0 pth i [] lay ]
+findLay (FocusP from@(PathP pth i) _)            str lay = firstJust [ findLay' str pth i [maxBound] 0 [] lay, findLay' str [] 0 pth i [] lay ]
+findLay _ str lay = findLay' str [] 0 [maxBound] 0 [] lay
+-- [maxBound] 0 is greater than any valid path, so we search until the end of the presentation
 
-findLay' :: (Show node, Show token) => String -> Path -> Int -> Path -> Layout doc node clip token -> Maybe FocusPres
-findLay' str focusPath i rootPath lay =
-  if take (length focusPath) rootPath < take (length rootPath) focusPath   
+
+findLay' :: (Show node, Show token) => String -> Path -> Int -> Path -> Int -> Path -> Layout doc node clip token -> Maybe FocusPres
+findLay' str fromPath fromIndex toPath toIndex rootPath lay =
+  --debug Prs ("paths "++show fromPath++show toPath) $
+  if rootPath < take (length rootPath) fromPath || rootPath > toPath
   then Nothing
-  else -- if focusPath is equal to but shorter than rootPath, we should stop searching, but this is not a valid focus anyway 
+  else -- this does not take into account focus selections of subtrees (but these aren't valid anyway) 
    case lay of
-    (StringP id str')         -> let searchStart = if focusPath == rootPath then (i+1) else 0
-                                 in  case (drop searchStart str') `containsStr` str of 
+    (StringP id str')         -> let searchStr = if rootPath == toPath then take toIndex str' else str'
+                                     searchStart = if rootPath == fromPath then fromIndex+1 else 0
+                                 in  case (drop searchStart searchStr) `containsStr` str of 
                                        Just pos -> Just $ FocusP (PathP rootPath $ searchStart + pos) 
                                                                  (PathP rootPath $ searchStart + pos + length str)
                                        Nothing -> Nothing
-    (RowP id rf press)        -> firstJust $ [ findLay' str focusPath i (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
-    (ColP id rf f press)      -> firstJust $ [ findLay' str focusPath i (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
-    (OverlayP d id press)     -> firstJust $ [ findLay' str focusPath i (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
-    (FormatterP  id press)    -> firstJust $ [ findLay' str focusPath i (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
-    (GraphP id _ _ _ _ press) -> firstJust $ [ findLay' str focusPath i (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
-    (VertexP _ _ x y _  pres) -> findLay' str focusPath i (rootPath ++ [0]) pres
-    (WithP ar pres)           -> findLay' str focusPath i (rootPath ++ [0]) pres
-    (StructuralP id pres)     -> findLay' str focusPath i (rootPath ++ [0]) pres
-    (ParsingP id p l pres)    -> findLay' str focusPath i (rootPath ++ [0]) pres
-    (LocatorP loc pres)       -> findLay' str focusPath i (rootPath ++ [0]) pres
-    (TagP loc pres)           -> findLay' str focusPath i (rootPath ++ [0]) pres
+    (RowP id rf press)        -> firstJust $ [ findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+    (ColP id rf f press)      -> firstJust $ [ findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+    (OverlayP d id press)     -> firstJust $ [ findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+    (FormatterP  id press)    -> firstJust $ [ findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+    (GraphP id _ _ _ _ press) -> firstJust $ [ findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press]
+    (VertexP _ _ x y _  pres) -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+    (WithP ar pres)           -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+    (StructuralP id pres)     -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+    (ParsingP id p l pres)    -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+    (LocatorP loc pres)       -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+    (TagP loc pres)           -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
     _                         -> Nothing -- all atomic presentations other than string
 
 containsStr str substr = contains' 0 str substr
