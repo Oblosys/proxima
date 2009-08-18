@@ -652,9 +652,45 @@ splitRowTreePresPth editable pth pr = debug Err ("*** TreeEditPres.splitRowTreeP
 -- should return a NoFocusP here
 
 
+setStylePres fromPath fromIndex toPath toIndex rootPath prs =
+  if rootPath < take (length rootPath) fromPath || rootPath > toPath
+  then prs
+  else 
+    case prs of 
+--      strr@(StringP id str)      -> WithP setStyleRed strr
+      (RowP id rf press)         -> RowP id rf [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (ColP id rf f press)       -> ColP id rf f [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (OverlayP d id press)      -> OverlayP d id [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (FormatterP  id press)     -> FormatterP id [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (GraphP id d w h es press) -> GraphP id d w h es [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (WithP ar pres)            -> WithP ar $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      (StructuralP id pres)      -> StructuralP id $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      (ParsingP id p l pres)     -> ParsingP id p l $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      (LocatorP loc pres)        -> LocatorP loc $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      (TagP ts pres)             -> TagP ts $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      pres                       -> WithP setStyleRed pres
+        {-
+findLay (ColP id rf f press)      = 
+findLay (OverlayP d id press)     = 
+findLay (FormatterP  id press)    = 
+findLay (GraphP id _ _ _ _ press) =
+findLay (VertexP _ _ x y _  pres) =
+findLay (WithP ar pres)           =
+findLay (StructuralP id pres)     =
+findLay (ParsingP id p l pres)    =
+findLay (LocatorP loc pres)       =
+findLay (TagP loc pres)           =
 
+findLay (EmptyP id)               = 
+findLay (ImageP id str _)         = 
+findLay (PolyP id _ _ _)          = 
+findLay (RectangleP id _ _ _ _)   = 
+findLay (EllipseP id _ _ _ _)     = 
 
-
+    (RowP id rf press)        = 
+    (VertexP _ _ x y _  pres) -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+-}
+setStyleRed (inh,syn) = (inh {textColor = red}, syn)
 
 
 
