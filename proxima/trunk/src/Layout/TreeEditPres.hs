@@ -653,7 +653,8 @@ splitRowTreePresPth editable pth pr = debug Err ("*** TreeEditPres.splitRowTreeP
 
 setStylePres (FocusP from@(PathP _ _) to@(PathP _ _)) prs = let PathP fromPath fromIndex = from `min` to
                                                                 PathP toPath toIndex = from `max` to
-                                                            in  setStylePres' fromPath fromIndex toPath toIndex [] prs
+                                                            in  debug Lay ("setStylePres on "++ show fromPath ++ show toPath) $
+                                                                setStylePres' fromPath fromIndex toPath toIndex [] prs
 setStylePres _ lay = lay
 
 setStylePres' fromPath fromIndex toPath toIndex rootPath prs =
@@ -661,7 +662,15 @@ setStylePres' fromPath fromIndex toPath toIndex rootPath prs =
   then prs
   else 
     case prs of 
---      strr@(StringP id str)      -> WithP setStyleRed strr
+      stringP@(StringP id str)   -> if fromPath == rootPath 
+                                    then if toPath == rootPath
+                                         then let (left, rest) = splitAt fromIndex str 
+                                                  (middle, right) = splitAt (toIndex - fromIndex) rest
+                                              in  RowP NoIDP 0 [ StringP id left, WithP setStyleRed $ StringP NoIDP middle, StringP NoIDP right ]
+                                         else RowP NoIDP 0 [ StringP id $ take fromIndex str, WithP setStyleRed $ StringP NoIDP $ drop fromIndex str ]
+                                    else if toPath == rootPath
+                                         then RowP NoIDP 0 [ WithP setStyleRed $ StringP id $ take toIndex str, StringP NoIDP $ drop toIndex str ]
+                                         else WithP setStyleRed $ StringP id str
       (RowP id rf press)         -> RowP id rf [ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
       (ColP id rf f press)       -> ColP id rf f [ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
       (OverlayP d id press)      -> OverlayP d id [ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
