@@ -662,6 +662,7 @@ setStylePresF (FocusP (PathP fp fi) (PathP tp ti)) = if fp == tp
                                                      else FocusP (PathP (fp++[1,0]) 0) (PathP (tp++[0,0]) ti)
 setStylePresF focus = focus  
 
+-- todo: should only fix stuff in the Parsing subtree that the focus is in
 setStylePres' fromPath fromIndex toPath toIndex rootPath prs =
   if rootPath < take (length rootPath) fromPath || rootPath > toPath
   then prs
