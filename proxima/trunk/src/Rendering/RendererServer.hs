@@ -45,7 +45,7 @@ renderFocus scale arrDb focus arrangement viewedArea =
 
     ; let focusArrList = arrangeFocus focus arrangement
 
-    ; debug Ren ("Focus: "++show focus ++ "\nFocus arrangement:\n"++show focusArrList) $
+    ; debug Ren ("Focus: "++show focus) $ -- ++ "\nFocus arrangement:\n"++show focusArrList) $
         renderArr arrDb scale origin viewedArea Nothing
                         (Just [1])
                         (DiffLeaf False)
