@@ -651,23 +651,27 @@ splitRowTreePresPth editable (p:path) (FormatterP id press) =
 splitRowTreePresPth editable pth pr = debug Err ("*** TreeEditPres.splitRowTreePresPth: can't handle "++show pth++" "++ show pr++"***") Right []
 -- should return a NoFocusP here
 
+setStylePres (FocusP from@(PathP _ _) to@(PathP _ _)) prs = let PathP fromPath fromIndex = from `min` to
+                                                                PathP toPath toIndex = from `max` to
+                                                            in  setStylePres' fromPath fromIndex toPath toIndex [] prs
+setStylePres _ lay = lay
 
-setStylePres fromPath fromIndex toPath toIndex rootPath prs =
+setStylePres' fromPath fromIndex toPath toIndex rootPath prs =
   if rootPath < take (length rootPath) fromPath || rootPath > toPath
   then prs
   else 
     case prs of 
 --      strr@(StringP id str)      -> WithP setStyleRed strr
-      (RowP id rf press)         -> RowP id rf [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
-      (ColP id rf f press)       -> ColP id rf f [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
-      (OverlayP d id press)      -> OverlayP d id [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
-      (FormatterP  id press)     -> FormatterP id [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
-      (GraphP id d w h es press) -> GraphP id d w h es [ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
-      (WithP ar pres)            -> WithP ar $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
-      (StructuralP id pres)      -> StructuralP id $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
-      (ParsingP id p l pres)     -> ParsingP id p l $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
-      (LocatorP loc pres)        -> LocatorP loc $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
-      (TagP ts pres)             -> TagP ts $ setStylePres fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      (RowP id rf press)         -> RowP id rf [ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (ColP id rf f press)       -> ColP id rf f [ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (OverlayP d id press)      -> OverlayP d id [ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (FormatterP  id press)     -> FormatterP id [ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (GraphP id d w h es press) -> GraphP id d w h es [ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [p]) pres | (p, pres) <- zip [0..] press ]
+      (WithP ar pres)            -> WithP ar $ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      (StructuralP id pres)      -> StructuralP id $ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      (ParsingP id p l pres)     -> ParsingP id p l $ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      (LocatorP loc pres)        -> LocatorP loc $ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
+      (TagP ts pres)             -> TagP ts $ setStylePres' fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
       pres                       -> WithP setStyleRed pres
         {-
 findLay (ColP id rf f press)      = 

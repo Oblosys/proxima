@@ -462,13 +462,18 @@ function keypress(e)
    var keyCode =  (e.keyCode != 0) ? e.keyCode : e.charCode
    // keyCode is 0 on Firefox
    
- //  debug('Key is '+keyCode +',' + e.charCode);
-  if (keyCode==102 && ctrlDown)
+  debugAdd('Key is '+keyCode +',' + e.charCode);
+  if (keyCode==102 && ctrlDown) // ctrl-f
   { var answer=prompt("Enter search term.");
 // todo: escape answer string
     if (answer) loadXMLDoc('Find "'+answer+'";');
-    return true;
+    return false;
   }
+  if (keyCode==116 && ctrlDown) // ctrl-t
+  { loadXMLDoc('SetStyle;');
+    return false;
+  }
+
   if (e.which != 0 && keyCode != 8 && keyCode != 13) 
      loadXMLDoc('Chr('+keyCode+','+showModifiers()+');');
 // ? is to prevent caching by IE 
