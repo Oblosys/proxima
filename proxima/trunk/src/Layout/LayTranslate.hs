@@ -31,7 +31,7 @@ translateIO scannerSheet state low high = castRemainingEditOps $ \editLow ->
 
 
 -- split in monadic and non-monadic part
-parseIO :: (Eq token, Show token, DocNode node) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> EditLayout doc enr node clip token -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+parseIO :: (Eq token, Show token, DocNode node, Show doc, Show enr) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> EditLayout doc enr node clip token -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
 --parseIO _ state layLvl prsLvl (OpenFileLay str) = openFile str state layLvl prsLvl
 --parseIO _ state layLvl prsLvl (SaveFileLay str) = setUpd NothingUpdated $ saveFile state layLvl prsLvl str 
 parseIO _ state layLvl prsLvl (OpenFileLay str) = return ([OpenFilePres str], state, layLvl)
@@ -51,7 +51,7 @@ parseIO scannerSheet state layLvl@(LayoutLevel pres _ dt) prsLvl (SetFocusLay fo
 parseIO scannerSheet state layLvl prsLvl event = let (editsHigh, state', low') = parse scannerSheet state layLvl prsLvl event
                                                  in  return (editsHigh, state', low')
 
-parse :: (DocNode node, Show token, Eq token) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> 
+parse :: (DocNode node, Show token, Eq token, Show doc, Show enr) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> 
          LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> EditLayout doc enr node clip token ->
          ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
 parse _ state layLvl prsLvl (SkipLay i)   = ([SkipPres (i+1)], state, layLvl)
@@ -73,6 +73,8 @@ parse scannerSheet state layLvl@(LayoutLevel pres f _) prsLvl RightDeleteLay =
   if focusIsOnGraph f pres -- if the from path is in a graph, this is a graph edit
   then graphEdit scannerSheet state layLvl prsLvl deleteInGraph
   else editLay editRightDelete state layLvl prsLvl
+
+parse _ state layLvl prsLvl SetStyleLay = editLay editSetStyle state layLvl prsLvl 
 
 
 parse _ state layLvl prsLvl LeftLay   = navigateLeft state layLvl prsLvl 
@@ -115,7 +117,7 @@ parse _ state layLvl prsLvl Test2Lay           = ([Test2Pres], state, layLvl)
 -- to allow presenter mouse handle: change GestureInterpreter, so the event is handled there
 -}
 parse _ state layLvl prsLvl (WrapLay wrapped) = ([unwrap wrapped],        state, layLvl)
-parse _ state layLvl prsLvl _            = ([SkipPres 0], state, layLvl)
+parse _ state layLvl prsLvl cmd            = debug Err ("LayTranslate.parse: unhandled command "++show cmd) $ ([SkipPres 0], state, layLvl)
 
 
 -- edit ops need to be consistent, when navigating with non-empty focus, collapse focus
@@ -223,8 +225,8 @@ editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
     in  (LayoutLevel pres' focus''' dt, clip)
 
 
-setStyle :: (DocNode node, Show token) => Layout doc node clip token -> LayoutLevel doc node clip token -> (LayoutLevel doc node clip token, Layout doc node clip token)
-setStyle clip (LayoutLevel pres focus dt) = 
+editSetStyle :: (DocNode node, Show token) => Layout doc node clip token -> LayoutLevel doc node clip token -> (LayoutLevel doc node clip token, Layout doc node clip token)
+editSetStyle clip (LayoutLevel pres focus dt) = 
  let pres' = setStylePres focus pres
  in  (LayoutLevel pres' focus dt, clip)
 
