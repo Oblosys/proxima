@@ -39,23 +39,6 @@ showPathNodesP (p:pth) pres = shallowShowPres pres ++ "\n" ++
                                    then showPathNodesP pth (index "PresUtils.showPathNodesP" children p)
                                    else "PresUtils.showPathNodesP: index out of bounds"
                             
-
--- set background so user knows doc is unparsed
--- if top node is With, don't do anything, so we won't pile up background with nodes.
--- this is a hack, and means that the presentation must not have a with node at the top
--- need some local state for this, and some way of putting the information in the presentation
-
---markUnparsed p@(WithP ar _) = let c = backgroundColor.fst $ (ar emptyAttrs)
---                              in  if c /= whiteSmoke
---                              then setUpd AllUpdated $  debug Prs "no With" (p`withbgColor` whiteSmoke)
---                              else debug Prs "With" p
---markUnparsed p           =  debug Prs "no With2" p `withbgColor` whiteSmoke
---markUnparsedF (WithP ar p) f = let c = backgroundColor.fst $ (ar emptyAttrs)
---                              in  if c /= whiteSmoke then debug Prs "no With" consFocusP 0 f else debug Prs "With" f
---markUnparsedF _           f = consFocusP 0 f
-markUnparsed p           =  p
-markUnparsedF _           f = f
-
 xyFromPath :: (DocNode node, Show token) => PathPres -> Layout doc node clip token -> (Int,Int, Bool)
 xyFromPath path pres = xyFromPathPres 0 0 path pres
 

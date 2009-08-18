@@ -135,14 +135,8 @@ parse _ state layLvl prsLvl _            = ([SkipPres 0], state, layLvl)
 editLay editF state layLvl@(LayoutLevel pres NoFocusP dt) presLvl = ([SkipPres 0], state, layLvl)
 editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter)) = 
  let (ll@(LayoutLevel pres' focus' dt), clip') = editF (getClipboard state) (LayoutLevel pres focus dt) -- this will be layLvl's own focus
-     (pres'', focus'')             = (markUnparsed pres', markUnparsedF pres' focus')
-   --  (pres''', layout', idCounter') = tokenize idCounter Nothing pres''
-   --  ******** don't forget to delete inserted tokens! when uncommenting this tokenize
-   --  presLvl'                      = PresentationLevel pres''' (layout', idCounter')
--- in  setUpd AllUpdated $ (SetPres presLvl', state', ll)
-     diffTree = diffPres pres'' pres
- in --        _                                    -> return ()  -- where did this line come from?
-    ([SkipPres 0], state { getClipboard = clip'}, LayoutLevel pres'' focus'' diffTree)
+     diffTree = diffPres pres' pres
+ in ([SkipPres 0], state { getClipboard = clip'}, LayoutLevel pres' focus' diffTree)
 
 
 -- should we make a similar function for edit ops that do not alter the presentation? This function would not do
@@ -225,7 +219,6 @@ editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
         focus''         = FocusP (toP focus) (toP focus')
         (pres', focus''') = deleteTree focus'' pres
     in  (LayoutLevel pres' focus''' dt, clip)
-
 
 
 navigateLeft :: (DocNode node, Show token) =>  LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> 
