@@ -42,8 +42,6 @@ parse :: (DocNode node, Ord token, Show token, Show enr) =>
 
 parse parseSheet state _       enrLvl (SetPres presLvl@(PresentationLevel pres layout))  = 
   editParse parseSheet state presLvl enrLvl
---  ( SkipDoc 0, state
---  , PresentationLevel (markUnparsed pres) layout)  -- this goes wrong, presentation focus is not used
 
 parse _ state presLvl enrLvl (SkipPres i) = (SkipEnr (i+1), state, presLvl)
 --can't normalize here because there is no focus. Maybe normalize without focus. 
@@ -86,7 +84,7 @@ editParse :: (DocNode node, Ord token, Show token, Show enr) =>
              (EditEnrichedDoc doc enr node clip token, LayerStatePres, PresentationLevel doc node clip token)
 editParse parseSheet state presLvl@(PresentationLevel pres layout) (EnrichedDocLevel _ oldFocus doc) = 
   case parsePres parseSheet pres of
-     Nothing   -> (SkipEnr 0, state, PresentationLevel (markUnparsed pres) layout)
+     Nothing   -> (SkipEnr 0, state, PresentationLevel pres layout)
      Just enr' -> (SetEnr (EnrichedDocLevel enr' oldFocus doc), state, presLvl)
 
 
