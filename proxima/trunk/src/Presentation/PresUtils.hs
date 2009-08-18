@@ -68,8 +68,9 @@ diffPres :: (DocNode node, Eq token, Show token) => PresentationBase doc node cl
 -- For graphs, doing compare does not work because pres and pres' are equal. Todo: Figure out why this is.
 --                                                                                 (is because the old pres coming from the left was already edited)
 -- Using the diffTree of the old pres does work. (but is not how we should do it)
-diffPres (WithP ar pres)       pres'                   = diffPres pres pres'
-diffPres pres                  (WithP ar' pres')       = diffPres pres pres'
+diffPres (WithP ar pres)       (WithP ar' pres')       = diffPres pres pres'
+diffPres (WithP ar pres)       pres'                   = DiffLeaf False
+diffPres pres                  (WithP ar' pres')       = DiffLeaf False
 diffPres (StructuralP id pres) pres'                   = diffPres pres pres'
 diffPres pres                  (StructuralP id pres')  = diffPres pres pres'
 diffPres (ParsingP id _ _ pres)    pres'               = diffPres pres pres'
