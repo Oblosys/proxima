@@ -655,7 +655,12 @@ setStylePres (FocusP from@(PathP _ _) to@(PathP _ _)) prs = let PathP fromPath f
                                                                 PathP toPath toIndex = from `max` to
                                                             in  debug Lay ("setStylePres on "++ show fromPath ++ show toPath) $
                                                                 setStylePres' fromPath fromIndex toPath toIndex [] prs
-setStylePres _ lay = lay
+setStylePres _ prs = prs
+
+setStylePresF (FocusP (PathP fp fi) (PathP tp ti)) = if fp == tp 
+                                                     then FocusP (PathP (fp++[1,0]) 0) (PathP (tp++[1,0]) (ti-fi))
+                                                     else FocusP (PathP (fp++[1,0]) 0) (PathP (tp++[0,0]) ti)
+setStylePresF focus = focus  
 
 setStylePres' fromPath fromIndex toPath toIndex rootPath prs =
   if rootPath < take (length rootPath) fromPath || rootPath > toPath

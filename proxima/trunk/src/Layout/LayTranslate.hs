@@ -228,7 +228,8 @@ editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
 editSetStyle :: (DocNode node, Show token) => Layout doc node clip token -> LayoutLevel doc node clip token -> (LayoutLevel doc node clip token, Layout doc node clip token)
 editSetStyle clip (LayoutLevel pres focus dt) = 
  let pres' = setStylePres focus pres
- in  (LayoutLevel pres' focus dt, clip)
+     focus' = setStylePresF focus
+ in  (LayoutLevel pres' focus' dt, clip)
 
 
 navigateLeft :: (DocNode node, Show token) =>  LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> 
