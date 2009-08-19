@@ -53,7 +53,9 @@ idPFromScanChars :: [ScanChar doc node clip token] -> IDP
 idPFromScanChars [] = NoIDP
 idPFromScanChars (Char (IDP idp) _ _ _ _ : scs) = IDP idp
 idPFromScanChars (Char NoIDP     _ _ _ _ : scs) = idPFromScanChars scs
-idPFromScanChars (Structural _ _ _ _ _ _ : scs) = debug Err "idPFromScanChars called on Structural" $ 
+idPFromScanChars (Structural _ _ _ _ _ _ : scs) = debug Err "LayLayerUtils.idPFromScanChars called on Structural" $ 
+                                                    idPFromScanChars scs
+idPFromScanChars (Style _ : scs)                = debug Err "LayLayerUtils.idPFromScanChars called on Style" $
                                                     idPFromScanChars scs
 
 -- Retrieve the first locator node from a list of scanChars. The returned locator is the locator of the first
@@ -62,16 +64,21 @@ locFromScanChars :: [ScanChar doc node clip token] -> Maybe node
 locFromScanChars [] = Nothing
 locFromScanChars (Char _ _ _ (Just loc) _ : scs) = Just loc
 locFromScanChars (Char _ _ _ Nothing    _ : scs) = locFromScanChars scs
-locFromScanChars (Style _ : scs) = locFromScanChars scs
-locFromScanChars (Structural _ _ _ _ _ _ : scs) = debug Err "locFromScanChars called on Structural" $ 
-                                                    locFromScanChars scs
+locFromScanChars (Structural _ _ _ _ _ _ : scs)  = debug Err "LayLayerUtils.locFromScanChars called on Structural" $ 
+                                                     locFromScanChars scs
+locFromScanChars (Style _ : scs)                 = debug Err "LayLayerUtils.locFromScanChars called on Style" $ 
+                                                     locFromScanChars scs
 
+markFocusStart sc@(Style _) = debug Err "illegal operation on Style scan char" sc
 markFocusStart scanChar = scanChar { startFocusMark = FocusMark }
 
+markFocusEnd sc@(Style _) = debug Err "illegal operation on Style scan char" sc
 markFocusEnd scanChar = scanChar { endFocusMark = FocusMark }
 
+hasFocusStartMark sc@(Style _) = debug Err "illegal operation on Style scan char" False
 hasFocusStartMark scanChar = startFocusMark scanChar == FocusMark
 
+hasFocusEndMark sc@(Style _) = debug Err "illegal operation on Style scan char" False
 hasFocusEndMark scanChar = endFocusMark scanChar == FocusMark
 
 -- TODO handle pattern match failures with internal errors

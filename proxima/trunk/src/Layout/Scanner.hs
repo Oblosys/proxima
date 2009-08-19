@@ -311,12 +311,14 @@ scanGroups sheet groupedScanChars = fst $ scanCharsOrStructurals sheet 0 grouped
 
 scanCharsOrStructurals sheet pos [] = ([],pos)
 scanCharsOrStructurals sheet pos (group@(scanChar:_):groups) = -- a group is never empty
-  let (scannedTokens, pos') = if isCharScanChar scanChar 
-                              then sheet pos group
-                              else scanStructurals pos group
+  let (scannedTokens, pos') = case scanChar of 
+                                Char _ _ _ _ _         -> sheet pos group
+                                Structural _ _ _ _ _ _ -> scanStructurals pos group
+                                Style _                -> ([],pos)                          
+                                                          
       (scannedTokens', pos'') = scanCharsOrStructurals sheet pos' groups
   in  (scannedTokens++scannedTokens', pos'')
-scanCharsOrStructurals sheet pos (group:groups) = debug Lay ("error"++show group) ([],pos)
+scanCharsOrStructurals sheet pos (group:groups) = debug Lay ("Layout.scanCharsOrStructurals: error"++show group) ([],pos)
  
 scanStructurals pos [] = ([], pos)
 scanStructurals pos (structural@(Structural idp _ _ loc tokens lay) : structuralScanChars) = 
