@@ -220,11 +220,11 @@ data PresentationBase doc node clip userToken level where
                   PresentationBase doc node clip userToken Pres_ 
        ImageP  :: !IDP -> !String -> !ImgStyle ->
                   PresentationBase doc node clip userToken level 
-       PolyP   :: !IDP -> ![Point] -> !LineWidth -> !Style ->
+       PolyP   :: !IDP -> ![Point] -> !LineWidth -> !FillStyle ->
                   PresentationBase doc node clip userToken level 
-       RectangleP :: !IDP -> !Width -> !Height -> !LineWidth -> !Style -> 
+       RectangleP :: !IDP -> !Width -> !Height -> !LineWidth -> !FillStyle -> 
                      PresentationBase doc node clip userToken level 
-       EllipseP   :: !IDP -> !Width -> !Height -> !LineWidth -> !Style -> 
+       EllipseP   :: !IDP -> !Width -> !Height -> !LineWidth -> !FillStyle -> 
                      PresentationBase doc node clip userToken level 
        RowP     :: !IDP -> !HRefNr -> ![PresentationBase doc node clip userToken level] ->
                    PresentationBase doc node clip userToken level 

@@ -87,7 +87,7 @@ data Font = Font { fFamily :: String, fSize :: Int
 
 defaultFont = Font "Verdana" 14 False False False False
 
-data Style = Solid | Transparent deriving (Show, Eq, Read)
+data FillStyle = Solid | Transparent deriving (Show, Eq, Read)
 
 data ImgStyle = Tile | Stretch deriving (Show, Eq, Read) -- also Center?
 

@@ -57,9 +57,9 @@ data Arrangement node =
     EmptyA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Color
   | StringA     !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !FGColor !BGColor !Font [Int]
   | ImageA      !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !String !ImgStyle !FGColor !BGColor
-  | PolyA       !IDA  !XCoord !YCoord !Width !Height !HRef !VRef ![(XCoord, YCoord)] !Int !Style !LineColor !FillColor !BGColor
-  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !LineColor !FillColor !BGColor
-  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !Style !LineColor !FillColor !BGColor
+  | PolyA       !IDA  !XCoord !YCoord !Width !Height !HRef !VRef ![(XCoord, YCoord)] !Int !FillStyle !LineColor !FillColor !BGColor
+  | RectangleA  !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !FillStyle !LineColor !FillColor !BGColor
+  | EllipseA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !Int !FillStyle !LineColor !FillColor !BGColor
   | RowA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor ![Arrangement node]
   | ColA        !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Formatted ![Arrangement node]
   | OverlayA    !IDA  !XCoord !YCoord !Width !Height !HRef !VRef !BGColor !Order ![Arrangement node]
