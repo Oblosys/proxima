@@ -300,19 +300,12 @@ markFocus setFocusStartOrEnd focus@(Just pos) scs =
 focusAfterLastChar scs Nothing    = False
 focusAfterLastChar scs (Just pos) = pos == length scs
 
-groupCharScanChars []        = []
-groupCharScanChars scanChars = 
-  case span isCharScanChar scanChars of
-    ([],    structurals) -> groupStructuralScanChars structurals -- prevent empty groups
-    (chars, structurals) -> chars : groupStructuralScanChars structurals
-
-
-groupStructuralScanChars []        = []
-groupStructuralScanChars scanChars =
-  case span isStructuralScanChar scanChars of
-    ([],          chars) -> groupCharScanChars chars -- prevent empty groups
-    (structurals, chars) -> structurals : groupCharScanChars chars
-
+groupCharScanChars scanChars = groupBy sameScanCharConstr scanChars
+ where sameScanCharConstr (Char _ _ _ _ _)         (Char _ _ _ _ _)         = True
+       sameScanCharConstr (Structural _ _ _ _ _ _) (Structural _ _ _ _ _ _) = True
+       sameScanCharConstr (Style _)                (Style _)                = True
+       sameScanCharConstr _                        _                        = False
+       
 -- scan each group either with the scanner sheet or by creating structural tokens
 scanGroups sheet groupedScanChars = fst $ scanCharsOrStructurals sheet 0 groupedScanChars
 
