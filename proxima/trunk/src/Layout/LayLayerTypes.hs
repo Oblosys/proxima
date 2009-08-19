@@ -24,7 +24,16 @@ data ScanChar doc node clip token =
      | Structural   { idp :: IDP, startFocusMark :: FocusMark, endFocusMark :: FocusMark
                     , locator :: (Maybe node), tokens :: [Token doc node clip token]
                     , prs :: (Presentation doc node clip token) -- original pres to show in case of parse/scan errors
-                    } deriving Show
+                    } 
+     | Style        { styleTag :: StyleTag
+                    }
+     deriving Show
+
+data StartOrEnd = Start | End deriving Show
+
+data StyleTag = StyleTag Style StartOrEnd deriving Show
+
+data Style = Bold | Italic | Colored Color deriving Show
 
 isCharScanChar (Char _ _ _ _ _) = True
 isCharScanChar _            = False
