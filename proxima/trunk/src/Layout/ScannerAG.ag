@@ -89,7 +89,7 @@ ATTR Layout LayoutList [ | pos : Int | ]
 
 SEM Layout
   | StringP
-      lhs.pos = @lhs.pos + length @text
+      lhs.pos = @lhs.pos + length @scanChars
   | StructuralP
       lhs.pos = @lhs.pos + 1
 
@@ -139,7 +139,7 @@ ATTR Layout [ | | scanChars : {[ScanChar @doc @node @clip @token]} ]
 
 SEM Layout
   | StringP
-      lhs.scanChars = styleChangeTags @lhs.previousCharStyle @lhs.styleAttrs ++
+      loc.scanChars = styleChangeTags @lhs.previousCharStyle @lhs.styleAttrs ++
                       map (Char @id NoFocusMark NoFocusMark @lhs.lloc) @text
 
   | RowP
