@@ -197,7 +197,10 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      lex = case  presentationLex of
              LexInherited -> inheritedLex
              _            -> presentationLex
-
+     
+     defaultStyleAttrs = Inh defaultFont defaultTextColor defaultLineColor defaultFillColor defaultBackColor
+                             Nothing [] [] 0 0 0 0
+                             
      inheritedAttrs = Inh_Layout { focus_Inh_Layout = foc
                                  , idPCounter_Inh_Layout = idPCounter
                                  , lexer_Inh_Layout = lex
@@ -207,6 +210,7 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                                  , scanStructural_Inh_Layout = (scanStructural sheet)
                                  , scannedFocusEnd_Inh_Layout = Nothing
                                  , scannedFocusStart_Inh_Layout = Nothing
+                                 , styleAttrs_Inh_Layout = defaultStyleAttrs
                                  , whitespaceMap_Inh_Layout = whitespaceMap
                                  }
      -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute

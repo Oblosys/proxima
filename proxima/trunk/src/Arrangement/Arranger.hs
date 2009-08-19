@@ -1,6 +1,6 @@
 module Arrangement.Arranger where
 
-import Common.CommonTypes hiding (defaultFont)
+import Common.CommonTypes
 import Common.CommonUtils
 import qualified Common.CommonTypes as CommonTypes
 import Arrangement.ArrLayerTypes
@@ -18,12 +18,6 @@ import System.IO
 
 import qualified Data.Map as Map
 import Data.Map (Map)
-
-defaultBackColor = transparent
-defaultFillColor = white
-defaultLineColor = black
-defaultTextColor = black
-defaultFont = CommonTypes.defaultFont
 
 arrangePresentation :: (Show node, Show token) => Settings ->
                        LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->

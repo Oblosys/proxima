@@ -70,6 +70,7 @@ transparent = (-1, -1, -1)
 isTransparent :: Color -> Bool
 isTransparent c  = c == transparent
 
+
 -- Formatted denotes whether a column originates from a formatter (in which case the argument
 -- denotes the number of elements in each of the rows in the column)
 data Formatted = NF | F [Int] deriving Show 
@@ -85,7 +86,12 @@ data Font = Font { fFamily :: String, fSize :: Int
                  , fBold :: Bool , fUnderline :: Bool
                  , fItalic :: Bool, fStrikeOut :: Bool } deriving (Show, Eq, Ord, Read)
 
+defaultBackColor = transparent
+defaultFillColor = white
+defaultLineColor = black
+defaultTextColor = black
 defaultFont = Font "Verdana" 14 False False False False
+
 
 data FillStyle = Solid | Transparent deriving (Show, Eq, Read)
 

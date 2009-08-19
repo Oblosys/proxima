@@ -180,3 +180,13 @@ SEM LayoutList
   | Cons
       lhs.scanCharss = @hd.scanChars : @tl.scanCharss
       
+
+
+-- Attribute scanning
+
+ATTR Layout LayoutList [ styleAttrs : {Inherited @doc @clip}| | ]
+
+SEM Layout
+  | WithP
+      child.styleAttrs = let (inh,syn) = @attrRule (@lhs.styleAttrs, error "Error in presentation: style depends on synthesized attributes")
+                         in  inh
