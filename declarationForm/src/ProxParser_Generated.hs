@@ -37,6 +37,7 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_FormDoc _ _) = construct_FormDoc
   construct (Node_TaskDoc _ _) = construct_TaskDoc
   construct (Node_SudokuDoc _ _) = construct_SudokuDoc
+  construct (Node_TestDoc _ _) = construct_TestDoc
   construct (Node_HoleChoiceDoc _ _) = construct_HoleChoiceDoc
   construct (Node_ParseErrChoiceDoc _ _) = construct_ParseErrChoiceDoc
   construct (Node_Form _ _) = construct_Form
@@ -70,6 +71,19 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_Field _ _) = construct_Field
   construct (Node_HoleField _ _) = construct_HoleField
   construct (Node_ParseErrField _ _) = construct_ParseErrField
+  construct (Node_Test _ _) = construct_Test
+  construct (Node_HoleTest _ _) = construct_HoleTest
+  construct (Node_ParseErrTest _ _) = construct_ParseErrTest
+  construct (Node_StyledText _ _) = construct_StyledText
+  construct (Node_HoleStyledText _ _) = construct_HoleStyledText
+  construct (Node_ParseErrStyledText _ _) = construct_ParseErrStyledText
+  construct (Node_String _ _) = construct_String
+  construct (Node_Styled _ _) = construct_Styled
+  construct (Node_HoleStringOrStyled _ _) = construct_HoleStringOrStyled
+  construct (Node_ParseErrStringOrStyled _ _) = construct_ParseErrStringOrStyled
+  construct (Node_TextBold _ _) = construct_TextBold
+  construct (Node_HoleTextStyle _ _) = construct_HoleTextStyle
+  construct (Node_ParseErrTextStyle _ _) = construct_ParseErrTextStyle
   construct (Node_Int_ _ _) = construct_Int_
   construct (Node_HoleInt_ _ _) = construct_HoleInt_
   construct (Node_ParseErrInt_ _ _) = construct_ParseErrInt_
@@ -88,6 +102,9 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_List_Task _ _) = construct_List_Task
   construct (Node_HoleList_Task _ _) = construct_HoleList_Task
   construct (Node_ParseErrList_Task _ _) = construct_ParseErrList_Task
+  construct (Node_List_StringOrStyled _ _) = construct_List_StringOrStyled
+  construct (Node_HoleList_StringOrStyled _ _) = construct_HoleList_StringOrStyled
+  construct (Node_ParseErrList_StringOrStyled _ _) = construct_ParseErrList_StringOrStyled
 construct_RootEnr tk ~[mClip0] = Clip_EnrichedDoc $ reuseRootEnr [tk]  (retrieveArg "RootEnr" "choiceDoc::ChoiceDoc" mClip0)
 construct_HoleEnrichedDoc tk ~[] = Clip_EnrichedDoc $ hole
 construct_ParseErrEnrichedDoc (StructuralTk _ _ pres _ _) ~[] = Clip_EnrichedDoc $ parseErr (StructuralParseErr pres)
@@ -97,6 +114,7 @@ construct_ParseErrDocument (StructuralTk _ _ pres _ _) ~[] = Clip_Document $ par
 construct_FormDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseFormDoc [tk]  (retrieveArg "FormDoc" "form::Form" mClip0)
 construct_TaskDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseTaskDoc [tk]  (retrieveArg "TaskDoc" "tasks::Tasks" mClip0)
 construct_SudokuDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseSudokuDoc [tk]  (retrieveArg "SudokuDoc" "sudoku::Sudoku" mClip0)
+construct_TestDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseTestDoc [tk]  (retrieveArg "TestDoc" "test::Test" mClip0)
 construct_HoleChoiceDoc tk ~[] = Clip_ChoiceDoc $ hole
 construct_ParseErrChoiceDoc (StructuralTk _ _ pres _ _) ~[] = Clip_ChoiceDoc $ parseErr (StructuralParseErr pres)
 construct_Form tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Form $ reuseForm [tk]  (retrieveArg "Form" "name::Description" mClip0) (retrieveArg "Form" "faculty::Description" mClip1) (retrieveArg "Form" "expenses::List_Expense" mClip2) (retrieveArg "Form" "currencies::List_Currency" mClip3)
@@ -130,6 +148,19 @@ construct_ParseErrRow (StructuralTk _ _ pres _ _) ~[] = Clip_Row $ parseErr (Str
 construct_Field tk ~[mClip0] = Clip_Field $ reuseField [tk]  (retrieveArg "Field" "val::Int_" mClip0)
 construct_HoleField tk ~[] = Clip_Field $ hole
 construct_ParseErrField (StructuralTk _ _ pres _ _) ~[] = Clip_Field $ parseErr (StructuralParseErr pres)
+construct_Test tk ~[mClip0] = Clip_Test $ reuseTest [tk]  (retrieveArg "Test" "styledText::StyledText" mClip0)
+construct_HoleTest tk ~[] = Clip_Test $ hole
+construct_ParseErrTest (StructuralTk _ _ pres _ _) ~[] = Clip_Test $ parseErr (StructuralParseErr pres)
+construct_StyledText tk ~[mClip0] = Clip_StyledText $ reuseStyledText [tk]  (retrieveArg "StyledText" "stringOrStyleds::List_StringOrStyled" mClip0)
+construct_HoleStyledText tk ~[] = Clip_StyledText $ hole
+construct_ParseErrStyledText (StructuralTk _ _ pres _ _) ~[] = Clip_StyledText $ parseErr (StructuralParseErr pres)
+construct_String tk ~[mClip0] = Clip_StringOrStyled $ reuseString [tk]  (retrieveArg "String" "string::String" mClip0)
+construct_Styled tk ~[mClip0,mClip1] = Clip_StringOrStyled $ reuseStyled [tk]  (retrieveArg "Styled" "style::TextStyle" mClip0) (retrieveArg "Styled" "styled::StyledText" mClip1)
+construct_HoleStringOrStyled tk ~[] = Clip_StringOrStyled $ hole
+construct_ParseErrStringOrStyled (StructuralTk _ _ pres _ _) ~[] = Clip_StringOrStyled $ parseErr (StructuralParseErr pres)
+construct_TextBold tk ~[] = Clip_TextStyle $ reuseTextBold [tk] 
+construct_HoleTextStyle tk ~[] = Clip_TextStyle $ hole
+construct_ParseErrTextStyle (StructuralTk _ _ pres _ _) ~[] = Clip_TextStyle $ parseErr (StructuralParseErr pres)
 construct_Int_ tk ~[mClip0] = Clip_Int_ $ reuseInt_ [tk]  (retrieveArg "Int_" "value::Int" mClip0)
 construct_HoleInt_ tk ~[] = Clip_Int_ $ hole
 construct_ParseErrInt_ (StructuralTk _ _ pres _ _) ~[] = Clip_Int_ $ parseErr (StructuralParseErr pres)
@@ -148,6 +179,9 @@ construct_ParseErrList_Thing (StructuralTk _ _ pres _ _) ~[] = Clip_List_Thing $
 construct_List_Task tk mClips = genericConstruct_List "Task" toList_Task mClips
 construct_HoleList_Task tk ~[] = Clip_List_Task $ hole
 construct_ParseErrList_Task (StructuralTk _ _ pres _ _) ~[] = Clip_List_Task $ parseErr (StructuralParseErr pres)
+construct_List_StringOrStyled tk mClips = genericConstruct_List "StringOrStyled" toList_StringOrStyled mClips
+construct_HoleList_StringOrStyled tk ~[] = Clip_List_StringOrStyled $ hole
+construct_ParseErrList_StringOrStyled (StructuralTk _ _ pres _ _) ~[] = Clip_List_StringOrStyled $ parseErr (StructuralParseErr pres)
 
 
 
@@ -184,6 +218,12 @@ reuseSudokuDoc nodes ma0
   = case extractFromTokens extractSudokuDoc defaultSudokuDoc nodes of
            (SudokuDoc a0) -> genericReuse1 SudokuDoc a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseSudokuDoc"
+
+reuseTestDoc :: [Token doc Node clip token] -> Maybe Test -> ChoiceDoc
+reuseTestDoc nodes ma0
+  = case extractFromTokens extractTestDoc defaultTestDoc nodes of
+           (TestDoc a0) -> genericReuse1 TestDoc a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseTestDoc"
 
 reuseForm :: [Token doc Node clip token] -> Maybe Description -> Maybe Description -> Maybe List_Expense -> Maybe List_Currency -> Form
 reuseForm nodes ma0 ma1 ma2 ma3
@@ -251,6 +291,36 @@ reuseField nodes ma0
            (Field a0) -> genericReuse1 Field a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseField"
 
+reuseTest :: [Token doc Node clip token] -> Maybe StyledText -> Test
+reuseTest nodes ma0
+  = case extractFromTokens extractTest defaultTest nodes of
+           (Test a0) -> genericReuse1 Test a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseTest"
+
+reuseStyledText :: [Token doc Node clip token] -> Maybe List_StringOrStyled -> StyledText
+reuseStyledText nodes ma0
+  = case extractFromTokens extractStyledText defaultStyledText nodes of
+           (StyledText a0) -> genericReuse1 StyledText a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseStyledText"
+
+reuseString :: [Token doc Node clip token] -> Maybe String -> StringOrStyled
+reuseString nodes ma0
+  = case extractFromTokens extractString defaultString nodes of
+           (String a0) -> genericReuse1 String a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseString"
+
+reuseStyled :: [Token doc Node clip token] -> Maybe TextStyle -> Maybe StyledText -> StringOrStyled
+reuseStyled nodes ma0 ma1
+  = case extractFromTokens extractStyled defaultStyled nodes of
+           (Styled a0 a1) -> genericReuse2 Styled a0 a1 ma0 ma1
+           _ -> error "Internal error:ProxParser_Generated.reuseStyled"
+
+reuseTextBold :: [Token doc Node clip token] -> TextStyle
+reuseTextBold nodes
+  = case extractFromTokens extractTextBold defaultTextBold nodes of
+           (TextBold) -> genericReuse0 TextBold
+           _ -> error "Internal error:ProxParser_Generated.reuseTextBold"
+
 reuseInt_ :: [Token doc Node clip token] -> Maybe Int -> Int_
 reuseInt_ nodes ma0
   = case extractFromTokens extractInt_ defaultInt_ nodes of
@@ -287,6 +357,12 @@ reuseList_Task nodes ma0
            (List_Task a0) -> genericReuse1 List_Task a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Task"
 
+reuseList_StringOrStyled :: [Token doc Node clip token] -> Maybe ConsList_StringOrStyled -> List_StringOrStyled
+reuseList_StringOrStyled nodes ma0
+  = case extractFromTokens extractList_StringOrStyled defaultList_StringOrStyled nodes of
+           (List_StringOrStyled a0) -> genericReuse1 List_StringOrStyled a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseList_StringOrStyled"
+
 
 
 
@@ -313,6 +389,10 @@ extractTaskDoc _ = Nothing
 extractSudokuDoc :: Maybe Node -> Maybe ChoiceDoc
 extractSudokuDoc (Just (Node_SudokuDoc x@(SudokuDoc _) _)) = Just x
 extractSudokuDoc _ = Nothing
+
+extractTestDoc :: Maybe Node -> Maybe ChoiceDoc
+extractTestDoc (Just (Node_TestDoc x@(TestDoc _) _)) = Just x
+extractTestDoc _ = Nothing
 
 extractForm :: Maybe Node -> Maybe Form
 extractForm (Just (Node_Form x@(Form _ _ _ _) _)) = Just x
@@ -358,6 +438,26 @@ extractField :: Maybe Node -> Maybe Field
 extractField (Just (Node_Field x@(Field _) _)) = Just x
 extractField _ = Nothing
 
+extractTest :: Maybe Node -> Maybe Test
+extractTest (Just (Node_Test x@(Test _) _)) = Just x
+extractTest _ = Nothing
+
+extractStyledText :: Maybe Node -> Maybe StyledText
+extractStyledText (Just (Node_StyledText x@(StyledText _) _)) = Just x
+extractStyledText _ = Nothing
+
+extractString :: Maybe Node -> Maybe StringOrStyled
+extractString (Just (Node_String x@(String _) _)) = Just x
+extractString _ = Nothing
+
+extractStyled :: Maybe Node -> Maybe StringOrStyled
+extractStyled (Just (Node_Styled x@(Styled _ _) _)) = Just x
+extractStyled _ = Nothing
+
+extractTextBold :: Maybe Node -> Maybe TextStyle
+extractTextBold (Just (Node_TextBold x@(TextBold) _)) = Just x
+extractTextBold _ = Nothing
+
 extractInt_ :: Maybe Node -> Maybe Int_
 extractInt_ (Just (Node_Int_ x@(Int_ _) _)) = Just x
 extractInt_ _ = Nothing
@@ -382,6 +482,10 @@ extractList_Task :: Maybe Node -> Maybe List_Task
 extractList_Task (Just (Node_List_Task x@(List_Task _) _)) = Just x
 extractList_Task _ = Nothing
 
+extractList_StringOrStyled :: Maybe Node -> Maybe List_StringOrStyled
+extractList_StringOrStyled (Just (Node_List_StringOrStyled x@(List_StringOrStyled _) _)) = Just x
+extractList_StringOrStyled _ = Nothing
+
 
 
 
@@ -403,6 +507,9 @@ defaultTaskDoc = TaskDoc hole
 
 defaultSudokuDoc :: ChoiceDoc
 defaultSudokuDoc = SudokuDoc hole
+
+defaultTestDoc :: ChoiceDoc
+defaultTestDoc = TestDoc hole
 
 defaultForm :: Form
 defaultForm = Form hole hole hole hole
@@ -437,6 +544,21 @@ defaultRow = Row hole hole hole hole hole hole hole hole hole
 defaultField :: Field
 defaultField = Field hole
 
+defaultTest :: Test
+defaultTest = Test hole
+
+defaultStyledText :: StyledText
+defaultStyledText = StyledText hole
+
+defaultString :: StringOrStyled
+defaultString = String hole
+
+defaultStyled :: StringOrStyled
+defaultStyled = Styled hole hole
+
+defaultTextBold :: TextStyle
+defaultTextBold = TextBold
+
 defaultInt_ :: Int_
 defaultInt_ = Int_ hole
 
@@ -454,6 +576,9 @@ defaultList_Thing = List_Thing Nil_Thing
 
 defaultList_Task :: List_Task
 defaultList_Task = List_Task Nil_Task
+
+defaultList_StringOrStyled :: List_StringOrStyled
+defaultList_StringOrStyled = List_StringOrStyled Nil_StringOrStyled
 
 
 

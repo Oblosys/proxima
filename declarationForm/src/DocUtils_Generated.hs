@@ -15,7 +15,9 @@ import Common.CommonTypes hiding (Clean, Dirty)
 
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
-  TaskDoc $
+    TestDoc $
+      Test (StyledText $ toList_StringOrStyled [ String "thisisalittlebitofnot-so-richtext" ])
+{-  TaskDoc $
     Tasks (toList_Thing [Thing 1, Thing 2, Thing 3]) (toList_Thing [])True $ toList_Task
       [ BasicTask (Description "Pinpas bestellen") True
       , CompositeTask True (Description "Declaratie editor bouwen") $ toList_Task
@@ -26,7 +28,7 @@ initialDocument = return $ RootDoc $
           , BasicTask (Description "Instantie maken") False 
           ]         
       ]       
-                        
+-}                        
 {-  
   FormDoc                 (Form (Description "Martijn") (Description "Informatica") 
                              (toList_Expense 
@@ -75,57 +77,74 @@ rankNode (Node_ParseErrDocument _ _) = 6
 rankNode (Node_FormDoc _ _) = 7
 rankNode (Node_TaskDoc _ _) = 8
 rankNode (Node_SudokuDoc _ _) = 9
-rankNode (Node_HoleChoiceDoc _ _) = 10
-rankNode (Node_ParseErrChoiceDoc _ _) = 11
-rankNode (Node_Form _ _) = 12
-rankNode (Node_HoleForm _ _) = 13
-rankNode (Node_ParseErrForm _ _) = 14
-rankNode (Node_Expense _ _) = 15
-rankNode (Node_HoleExpense _ _) = 16
-rankNode (Node_ParseErrExpense _ _) = 17
-rankNode (Node_Currency _ _) = 18
-rankNode (Node_HoleCurrency _ _) = 19
-rankNode (Node_ParseErrCurrency _ _) = 20
-rankNode (Node_Tasks _ _) = 21
-rankNode (Node_HoleTasks _ _) = 22
-rankNode (Node_ParseErrTasks _ _) = 23
-rankNode (Node_Thing _ _) = 24
-rankNode (Node_HoleThing _ _) = 25
-rankNode (Node_ParseErrThing _ _) = 26
-rankNode (Node_BasicTask _ _) = 27
-rankNode (Node_CompositeTask _ _) = 28
-rankNode (Node_HoleTask _ _) = 29
-rankNode (Node_ParseErrTask _ _) = 30
-rankNode (Node_Description _ _) = 31
-rankNode (Node_HoleDescription _ _) = 32
-rankNode (Node_ParseErrDescription _ _) = 33
-rankNode (Node_Sudoku _ _) = 34
-rankNode (Node_HoleSudoku _ _) = 35
-rankNode (Node_ParseErrSudoku _ _) = 36
-rankNode (Node_Row _ _) = 37
-rankNode (Node_HoleRow _ _) = 38
-rankNode (Node_ParseErrRow _ _) = 39
-rankNode (Node_Field _ _) = 40
-rankNode (Node_HoleField _ _) = 41
-rankNode (Node_ParseErrField _ _) = 42
-rankNode (Node_Int_ _ _) = 43
-rankNode (Node_HoleInt_ _ _) = 44
-rankNode (Node_ParseErrInt_ _ _) = 45
-rankNode (Node_Float_ _ _) = 46
-rankNode (Node_HoleFloat_ _ _) = 47
-rankNode (Node_ParseErrFloat_ _ _) = 48
-rankNode (Node_List_Expense _ _) = 49
-rankNode (Node_HoleList_Expense _ _) = 50
-rankNode (Node_ParseErrList_Expense _ _) = 51
-rankNode (Node_List_Currency _ _) = 52
-rankNode (Node_HoleList_Currency _ _) = 53
-rankNode (Node_ParseErrList_Currency _ _) = 54
-rankNode (Node_List_Thing _ _) = 55
-rankNode (Node_HoleList_Thing _ _) = 56
-rankNode (Node_ParseErrList_Thing _ _) = 57
-rankNode (Node_List_Task _ _) = 58
-rankNode (Node_HoleList_Task _ _) = 59
-rankNode (Node_ParseErrList_Task _ _) = 60
+rankNode (Node_TestDoc _ _) = 10
+rankNode (Node_HoleChoiceDoc _ _) = 11
+rankNode (Node_ParseErrChoiceDoc _ _) = 12
+rankNode (Node_Form _ _) = 13
+rankNode (Node_HoleForm _ _) = 14
+rankNode (Node_ParseErrForm _ _) = 15
+rankNode (Node_Expense _ _) = 16
+rankNode (Node_HoleExpense _ _) = 17
+rankNode (Node_ParseErrExpense _ _) = 18
+rankNode (Node_Currency _ _) = 19
+rankNode (Node_HoleCurrency _ _) = 20
+rankNode (Node_ParseErrCurrency _ _) = 21
+rankNode (Node_Tasks _ _) = 22
+rankNode (Node_HoleTasks _ _) = 23
+rankNode (Node_ParseErrTasks _ _) = 24
+rankNode (Node_Thing _ _) = 25
+rankNode (Node_HoleThing _ _) = 26
+rankNode (Node_ParseErrThing _ _) = 27
+rankNode (Node_BasicTask _ _) = 28
+rankNode (Node_CompositeTask _ _) = 29
+rankNode (Node_HoleTask _ _) = 30
+rankNode (Node_ParseErrTask _ _) = 31
+rankNode (Node_Description _ _) = 32
+rankNode (Node_HoleDescription _ _) = 33
+rankNode (Node_ParseErrDescription _ _) = 34
+rankNode (Node_Sudoku _ _) = 35
+rankNode (Node_HoleSudoku _ _) = 36
+rankNode (Node_ParseErrSudoku _ _) = 37
+rankNode (Node_Row _ _) = 38
+rankNode (Node_HoleRow _ _) = 39
+rankNode (Node_ParseErrRow _ _) = 40
+rankNode (Node_Field _ _) = 41
+rankNode (Node_HoleField _ _) = 42
+rankNode (Node_ParseErrField _ _) = 43
+rankNode (Node_Test _ _) = 44
+rankNode (Node_HoleTest _ _) = 45
+rankNode (Node_ParseErrTest _ _) = 46
+rankNode (Node_StyledText _ _) = 47
+rankNode (Node_HoleStyledText _ _) = 48
+rankNode (Node_ParseErrStyledText _ _) = 49
+rankNode (Node_String _ _) = 50
+rankNode (Node_Styled _ _) = 51
+rankNode (Node_HoleStringOrStyled _ _) = 52
+rankNode (Node_ParseErrStringOrStyled _ _) = 53
+rankNode (Node_TextBold _ _) = 54
+rankNode (Node_HoleTextStyle _ _) = 55
+rankNode (Node_ParseErrTextStyle _ _) = 56
+rankNode (Node_Int_ _ _) = 57
+rankNode (Node_HoleInt_ _ _) = 58
+rankNode (Node_ParseErrInt_ _ _) = 59
+rankNode (Node_Float_ _ _) = 60
+rankNode (Node_HoleFloat_ _ _) = 61
+rankNode (Node_ParseErrFloat_ _ _) = 62
+rankNode (Node_List_Expense _ _) = 63
+rankNode (Node_HoleList_Expense _ _) = 64
+rankNode (Node_ParseErrList_Expense _ _) = 65
+rankNode (Node_List_Currency _ _) = 66
+rankNode (Node_HoleList_Currency _ _) = 67
+rankNode (Node_ParseErrList_Currency _ _) = 68
+rankNode (Node_List_Thing _ _) = 69
+rankNode (Node_HoleList_Thing _ _) = 70
+rankNode (Node_ParseErrList_Thing _ _) = 71
+rankNode (Node_List_Task _ _) = 72
+rankNode (Node_HoleList_Task _ _) = 73
+rankNode (Node_ParseErrList_Task _ _) = 74
+rankNode (Node_List_StringOrStyled _ _) = 75
+rankNode (Node_HoleList_StringOrStyled _ _) = 76
+rankNode (Node_ParseErrList_StringOrStyled _ _) = 77
 
 
 
@@ -146,6 +165,7 @@ instance DocNode Node where
   pathNode (Node_FormDoc _ pth) = PathD pth
   pathNode (Node_TaskDoc _ pth) = PathD pth
   pathNode (Node_SudokuDoc _ pth) = PathD pth
+  pathNode (Node_TestDoc _ pth) = PathD pth
   pathNode (Node_HoleChoiceDoc _ pth) = PathD pth
   pathNode (Node_ParseErrChoiceDoc _ pth) = PathD pth
   pathNode (Node_Form _ pth) = PathD pth
@@ -179,6 +199,19 @@ instance DocNode Node where
   pathNode (Node_Field _ pth) = PathD pth
   pathNode (Node_HoleField _ pth) = PathD pth
   pathNode (Node_ParseErrField _ pth) = PathD pth
+  pathNode (Node_Test _ pth) = PathD pth
+  pathNode (Node_HoleTest _ pth) = PathD pth
+  pathNode (Node_ParseErrTest _ pth) = PathD pth
+  pathNode (Node_StyledText _ pth) = PathD pth
+  pathNode (Node_HoleStyledText _ pth) = PathD pth
+  pathNode (Node_ParseErrStyledText _ pth) = PathD pth
+  pathNode (Node_String _ pth) = PathD pth
+  pathNode (Node_Styled _ pth) = PathD pth
+  pathNode (Node_HoleStringOrStyled _ pth) = PathD pth
+  pathNode (Node_ParseErrStringOrStyled _ pth) = PathD pth
+  pathNode (Node_TextBold _ pth) = PathD pth
+  pathNode (Node_HoleTextStyle _ pth) = PathD pth
+  pathNode (Node_ParseErrTextStyle _ pth) = PathD pth
   pathNode (Node_Int_ _ pth) = PathD pth
   pathNode (Node_HoleInt_ _ pth) = PathD pth
   pathNode (Node_ParseErrInt_ _ pth) = PathD pth
@@ -197,6 +230,9 @@ instance DocNode Node where
   pathNode (Node_List_Task _ pth) = PathD pth
   pathNode (Node_HoleList_Task _ pth) = PathD pth
   pathNode (Node_ParseErrList_Task _ pth) = PathD pth
+  pathNode (Node_List_StringOrStyled _ pth) = PathD pth
+  pathNode (Node_HoleList_StringOrStyled _ pth) = PathD pth
+  pathNode (Node_ParseErrList_StringOrStyled _ pth) = PathD pth
 
   typeOfNode (Node_RootEnr _ _) = BasicType "EnrichedDoc"
   typeOfNode (Node_HoleEnrichedDoc _ _) = BasicType "EnrichedDoc"
@@ -207,6 +243,7 @@ instance DocNode Node where
   typeOfNode (Node_FormDoc _ _) = BasicType "ChoiceDoc"
   typeOfNode (Node_TaskDoc _ _) = BasicType "ChoiceDoc"
   typeOfNode (Node_SudokuDoc _ _) = BasicType "ChoiceDoc"
+  typeOfNode (Node_TestDoc _ _) = BasicType "ChoiceDoc"
   typeOfNode (Node_HoleChoiceDoc _ _) = BasicType "ChoiceDoc"
   typeOfNode (Node_ParseErrChoiceDoc _ _) = BasicType "ChoiceDoc"
   typeOfNode (Node_Form _ _) = BasicType "Form"
@@ -240,6 +277,19 @@ instance DocNode Node where
   typeOfNode (Node_Field _ _) = BasicType "Field"
   typeOfNode (Node_HoleField _ _) = BasicType "Field"
   typeOfNode (Node_ParseErrField _ _) = BasicType "Field"
+  typeOfNode (Node_Test _ _) = BasicType "Test"
+  typeOfNode (Node_HoleTest _ _) = BasicType "Test"
+  typeOfNode (Node_ParseErrTest _ _) = BasicType "Test"
+  typeOfNode (Node_StyledText _ _) = BasicType "StyledText"
+  typeOfNode (Node_HoleStyledText _ _) = BasicType "StyledText"
+  typeOfNode (Node_ParseErrStyledText _ _) = BasicType "StyledText"
+  typeOfNode (Node_String _ _) = BasicType "StringOrStyled"
+  typeOfNode (Node_Styled _ _) = BasicType "StringOrStyled"
+  typeOfNode (Node_HoleStringOrStyled _ _) = BasicType "StringOrStyled"
+  typeOfNode (Node_ParseErrStringOrStyled _ _) = BasicType "StringOrStyled"
+  typeOfNode (Node_TextBold _ _) = BasicType "TextStyle"
+  typeOfNode (Node_HoleTextStyle _ _) = BasicType "TextStyle"
+  typeOfNode (Node_ParseErrTextStyle _ _) = BasicType "TextStyle"
   typeOfNode (Node_Int_ _ _) = BasicType "Int_"
   typeOfNode (Node_HoleInt_ _ _) = BasicType "Int_"
   typeOfNode (Node_ParseErrInt_ _ _) = BasicType "Int_"
@@ -258,6 +308,9 @@ instance DocNode Node where
   typeOfNode (Node_List_Task _ _) = ListType "Task"
   typeOfNode (Node_HoleList_Task _ _) = ListType "Task"
   typeOfNode (Node_ParseErrList_Task _ _) = ListType "Task"
+  typeOfNode (Node_List_StringOrStyled _ _) = ListType "StringOrStyled"
+  typeOfNode (Node_HoleList_StringOrStyled _ _) = ListType "StringOrStyled"
+  typeOfNode (Node_ParseErrList_StringOrStyled _ _) = ListType "StringOrStyled"
 
 
 
@@ -274,6 +327,7 @@ toXMLDocument (ParseErrDocument error) = EmptyElt "ParseErrDocument" []
 toXMLChoiceDoc (FormDoc form) = Elt "FormDoc" [] $ [toXMLForm form]
 toXMLChoiceDoc (TaskDoc tasks) = Elt "TaskDoc" [] $ [toXMLTasks tasks]
 toXMLChoiceDoc (SudokuDoc sudoku) = Elt "SudokuDoc" [] $ [toXMLSudoku sudoku]
+toXMLChoiceDoc (TestDoc test) = Elt "TestDoc" [] $ [toXMLTest test]
 toXMLChoiceDoc (HoleChoiceDoc) = EmptyElt "HoleChoiceDoc" [] 
 toXMLChoiceDoc (ParseErrChoiceDoc error) = EmptyElt "ParseErrChoiceDoc" []
 toXMLForm (Form name faculty expenses currencies) = Elt "Form" [] $ [toXMLDescription name] ++ [toXMLDescription faculty] ++ toXMLList_Expense expenses ++ toXMLList_Currency currencies
@@ -307,6 +361,19 @@ toXMLRow (ParseErrRow error) = EmptyElt "ParseErrRow" []
 toXMLField (Field val) = Elt "Field" [] $ [toXMLInt_ val]
 toXMLField (HoleField) = EmptyElt "HoleField" [] 
 toXMLField (ParseErrField error) = EmptyElt "ParseErrField" []
+toXMLTest (Test styledText) = Elt "Test" [] $ [toXMLStyledText styledText]
+toXMLTest (HoleTest) = EmptyElt "HoleTest" [] 
+toXMLTest (ParseErrTest error) = EmptyElt "ParseErrTest" []
+toXMLStyledText (StyledText stringOrStyleds) = Elt "StyledText" [] $ toXMLList_StringOrStyled stringOrStyleds
+toXMLStyledText (HoleStyledText) = EmptyElt "HoleStyledText" [] 
+toXMLStyledText (ParseErrStyledText error) = EmptyElt "ParseErrStyledText" []
+toXMLStringOrStyled (String string) = Elt "String" [] $ [toXMLString string]
+toXMLStringOrStyled (Styled style styled) = Elt "Styled" [] $ [toXMLTextStyle style] ++ [toXMLStyledText styled]
+toXMLStringOrStyled (HoleStringOrStyled) = EmptyElt "HoleStringOrStyled" [] 
+toXMLStringOrStyled (ParseErrStringOrStyled error) = EmptyElt "ParseErrStringOrStyled" []
+toXMLTextStyle (TextBold) = EmptyElt "TextBold" [] 
+toXMLTextStyle (HoleTextStyle) = EmptyElt "HoleTextStyle" [] 
+toXMLTextStyle (ParseErrTextStyle error) = EmptyElt "ParseErrTextStyle" []
 toXMLInt_ (Int_ value) = Elt "Int_" [] $ [toXMLInt value]
 toXMLInt_ (HoleInt_) = EmptyElt "HoleInt_" [] 
 toXMLInt_ (ParseErrInt_ error) = EmptyElt "ParseErrInt_" []
@@ -325,6 +392,9 @@ toXMLList_Thing (ParseErrList_Thing _) = []
 toXMLList_Task (List_Task xs) = toXMLConsList_Task xs
 toXMLList_Task HoleList_Task = []
 toXMLList_Task (ParseErrList_Task _) = []
+toXMLList_StringOrStyled (List_StringOrStyled xs) = toXMLConsList_StringOrStyled xs
+toXMLList_StringOrStyled HoleList_StringOrStyled = []
+toXMLList_StringOrStyled (ParseErrList_StringOrStyled _) = []
 toXMLConsList_Expense (Cons_Expense x xs) = toXMLExpense x : toXMLConsList_Expense xs
 toXMLConsList_Expense Nil_Expense             = []
 toXMLConsList_Currency (Cons_Currency x xs) = toXMLCurrency x : toXMLConsList_Currency xs
@@ -333,6 +403,8 @@ toXMLConsList_Thing (Cons_Thing x xs) = toXMLThing x : toXMLConsList_Thing xs
 toXMLConsList_Thing Nil_Thing             = []
 toXMLConsList_Task (Cons_Task x xs) = toXMLTask x : toXMLConsList_Task xs
 toXMLConsList_Task Nil_Task             = []
+toXMLConsList_StringOrStyled (Cons_StringOrStyled x xs) = toXMLStringOrStyled x : toXMLConsList_StringOrStyled xs
+toXMLConsList_StringOrStyled Nil_StringOrStyled             = []
 
 
 
@@ -344,10 +416,11 @@ parseXML_EnrichedDoc = parseXMLCns_RootEnr <|> parseHoleAndParseErr "EnrichedDoc
 parseXMLCns_RootEnr = RootEnr <$ startTag "RootEnr" <*> parseXML_ChoiceDoc<* endTag "RootEnr"
 parseXML_Document = parseXMLCns_RootDoc <|> parseHoleAndParseErr "Document" HoleDocument
 parseXMLCns_RootDoc = RootDoc <$ startTag "RootDoc" <*> parseXML_ChoiceDoc<* endTag "RootDoc"
-parseXML_ChoiceDoc = parseXMLCns_FormDoc <|> parseXMLCns_TaskDoc <|> parseXMLCns_SudokuDoc <|> parseHoleAndParseErr "ChoiceDoc" HoleChoiceDoc
+parseXML_ChoiceDoc = parseXMLCns_FormDoc <|> parseXMLCns_TaskDoc <|> parseXMLCns_SudokuDoc <|> parseXMLCns_TestDoc <|> parseHoleAndParseErr "ChoiceDoc" HoleChoiceDoc
 parseXMLCns_FormDoc = FormDoc <$ startTag "FormDoc" <*> parseXML_Form<* endTag "FormDoc"
 parseXMLCns_TaskDoc = TaskDoc <$ startTag "TaskDoc" <*> parseXML_Tasks<* endTag "TaskDoc"
 parseXMLCns_SudokuDoc = SudokuDoc <$ startTag "SudokuDoc" <*> parseXML_Sudoku<* endTag "SudokuDoc"
+parseXMLCns_TestDoc = TestDoc <$ startTag "TestDoc" <*> parseXML_Test<* endTag "TestDoc"
 parseXML_Form = parseXMLCns_Form <|> parseHoleAndParseErr "Form" HoleForm
 parseXMLCns_Form = Form <$ startTag "Form" <*> parseXML_Description <*> parseXML_Description <*> parseXML_List_Expense <*> parseXML_List_Currency<* endTag "Form"
 parseXML_Expense = parseXMLCns_Expense <|> parseHoleAndParseErr "Expense" HoleExpense
@@ -369,6 +442,15 @@ parseXML_Row = parseXMLCns_Row <|> parseHoleAndParseErr "Row" HoleRow
 parseXMLCns_Row = Row <$ startTag "Row" <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field <*> parseXML_Field<* endTag "Row"
 parseXML_Field = parseXMLCns_Field <|> parseHoleAndParseErr "Field" HoleField
 parseXMLCns_Field = Field <$ startTag "Field" <*> parseXML_Int_<* endTag "Field"
+parseXML_Test = parseXMLCns_Test <|> parseHoleAndParseErr "Test" HoleTest
+parseXMLCns_Test = Test <$ startTag "Test" <*> parseXML_StyledText<* endTag "Test"
+parseXML_StyledText = parseXMLCns_StyledText <|> parseHoleAndParseErr "StyledText" HoleStyledText
+parseXMLCns_StyledText = StyledText <$ startTag "StyledText" <*> parseXML_List_StringOrStyled<* endTag "StyledText"
+parseXML_StringOrStyled = parseXMLCns_String <|> parseXMLCns_Styled <|> parseHoleAndParseErr "StringOrStyled" HoleStringOrStyled
+parseXMLCns_String = String <$ startTag "String" <*> parseXML_String<* endTag "String"
+parseXMLCns_Styled = Styled <$ startTag "Styled" <*> parseXML_TextStyle <*> parseXML_StyledText<* endTag "Styled"
+parseXML_TextStyle = parseXMLCns_TextBold <|> parseHoleAndParseErr "TextStyle" HoleTextStyle
+parseXMLCns_TextBold = TextBold <$ emptyTag "TextBold"
 parseXML_Int_ = parseXMLCns_Int_ <|> parseHoleAndParseErr "Int_" HoleInt_
 parseXMLCns_Int_ = Int_ <$ startTag "Int_" <*> parseXML_Int<* endTag "Int_"
 parseXML_Float_ = parseXMLCns_Float_ <|> parseHoleAndParseErr "Float_" HoleFloat_
@@ -377,6 +459,7 @@ parseXML_List_Expense = mkList List_Expense Cons_Expense Nil_Expense <$> pList_n
 parseXML_List_Currency = mkList List_Currency Cons_Currency Nil_Currency <$> pList_ng parseXML_Currency
 parseXML_List_Thing = mkList List_Thing Cons_Thing Nil_Thing <$> pList_ng parseXML_Thing
 parseXML_List_Task = mkList List_Task Cons_Task Nil_Task <$> pList_ng parseXML_Task
+parseXML_List_StringOrStyled = mkList List_StringOrStyled Cons_StringOrStyled Nil_StringOrStyled <$> pList_ng parseXML_StringOrStyled
 
 
 
@@ -475,6 +558,29 @@ insertList_Task n x (Cons_Task cx cxs) = Cons_Task cx (insertList_Task (n-1) x c
 removeList_Task _ Nil_Task  = Nil_Task  -- remove beyond end of list
 removeList_Task 0 (Cons_Task cx cxs) = cxs
 removeList_Task n (Cons_Task cx cxs) = Cons_Task cx (removeList_Task (n-1) cxs)
+
+toList_StringOrStyled vs = List_StringOrStyled (toConsList_StringOrStyled vs)
+
+fromList_StringOrStyled (List_StringOrStyled vs) = fromConsList_StringOrStyled vs
+fromList_StringOrStyled _ = []
+
+toConsList_StringOrStyled [] = Nil_StringOrStyled
+toConsList_StringOrStyled (x:xs) = Cons_StringOrStyled x (toConsList_StringOrStyled xs)
+
+fromConsList_StringOrStyled Nil_StringOrStyled = []
+fromConsList_StringOrStyled (Cons_StringOrStyled x xs) = x: fromConsList_StringOrStyled xs
+
+replaceList_StringOrStyled _ x Nil_StringOrStyled = Nil_StringOrStyled  -- replace beyond end of list
+replaceList_StringOrStyled 0 x (Cons_StringOrStyled cx cxs) = Cons_StringOrStyled x cxs
+replaceList_StringOrStyled n x (Cons_StringOrStyled cx cxs) = Cons_StringOrStyled cx (replaceList_StringOrStyled (n-1) x cxs)
+
+insertList_StringOrStyled 0 x cxs = Cons_StringOrStyled x cxs
+insertList_StringOrStyled _ x Nil_StringOrStyled  = Nil_StringOrStyled  -- insert beyond end of list
+insertList_StringOrStyled n x (Cons_StringOrStyled cx cxs) = Cons_StringOrStyled cx (insertList_StringOrStyled (n-1) x cxs)
+
+removeList_StringOrStyled _ Nil_StringOrStyled  = Nil_StringOrStyled  -- remove beyond end of list
+removeList_StringOrStyled 0 (Cons_StringOrStyled cx cxs) = cxs
+removeList_StringOrStyled n (Cons_StringOrStyled cx cxs) = Cons_StringOrStyled cx (removeList_StringOrStyled (n-1) cxs)
 
 
 

@@ -39,6 +39,19 @@ pDescription = Description
   <$> pLine
 
 
+
+
+
+pStyledText :: ProxParser StyledText
+pStyledText = StyledText . toList_StringOrStyled <$> pList pStringOrStyled 
+
+pStringOrStyled = String <$> pWord <|> pStyle
+
+pStyle = (\_ styled _ -> Styled TextBold styled) <$> pStyleTag Bold Start <*> pStyledText <*> pStyleTag Bold End
+
+
+
+
 pLine = 
       (\spcs wrds -> spcs ++ concat wrds)
   <$> pSpaces <*> pList ((++) <$> pWord <*> pSpaces)
@@ -46,6 +59,12 @@ pLine =
 pSpaces = concat <$> pList (const " " <$> pToken (KeyTk " "))
 
 pWord = tokenString <$> pToken WordTk
+
+
+
+
+pStyleTag :: Style -> StartOrEnd -> ProxParser (Token Document Node ClipDoc UserToken)
+pStyleTag style startorend = pSym $ StyleTk 0 (StyleTag style startorend)
 
 pFloat = read . tokenString <$> pToken FloatTk
 

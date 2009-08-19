@@ -3,6 +3,7 @@ data Document = RootDoc choiceDoc : ChoiceDoc
 data ChoiceDoc = FormDoc form : Form
                | TaskDoc tasks : Tasks
                | SudokuDoc sudoku : Sudoku
+               | TestDoc test : Test
 
 data Form = Form name :  Description faculty :  Description expenses : [Expense] currencies : [Currency]
 
@@ -33,6 +34,16 @@ data Field = Field val : Int_
 
 
 
+data Test = Test styledText : StyledText
+
+
+
+data StyledText = StyledText stringOrStyleds : [StringOrStyled]
+
+data StringOrStyled = String string : String
+                    | Styled style : TextStyle styled : StyledText
+
+data TextStyle = TextBold
 
 data Int_ = Int_ value : Int
 

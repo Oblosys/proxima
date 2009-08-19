@@ -29,6 +29,7 @@ data Document = RootDoc ChoiceDoc
 data ChoiceDoc = FormDoc Form
                | TaskDoc Tasks
                | SudokuDoc Sudoku
+               | TestDoc Test
                | HoleChoiceDoc
                | ParseErrChoiceDoc (ParseError Document Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
@@ -84,6 +85,27 @@ data Field = Field Int_
            | ParseErrField (ParseError Document Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
+data Test = Test StyledText
+          | HoleTest
+          | ParseErrTest (ParseError Document Node ClipDoc UserToken)
+              deriving (Show, Data, Typeable)
+
+data StyledText = StyledText List_StringOrStyled
+                | HoleStyledText
+                | ParseErrStyledText (ParseError Document Node ClipDoc UserToken)
+                    deriving (Show, Data, Typeable)
+
+data StringOrStyled = String String
+                    | Styled TextStyle StyledText
+                    | HoleStringOrStyled
+                    | ParseErrStringOrStyled (ParseError Document Node ClipDoc UserToken)
+                        deriving (Show, Data, Typeable)
+
+data TextStyle = TextBold
+               | HoleTextStyle
+               | ParseErrTextStyle (ParseError Document Node ClipDoc UserToken)
+                   deriving (Show, Data, Typeable)
+
 data Int_ = Int_ Int
           | HoleInt_
           | ParseErrInt_ (ParseError Document Node ClipDoc UserToken)
@@ -114,6 +136,11 @@ data List_Task = List_Task ConsList_Task
                | ParseErrList_Task (ParseError Document Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
+data List_StringOrStyled = List_StringOrStyled ConsList_StringOrStyled
+                         | HoleList_StringOrStyled
+                         | ParseErrList_StringOrStyled (ParseError Document Node ClipDoc UserToken)
+                             deriving (Show, Data, Typeable)
+
 data ConsList_Expense = Cons_Expense Expense ConsList_Expense
                       | Nil_Expense
                           deriving (Show, Data, Typeable)
@@ -129,6 +156,10 @@ data ConsList_Thing = Cons_Thing Thing ConsList_Thing
 data ConsList_Task = Cons_Task Task ConsList_Task
                    | Nil_Task
                        deriving (Show, Data, Typeable)
+
+data ConsList_StringOrStyled = Cons_StringOrStyled StringOrStyled ConsList_StringOrStyled
+                             | Nil_StringOrStyled
+                                 deriving (Show, Data, Typeable)
 
 
 
@@ -150,12 +181,17 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Sudoku Sudoku
              | Clip_Row Row
              | Clip_Field Field
+             | Clip_Test Test
+             | Clip_StyledText StyledText
+             | Clip_StringOrStyled StringOrStyled
+             | Clip_TextStyle TextStyle
              | Clip_Int_ Int_
              | Clip_Float_ Float_
              | Clip_List_Expense List_Expense
              | Clip_List_Currency List_Currency
              | Clip_List_Thing List_Thing
              | Clip_List_Task List_Task
+             | Clip_List_StringOrStyled List_StringOrStyled
              | Clip_Bool Bool
              | Clip_Int Int
              | Clip_String String
@@ -178,6 +214,7 @@ data Node = NoNode
           | Node_FormDoc ChoiceDoc Path
           | Node_TaskDoc ChoiceDoc Path
           | Node_SudokuDoc ChoiceDoc Path
+          | Node_TestDoc ChoiceDoc Path
           | Node_HoleChoiceDoc ChoiceDoc Path
           | Node_ParseErrChoiceDoc ChoiceDoc Path
           | Node_Form Form Path
@@ -211,6 +248,19 @@ data Node = NoNode
           | Node_Field Field Path
           | Node_HoleField Field Path
           | Node_ParseErrField Field Path
+          | Node_Test Test Path
+          | Node_HoleTest Test Path
+          | Node_ParseErrTest Test Path
+          | Node_StyledText StyledText Path
+          | Node_HoleStyledText StyledText Path
+          | Node_ParseErrStyledText StyledText Path
+          | Node_String StringOrStyled Path
+          | Node_Styled StringOrStyled Path
+          | Node_HoleStringOrStyled StringOrStyled Path
+          | Node_ParseErrStringOrStyled StringOrStyled Path
+          | Node_TextBold TextStyle Path
+          | Node_HoleTextStyle TextStyle Path
+          | Node_ParseErrTextStyle TextStyle Path
           | Node_Int_ Int_ Path
           | Node_HoleInt_ Int_ Path
           | Node_ParseErrInt_ Int_ Path
@@ -229,6 +279,9 @@ data Node = NoNode
           | Node_List_Task List_Task Path
           | Node_HoleList_Task List_Task Path
           | Node_ParseErrList_Task List_Task Path
+          | Node_List_StringOrStyled List_StringOrStyled Path
+          | Node_HoleList_StringOrStyled List_StringOrStyled Path
+          | Node_ParseErrList_StringOrStyled List_StringOrStyled Path
             deriving Typeable
 
 
@@ -248,6 +301,7 @@ instance Show Node where
   show (Node_FormDoc _ _) = "Node_FormDoc" 
   show (Node_TaskDoc _ _) = "Node_TaskDoc" 
   show (Node_SudokuDoc _ _) = "Node_SudokuDoc" 
+  show (Node_TestDoc _ _) = "Node_TestDoc" 
   show (Node_HoleChoiceDoc _ _) = "Node_HoleChoiceDoc" 
   show (Node_ParseErrChoiceDoc _ _) = "Node_ParseErrChoiceDoc" 
   show (Node_Form _ _) = "Node_Form" 
@@ -281,6 +335,19 @@ instance Show Node where
   show (Node_Field _ _) = "Node_Field" 
   show (Node_HoleField _ _) = "Node_HoleField" 
   show (Node_ParseErrField _ _) = "Node_ParseErrField" 
+  show (Node_Test _ _) = "Node_Test" 
+  show (Node_HoleTest _ _) = "Node_HoleTest" 
+  show (Node_ParseErrTest _ _) = "Node_ParseErrTest" 
+  show (Node_StyledText _ _) = "Node_StyledText" 
+  show (Node_HoleStyledText _ _) = "Node_HoleStyledText" 
+  show (Node_ParseErrStyledText _ _) = "Node_ParseErrStyledText" 
+  show (Node_String _ _) = "Node_String" 
+  show (Node_Styled _ _) = "Node_Styled" 
+  show (Node_HoleStringOrStyled _ _) = "Node_HoleStringOrStyled" 
+  show (Node_ParseErrStringOrStyled _ _) = "Node_ParseErrStringOrStyled" 
+  show (Node_TextBold _ _) = "Node_TextBold" 
+  show (Node_HoleTextStyle _ _) = "Node_HoleTextStyle" 
+  show (Node_ParseErrTextStyle _ _) = "Node_ParseErrTextStyle" 
   show (Node_Int_ _ _) = "Node_Int_" 
   show (Node_HoleInt_ _ _) = "Node_HoleInt_" 
   show (Node_ParseErrInt_ _ _) = "Node_ParseErrInt_" 
@@ -299,5 +366,8 @@ instance Show Node where
   show (Node_List_Task _ _) = "Node_List_Task" 
   show (Node_HoleList_Task _ _) = "Node_HoleList_Task" 
   show (Node_ParseErrList_Task _ _) = "Node_ParseErrList_Task" 
+  show (Node_List_StringOrStyled _ _) = "Node_List_StringOrStyled" 
+  show (Node_HoleList_StringOrStyled _ _) = "Node_HoleList_StringOrStyled" 
+  show (Node_ParseErrList_StringOrStyled _ _) = "Node_ParseErrList_StringOrStyled" 
 
 

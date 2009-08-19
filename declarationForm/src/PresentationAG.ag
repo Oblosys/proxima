@@ -42,6 +42,8 @@ SEM ChoiceDoc
       loc.pres = structural $ @tasks.pres
   | SudokuDoc
       loc.pres = structural $ @sudoku.pres
+  | TestDoc
+      loc.pres = structural $ @test.pres
                    
 SEM Form
   | Form
@@ -624,3 +626,55 @@ moveElementDown path =
              in  DocumentLevel d'' f cl
         else DocumentLevel d f cl
 }
+
+
+
+
+
+
+SEM Test
+  | Test
+      loc.pres = structural $ leftTopMargins 30 40 $
+                   col [ row [ text "Rich text: ", @styledText.pres `withFontFam` "Courier" ]
+		       , row [ text "Parsed: ", text @styledText.str ]
+                       ]
+
+SEM StyledText [ | | str : String ]
+  | StyledText
+     loc.pres = parsingWithParser pStyledText @self $
+                  @stringOrStyleds.pres
+     lhs.str = @stringOrStyleds.str
+  | ParseErrStyledText
+     lhs.str = "<parse error>"
+
+SEM StringOrStyled [ | | str : String ]
+  | String
+     loc.pres = parsing $ text @string
+     lhs.str = @string
+  | Styled
+     loc.pres = parsing $ @style.presStyle @styled.pres
+     lhs.str = "<" ++ @style.str ++ ">" ++ @styled.str ++ "<" ++ @style.str ++ "/>"
+  | ParseErrStringOrStyled
+     lhs.str = "<parse error>"
+
+SEM List_StringOrStyled [ | | ]
+  | List_StringOrStyled
+      loc.pres = parsing $ row $ @elts.press
+
+
+SEM TextStyle [ | | str : String presStyle : {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} ]
+  | TextBold
+      lhs.str = "b"
+      lhs.presStyle = bold
+
+ATTR List_StringOrStyled ConsList_StringOrStyled
+     [ | | str USE {++} {[]} : String ]
+{-
+SEM List_TextStyle
+  | List_TextStyle
+      loc.pres = structural $ empty
+-}
+
+SEM TextStyle
+  | TextBold
+      loc.pres = structural $ empty
