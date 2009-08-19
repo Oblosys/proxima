@@ -93,6 +93,13 @@ defaultTextColor = black
 defaultFont = Font "Verdana" 14 False False False False
 
 
+data StartOrEnd = Start | End deriving (Show, Eq)
+
+data StyleTag = StyleTag Style StartOrEnd deriving (Show, Eq)
+
+data Style = Bold | Italic | Colored Color deriving (Show, Eq)
+
+
 data FillStyle = Solid | Transparent deriving (Show, Eq, Read)
 
 data ImgStyle = Tile | Stretch deriving (Show, Eq, Read) -- also Center?

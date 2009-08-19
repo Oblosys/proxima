@@ -139,7 +139,8 @@ ATTR Layout [ | | scanChars : {[ScanChar @doc @node @clip @token]} ]
 
 SEM Layout
   | StringP
-      lhs.scanChars = map (Char @id NoFocusMark NoFocusMark @lhs.lloc) @text
+      lhs.scanChars = styleChangeTags @lhs.previousCharStyle @lhs.styleAttrs ++
+                      map (Char @id NoFocusMark NoFocusMark @lhs.lloc) @text
 
   | RowP
       lhs.scanChars = concat @presentationList.scanCharss
@@ -190,3 +191,16 @@ SEM Layout
   | WithP
       child.styleAttrs = let (inh,syn) = @attrRule (@lhs.styleAttrs, error "Error in presentation: style depends on synthesized attributes")
                          in  inh
+
+ATTR Layout LayoutList [ | previousCharStyle : {[Style]} | ]
+
+SEM Layout
+  | StringP
+      lhs.previousCharStyle = if fBold (font @lhs.styleAttrs) then [Bold] else [] 
+
+{
+styleChangeTags previousCharStyle styleAttrs = 
+  if fBold (font styleAttrs) 
+  then if null previousCharStyle then [Style $ StyleTag Bold Start] else []
+  else if previousCharStyle == [Bold] then [Style $ StyleTag Bold End] else []
+}

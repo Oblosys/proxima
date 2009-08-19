@@ -41,6 +41,9 @@ stringFromScanChars :: [ScanChar doc node clip token] -> String
 stringFromScanChars scs = 
   [ case sc of Char _ _ _ _ c           -> c
                Structural _ _ _ _ _ _ -> '@' -- in the Alex scanner, this is \255, this output is only for show
+               Style (StyleTag _ Start) -> '<' -- in the Alex scanner, this is \255, this output is only for show
+               Style (StyleTag _ End) -> '>' -- in the Alex scanner, this is \255, this output is only for show
+  
   | sc <- scs
   ]
 
@@ -59,6 +62,7 @@ locFromScanChars :: [ScanChar doc node clip token] -> Maybe node
 locFromScanChars [] = Nothing
 locFromScanChars (Char _ _ _ (Just loc) _ : scs) = Just loc
 locFromScanChars (Char _ _ _ Nothing    _ : scs) = locFromScanChars scs
+locFromScanChars (Style _ : scs) = locFromScanChars scs
 locFromScanChars (Structural _ _ _ _ _ _ : scs) = debug Err "locFromScanChars called on Structural" $ 
                                                     locFromScanChars scs
 

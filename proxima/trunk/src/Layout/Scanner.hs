@@ -204,9 +204,10 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      inheritedAttrs = Inh_Layout { focus_Inh_Layout = foc
                                  , idPCounter_Inh_Layout = idPCounter
                                  , lexer_Inh_Layout = lex
-                                 , lloc_Inh_Layout =mNode
+                                 , lloc_Inh_Layout = mNode
                                  , path_Inh_Layout = pth
                                  , pos_Inh_Layout = 0
+                                 , previousCharStyle_Inh_Layout = []
                                  , scanStructural_Inh_Layout = (scanStructural sheet)
                                  , scannedFocusEnd_Inh_Layout = Nothing
                                  , scannedFocusStart_Inh_Layout = Nothing
@@ -259,7 +260,7 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                       f _                = Nothing
      -- finally, remove all whitespace tokens.
      
- in  --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
+ in  debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
      --debug Lay ("focused scan chars:\n"++showFocusedScanChars focusedScanChars) $
      --debug Lay ("Grouped scan chars:\n"++show groupedScanChars) $
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap' ) $

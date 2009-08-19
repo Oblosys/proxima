@@ -29,12 +29,6 @@ data ScanChar doc node clip token =
                     }
      deriving Show
 
-data StartOrEnd = Start | End deriving Show
-
-data StyleTag = StyleTag Style StartOrEnd deriving Show
-
-data Style = Bold | Italic | Colored Color deriving Show
-
 isCharScanChar (Char _ _ _ _ _) = True
 isCharScanChar _            = False
 

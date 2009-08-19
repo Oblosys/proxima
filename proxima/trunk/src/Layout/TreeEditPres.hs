@@ -709,7 +709,7 @@ findLay (EllipseP id _ _ _ _)     =
     (RowP id rf press)        = 
     (VertexP _ _ x y _  pres) -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
 -}
-setStyleRed (inh,syn) = (inh {textColor = red}, syn)
+setStyleRed (inh,syn) = (inh {font = (font inh) {fBold = True}}, syn)
 
 
 
