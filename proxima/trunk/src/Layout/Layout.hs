@@ -187,6 +187,7 @@ addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = --debug Lay ("Adding whi
                                                         in  addWhitespace True wm (Just f) idp pres'
 addWhitespaceToken wm idp (ErrorTk _ str _)           = --debug Lay ("Adding whitespace to ErrorTk "++show idp) $
                                                           addWhitespaceErrorToken wm idp str
+addWhitespaceToken wm idp tk@(StyleTk _ _)               = debug Lay "addWhitespaceToken called on Style token" []
 
 -- if pres is a structural, we add a "" before and after it, to handle focus. (after is only necessary
 -- if it is the last token and there is no whitespace behind it)                   

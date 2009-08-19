@@ -87,6 +87,7 @@ type ClipParser doc node clip token = [Token doc node clip token] -> clip
 data Token doc node clip token = 
                UserTk       Position token String (Maybe node) IDP
              | StructuralTk Position (Maybe node) (Presentation doc node clip token) [Token doc node clip token] IDP
+             | StyleTk      Position StyleTag
              | ParsingTk    (Maybe (ClipParser doc node clip token)) (Maybe node)  [Token doc node clip token] IDP -- deriving (Show)
              | GraphTk               Dirty [(Int, Int)] (Maybe node) IDP
              | VertexTk              Int (Int, Int) (Maybe node) IDP
@@ -106,6 +107,7 @@ instance (Show node, Show token) => Show (Token doc node clip token) where
                   then drop (length "Node_") showNode
                   else showNode
     in  "<"++show nr ++":StructuralTk:"++nodeStr++":"++show id++">" 
+  show (StyleTk _ tag)       = "<StyleTk:"++show tag++">" 
   show (ParsingTk _ _ tks _)       = "<ParsingTk>" 
   show (GraphTk _ edges _ _)     = "<GraphTk:"++show edges++">"
   show (VertexTk id pos _ _)     = "<VertexTk: "++show id++">"
@@ -116,6 +118,7 @@ instance (Eq node, Eq token) => Eq (Token doc node clip token) where
   StructuralTk _ Nothing _ _ _    == StructuralTk _ _ _ _ _ = True       -- StructuralTks with no node always match
   StructuralTk _ _ _ _ _          == StructuralTk _ Nothing _ _ _ = True -- StructuralTks with no node always match
   StructuralTk _ (Just nd1) _ _ _ == StructuralTk _(Just nd2) _ _ _ = nd1 == nd2
+  StyleTk _ tag1  == StyleTk _ tag2 = tag1 == tag2   
   ParsingTk _ _ _ _   == ParsingTk _ _ _ _ = True   
   GraphTk _ _ _ _  == GraphTk _ _ _ _  = True
   VertexTk _ _ _ _ == VertexTk _ _ _ _ = True -- if we want to recognize specific vertices, maybe some
@@ -129,22 +132,29 @@ instance (Ord node, Ord token) => Ord (Token doc node clip token) where
   StructuralTk _ _ _ _ _          <= StructuralTk _ Nothing _ _ _ = True
   StructuralTk _ (Just nd1) _ _ _ <= StructuralTk _ (Just nd2) _ _ _ = nd1 <= nd2
   StructuralTk _ _ _ _ _ <= UserTk _ _ _ _ _  = True
+  StyleTk _ _ <= StyleTk _ _      = True
+  StyleTk _ _ <= StructuralTk _ _ _ _ _ = True
+  StyleTk _ _ <= UserTk _ _ _ _ _       = True
   ParsingTk _ _ _ _ <= ParsingTk _ _ _ _      = True
+  ParsingTk _ _ _ _ <= StyleTk _ _            = True
   ParsingTk _ _ _ _ <= StructuralTk _ _ _ _ _ = True
   ParsingTk _ _ _ _ <= UserTk _ _ _ _ _       = True
   GraphTk _ _ _ _ <= GraphTk _ _ _ _      = True
   GraphTk _ _ _ _ <= ParsingTk _ _ _ _      = True
+  GraphTk _ _ _ _ <= StyleTk _ _      = True
   GraphTk _ _ _ _ <= StructuralTk _ _ _ _ _ = True
   GraphTk _ _ _ _ <= UserTk _ _ _ _ _       = True
   VertexTk _ _  _ _ <= VertexTk _ _ _ _    = True
   VertexTk _ _ _ _ <= GraphTk _ _ _ _      = True
   VertexTk _ _ _ _ <= ParsingTk _ _ _ _      = True
+  VertexTk _ _ _ _ <= StyleTk _ _      = True
   VertexTk _ _ _ _ <= StructuralTk _ _ _ _ _ = True
   VertexTk _ _ _ _ <= UserTk _ _ _ _ _       = True 
   ErrorTk _ _ _        <= ErrorTk _ _ _            = True
   ErrorTk _ _ _        <= VertexTk _ _ _ _     = True
   ErrorTk _ _ _        <= GraphTk _ _ _ _      = True
   ErrorTk _ _ _        <= ParsingTk _ _ _ _      = True
+  ErrorTk _ _ _        <= StyleTk _ _      = True
   ErrorTk _ _ _        <= StructuralTk _ _ _ _ _ = True
   ErrorTk _ _ _        <= UserTk _ _ _ _ _       = True
   _                <= _           = False
@@ -152,6 +162,7 @@ instance (Ord node, Ord token) => Ord (Token doc node clip token) where
 tokenString :: Token doc node clip token -> String                  
 tokenString (UserTk _ _ s n id)      = s
 tokenString (StructuralTk _ n _ _ id) = "<structural token>"
+tokenString (StyleTk _ _) = "<style token>"
 tokenString (GraphTk d es n id) = "<graph token>"
 tokenString (VertexTk i p n id) = "<vertex token>"
 tokenString (ErrorTk _ str _)       = str
@@ -161,6 +172,7 @@ tokenNode (StructuralTk _ n _ _ id) = n
 tokenNode (GraphTk d es n id) = n
 tokenNode (VertexTk i p n id) = n
 tokenNode (UserTk _ u s n id)   = n
+tokenNode (StyleTk p t)       = error $ "tokenNode called on Style token ("++show p ++ "):" ++ show t
 tokenNode (ErrorTk _ str _)       = error $ "tokenNode called on error token: " ++ str
 
 getTokenIDP :: Token doc node clip token -> IDP       
@@ -169,6 +181,7 @@ getTokenIDP (StructuralTk _ n _ _ id)  = id
 getTokenIDP (GraphTk d es n id) = id
 getTokenIDP (VertexTk i p n id) = id
 getTokenIDP (ErrorTk _ str id)  = id
+getTokenIDP (StyleTk p t)       = NoIDP
 
 setTokenIDP :: IDP -> Token doc node clip token -> Token doc node clip token
 setTokenIDP idp (UserTk p u s n _)         = UserTk p u s n idp
@@ -176,6 +189,7 @@ setTokenIDP idp (StructuralTk p n pr ts _) = StructuralTk p n pr ts idp
 setTokenIDP idp (GraphTk d es n id)        = GraphTk d es n idp
 setTokenIDP idp (VertexTk i p n _)         = VertexTk i p n idp
 setTokenIDP idp (ErrorTk p str _)          = ErrorTk p str idp
+setTokenIDP idp (StyleTk p t)              = (StyleTk p t) -- error $ "setTokenIDP called on Style token ("++show p ++ "):" ++ show t
 
 deepShowTks i tok = case tok of
                       (StructuralTk _ _ _ cs _) -> indent i ++ show tok ++ "\n"

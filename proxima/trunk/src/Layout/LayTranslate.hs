@@ -74,8 +74,7 @@ parse scannerSheet state layLvl@(LayoutLevel pres f _) prsLvl RightDeleteLay =
   then graphEdit scannerSheet state layLvl prsLvl deleteInGraph
   else editLay editRightDelete state layLvl prsLvl
 
-parse _ state layLvl prsLvl SetStyleLay = editLay editSetStyle state layLvl prsLvl 
-
+parse scannerSheet state layLvl prsLvl SetStyleLay = editLayParse editSetStyle scannerSheet state layLvl prsLvl 
 
 parse _ state layLvl prsLvl LeftLay   = navigateLeft state layLvl prsLvl 
 parse _ state layLvl prsLvl RightLay  = navigateRight state layLvl prsLvl
@@ -142,7 +141,12 @@ editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, id
      diffTree = diffPres pres' pres
  in ([SkipPres 0], state { getClipboard = clip'}, LayoutLevel pres' focus' diffTree)
 
-
+editLayParse editF scannerSheet state layLvl@(LayoutLevel pres NoFocusP dt) presLvl = ([SkipPres 0], state, layLvl)
+editLayParse editF scannerSheet state layLvl@(LayoutLevel pres focus dt) prsLvl@(PresentationLevel _ (layout, idCounter)) = 
+ let (ll@(LayoutLevel pres' focus' dt), clip') = editF (getClipboard state) (LayoutLevel pres focus dt) -- this will be layLvl's own focus
+     diffTree = diffPres pres' pres
+ in  tokenizeLay scannerSheet state ll prsLvl
+     
 -- should we make a similar function for edit ops that do not alter the presentation? This function would not do
 -- much, except setting the update region, getting rid of the document argument and returning a SkipPres 0,
 -- Also some edit ops change the focus, whereas others only change the clip, or do IO.  Different functions?

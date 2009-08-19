@@ -314,7 +314,7 @@ scanCharsOrStructurals sheet pos (group@(scanChar:_):groups) = -- a group is nev
   let (scannedTokens, pos') = case scanChar of 
                                 Char _ _ _ _ _         -> sheet pos group
                                 Structural _ _ _ _ _ _ -> scanStructurals pos group
-                                Style _                -> ([],pos)                          
+                                Style _                -> scanStyleTags pos group                          
                                                           
       (scannedTokens', pos'') = scanCharsOrStructurals sheet pos' groups
   in  (scannedTokens++scannedTokens', pos'')
@@ -326,6 +326,11 @@ scanStructurals pos (structural@(Structural idp _ _ loc tokens lay) : structural
       (scannedTokens, pos') = scanStructurals (pos + 1) structuralScanChars
   in  (scannedToken:scannedTokens, pos')
 
+scanStyleTags pos [] = ([], pos)
+scanStyleTags pos (Style styleTag : styleScanChars) =
+  let scannedToken = ScannedToken (Nothing, Nothing) $ StyleTk pos styleTag
+      (scannedTokens, pos') = scanStyleTags (pos + 1) styleScanChars
+  in  (scannedToken:scannedTokens, pos')
 
 -- If ScannedFocusStart or ScannedFocusEnd is after the last character, it was not recorded in the
 -- scanChars. This function adds it directly to the scanned tokens.
