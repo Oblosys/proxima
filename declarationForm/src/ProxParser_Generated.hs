@@ -82,6 +82,8 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_HoleStringOrStyled _ _) = construct_HoleStringOrStyled
   construct (Node_ParseErrStringOrStyled _ _) = construct_ParseErrStringOrStyled
   construct (Node_TextBold _ _) = construct_TextBold
+  construct (Node_TextItalic _ _) = construct_TextItalic
+  construct (Node_TextRed _ _) = construct_TextRed
   construct (Node_HoleTextStyle _ _) = construct_HoleTextStyle
   construct (Node_ParseErrTextStyle _ _) = construct_ParseErrTextStyle
   construct (Node_Int_ _ _) = construct_Int_
@@ -159,6 +161,8 @@ construct_Styled tk ~[mClip0,mClip1] = Clip_StringOrStyled $ reuseStyled [tk]  (
 construct_HoleStringOrStyled tk ~[] = Clip_StringOrStyled $ hole
 construct_ParseErrStringOrStyled (StructuralTk _ _ pres _ _) ~[] = Clip_StringOrStyled $ parseErr (StructuralParseErr pres)
 construct_TextBold tk ~[] = Clip_TextStyle $ reuseTextBold [tk] 
+construct_TextItalic tk ~[] = Clip_TextStyle $ reuseTextItalic [tk] 
+construct_TextRed tk ~[] = Clip_TextStyle $ reuseTextRed [tk] 
 construct_HoleTextStyle tk ~[] = Clip_TextStyle $ hole
 construct_ParseErrTextStyle (StructuralTk _ _ pres _ _) ~[] = Clip_TextStyle $ parseErr (StructuralParseErr pres)
 construct_Int_ tk ~[mClip0] = Clip_Int_ $ reuseInt_ [tk]  (retrieveArg "Int_" "value::Int" mClip0)
@@ -321,6 +325,18 @@ reuseTextBold nodes
            (TextBold) -> genericReuse0 TextBold
            _ -> error "Internal error:ProxParser_Generated.reuseTextBold"
 
+reuseTextItalic :: [Token doc Node clip token] -> TextStyle
+reuseTextItalic nodes
+  = case extractFromTokens extractTextItalic defaultTextItalic nodes of
+           (TextItalic) -> genericReuse0 TextItalic
+           _ -> error "Internal error:ProxParser_Generated.reuseTextItalic"
+
+reuseTextRed :: [Token doc Node clip token] -> TextStyle
+reuseTextRed nodes
+  = case extractFromTokens extractTextRed defaultTextRed nodes of
+           (TextRed) -> genericReuse0 TextRed
+           _ -> error "Internal error:ProxParser_Generated.reuseTextRed"
+
 reuseInt_ :: [Token doc Node clip token] -> Maybe Int -> Int_
 reuseInt_ nodes ma0
   = case extractFromTokens extractInt_ defaultInt_ nodes of
@@ -458,6 +474,14 @@ extractTextBold :: Maybe Node -> Maybe TextStyle
 extractTextBold (Just (Node_TextBold x@(TextBold) _)) = Just x
 extractTextBold _ = Nothing
 
+extractTextItalic :: Maybe Node -> Maybe TextStyle
+extractTextItalic (Just (Node_TextItalic x@(TextItalic) _)) = Just x
+extractTextItalic _ = Nothing
+
+extractTextRed :: Maybe Node -> Maybe TextStyle
+extractTextRed (Just (Node_TextRed x@(TextRed) _)) = Just x
+extractTextRed _ = Nothing
+
 extractInt_ :: Maybe Node -> Maybe Int_
 extractInt_ (Just (Node_Int_ x@(Int_ _) _)) = Just x
 extractInt_ _ = Nothing
@@ -558,6 +582,12 @@ defaultStyled = Styled hole hole
 
 defaultTextBold :: TextStyle
 defaultTextBold = TextBold
+
+defaultTextItalic :: TextStyle
+defaultTextItalic = TextItalic
+
+defaultTextRed :: TextStyle
+defaultTextRed = TextRed
 
 defaultInt_ :: Int_
 defaultInt_ = Int_ hole

@@ -93,11 +93,11 @@ defaultTextColor = black
 defaultFont = Font "Verdana" 14 False False False False
 
 
-data StartOrEnd = Start | End deriving (Show, Eq)
+data StartOrEnd = Start | End deriving (Show, Eq, Ord)
 
-data StyleTag = StyleTag Style StartOrEnd deriving (Show, Eq)
+data StyleTag = StyleTag Style StartOrEnd deriving (Show, Eq, Ord)
 
-data Style = Bold | Italic | Colored Color deriving (Show, Eq)
+data Style = Bold | Italic | Colored Color deriving (Show, Read, Eq, Ord)
 
 
 data FillStyle = Solid | Transparent deriving (Show, Eq, Read)

@@ -132,7 +132,7 @@ instance (Ord node, Ord token) => Ord (Token doc node clip token) where
   StructuralTk _ _ _ _ _          <= StructuralTk _ Nothing _ _ _ = True
   StructuralTk _ (Just nd1) _ _ _ <= StructuralTk _ (Just nd2) _ _ _ = nd1 <= nd2
   StructuralTk _ _ _ _ _ <= UserTk _ _ _ _ _  = True
-  StyleTk _ _ <= StyleTk _ _      = True
+  StyleTk _ tag1 <= StyleTk _ tag2      = tag1 <= tag2
   StyleTk _ _ <= StructuralTk _ _ _ _ _ = True
   StyleTk _ _ <= UserTk _ _ _ _ _       = True
   ParsingTk _ _ _ _ <= ParsingTk _ _ _ _      = True

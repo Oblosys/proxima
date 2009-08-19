@@ -801,10 +801,14 @@ instance Editable TextStyle Document Node ClipDoc UserToken where
   paste _ _ x = x
 
   alternatives _ = [ ("TextBold "  , Clip_TextStyle $ TextBold)
+                   , ("TextItalic "  , Clip_TextStyle $ TextItalic)
+                   , ("TextRed "  , Clip_TextStyle $ TextRed)
                    ,("{TextStyle}", Clip_TextStyle hole)
                    ]
 
   arity (TextBold) = 0
+  arity (TextItalic) = 0
+  arity (TextRed) = 0
   arity _                        = 0
 
   toClip t = Clip_TextStyle t

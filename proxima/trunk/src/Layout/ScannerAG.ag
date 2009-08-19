@@ -196,11 +196,20 @@ ATTR Layout LayoutList [ | previousCharStyle : {[Style]} | ]
 
 SEM Layout
   | StringP
-      lhs.previousCharStyle = if fBold (font @lhs.styleAttrs) then [Bold] else [] 
+      lhs.previousCharStyle = (if fBold (font @lhs.styleAttrs) then [Bold] else []) ++
+                              (if fItalic (font @lhs.styleAttrs) then [Italic] else []) ++
+                              (if textColor @lhs.styleAttrs == (255,0,0) then [Colored (255,0,0)] else [])
 
 {
 styleChangeTags previousCharStyle styleAttrs = 
-  if fBold (font styleAttrs) 
-  then if null previousCharStyle then [Style $ StyleTag Bold Start] else []
-  else if previousCharStyle == [Bold] then [Style $ StyleTag Bold End] else []
+  (if fBold (font styleAttrs) 
+   then if Bold `elem` previousCharStyle then [] else [Style $ StyleTag Bold Start]
+   else if Bold `elem` previousCharStyle then [Style $ StyleTag Bold End] else []) ++
+  (if fItalic (font styleAttrs) 
+   then if Italic `elem` previousCharStyle then [] else [Style $ StyleTag Italic Start]
+   else if Italic `elem` previousCharStyle then [Style $ StyleTag Italic End] else []) ++
+  (if textColor styleAttrs == (255,0,0) 
+   then if (Colored (255,0,0)) `elem` previousCharStyle then [] else [Style $ StyleTag (Colored (255,0,0)) Start]
+   else if (Colored (255,0,0)) `elem` previousCharStyle then [Style $ StyleTag (Colored (255,0,0)) End] else [])
+
 }

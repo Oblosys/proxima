@@ -102,6 +102,8 @@ data StringOrStyled = String String
                         deriving (Show, Data, Typeable)
 
 data TextStyle = TextBold
+               | TextItalic
+               | TextRed
                | HoleTextStyle
                | ParseErrTextStyle (ParseError Document Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
@@ -259,6 +261,8 @@ data Node = NoNode
           | Node_HoleStringOrStyled StringOrStyled Path
           | Node_ParseErrStringOrStyled StringOrStyled Path
           | Node_TextBold TextStyle Path
+          | Node_TextItalic TextStyle Path
+          | Node_TextRed TextStyle Path
           | Node_HoleTextStyle TextStyle Path
           | Node_ParseErrTextStyle TextStyle Path
           | Node_Int_ Int_ Path
@@ -346,6 +350,8 @@ instance Show Node where
   show (Node_HoleStringOrStyled _ _) = "Node_HoleStringOrStyled" 
   show (Node_ParseErrStringOrStyled _ _) = "Node_ParseErrStringOrStyled" 
   show (Node_TextBold _ _) = "Node_TextBold" 
+  show (Node_TextItalic _ _) = "Node_TextItalic" 
+  show (Node_TextRed _ _) = "Node_TextRed" 
   show (Node_HoleTextStyle _ _) = "Node_HoleTextStyle" 
   show (Node_ParseErrTextStyle _ _) = "Node_ParseErrTextStyle" 
   show (Node_Int_ _ _) = "Node_Int_" 

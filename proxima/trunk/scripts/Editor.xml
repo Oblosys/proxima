@@ -469,8 +469,16 @@ function keypress(e)
     if (answer) loadXMLDoc('Find "'+answer+'";');
     return false;
   }
-  if (keyCode==116 && ctrlDown) // ctrl-t
-  { loadXMLDoc('SetStyle;');
+  if (keyCode==98 && ctrlDown) // ctrl-b
+  { loadXMLDoc('SetStyle Bold;');
+    return false;
+  }
+  if (keyCode==105 && ctrlDown) // ctrl-i
+  { loadXMLDoc('SetStyle Italic;');
+    return false;
+  }
+  if (keyCode==114 && ctrlDown) // ctrl-r
+  { loadXMLDoc('SetStyle (Colored (255,0,0));');
     return false;
   }
 

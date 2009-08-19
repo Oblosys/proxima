@@ -43,7 +43,7 @@ data StyledText = StyledText stringOrStyleds : [StringOrStyled]
 data StringOrStyled = String string : String
                     | Styled style : TextStyle styled : StyledText
 
-data TextStyle = TextBold
+data TextStyle = TextBold | TextItalic | TextRed
 
 data Int_ = Int_ value : Int
 
