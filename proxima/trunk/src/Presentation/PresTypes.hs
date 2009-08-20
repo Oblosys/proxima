@@ -98,6 +98,10 @@ data Token doc node clip token =
 -- The other tokens are not produced by the scanner, and therefore do not need this field.
 -- The position is only used for children of ParsingTk. StructuralTk children of a StructuralTk all have
 -- position 0
+
+isStyleTk (StyleTk _ _) = True
+isStyleTk _             = False
+
 instance (Show node, Show token) => Show (Token doc node clip token) where
   show (UserTk nr u s _ id)         = "<"++show nr ++":"++"UserTk "++show u++":"++show s++":"++show id++">"
   show (StructuralTk nr Nothing _ tks id) = "<"++show nr ++":"++"structural:Nothing:"++show id++">" 
