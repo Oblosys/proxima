@@ -90,16 +90,22 @@ data Test = Test StyledText
           | ParseErrTest (ParseError Document Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
-data StyledText = StyledText List_StringOrStyled
+data StyledText = StyledText List_Word
                 | HoleStyledText
                 | ParseErrStyledText (ParseError Document Node ClipDoc UserToken)
                     deriving (Show, Data, Typeable)
 
-data StringOrStyled = String IDP String
-                    | Styled TextStyle StyledText
-                    | HoleStringOrStyled
-                    | ParseErrStringOrStyled (ParseError Document Node ClipDoc UserToken)
-                        deriving (Show, Data, Typeable)
+data Word = Word List_WordPart
+          | HoleWord
+          | ParseErrWord (ParseError Document Node ClipDoc UserToken)
+              deriving (Show, Data, Typeable)
+
+data WordPart = WordPart IDP String
+              | OpenTag TextStyle
+              | CloseTag TextStyle
+              | HoleWordPart
+              | ParseErrWordPart (ParseError Document Node ClipDoc UserToken)
+                  deriving (Show, Data, Typeable)
 
 data TextStyle = TextBold
                | TextItalic
@@ -138,10 +144,15 @@ data List_Task = List_Task ConsList_Task
                | ParseErrList_Task (ParseError Document Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
-data List_StringOrStyled = List_StringOrStyled ConsList_StringOrStyled
-                         | HoleList_StringOrStyled
-                         | ParseErrList_StringOrStyled (ParseError Document Node ClipDoc UserToken)
-                             deriving (Show, Data, Typeable)
+data List_Word = List_Word ConsList_Word
+               | HoleList_Word
+               | ParseErrList_Word (ParseError Document Node ClipDoc UserToken)
+                   deriving (Show, Data, Typeable)
+
+data List_WordPart = List_WordPart ConsList_WordPart
+                   | HoleList_WordPart
+                   | ParseErrList_WordPart (ParseError Document Node ClipDoc UserToken)
+                       deriving (Show, Data, Typeable)
 
 data ConsList_Expense = Cons_Expense Expense ConsList_Expense
                       | Nil_Expense
@@ -159,9 +170,13 @@ data ConsList_Task = Cons_Task Task ConsList_Task
                    | Nil_Task
                        deriving (Show, Data, Typeable)
 
-data ConsList_StringOrStyled = Cons_StringOrStyled StringOrStyled ConsList_StringOrStyled
-                             | Nil_StringOrStyled
-                                 deriving (Show, Data, Typeable)
+data ConsList_Word = Cons_Word Word ConsList_Word
+                   | Nil_Word
+                       deriving (Show, Data, Typeable)
+
+data ConsList_WordPart = Cons_WordPart WordPart ConsList_WordPart
+                       | Nil_WordPart
+                           deriving (Show, Data, Typeable)
 
 
 
@@ -185,7 +200,8 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Field Field
              | Clip_Test Test
              | Clip_StyledText StyledText
-             | Clip_StringOrStyled StringOrStyled
+             | Clip_Word Word
+             | Clip_WordPart WordPart
              | Clip_TextStyle TextStyle
              | Clip_Int_ Int_
              | Clip_Float_ Float_
@@ -193,7 +209,8 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_List_Currency List_Currency
              | Clip_List_Thing List_Thing
              | Clip_List_Task List_Task
-             | Clip_List_StringOrStyled List_StringOrStyled
+             | Clip_List_Word List_Word
+             | Clip_List_WordPart List_WordPart
              | Clip_Bool Bool
              | Clip_Int Int
              | Clip_String String
@@ -256,10 +273,14 @@ data Node = NoNode
           | Node_StyledText StyledText Path
           | Node_HoleStyledText StyledText Path
           | Node_ParseErrStyledText StyledText Path
-          | Node_String StringOrStyled Path
-          | Node_Styled StringOrStyled Path
-          | Node_HoleStringOrStyled StringOrStyled Path
-          | Node_ParseErrStringOrStyled StringOrStyled Path
+          | Node_Word Word Path
+          | Node_HoleWord Word Path
+          | Node_ParseErrWord Word Path
+          | Node_WordPart WordPart Path
+          | Node_OpenTag WordPart Path
+          | Node_CloseTag WordPart Path
+          | Node_HoleWordPart WordPart Path
+          | Node_ParseErrWordPart WordPart Path
           | Node_TextBold TextStyle Path
           | Node_TextItalic TextStyle Path
           | Node_TextRed TextStyle Path
@@ -283,9 +304,12 @@ data Node = NoNode
           | Node_List_Task List_Task Path
           | Node_HoleList_Task List_Task Path
           | Node_ParseErrList_Task List_Task Path
-          | Node_List_StringOrStyled List_StringOrStyled Path
-          | Node_HoleList_StringOrStyled List_StringOrStyled Path
-          | Node_ParseErrList_StringOrStyled List_StringOrStyled Path
+          | Node_List_Word List_Word Path
+          | Node_HoleList_Word List_Word Path
+          | Node_ParseErrList_Word List_Word Path
+          | Node_List_WordPart List_WordPart Path
+          | Node_HoleList_WordPart List_WordPart Path
+          | Node_ParseErrList_WordPart List_WordPart Path
             deriving Typeable
 
 
@@ -345,10 +369,14 @@ instance Show Node where
   show (Node_StyledText _ _) = "Node_StyledText" 
   show (Node_HoleStyledText _ _) = "Node_HoleStyledText" 
   show (Node_ParseErrStyledText _ _) = "Node_ParseErrStyledText" 
-  show (Node_String _ _) = "Node_String" 
-  show (Node_Styled _ _) = "Node_Styled" 
-  show (Node_HoleStringOrStyled _ _) = "Node_HoleStringOrStyled" 
-  show (Node_ParseErrStringOrStyled _ _) = "Node_ParseErrStringOrStyled" 
+  show (Node_Word _ _) = "Node_Word" 
+  show (Node_HoleWord _ _) = "Node_HoleWord" 
+  show (Node_ParseErrWord _ _) = "Node_ParseErrWord" 
+  show (Node_WordPart _ _) = "Node_WordPart" 
+  show (Node_OpenTag _ _) = "Node_OpenTag" 
+  show (Node_CloseTag _ _) = "Node_CloseTag" 
+  show (Node_HoleWordPart _ _) = "Node_HoleWordPart" 
+  show (Node_ParseErrWordPart _ _) = "Node_ParseErrWordPart" 
   show (Node_TextBold _ _) = "Node_TextBold" 
   show (Node_TextItalic _ _) = "Node_TextItalic" 
   show (Node_TextRed _ _) = "Node_TextRed" 
@@ -372,8 +400,11 @@ instance Show Node where
   show (Node_List_Task _ _) = "Node_List_Task" 
   show (Node_HoleList_Task _ _) = "Node_HoleList_Task" 
   show (Node_ParseErrList_Task _ _) = "Node_ParseErrList_Task" 
-  show (Node_List_StringOrStyled _ _) = "Node_List_StringOrStyled" 
-  show (Node_HoleList_StringOrStyled _ _) = "Node_HoleList_StringOrStyled" 
-  show (Node_ParseErrList_StringOrStyled _ _) = "Node_ParseErrList_StringOrStyled" 
+  show (Node_List_Word _ _) = "Node_List_Word" 
+  show (Node_HoleList_Word _ _) = "Node_HoleList_Word" 
+  show (Node_ParseErrList_Word _ _) = "Node_ParseErrList_Word" 
+  show (Node_List_WordPart _ _) = "Node_List_WordPart" 
+  show (Node_HoleList_WordPart _ _) = "Node_HoleList_WordPart" 
+  show (Node_ParseErrList_WordPart _ _) = "Node_ParseErrList_WordPart" 
 
 

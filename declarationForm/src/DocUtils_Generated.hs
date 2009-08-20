@@ -16,7 +16,8 @@ import Common.CommonTypes hiding (Clean, Dirty)
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
     TestDoc $
-      Test (StyledText $ toList_StringOrStyled [ String NoIDP "styledtext" ])--thisisalittlebitofnot-so-richtext" ])
+      Test $ StyledText $ toList_Word [ Word $ toList_WordPart [ WordPart NoIDP "bla" ]]
+--      Test (StyledText $ toList_StringOrStyled [ String NoIDP "styledtext" ])
 {-  TaskDoc $
     Tasks (toList_Thing [Thing 1, Thing 2, Thing 3]) (toList_Thing [])True $ toList_Task
       [ BasicTask (Description "Pinpas bestellen") True
@@ -60,6 +61,11 @@ toInt_ x = Int_ x
  
 toFloat_ x = Float_ x
 
+instance Eq TextStyle where
+  TextBold   == TextBold   = True
+  TextItalic == TextItalic = True
+  TextRed    == TextRed    = True
+  _          == _          = False
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 --------------------------------------------------------------------------
@@ -117,36 +123,43 @@ rankNode (Node_ParseErrTest _ _) = 46
 rankNode (Node_StyledText _ _) = 47
 rankNode (Node_HoleStyledText _ _) = 48
 rankNode (Node_ParseErrStyledText _ _) = 49
-rankNode (Node_String _ _) = 50
-rankNode (Node_Styled _ _) = 51
-rankNode (Node_HoleStringOrStyled _ _) = 52
-rankNode (Node_ParseErrStringOrStyled _ _) = 53
-rankNode (Node_TextBold _ _) = 54
-rankNode (Node_TextItalic _ _) = 55
-rankNode (Node_TextRed _ _) = 56
-rankNode (Node_HoleTextStyle _ _) = 57
-rankNode (Node_ParseErrTextStyle _ _) = 58
-rankNode (Node_Int_ _ _) = 59
-rankNode (Node_HoleInt_ _ _) = 60
-rankNode (Node_ParseErrInt_ _ _) = 61
-rankNode (Node_Float_ _ _) = 62
-rankNode (Node_HoleFloat_ _ _) = 63
-rankNode (Node_ParseErrFloat_ _ _) = 64
-rankNode (Node_List_Expense _ _) = 65
-rankNode (Node_HoleList_Expense _ _) = 66
-rankNode (Node_ParseErrList_Expense _ _) = 67
-rankNode (Node_List_Currency _ _) = 68
-rankNode (Node_HoleList_Currency _ _) = 69
-rankNode (Node_ParseErrList_Currency _ _) = 70
-rankNode (Node_List_Thing _ _) = 71
-rankNode (Node_HoleList_Thing _ _) = 72
-rankNode (Node_ParseErrList_Thing _ _) = 73
-rankNode (Node_List_Task _ _) = 74
-rankNode (Node_HoleList_Task _ _) = 75
-rankNode (Node_ParseErrList_Task _ _) = 76
-rankNode (Node_List_StringOrStyled _ _) = 77
-rankNode (Node_HoleList_StringOrStyled _ _) = 78
-rankNode (Node_ParseErrList_StringOrStyled _ _) = 79
+rankNode (Node_Word _ _) = 50
+rankNode (Node_HoleWord _ _) = 51
+rankNode (Node_ParseErrWord _ _) = 52
+rankNode (Node_WordPart _ _) = 53
+rankNode (Node_OpenTag _ _) = 54
+rankNode (Node_CloseTag _ _) = 55
+rankNode (Node_HoleWordPart _ _) = 56
+rankNode (Node_ParseErrWordPart _ _) = 57
+rankNode (Node_TextBold _ _) = 58
+rankNode (Node_TextItalic _ _) = 59
+rankNode (Node_TextRed _ _) = 60
+rankNode (Node_HoleTextStyle _ _) = 61
+rankNode (Node_ParseErrTextStyle _ _) = 62
+rankNode (Node_Int_ _ _) = 63
+rankNode (Node_HoleInt_ _ _) = 64
+rankNode (Node_ParseErrInt_ _ _) = 65
+rankNode (Node_Float_ _ _) = 66
+rankNode (Node_HoleFloat_ _ _) = 67
+rankNode (Node_ParseErrFloat_ _ _) = 68
+rankNode (Node_List_Expense _ _) = 69
+rankNode (Node_HoleList_Expense _ _) = 70
+rankNode (Node_ParseErrList_Expense _ _) = 71
+rankNode (Node_List_Currency _ _) = 72
+rankNode (Node_HoleList_Currency _ _) = 73
+rankNode (Node_ParseErrList_Currency _ _) = 74
+rankNode (Node_List_Thing _ _) = 75
+rankNode (Node_HoleList_Thing _ _) = 76
+rankNode (Node_ParseErrList_Thing _ _) = 77
+rankNode (Node_List_Task _ _) = 78
+rankNode (Node_HoleList_Task _ _) = 79
+rankNode (Node_ParseErrList_Task _ _) = 80
+rankNode (Node_List_Word _ _) = 81
+rankNode (Node_HoleList_Word _ _) = 82
+rankNode (Node_ParseErrList_Word _ _) = 83
+rankNode (Node_List_WordPart _ _) = 84
+rankNode (Node_HoleList_WordPart _ _) = 85
+rankNode (Node_ParseErrList_WordPart _ _) = 86
 
 
 
@@ -207,10 +220,14 @@ instance DocNode Node where
   pathNode (Node_StyledText _ pth) = PathD pth
   pathNode (Node_HoleStyledText _ pth) = PathD pth
   pathNode (Node_ParseErrStyledText _ pth) = PathD pth
-  pathNode (Node_String _ pth) = PathD pth
-  pathNode (Node_Styled _ pth) = PathD pth
-  pathNode (Node_HoleStringOrStyled _ pth) = PathD pth
-  pathNode (Node_ParseErrStringOrStyled _ pth) = PathD pth
+  pathNode (Node_Word _ pth) = PathD pth
+  pathNode (Node_HoleWord _ pth) = PathD pth
+  pathNode (Node_ParseErrWord _ pth) = PathD pth
+  pathNode (Node_WordPart _ pth) = PathD pth
+  pathNode (Node_OpenTag _ pth) = PathD pth
+  pathNode (Node_CloseTag _ pth) = PathD pth
+  pathNode (Node_HoleWordPart _ pth) = PathD pth
+  pathNode (Node_ParseErrWordPart _ pth) = PathD pth
   pathNode (Node_TextBold _ pth) = PathD pth
   pathNode (Node_TextItalic _ pth) = PathD pth
   pathNode (Node_TextRed _ pth) = PathD pth
@@ -234,9 +251,12 @@ instance DocNode Node where
   pathNode (Node_List_Task _ pth) = PathD pth
   pathNode (Node_HoleList_Task _ pth) = PathD pth
   pathNode (Node_ParseErrList_Task _ pth) = PathD pth
-  pathNode (Node_List_StringOrStyled _ pth) = PathD pth
-  pathNode (Node_HoleList_StringOrStyled _ pth) = PathD pth
-  pathNode (Node_ParseErrList_StringOrStyled _ pth) = PathD pth
+  pathNode (Node_List_Word _ pth) = PathD pth
+  pathNode (Node_HoleList_Word _ pth) = PathD pth
+  pathNode (Node_ParseErrList_Word _ pth) = PathD pth
+  pathNode (Node_List_WordPart _ pth) = PathD pth
+  pathNode (Node_HoleList_WordPart _ pth) = PathD pth
+  pathNode (Node_ParseErrList_WordPart _ pth) = PathD pth
 
   typeOfNode (Node_RootEnr _ _) = BasicType "EnrichedDoc"
   typeOfNode (Node_HoleEnrichedDoc _ _) = BasicType "EnrichedDoc"
@@ -287,10 +307,14 @@ instance DocNode Node where
   typeOfNode (Node_StyledText _ _) = BasicType "StyledText"
   typeOfNode (Node_HoleStyledText _ _) = BasicType "StyledText"
   typeOfNode (Node_ParseErrStyledText _ _) = BasicType "StyledText"
-  typeOfNode (Node_String _ _) = BasicType "StringOrStyled"
-  typeOfNode (Node_Styled _ _) = BasicType "StringOrStyled"
-  typeOfNode (Node_HoleStringOrStyled _ _) = BasicType "StringOrStyled"
-  typeOfNode (Node_ParseErrStringOrStyled _ _) = BasicType "StringOrStyled"
+  typeOfNode (Node_Word _ _) = BasicType "Word"
+  typeOfNode (Node_HoleWord _ _) = BasicType "Word"
+  typeOfNode (Node_ParseErrWord _ _) = BasicType "Word"
+  typeOfNode (Node_WordPart _ _) = BasicType "WordPart"
+  typeOfNode (Node_OpenTag _ _) = BasicType "WordPart"
+  typeOfNode (Node_CloseTag _ _) = BasicType "WordPart"
+  typeOfNode (Node_HoleWordPart _ _) = BasicType "WordPart"
+  typeOfNode (Node_ParseErrWordPart _ _) = BasicType "WordPart"
   typeOfNode (Node_TextBold _ _) = BasicType "TextStyle"
   typeOfNode (Node_TextItalic _ _) = BasicType "TextStyle"
   typeOfNode (Node_TextRed _ _) = BasicType "TextStyle"
@@ -314,9 +338,12 @@ instance DocNode Node where
   typeOfNode (Node_List_Task _ _) = ListType "Task"
   typeOfNode (Node_HoleList_Task _ _) = ListType "Task"
   typeOfNode (Node_ParseErrList_Task _ _) = ListType "Task"
-  typeOfNode (Node_List_StringOrStyled _ _) = ListType "StringOrStyled"
-  typeOfNode (Node_HoleList_StringOrStyled _ _) = ListType "StringOrStyled"
-  typeOfNode (Node_ParseErrList_StringOrStyled _ _) = ListType "StringOrStyled"
+  typeOfNode (Node_List_Word _ _) = ListType "Word"
+  typeOfNode (Node_HoleList_Word _ _) = ListType "Word"
+  typeOfNode (Node_ParseErrList_Word _ _) = ListType "Word"
+  typeOfNode (Node_List_WordPart _ _) = ListType "WordPart"
+  typeOfNode (Node_HoleList_WordPart _ _) = ListType "WordPart"
+  typeOfNode (Node_ParseErrList_WordPart _ _) = ListType "WordPart"
 
 
 
@@ -370,13 +397,17 @@ toXMLField (ParseErrField error) = EmptyElt "ParseErrField" []
 toXMLTest (Test styledText) = Elt "Test" [] $ [toXMLStyledText styledText]
 toXMLTest (HoleTest) = EmptyElt "HoleTest" [] 
 toXMLTest (ParseErrTest error) = EmptyElt "ParseErrTest" []
-toXMLStyledText (StyledText stringOrStyleds) = Elt "StyledText" [] $ toXMLList_StringOrStyled stringOrStyleds
+toXMLStyledText (StyledText words) = Elt "StyledText" [] $ toXMLList_Word words
 toXMLStyledText (HoleStyledText) = EmptyElt "HoleStyledText" [] 
 toXMLStyledText (ParseErrStyledText error) = EmptyElt "ParseErrStyledText" []
-toXMLStringOrStyled (String _ string) = Elt "String" [] $ [toXMLString string]
-toXMLStringOrStyled (Styled style styled) = Elt "Styled" [] $ [toXMLTextStyle style] ++ [toXMLStyledText styled]
-toXMLStringOrStyled (HoleStringOrStyled) = EmptyElt "HoleStringOrStyled" [] 
-toXMLStringOrStyled (ParseErrStringOrStyled error) = EmptyElt "ParseErrStringOrStyled" []
+toXMLWord (Word parts) = Elt "Word" [] $ toXMLList_WordPart parts
+toXMLWord (HoleWord) = EmptyElt "HoleWord" [] 
+toXMLWord (ParseErrWord error) = EmptyElt "ParseErrWord" []
+toXMLWordPart (WordPart _ word) = Elt "WordPart" [] $ [toXMLString word]
+toXMLWordPart (OpenTag style) = Elt "OpenTag" [] $ [toXMLTextStyle style]
+toXMLWordPart (CloseTag style) = Elt "CloseTag" [] $ [toXMLTextStyle style]
+toXMLWordPart (HoleWordPart) = EmptyElt "HoleWordPart" [] 
+toXMLWordPart (ParseErrWordPart error) = EmptyElt "ParseErrWordPart" []
 toXMLTextStyle (TextBold) = EmptyElt "TextBold" [] 
 toXMLTextStyle (TextItalic) = EmptyElt "TextItalic" [] 
 toXMLTextStyle (TextRed) = EmptyElt "TextRed" [] 
@@ -400,9 +431,12 @@ toXMLList_Thing (ParseErrList_Thing _) = []
 toXMLList_Task (List_Task xs) = toXMLConsList_Task xs
 toXMLList_Task HoleList_Task = []
 toXMLList_Task (ParseErrList_Task _) = []
-toXMLList_StringOrStyled (List_StringOrStyled xs) = toXMLConsList_StringOrStyled xs
-toXMLList_StringOrStyled HoleList_StringOrStyled = []
-toXMLList_StringOrStyled (ParseErrList_StringOrStyled _) = []
+toXMLList_Word (List_Word xs) = toXMLConsList_Word xs
+toXMLList_Word HoleList_Word = []
+toXMLList_Word (ParseErrList_Word _) = []
+toXMLList_WordPart (List_WordPart xs) = toXMLConsList_WordPart xs
+toXMLList_WordPart HoleList_WordPart = []
+toXMLList_WordPart (ParseErrList_WordPart _) = []
 toXMLConsList_Expense (Cons_Expense x xs) = toXMLExpense x : toXMLConsList_Expense xs
 toXMLConsList_Expense Nil_Expense             = []
 toXMLConsList_Currency (Cons_Currency x xs) = toXMLCurrency x : toXMLConsList_Currency xs
@@ -411,8 +445,10 @@ toXMLConsList_Thing (Cons_Thing x xs) = toXMLThing x : toXMLConsList_Thing xs
 toXMLConsList_Thing Nil_Thing             = []
 toXMLConsList_Task (Cons_Task x xs) = toXMLTask x : toXMLConsList_Task xs
 toXMLConsList_Task Nil_Task             = []
-toXMLConsList_StringOrStyled (Cons_StringOrStyled x xs) = toXMLStringOrStyled x : toXMLConsList_StringOrStyled xs
-toXMLConsList_StringOrStyled Nil_StringOrStyled             = []
+toXMLConsList_Word (Cons_Word x xs) = toXMLWord x : toXMLConsList_Word xs
+toXMLConsList_Word Nil_Word             = []
+toXMLConsList_WordPart (Cons_WordPart x xs) = toXMLWordPart x : toXMLConsList_WordPart xs
+toXMLConsList_WordPart Nil_WordPart             = []
 
 
 
@@ -453,10 +489,13 @@ parseXMLCns_Field = Field <$ startTag "Field" <*> parseXML_Int_<* endTag "Field"
 parseXML_Test = parseXMLCns_Test <|> parseHoleAndParseErr "Test" HoleTest
 parseXMLCns_Test = Test <$ startTag "Test" <*> parseXML_StyledText<* endTag "Test"
 parseXML_StyledText = parseXMLCns_StyledText <|> parseHoleAndParseErr "StyledText" HoleStyledText
-parseXMLCns_StyledText = StyledText <$ startTag "StyledText" <*> parseXML_List_StringOrStyled<* endTag "StyledText"
-parseXML_StringOrStyled = parseXMLCns_String <|> parseXMLCns_Styled <|> parseHoleAndParseErr "StringOrStyled" HoleStringOrStyled
-parseXMLCns_String = String NoIDP <$ startTag "String" <*> parseXML_String<* endTag "String"
-parseXMLCns_Styled = Styled <$ startTag "Styled" <*> parseXML_TextStyle <*> parseXML_StyledText<* endTag "Styled"
+parseXMLCns_StyledText = StyledText <$ startTag "StyledText" <*> parseXML_List_Word<* endTag "StyledText"
+parseXML_Word = parseXMLCns_Word <|> parseHoleAndParseErr "Word" HoleWord
+parseXMLCns_Word = Word <$ startTag "Word" <*> parseXML_List_WordPart<* endTag "Word"
+parseXML_WordPart = parseXMLCns_WordPart <|> parseXMLCns_OpenTag <|> parseXMLCns_CloseTag <|> parseHoleAndParseErr "WordPart" HoleWordPart
+parseXMLCns_WordPart = WordPart NoIDP <$ startTag "WordPart" <*> parseXML_String<* endTag "WordPart"
+parseXMLCns_OpenTag = OpenTag <$ startTag "OpenTag" <*> parseXML_TextStyle<* endTag "OpenTag"
+parseXMLCns_CloseTag = CloseTag <$ startTag "CloseTag" <*> parseXML_TextStyle<* endTag "CloseTag"
 parseXML_TextStyle = parseXMLCns_TextBold <|> parseXMLCns_TextItalic <|> parseXMLCns_TextRed <|> parseHoleAndParseErr "TextStyle" HoleTextStyle
 parseXMLCns_TextBold = TextBold <$ emptyTag "TextBold"
 parseXMLCns_TextItalic = TextItalic <$ emptyTag "TextItalic"
@@ -469,7 +508,8 @@ parseXML_List_Expense = mkList List_Expense Cons_Expense Nil_Expense <$> pList_n
 parseXML_List_Currency = mkList List_Currency Cons_Currency Nil_Currency <$> pList_ng parseXML_Currency
 parseXML_List_Thing = mkList List_Thing Cons_Thing Nil_Thing <$> pList_ng parseXML_Thing
 parseXML_List_Task = mkList List_Task Cons_Task Nil_Task <$> pList_ng parseXML_Task
-parseXML_List_StringOrStyled = mkList List_StringOrStyled Cons_StringOrStyled Nil_StringOrStyled <$> pList_ng parseXML_StringOrStyled
+parseXML_List_Word = mkList List_Word Cons_Word Nil_Word <$> pList_ng parseXML_Word
+parseXML_List_WordPart = mkList List_WordPart Cons_WordPart Nil_WordPart <$> pList_ng parseXML_WordPart
 
 
 
@@ -569,28 +609,51 @@ removeList_Task _ Nil_Task  = Nil_Task  -- remove beyond end of list
 removeList_Task 0 (Cons_Task cx cxs) = cxs
 removeList_Task n (Cons_Task cx cxs) = Cons_Task cx (removeList_Task (n-1) cxs)
 
-toList_StringOrStyled vs = List_StringOrStyled (toConsList_StringOrStyled vs)
+toList_Word vs = List_Word (toConsList_Word vs)
 
-fromList_StringOrStyled (List_StringOrStyled vs) = fromConsList_StringOrStyled vs
-fromList_StringOrStyled _ = []
+fromList_Word (List_Word vs) = fromConsList_Word vs
+fromList_Word _ = []
 
-toConsList_StringOrStyled [] = Nil_StringOrStyled
-toConsList_StringOrStyled (x:xs) = Cons_StringOrStyled x (toConsList_StringOrStyled xs)
+toConsList_Word [] = Nil_Word
+toConsList_Word (x:xs) = Cons_Word x (toConsList_Word xs)
 
-fromConsList_StringOrStyled Nil_StringOrStyled = []
-fromConsList_StringOrStyled (Cons_StringOrStyled x xs) = x: fromConsList_StringOrStyled xs
+fromConsList_Word Nil_Word = []
+fromConsList_Word (Cons_Word x xs) = x: fromConsList_Word xs
 
-replaceList_StringOrStyled _ x Nil_StringOrStyled = Nil_StringOrStyled  -- replace beyond end of list
-replaceList_StringOrStyled 0 x (Cons_StringOrStyled cx cxs) = Cons_StringOrStyled x cxs
-replaceList_StringOrStyled n x (Cons_StringOrStyled cx cxs) = Cons_StringOrStyled cx (replaceList_StringOrStyled (n-1) x cxs)
+replaceList_Word _ x Nil_Word = Nil_Word  -- replace beyond end of list
+replaceList_Word 0 x (Cons_Word cx cxs) = Cons_Word x cxs
+replaceList_Word n x (Cons_Word cx cxs) = Cons_Word cx (replaceList_Word (n-1) x cxs)
 
-insertList_StringOrStyled 0 x cxs = Cons_StringOrStyled x cxs
-insertList_StringOrStyled _ x Nil_StringOrStyled  = Nil_StringOrStyled  -- insert beyond end of list
-insertList_StringOrStyled n x (Cons_StringOrStyled cx cxs) = Cons_StringOrStyled cx (insertList_StringOrStyled (n-1) x cxs)
+insertList_Word 0 x cxs = Cons_Word x cxs
+insertList_Word _ x Nil_Word  = Nil_Word  -- insert beyond end of list
+insertList_Word n x (Cons_Word cx cxs) = Cons_Word cx (insertList_Word (n-1) x cxs)
 
-removeList_StringOrStyled _ Nil_StringOrStyled  = Nil_StringOrStyled  -- remove beyond end of list
-removeList_StringOrStyled 0 (Cons_StringOrStyled cx cxs) = cxs
-removeList_StringOrStyled n (Cons_StringOrStyled cx cxs) = Cons_StringOrStyled cx (removeList_StringOrStyled (n-1) cxs)
+removeList_Word _ Nil_Word  = Nil_Word  -- remove beyond end of list
+removeList_Word 0 (Cons_Word cx cxs) = cxs
+removeList_Word n (Cons_Word cx cxs) = Cons_Word cx (removeList_Word (n-1) cxs)
+
+toList_WordPart vs = List_WordPart (toConsList_WordPart vs)
+
+fromList_WordPart (List_WordPart vs) = fromConsList_WordPart vs
+fromList_WordPart _ = []
+
+toConsList_WordPart [] = Nil_WordPart
+toConsList_WordPart (x:xs) = Cons_WordPart x (toConsList_WordPart xs)
+
+fromConsList_WordPart Nil_WordPart = []
+fromConsList_WordPart (Cons_WordPart x xs) = x: fromConsList_WordPart xs
+
+replaceList_WordPart _ x Nil_WordPart = Nil_WordPart  -- replace beyond end of list
+replaceList_WordPart 0 x (Cons_WordPart cx cxs) = Cons_WordPart x cxs
+replaceList_WordPart n x (Cons_WordPart cx cxs) = Cons_WordPart cx (replaceList_WordPart (n-1) x cxs)
+
+insertList_WordPart 0 x cxs = Cons_WordPart x cxs
+insertList_WordPart _ x Nil_WordPart  = Nil_WordPart  -- insert beyond end of list
+insertList_WordPart n x (Cons_WordPart cx cxs) = Cons_WordPart cx (insertList_WordPart (n-1) x cxs)
+
+removeList_WordPart _ Nil_WordPart  = Nil_WordPart  -- remove beyond end of list
+removeList_WordPart 0 (Cons_WordPart cx cxs) = cxs
+removeList_WordPart n (Cons_WordPart cx cxs) = Cons_WordPart cx (removeList_WordPart (n-1) cxs)
 
 
 

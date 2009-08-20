@@ -31,7 +31,8 @@ instance Clip ClipDoc where
   arityClip (Clip_Field x) = arity x
   arityClip (Clip_Test x) = arity x
   arityClip (Clip_StyledText x) = arity x
-  arityClip (Clip_StringOrStyled x) = arity x
+  arityClip (Clip_Word x) = arity x
+  arityClip (Clip_WordPart x) = arity x
   arityClip (Clip_TextStyle x) = arity x
   arityClip (Clip_Int_ x) = arity x
   arityClip (Clip_Float_ x) = arity x
@@ -39,7 +40,8 @@ instance Clip ClipDoc where
   arityClip (Clip_List_Currency x) = arity x
   arityClip (Clip_List_Thing x) = arity x
   arityClip (Clip_List_Task x) = arity x
-  arityClip (Clip_List_StringOrStyled x) = arity x
+  arityClip (Clip_List_Word x) = arity x
+  arityClip (Clip_List_WordPart x) = arity x
   arityClip (Clip_Bool x) = arity x
   arityClip (Clip_Int x) = arity x
   arityClip (Clip_String x) = arity x
@@ -61,7 +63,8 @@ instance Clip ClipDoc where
   alternativesClip (Clip_Field x) = alternatives x
   alternativesClip (Clip_Test x) = alternatives x
   alternativesClip (Clip_StyledText x) = alternatives x
-  alternativesClip (Clip_StringOrStyled x) = alternatives x
+  alternativesClip (Clip_Word x) = alternatives x
+  alternativesClip (Clip_WordPart x) = alternatives x
   alternativesClip (Clip_TextStyle x) = alternatives x
   alternativesClip (Clip_Int_ x) = alternatives x
   alternativesClip (Clip_Float_ x) = alternatives x
@@ -69,7 +72,8 @@ instance Clip ClipDoc where
   alternativesClip (Clip_List_Currency x) = alternatives x
   alternativesClip (Clip_List_Thing x) = alternatives x
   alternativesClip (Clip_List_Task x) = alternatives x
-  alternativesClip (Clip_List_StringOrStyled x) = alternatives x
+  alternativesClip (Clip_List_Word x) = alternatives x
+  alternativesClip (Clip_List_WordPart x) = alternatives x
   alternativesClip (Clip_Bool x) = alternatives x
   alternativesClip (Clip_Int x) = alternatives x
   alternativesClip (Clip_String x) = alternatives x
@@ -91,7 +95,8 @@ instance Clip ClipDoc where
   holeClip (Clip_Field x) = Clip_Field hole
   holeClip (Clip_Test x) = Clip_Test hole
   holeClip (Clip_StyledText x) = Clip_StyledText hole
-  holeClip (Clip_StringOrStyled x) = Clip_StringOrStyled hole
+  holeClip (Clip_Word x) = Clip_Word hole
+  holeClip (Clip_WordPart x) = Clip_WordPart hole
   holeClip (Clip_TextStyle x) = Clip_TextStyle hole
   holeClip (Clip_Int_ x) = Clip_Int_ hole
   holeClip (Clip_Float_ x) = Clip_Float_ hole
@@ -99,7 +104,8 @@ instance Clip ClipDoc where
   holeClip (Clip_List_Currency x) = Clip_List_Currency hole
   holeClip (Clip_List_Thing x) = Clip_List_Thing hole
   holeClip (Clip_List_Task x) = Clip_List_Task hole
-  holeClip (Clip_List_StringOrStyled x) = Clip_List_StringOrStyled hole
+  holeClip (Clip_List_Word x) = Clip_List_Word hole
+  holeClip (Clip_List_WordPart x) = Clip_List_WordPart hole
   holeClip (Clip_Bool x) = Clip_Bool hole
   holeClip (Clip_Int x) = Clip_Int hole
   holeClip (Clip_String x) = Clip_String hole
@@ -121,7 +127,8 @@ instance Clip ClipDoc where
   isListClip (Clip_Field x) = isList x
   isListClip (Clip_Test x) = isList x
   isListClip (Clip_StyledText x) = isList x
-  isListClip (Clip_StringOrStyled x) = isList x
+  isListClip (Clip_Word x) = isList x
+  isListClip (Clip_WordPart x) = isList x
   isListClip (Clip_TextStyle x) = isList x
   isListClip (Clip_Int_ x) = isList x
   isListClip (Clip_Float_ x) = isList x
@@ -129,7 +136,8 @@ instance Clip ClipDoc where
   isListClip (Clip_List_Currency x) = isList x
   isListClip (Clip_List_Thing x) = isList x
   isListClip (Clip_List_Task x) = isList x
-  isListClip (Clip_List_StringOrStyled x) = isList x
+  isListClip (Clip_List_Word x) = isList x
+  isListClip (Clip_List_WordPart x) = isList x
   isListClip (Clip_Bool x) = isList x
   isListClip (Clip_Int x) = isList x
   isListClip (Clip_String x) = isList x
@@ -151,7 +159,8 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_Field x) = insertList i c x
   insertListClip i c (Clip_Test x) = insertList i c x
   insertListClip i c (Clip_StyledText x) = insertList i c x
-  insertListClip i c (Clip_StringOrStyled x) = insertList i c x
+  insertListClip i c (Clip_Word x) = insertList i c x
+  insertListClip i c (Clip_WordPart x) = insertList i c x
   insertListClip i c (Clip_TextStyle x) = insertList i c x
   insertListClip i c (Clip_Int_ x) = insertList i c x
   insertListClip i c (Clip_Float_ x) = insertList i c x
@@ -159,7 +168,8 @@ instance Clip ClipDoc where
   insertListClip i c (Clip_List_Currency x) = insertList i c x
   insertListClip i c (Clip_List_Thing x) = insertList i c x
   insertListClip i c (Clip_List_Task x) = insertList i c x
-  insertListClip i c (Clip_List_StringOrStyled x) = insertList i c x
+  insertListClip i c (Clip_List_Word x) = insertList i c x
+  insertListClip i c (Clip_List_WordPart x) = insertList i c x
   insertListClip i c (Clip_Bool x) = insertList i c x
   insertListClip i c (Clip_Int x) = insertList i c x
   insertListClip i c (Clip_String x) = insertList i c x
@@ -181,7 +191,8 @@ instance Clip ClipDoc where
   removeListClip i (Clip_Field x) = removeList i x
   removeListClip i (Clip_Test x) = removeList i x
   removeListClip i (Clip_StyledText x) = removeList i x
-  removeListClip i (Clip_StringOrStyled x) = removeList i x
+  removeListClip i (Clip_Word x) = removeList i x
+  removeListClip i (Clip_WordPart x) = removeList i x
   removeListClip i (Clip_TextStyle x) = removeList i x
   removeListClip i (Clip_Int_ x) = removeList i x
   removeListClip i (Clip_Float_ x) = removeList i x
@@ -189,7 +200,8 @@ instance Clip ClipDoc where
   removeListClip i (Clip_List_Currency x) = removeList i x
   removeListClip i (Clip_List_Thing x) = removeList i x
   removeListClip i (Clip_List_Task x) = removeList i x
-  removeListClip i (Clip_List_StringOrStyled x) = removeList i x
+  removeListClip i (Clip_List_Word x) = removeList i x
+  removeListClip i (Clip_List_WordPart x) = removeList i x
   removeListClip i (Clip_Bool x) = removeList i x
   removeListClip i (Clip_Int x) = removeList i x
   removeListClip i (Clip_String x) = removeList i x
@@ -732,7 +744,7 @@ instance Editable StyledText Document Node ClipDoc UserToken where
   paste (0:p) c (StyledText x0) = StyledText (paste p c x0)
   paste _ _ x = x
 
-  alternatives _ = [ ("StyledText {List_StringOrStyled} "  , Clip_StyledText $ StyledText hole)
+  alternatives _ = [ ("StyledText {List_Word} "  , Clip_StyledText $ StyledText hole)
                    ,("{StyledText}", Clip_StyledText hole)
                    ]
 
@@ -754,39 +766,73 @@ instance Editable StyledText Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable StringOrStyled Document Node ClipDoc UserToken where
-  select [] x = Clip_StringOrStyled x
-  select (0:p) (String _ x0) = select p x0
-  select (0:p) (Styled x0 x1) = select p x0
-  select (1:p) (Styled x0 x1) = select p x1
+instance Editable Word Document Node ClipDoc UserToken where
+  select [] x = Clip_Word x
+  select (0:p) (Word x0) = select p x0
   select _ _ = Clip_Nothing
 
-  paste [] (Clip_StringOrStyled c) _ = c
-  paste [] c x = debug Err ("Type error: pasting "++show c++" on StringOrStyled") x
-  paste (0:p) c (String i0 x0) = String i0 (paste p c x0)
-  paste (0:p) c (Styled x0 x1) = Styled (paste p c x0) x1
-  paste (1:p) c (Styled x0 x1) = Styled x0 (paste p c x1)
+  paste [] (Clip_Word c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on Word") x
+  paste (0:p) c (Word x0) = Word (paste p c x0)
   paste _ _ x = x
 
-  alternatives _ = [ ("String {String} "  , Clip_StringOrStyled $ String NoIDP hole)
-                   , ("Styled {TextStyle} {StyledText} "  , Clip_StringOrStyled $ Styled hole hole)
-                   ,("{StringOrStyled}", Clip_StringOrStyled hole)
+  alternatives _ = [ ("Word {List_WordPart} "  , Clip_Word $ Word hole)
+                   ,("{Word}", Clip_Word hole)
                    ]
 
-  arity (String _ x0) = 1
-  arity (Styled x0 x1) = 2
+  arity (Word x0) = 1
   arity _                        = 0
 
-  toClip t = Clip_StringOrStyled t
+  toClip t = Clip_Word t
 
-  fromClip (Clip_StringOrStyled t) = Just t
+  fromClip (Clip_Word t) = Just t
   fromClip _             = Nothing
 
-  parseErr = ParseErrStringOrStyled
+  parseErr = ParseErrWord
 
-  hole = HoleStringOrStyled
+  hole = HoleWord
 
-  holeNodeConstr = Node_HoleStringOrStyled
+  holeNodeConstr = Node_HoleWord
+
+  isList _ = False
+  insertList _ _ _ = Clip_Nothing
+  removeList _ _ = Clip_Nothing
+
+instance Editable WordPart Document Node ClipDoc UserToken where
+  select [] x = Clip_WordPart x
+  select (0:p) (WordPart _ x0) = select p x0
+  select (0:p) (OpenTag x0) = select p x0
+  select (0:p) (CloseTag x0) = select p x0
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_WordPart c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on WordPart") x
+  paste (0:p) c (WordPart i0 x0) = WordPart i0 (paste p c x0)
+  paste (0:p) c (OpenTag x0) = OpenTag (paste p c x0)
+  paste (0:p) c (CloseTag x0) = CloseTag (paste p c x0)
+  paste _ _ x = x
+
+  alternatives _ = [ ("WordPart {String} "  , Clip_WordPart $ WordPart NoIDP hole)
+                   , ("OpenTag {TextStyle} "  , Clip_WordPart $ OpenTag hole)
+                   , ("CloseTag {TextStyle} "  , Clip_WordPart $ CloseTag hole)
+                   ,("{WordPart}", Clip_WordPart hole)
+                   ]
+
+  arity (WordPart _ x0) = 1
+  arity (OpenTag x0) = 1
+  arity (CloseTag x0) = 1
+  arity _                        = 0
+
+  toClip t = Clip_WordPart t
+
+  fromClip (Clip_WordPart t) = Just t
+  fromClip _             = Nothing
+
+  parseErr = ParseErrWordPart
+
+  hole = HoleWordPart
+
+  holeNodeConstr = Node_HoleWordPart
 
   isList _ = False
   insertList _ _ _ = Clip_Nothing
@@ -1074,51 +1120,97 @@ instance Editable List_Task Document Node ClipDoc UserToken where
   removeList n (List_Task cxs) = Clip_List_Task $ List_Task (removeList_Task n cxs)
   removeList _ xs = Clip_List_Task $ xs
 
-instance Editable List_StringOrStyled Document Node ClipDoc UserToken where
-  select [] x = Clip_List_StringOrStyled x
-  select (n:p) (List_StringOrStyled cxs) =
-    let xs = fromConsList_StringOrStyled cxs
+instance Editable List_Word Document Node ClipDoc UserToken where
+  select [] x = Clip_List_Word x
+  select (n:p) (List_Word cxs) =
+    let xs = fromConsList_Word cxs
     in  if n < length xs 
         then select p (xs !! n)
         else Clip_Nothing
   select _ _ = Clip_Nothing
 
-  paste [] (Clip_List_StringOrStyled c) _ = c
-  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_StringOrStyled")   x
-  paste (n:p) c (List_StringOrStyled cxs) =
-    let xs = fromConsList_StringOrStyled cxs
+  paste [] (Clip_List_Word c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_Word")   x
+  paste (n:p) c (List_Word cxs) =
+    let xs = fromConsList_Word cxs
     in  if n < length xs
         then let x  = xs!!n
                  x' = paste p c x
-             in  List_StringOrStyled (replaceList_StringOrStyled n x' cxs)
-        else List_StringOrStyled cxs -- paste beyond end of list
+             in  List_Word (replaceList_Word n x' cxs)
+        else List_Word cxs -- paste beyond end of list
   paste _ _ x = x
 
-  alternatives _ = [("{List_StringOrStyled}", Clip_List_StringOrStyled hole)
+  alternatives _ = [("{List_Word}", Clip_List_Word hole)
                    ]
 
-  arity (List_StringOrStyled x1) = length (fromConsList_StringOrStyled x1)
+  arity (List_Word x1) = length (fromConsList_Word x1)
   arity _ = 0
 
-  toClip t = Clip_List_StringOrStyled t
+  toClip t = Clip_List_Word t
 
-  fromClip (Clip_List_StringOrStyled t) = Just t
+  fromClip (Clip_List_Word t) = Just t
   fromClip _ = Nothing
 
-  parseErr = ParseErrList_StringOrStyled
+  parseErr = ParseErrList_Word
 
-  hole = List_StringOrStyled Nil_StringOrStyled
+  hole = List_Word Nil_Word
 
-  holeNodeConstr = Node_HoleList_StringOrStyled
+  holeNodeConstr = Node_HoleList_Word
 
   isList _ = True
 
-  insertList n (Clip_StringOrStyled c) (List_StringOrStyled cxs) = Clip_List_StringOrStyled $ List_StringOrStyled (insertList_StringOrStyled n c cxs)
-  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_StringOrStyled xs
-  insertList _ c xs = Clip_List_StringOrStyled xs
+  insertList n (Clip_Word c) (List_Word cxs) = Clip_List_Word $ List_Word (insertList_Word n c cxs)
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_Word xs
+  insertList _ c xs = Clip_List_Word xs
 
-  removeList n (List_StringOrStyled cxs) = Clip_List_StringOrStyled $ List_StringOrStyled (removeList_StringOrStyled n cxs)
-  removeList _ xs = Clip_List_StringOrStyled $ xs
+  removeList n (List_Word cxs) = Clip_List_Word $ List_Word (removeList_Word n cxs)
+  removeList _ xs = Clip_List_Word $ xs
+
+instance Editable List_WordPart Document Node ClipDoc UserToken where
+  select [] x = Clip_List_WordPart x
+  select (n:p) (List_WordPart cxs) =
+    let xs = fromConsList_WordPart cxs
+    in  if n < length xs 
+        then select p (xs !! n)
+        else Clip_Nothing
+  select _ _ = Clip_Nothing
+
+  paste [] (Clip_List_WordPart c) _ = c
+  paste [] c x = debug Err ("Type error: pasting "++show c++" on List_WordPart")   x
+  paste (n:p) c (List_WordPart cxs) =
+    let xs = fromConsList_WordPart cxs
+    in  if n < length xs
+        then let x  = xs!!n
+                 x' = paste p c x
+             in  List_WordPart (replaceList_WordPart n x' cxs)
+        else List_WordPart cxs -- paste beyond end of list
+  paste _ _ x = x
+
+  alternatives _ = [("{List_WordPart}", Clip_List_WordPart hole)
+                   ]
+
+  arity (List_WordPart x1) = length (fromConsList_WordPart x1)
+  arity _ = 0
+
+  toClip t = Clip_List_WordPart t
+
+  fromClip (Clip_List_WordPart t) = Just t
+  fromClip _ = Nothing
+
+  parseErr = ParseErrList_WordPart
+
+  hole = List_WordPart Nil_WordPart
+
+  holeNodeConstr = Node_HoleList_WordPart
+
+  isList _ = True
+
+  insertList n (Clip_WordPart c) (List_WordPart cxs) = Clip_List_WordPart $ List_WordPart (insertList_WordPart n c cxs)
+  insertList _ _ xs = debug Err "Type error, no paste" $ Clip_List_WordPart xs
+  insertList _ c xs = Clip_List_WordPart xs
+
+  removeList n (List_WordPart cxs) = Clip_List_WordPart $ List_WordPart (removeList_WordPart n cxs)
+  removeList _ xs = Clip_List_WordPart $ xs
 
 
 

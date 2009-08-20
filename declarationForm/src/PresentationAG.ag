@@ -636,9 +636,11 @@ SEM Test
   | Test
       loc.pres = structural $ leftTopMargins 30 40 $
                    col [ row [ text "Rich text: ", @styledText.pres `withFontFam` "Courier" ]
-		       , row [ text "Parsed: ", text @styledText.str ]
+		     --  , row [ text "Parsed: ", text @styledText.str ]
+                       , formatter $ replicate 0 (text "bla") 
                        ]
-
+     styledText.styles = []
+{-
 SEM StyledText [ | | str : String ]
   | StyledText
      loc.pres = parsingWithParser pStyledText @self $
@@ -688,3 +690,52 @@ SEM TextStyle
       loc.pres = structural $ empty
   | TextRed
       loc.pres = structural $ empty
+-}
+
+ATTR StyledText List_Word ConsList_Word Word List_WordPart ConsList_WordPart WordPart [ | styles : {[TextStyle]} | ]
+
+SEM StyledText
+  | StyledText 
+      loc.pres = parsingWithParser pStyledText @self $ @words.pres
+
+SEM List_Word
+  | List_Word
+      loc.pres = parsing $
+                   formatter (if null @elts.press then [text ""] 
+                              else intersperse (text " ") @elts.press )
+                   `withWidth` 800
+       -- for an empty paragraph, we add a dummy word "" so its presentation does not get height 0
+
+SEM Word 
+  | Word 
+      loc.pres = parsing $ @parts.pres
+
+SEM List_WordPart
+  | List_WordPart
+      loc.pres = parsing $ row $ @elts.press
+
+SEM WordPart [ || ]
+  | WordPart
+      loc.pres = parsing $
+                   applyStyles @lhs.styles $ row [ StringP @idp @word ]
+  | OpenTag
+      loc.pres = empty
+      lhs.styles = @lhs.styles ++ [@style.self]
+  | CloseTag
+      loc.pres = empty
+      lhs.styles = @lhs.styles \\ [@style.self]
+      
+SEM TextStyle
+  | TextBold
+      loc.pres = structural $ empty
+  | TextItalic
+      loc.pres = structural $ empty
+  | TextRed
+      loc.pres = structural $ empty
+
+{
+applyStyles [] pres = pres
+applyStyles (TextBold:styles) pres = applyStyles styles (bold pres)
+applyStyles (TextItalic:styles) pres = applyStyles styles (italic pres)
+applyStyles (TextRed:styles) pres = applyStyles styles (pres `withColor` red)
+}

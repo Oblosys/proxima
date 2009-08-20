@@ -77,10 +77,14 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_StyledText _ _) = construct_StyledText
   construct (Node_HoleStyledText _ _) = construct_HoleStyledText
   construct (Node_ParseErrStyledText _ _) = construct_ParseErrStyledText
-  construct (Node_String _ _) = construct_String
-  construct (Node_Styled _ _) = construct_Styled
-  construct (Node_HoleStringOrStyled _ _) = construct_HoleStringOrStyled
-  construct (Node_ParseErrStringOrStyled _ _) = construct_ParseErrStringOrStyled
+  construct (Node_Word _ _) = construct_Word
+  construct (Node_HoleWord _ _) = construct_HoleWord
+  construct (Node_ParseErrWord _ _) = construct_ParseErrWord
+  construct (Node_WordPart _ _) = construct_WordPart
+  construct (Node_OpenTag _ _) = construct_OpenTag
+  construct (Node_CloseTag _ _) = construct_CloseTag
+  construct (Node_HoleWordPart _ _) = construct_HoleWordPart
+  construct (Node_ParseErrWordPart _ _) = construct_ParseErrWordPart
   construct (Node_TextBold _ _) = construct_TextBold
   construct (Node_TextItalic _ _) = construct_TextItalic
   construct (Node_TextRed _ _) = construct_TextRed
@@ -104,9 +108,12 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_List_Task _ _) = construct_List_Task
   construct (Node_HoleList_Task _ _) = construct_HoleList_Task
   construct (Node_ParseErrList_Task _ _) = construct_ParseErrList_Task
-  construct (Node_List_StringOrStyled _ _) = construct_List_StringOrStyled
-  construct (Node_HoleList_StringOrStyled _ _) = construct_HoleList_StringOrStyled
-  construct (Node_ParseErrList_StringOrStyled _ _) = construct_ParseErrList_StringOrStyled
+  construct (Node_List_Word _ _) = construct_List_Word
+  construct (Node_HoleList_Word _ _) = construct_HoleList_Word
+  construct (Node_ParseErrList_Word _ _) = construct_ParseErrList_Word
+  construct (Node_List_WordPart _ _) = construct_List_WordPart
+  construct (Node_HoleList_WordPart _ _) = construct_HoleList_WordPart
+  construct (Node_ParseErrList_WordPart _ _) = construct_ParseErrList_WordPart
 construct_RootEnr tk ~[mClip0] = Clip_EnrichedDoc $ reuseRootEnr [tk]  (retrieveArg "RootEnr" "choiceDoc::ChoiceDoc" mClip0)
 construct_HoleEnrichedDoc tk ~[] = Clip_EnrichedDoc $ hole
 construct_ParseErrEnrichedDoc (StructuralTk _ _ pres _ _) ~[] = Clip_EnrichedDoc $ parseErr (StructuralParseErr pres)
@@ -153,13 +160,17 @@ construct_ParseErrField (StructuralTk _ _ pres _ _) ~[] = Clip_Field $ parseErr 
 construct_Test tk ~[mClip0] = Clip_Test $ reuseTest [tk]  (retrieveArg "Test" "styledText::StyledText" mClip0)
 construct_HoleTest tk ~[] = Clip_Test $ hole
 construct_ParseErrTest (StructuralTk _ _ pres _ _) ~[] = Clip_Test $ parseErr (StructuralParseErr pres)
-construct_StyledText tk ~[mClip0] = Clip_StyledText $ reuseStyledText [tk]  (retrieveArg "StyledText" "stringOrStyleds::List_StringOrStyled" mClip0)
+construct_StyledText tk ~[mClip0] = Clip_StyledText $ reuseStyledText [tk]  (retrieveArg "StyledText" "words::List_Word" mClip0)
 construct_HoleStyledText tk ~[] = Clip_StyledText $ hole
 construct_ParseErrStyledText (StructuralTk _ _ pres _ _) ~[] = Clip_StyledText $ parseErr (StructuralParseErr pres)
-construct_String tk ~[mClip0] = Clip_StringOrStyled $ reuseString [tk]  Nothing (retrieveArg "String" "string::String" mClip0)
-construct_Styled tk ~[mClip0,mClip1] = Clip_StringOrStyled $ reuseStyled [tk]  (retrieveArg "Styled" "style::TextStyle" mClip0) (retrieveArg "Styled" "styled::StyledText" mClip1)
-construct_HoleStringOrStyled tk ~[] = Clip_StringOrStyled $ hole
-construct_ParseErrStringOrStyled (StructuralTk _ _ pres _ _) ~[] = Clip_StringOrStyled $ parseErr (StructuralParseErr pres)
+construct_Word tk ~[mClip0] = Clip_Word $ reuseWord [tk]  (retrieveArg "Word" "parts::List_WordPart" mClip0)
+construct_HoleWord tk ~[] = Clip_Word $ hole
+construct_ParseErrWord (StructuralTk _ _ pres _ _) ~[] = Clip_Word $ parseErr (StructuralParseErr pres)
+construct_WordPart tk ~[mClip0] = Clip_WordPart $ reuseWordPart [tk]  Nothing (retrieveArg "WordPart" "word::String" mClip0)
+construct_OpenTag tk ~[mClip0] = Clip_WordPart $ reuseOpenTag [tk]  (retrieveArg "OpenTag" "style::TextStyle" mClip0)
+construct_CloseTag tk ~[mClip0] = Clip_WordPart $ reuseCloseTag [tk]  (retrieveArg "CloseTag" "style::TextStyle" mClip0)
+construct_HoleWordPart tk ~[] = Clip_WordPart $ hole
+construct_ParseErrWordPart (StructuralTk _ _ pres _ _) ~[] = Clip_WordPart $ parseErr (StructuralParseErr pres)
 construct_TextBold tk ~[] = Clip_TextStyle $ reuseTextBold [tk] 
 construct_TextItalic tk ~[] = Clip_TextStyle $ reuseTextItalic [tk] 
 construct_TextRed tk ~[] = Clip_TextStyle $ reuseTextRed [tk] 
@@ -183,9 +194,12 @@ construct_ParseErrList_Thing (StructuralTk _ _ pres _ _) ~[] = Clip_List_Thing $
 construct_List_Task tk mClips = genericConstruct_List "Task" toList_Task mClips
 construct_HoleList_Task tk ~[] = Clip_List_Task $ hole
 construct_ParseErrList_Task (StructuralTk _ _ pres _ _) ~[] = Clip_List_Task $ parseErr (StructuralParseErr pres)
-construct_List_StringOrStyled tk mClips = genericConstruct_List "StringOrStyled" toList_StringOrStyled mClips
-construct_HoleList_StringOrStyled tk ~[] = Clip_List_StringOrStyled $ hole
-construct_ParseErrList_StringOrStyled (StructuralTk _ _ pres _ _) ~[] = Clip_List_StringOrStyled $ parseErr (StructuralParseErr pres)
+construct_List_Word tk mClips = genericConstruct_List "Word" toList_Word mClips
+construct_HoleList_Word tk ~[] = Clip_List_Word $ hole
+construct_ParseErrList_Word (StructuralTk _ _ pres _ _) ~[] = Clip_List_Word $ parseErr (StructuralParseErr pres)
+construct_List_WordPart tk mClips = genericConstruct_List "WordPart" toList_WordPart mClips
+construct_HoleList_WordPart tk ~[] = Clip_List_WordPart $ hole
+construct_ParseErrList_WordPart (StructuralTk _ _ pres _ _) ~[] = Clip_List_WordPart $ parseErr (StructuralParseErr pres)
 
 
 
@@ -301,23 +315,35 @@ reuseTest nodes ma0
            (Test a0) -> genericReuse1 Test a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseTest"
 
-reuseStyledText :: [Token doc Node clip token] -> Maybe List_StringOrStyled -> StyledText
+reuseStyledText :: [Token doc Node clip token] -> Maybe List_Word -> StyledText
 reuseStyledText nodes ma0
   = case extractFromTokens extractStyledText defaultStyledText nodes of
            (StyledText a0) -> genericReuse1 StyledText a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseStyledText"
 
-reuseString :: [Token doc Node clip token] -> Maybe IDP -> Maybe String -> StringOrStyled
-reuseString nodes ma0 ma1
-  = case extractFromTokens extractString defaultString nodes of
-           (String a0 a1) -> genericReuse2 String a0 a1 ma0 ma1
-           _ -> error "Internal error:ProxParser_Generated.reuseString"
+reuseWord :: [Token doc Node clip token] -> Maybe List_WordPart -> Word
+reuseWord nodes ma0
+  = case extractFromTokens extractWord defaultWord nodes of
+           (Word a0) -> genericReuse1 Word a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseWord"
 
-reuseStyled :: [Token doc Node clip token] -> Maybe TextStyle -> Maybe StyledText -> StringOrStyled
-reuseStyled nodes ma0 ma1
-  = case extractFromTokens extractStyled defaultStyled nodes of
-           (Styled a0 a1) -> genericReuse2 Styled a0 a1 ma0 ma1
-           _ -> error "Internal error:ProxParser_Generated.reuseStyled"
+reuseWordPart :: [Token doc Node clip token] -> Maybe IDP -> Maybe String -> WordPart
+reuseWordPart nodes ma0 ma1
+  = case extractFromTokens extractWordPart defaultWordPart nodes of
+           (WordPart a0 a1) -> genericReuse2 WordPart a0 a1 ma0 ma1
+           _ -> error "Internal error:ProxParser_Generated.reuseWordPart"
+
+reuseOpenTag :: [Token doc Node clip token] -> Maybe TextStyle -> WordPart
+reuseOpenTag nodes ma0
+  = case extractFromTokens extractOpenTag defaultOpenTag nodes of
+           (OpenTag a0) -> genericReuse1 OpenTag a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseOpenTag"
+
+reuseCloseTag :: [Token doc Node clip token] -> Maybe TextStyle -> WordPart
+reuseCloseTag nodes ma0
+  = case extractFromTokens extractCloseTag defaultCloseTag nodes of
+           (CloseTag a0) -> genericReuse1 CloseTag a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseCloseTag"
 
 reuseTextBold :: [Token doc Node clip token] -> TextStyle
 reuseTextBold nodes
@@ -373,11 +399,17 @@ reuseList_Task nodes ma0
            (List_Task a0) -> genericReuse1 List_Task a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Task"
 
-reuseList_StringOrStyled :: [Token doc Node clip token] -> Maybe ConsList_StringOrStyled -> List_StringOrStyled
-reuseList_StringOrStyled nodes ma0
-  = case extractFromTokens extractList_StringOrStyled defaultList_StringOrStyled nodes of
-           (List_StringOrStyled a0) -> genericReuse1 List_StringOrStyled a0 ma0
-           _ -> error "Internal error:ProxParser_Generated.reuseList_StringOrStyled"
+reuseList_Word :: [Token doc Node clip token] -> Maybe ConsList_Word -> List_Word
+reuseList_Word nodes ma0
+  = case extractFromTokens extractList_Word defaultList_Word nodes of
+           (List_Word a0) -> genericReuse1 List_Word a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseList_Word"
+
+reuseList_WordPart :: [Token doc Node clip token] -> Maybe ConsList_WordPart -> List_WordPart
+reuseList_WordPart nodes ma0
+  = case extractFromTokens extractList_WordPart defaultList_WordPart nodes of
+           (List_WordPart a0) -> genericReuse1 List_WordPart a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseList_WordPart"
 
 
 
@@ -462,13 +494,21 @@ extractStyledText :: Maybe Node -> Maybe StyledText
 extractStyledText (Just (Node_StyledText x@(StyledText _) _)) = Just x
 extractStyledText _ = Nothing
 
-extractString :: Maybe Node -> Maybe StringOrStyled
-extractString (Just (Node_String x@(String _ _) _)) = Just x
-extractString _ = Nothing
+extractWord :: Maybe Node -> Maybe Word
+extractWord (Just (Node_Word x@(Word _) _)) = Just x
+extractWord _ = Nothing
 
-extractStyled :: Maybe Node -> Maybe StringOrStyled
-extractStyled (Just (Node_Styled x@(Styled _ _) _)) = Just x
-extractStyled _ = Nothing
+extractWordPart :: Maybe Node -> Maybe WordPart
+extractWordPart (Just (Node_WordPart x@(WordPart _ _) _)) = Just x
+extractWordPart _ = Nothing
+
+extractOpenTag :: Maybe Node -> Maybe WordPart
+extractOpenTag (Just (Node_OpenTag x@(OpenTag _) _)) = Just x
+extractOpenTag _ = Nothing
+
+extractCloseTag :: Maybe Node -> Maybe WordPart
+extractCloseTag (Just (Node_CloseTag x@(CloseTag _) _)) = Just x
+extractCloseTag _ = Nothing
 
 extractTextBold :: Maybe Node -> Maybe TextStyle
 extractTextBold (Just (Node_TextBold x@(TextBold) _)) = Just x
@@ -506,9 +546,13 @@ extractList_Task :: Maybe Node -> Maybe List_Task
 extractList_Task (Just (Node_List_Task x@(List_Task _) _)) = Just x
 extractList_Task _ = Nothing
 
-extractList_StringOrStyled :: Maybe Node -> Maybe List_StringOrStyled
-extractList_StringOrStyled (Just (Node_List_StringOrStyled x@(List_StringOrStyled _) _)) = Just x
-extractList_StringOrStyled _ = Nothing
+extractList_Word :: Maybe Node -> Maybe List_Word
+extractList_Word (Just (Node_List_Word x@(List_Word _) _)) = Just x
+extractList_Word _ = Nothing
+
+extractList_WordPart :: Maybe Node -> Maybe List_WordPart
+extractList_WordPart (Just (Node_List_WordPart x@(List_WordPart _) _)) = Just x
+extractList_WordPart _ = Nothing
 
 
 
@@ -574,11 +618,17 @@ defaultTest = Test hole
 defaultStyledText :: StyledText
 defaultStyledText = StyledText hole
 
-defaultString :: StringOrStyled
-defaultString = String NoIDP hole
+defaultWord :: Word
+defaultWord = Word hole
 
-defaultStyled :: StringOrStyled
-defaultStyled = Styled hole hole
+defaultWordPart :: WordPart
+defaultWordPart = WordPart NoIDP hole
+
+defaultOpenTag :: WordPart
+defaultOpenTag = OpenTag hole
+
+defaultCloseTag :: WordPart
+defaultCloseTag = CloseTag hole
 
 defaultTextBold :: TextStyle
 defaultTextBold = TextBold
@@ -607,8 +657,11 @@ defaultList_Thing = List_Thing Nil_Thing
 defaultList_Task :: List_Task
 defaultList_Task = List_Task Nil_Task
 
-defaultList_StringOrStyled :: List_StringOrStyled
-defaultList_StringOrStyled = List_StringOrStyled Nil_StringOrStyled
+defaultList_Word :: List_Word
+defaultList_Word = List_Word Nil_Word
+
+defaultList_WordPart :: List_WordPart
+defaultList_WordPart = List_WordPart Nil_WordPart
 
 
 

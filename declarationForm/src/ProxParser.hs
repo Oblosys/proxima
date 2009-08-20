@@ -39,9 +39,28 @@ pDescription = Description
   <$> pLine
 
 
+pStyledText :: ProxParser StyledText
+pStyledText = 
+          (\ws -> reuseStyledText [] (Just (toList_Word ws)))
+      <$  pList (pKey " ") 
+      <*> pList pWord'
+
+pWord' = (\ps -> Word $ toList_WordPart ps) <$> 
+         pList1 pWordPart <*  pList (pKey " ")  
 
 
+pWordPart = (\word -> reuseWordPart [] (Just $ getTokenIDP word) (Just $ tokenString word)) <$>
+          pToken WordTk
+ <|> OpenTag TextBold <$ pStyleTag Bold Start
+ <|> OpenTag TextItalic <$ pStyleTag Italic Start
+ <|> OpenTag TextRed <$ pStyleTag (Colored (255,0,0)) Start
+ <|> CloseTag TextBold <$ pStyleTag Bold End
+ <|> CloseTag TextItalic <$ pStyleTag Italic End
+ <|> CloseTag TextRed <$ pStyleTag (Colored (255,0,0)) End
+      
+pKey str  = pToken (KeyTk str)
 
+{-
 pStyledText :: ProxParser StyledText
 pStyledText = StyledText . toList_StringOrStyled <$> pList pStringOrStyled 
 
@@ -54,7 +73,7 @@ pStyle = (\_ styled _ -> Styled TextBold styled) <$> pStyleTag Bold Start <*> pS
      <|> (\_ styled _ -> Styled TextItalic styled) <$> pStyleTag Italic Start <*> pStyledText <*> pStyleTag Italic End
      <|> (\_ styled _ -> Styled TextRed styled) <$> pStyleTag (Colored (255,0,0)) Start <*> pStyledText <*> pStyleTag (Colored (255,0,0)) End
 
-
+-}
 
 
 pLine = 

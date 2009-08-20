@@ -36,15 +36,24 @@ data Field = Field val : Int_
 
 data Test = Test styledText : StyledText
 
+data StyledText = StyledText words : [Word]
 
+data Word = Word parts : [WordPart]
 
+data WordPart = WordPart word:String { idp : IDP }
+          | OpenTag style : TextStyle
+          | CloseTag style : TextStyle
+
+data TextStyle = TextBold | TextItalic | TextRed
+
+{-
 data StyledText = StyledText stringOrStyleds : [StringOrStyled]
 
 data StringOrStyled = String string : String  {idp:IDP}
                     | Styled style : TextStyle styled : StyledText
 
 data TextStyle = TextBold | TextItalic | TextRed
-
+-}
 data Int_ = Int_ value : Int
 
 data Float_ = Float_ value : Float

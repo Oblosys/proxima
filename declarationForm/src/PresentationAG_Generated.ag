@@ -104,15 +104,21 @@ DATA Test
   | ParseErrTest error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA StyledText
-  | StyledText stringOrStyleds:List_StringOrStyled
+  | StyledText words:List_Word
   | HoleStyledText
   | ParseErrStyledText error:{(ParseError Document Node ClipDoc UserToken)}
 
-DATA StringOrStyled
-  | String idp:IDP string:String
-  | Styled style:TextStyle styled:StyledText
-  | HoleStringOrStyled
-  | ParseErrStringOrStyled error:{(ParseError Document Node ClipDoc UserToken)}
+DATA Word
+  | Word parts:List_WordPart
+  | HoleWord
+  | ParseErrWord error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA WordPart
+  | WordPart idp:IDP word:String
+  | OpenTag style:TextStyle
+  | CloseTag style:TextStyle
+  | HoleWordPart
+  | ParseErrWordPart error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA TextStyle
   | TextBold
@@ -151,10 +157,15 @@ DATA List_Task
   | HoleList_Task
   | ParseErrList_Task error:{(ParseError Document Node ClipDoc UserToken)}
 
-DATA List_StringOrStyled
-  | List_StringOrStyled elts:ConsList_StringOrStyled
-  | HoleList_StringOrStyled
-  | ParseErrList_StringOrStyled error:{(ParseError Document Node ClipDoc UserToken)}
+DATA List_Word
+  | List_Word elts:ConsList_Word
+  | HoleList_Word
+  | ParseErrList_Word error:{(ParseError Document Node ClipDoc UserToken)}
+
+DATA List_WordPart
+  | List_WordPart elts:ConsList_WordPart
+  | HoleList_WordPart
+  | ParseErrList_WordPart error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA ConsList_Expense
   | Cons_Expense head:Expense tail:ConsList_Expense
@@ -172,9 +183,13 @@ DATA ConsList_Task
   | Cons_Task head:Task tail:ConsList_Task
   | Nil_Task
 
-DATA ConsList_StringOrStyled
-  | Cons_StringOrStyled head:StringOrStyled tail:ConsList_StringOrStyled
-  | Nil_StringOrStyled
+DATA ConsList_Word
+  | Cons_Word head:Word tail:ConsList_Word
+  | Nil_Word
+
+DATA ConsList_WordPart
+  | Cons_WordPart head:WordPart tail:ConsList_WordPart
+  | Nil_WordPart
 
 
 
@@ -183,22 +198,22 @@ DATA ConsList_StringOrStyled
 -- Attr declarations                                                    --
 --------------------------------------------------------------------------
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText StringOrStyled TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_StringOrStyled ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_StringOrStyled
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText Word WordPart TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_Word List_WordPart ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_Word ConsList_WordPart
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
-ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText StringOrStyled TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_StringOrStyled
+ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText Word WordPart TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_Word List_WordPart
      [ | | pres : Presentation_Doc_Node_Clip_Token ]
 
-ATTR ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText StringOrStyled TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_StringOrStyled ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_StringOrStyled
+ATTR ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText Word WordPart TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_Word List_WordPart ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_Word ConsList_WordPart
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
-ATTR ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText StringOrStyled TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_StringOrStyled
+ATTR ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText Word WordPart TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_Word List_WordPart
      [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
 
-ATTR List_Expense List_Currency List_Thing List_Task List_StringOrStyled ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_StringOrStyled
+ATTR List_Expense List_Currency List_Thing List_Task List_Word List_WordPart ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_Word ConsList_WordPart
      [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]
 
-ATTR ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_StringOrStyled
+ATTR ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_Word ConsList_WordPart
      [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]
 
 
@@ -545,11 +560,11 @@ SEM Test
 
 SEM StyledText
   | StyledText 
-      stringOrStyleds.pIdC = @lhs.pIdC + 0
-      lhs.pIdC = @stringOrStyleds.pIdC
-      stringOrStyleds.path  = @lhs.path++[0]
+      words.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @words.pIdC
+      words.path  = @lhs.path++[0]
   | StyledText
-    stringOrStyleds.ix = 0
+    words.ix = 0
   | StyledText
       lhs.pres = loc (Node_StyledText @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
@@ -561,30 +576,54 @@ SEM StyledText
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
-SEM StringOrStyled
-  | String 
+SEM Word
+  | Word 
+      parts.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @parts.pIdC
+      parts.path  = @lhs.path++[0]
+  | Word
+    parts.ix = 0
+  | Word
+      lhs.pres = loc (Node_Word @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | HoleWord
+      lhs.pres = presHole @lhs.focusD "Word" (Node_HoleWord @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrWord
+      lhs.pres = presParseErr (Node_ParseErrWord @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+
+SEM WordPart
+  | WordPart 
       lhs.pIdC = @lhs.pIdC + 1
-  | Styled 
+  | OpenTag 
       style.pIdC = @lhs.pIdC + 0
-      styled.pIdC = @style.pIdC
-      lhs.pIdC = @styled.pIdC
+      lhs.pIdC = @style.pIdC
       style.path  = @lhs.path++[0]
-      styled.path  = @lhs.path++[1]
-  | String
-  | Styled
+  | CloseTag 
+      style.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @style.pIdC
+      style.path  = @lhs.path++[0]
+  | WordPart
+  | OpenTag
     style.ix = 0
-    styled.ix = 1
-  | String
-      lhs.pres = loc (Node_String @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+  | CloseTag
+    style.ix = 0
+  | WordPart
+      lhs.pres = loc (Node_WordPart @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
-  | Styled
-      lhs.pres = loc (Node_Styled @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+  | OpenTag
+      lhs.pres = loc (Node_OpenTag @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
-  | HoleStringOrStyled
-      lhs.pres = presHole @lhs.focusD "StringOrStyled" (Node_HoleStringOrStyled @self @lhs.path) @lhs.path
+  | CloseTag
+      lhs.pres = loc (Node_CloseTag @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
-  | ParseErrStringOrStyled
-      lhs.pres = presParseErr (Node_ParseErrStringOrStyled @self @lhs.path) @error
+  | HoleWordPart
+      lhs.pres = presHole @lhs.focusD "WordPart" (Node_HoleWordPart @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrWordPart
+      lhs.pres = presParseErr (Node_ParseErrWordPart @self @lhs.path) @error
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
 
@@ -737,9 +776,9 @@ SEM List_Task
       lhs.pres = presHole @lhs.focusD "Task" (Node_HoleList_Task @self @lhs.path) @lhs.path
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
 
-SEM List_StringOrStyled
-  | List_StringOrStyled
-      lhs.press = map ( loc (Node_List_StringOrStyled @self @lhs.path)
+SEM List_Word
+  | List_Word
+      lhs.press = map ( loc (Node_List_Word @self @lhs.path)
                       . presentFocus @lhs.focusD @lhs.path )
                       @elts.press
                       -- parent is reponsible for setting parsing/structural
@@ -747,17 +786,40 @@ SEM List_StringOrStyled
       lhs.pIdC = @elts.pIdC
       elts.path = @lhs.path
       elts.ix = 0
-  | HoleList_StringOrStyled     lhs.press = []
-  | ParseErrList_StringOrStyled lhs.press = []
-  | List_StringOrStyled
-      lhs.pres = loc (Node_List_StringOrStyled @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+  | HoleList_Word     lhs.press = []
+  | ParseErrList_Word lhs.press = []
+  | List_Word
+      lhs.pres = loc (Node_List_Word @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
-  | ParseErrList_StringOrStyled
-      lhs.pres = presParseErr (Node_ParseErrList_StringOrStyled @self @lhs.path) @error
+  | ParseErrList_Word
+      lhs.pres = presParseErr (Node_ParseErrList_Word @self @lhs.path) @error
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
       lhs.parseErrors = getErrorMessages @error
-  | HoleList_StringOrStyled
-      lhs.pres = presHole @lhs.focusD "StringOrStyled" (Node_HoleList_StringOrStyled @self @lhs.path) @lhs.path
+  | HoleList_Word
+      lhs.pres = presHole @lhs.focusD "Word" (Node_HoleList_Word @self @lhs.path) @lhs.path
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+
+SEM List_WordPart
+  | List_WordPart
+      lhs.press = map ( loc (Node_List_WordPart @self @lhs.path)
+                      . presentFocus @lhs.focusD @lhs.path )
+                      @elts.press
+                      -- parent is reponsible for setting parsing/structural
+      elts.pIdC = @lhs.pIdC + 100 -- NOT RIGHT, should be taken from document type def.
+      lhs.pIdC = @elts.pIdC
+      elts.path = @lhs.path
+      elts.ix = 0
+  | HoleList_WordPart     lhs.press = []
+  | ParseErrList_WordPart lhs.press = []
+  | List_WordPart
+      lhs.pres = loc (Node_List_WordPart @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+  | ParseErrList_WordPart
+      lhs.pres = presParseErr (Node_ParseErrList_WordPart @self @lhs.path) @error
+                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+      lhs.parseErrors = getErrorMessages @error
+  | HoleList_WordPart
+      lhs.pres = presHole @lhs.focusD "WordPart" (Node_HoleList_WordPart @self @lhs.path) @lhs.path
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
 
 SEM ConsList_Expense
@@ -804,8 +866,8 @@ SEM ConsList_Task
       tail.ix  = @lhs.ix + 1
   | Nil_Task      lhs.press = []
 
-SEM ConsList_StringOrStyled
-  | Cons_StringOrStyled
+SEM ConsList_Word
+  | Cons_Word
       head.path  = @lhs.path++[@lhs.ix]
       tail.path = @lhs.path
       lhs.press = @head.pres : @tail.press
@@ -813,7 +875,18 @@ SEM ConsList_StringOrStyled
       tail.pIdC = @head.pIdC
       lhs.pIdC = @tail.pIdC
       tail.ix  = @lhs.ix + 1
-  | Nil_StringOrStyled      lhs.press = []
+  | Nil_Word      lhs.press = []
+
+SEM ConsList_WordPart
+  | Cons_WordPart
+      head.path  = @lhs.path++[@lhs.ix]
+      tail.path = @lhs.path
+      lhs.press = @head.pres : @tail.press
+      head.pIdC = @lhs.pIdC + 30 -- NOT RIGHT, should be taken from document type def.
+      tail.pIdC = @head.pIdC
+      lhs.pIdC = @tail.pIdC
+      tail.ix  = @lhs.ix + 1
+  | Nil_WordPart      lhs.press = []
 
 
 
@@ -865,9 +938,13 @@ SEM Test
 SEM StyledText
   | StyledText lhs.path = @lhs.path
 
-SEM StringOrStyled
-  | String lhs.path = @lhs.path
-  | Styled lhs.path = @lhs.path
+SEM Word
+  | Word lhs.path = @lhs.path
+
+SEM WordPart
+  | WordPart lhs.path = @lhs.path
+  | OpenTag lhs.path = @lhs.path
+  | CloseTag lhs.path = @lhs.path
 
 SEM TextStyle
   | TextBold lhs.path = @lhs.path
@@ -892,8 +969,11 @@ SEM List_Thing
 SEM List_Task
   | List_Task lhs.path = @lhs.path
 
-SEM List_StringOrStyled
-  | List_StringOrStyled lhs.path = @lhs.path
+SEM List_Word
+  | List_Word lhs.path = @lhs.path
+
+SEM List_WordPart
+  | List_WordPart lhs.path = @lhs.path
 
 
 
@@ -984,17 +1064,25 @@ SEM Test
 
 SEM StyledText
   | StyledText
-      lhs.presXML = presentElementXML @lhs.focusD (Node_StyledText @self @lhs.path) @lhs.path "StyledText" [ @stringOrStyleds.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_StyledText @self @lhs.path) @lhs.path "StyledText" [ @words.presXML ] 
   | HoleStyledText     lhs.presXML = presHole @lhs.focusD "StyledText" (Node_HoleStyledText @self @lhs.path) @lhs.path
   | ParseErrStyledText lhs.presXML = presParseErr (Node_ParseErrStyledText @self @lhs.path) @error
 
-SEM StringOrStyled
-  | String
-      lhs.presXML = presentElementXML @lhs.focusD (Node_String @self @lhs.path) @lhs.path "String" [ presentPrimXMLString @string ] 
-  | Styled
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Styled @self @lhs.path) @lhs.path "Styled" [ @style.presXML, @styled.presXML ] 
-  | HoleStringOrStyled     lhs.presXML = presHole @lhs.focusD "StringOrStyled" (Node_HoleStringOrStyled @self @lhs.path) @lhs.path
-  | ParseErrStringOrStyled lhs.presXML = presParseErr (Node_ParseErrStringOrStyled @self @lhs.path) @error
+SEM Word
+  | Word
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Word @self @lhs.path) @lhs.path "Word" [ @parts.presXML ] 
+  | HoleWord     lhs.presXML = presHole @lhs.focusD "Word" (Node_HoleWord @self @lhs.path) @lhs.path
+  | ParseErrWord lhs.presXML = presParseErr (Node_ParseErrWord @self @lhs.path) @error
+
+SEM WordPart
+  | WordPart
+      lhs.presXML = presentElementXML @lhs.focusD (Node_WordPart @self @lhs.path) @lhs.path "WordPart" [ presentPrimXMLString @word ] 
+  | OpenTag
+      lhs.presXML = presentElementXML @lhs.focusD (Node_OpenTag @self @lhs.path) @lhs.path "OpenTag" [ @style.presXML ] 
+  | CloseTag
+      lhs.presXML = presentElementXML @lhs.focusD (Node_CloseTag @self @lhs.path) @lhs.path "CloseTag" [ @style.presXML ] 
+  | HoleWordPart     lhs.presXML = presHole @lhs.focusD "WordPart" (Node_HoleWordPart @self @lhs.path) @lhs.path
+  | ParseErrWordPart lhs.presXML = presParseErr (Node_ParseErrWordPart @self @lhs.path) @error
 
 SEM TextStyle
   | TextBold
@@ -1062,16 +1150,27 @@ SEM List_Task
       lhs.presXML = loc (Node_List_Task @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     presHole @lhs.focusD "List_Task" (Node_HoleList_Task @self @lhs.path) @lhs.path
 
-SEM List_StringOrStyled
-  | List_StringOrStyled
-      lhs.presXML = loc (Node_List_StringOrStyled @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+SEM List_Word
+  | List_Word
+      lhs.presXML = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                     col @elts.pressXML
-  | ParseErrList_StringOrStyled
-      lhs.presXML = loc (Node_List_StringOrStyled @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presParseErr (Node_ParseErrList_StringOrStyled @self @lhs.path) @error
-  | HoleList_StringOrStyled
-      lhs.presXML = loc (Node_List_StringOrStyled @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                    presHole @lhs.focusD "List_StringOrStyled" (Node_HoleList_StringOrStyled @self @lhs.path) @lhs.path
+  | ParseErrList_Word
+      lhs.presXML = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presParseErr (Node_ParseErrList_Word @self @lhs.path) @error
+  | HoleList_Word
+      lhs.presXML = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presHole @lhs.focusD "List_Word" (Node_HoleList_Word @self @lhs.path) @lhs.path
+
+SEM List_WordPart
+  | List_WordPart
+      lhs.presXML = loc (Node_List_WordPart @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    col @elts.pressXML
+  | ParseErrList_WordPart
+      lhs.presXML = loc (Node_List_WordPart @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presParseErr (Node_ParseErrList_WordPart @self @lhs.path) @error
+  | HoleList_WordPart
+      lhs.presXML = loc (Node_List_WordPart @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                    presHole @lhs.focusD "List_WordPart" (Node_HoleList_WordPart @self @lhs.path) @lhs.path
 
 SEM ConsList_Expense
   | Cons_Expense lhs.pressXML  = @head.presXML : @tail.pressXML
@@ -1089,9 +1188,13 @@ SEM ConsList_Task
   | Cons_Task lhs.pressXML  = @head.presXML : @tail.pressXML
   | Nil_Task  lhs.pressXML  = []
 
-SEM ConsList_StringOrStyled
-  | Cons_StringOrStyled lhs.pressXML  = @head.presXML : @tail.pressXML
-  | Nil_StringOrStyled  lhs.pressXML  = []
+SEM ConsList_Word
+  | Cons_Word lhs.pressXML  = @head.presXML : @tail.pressXML
+  | Nil_Word  lhs.pressXML  = []
+
+SEM ConsList_WordPart
+  | Cons_WordPart lhs.pressXML  = @head.presXML : @tail.pressXML
+  | Nil_WordPart  lhs.pressXML  = []
 
 
 
@@ -1182,17 +1285,25 @@ SEM Test
 
 SEM StyledText
   | StyledText
-      lhs.presTree = presentElementTree @lhs.focusD (Node_StyledText @self @lhs.path) @lhs.path "StyledText" [ @stringOrStyleds.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_StyledText @self @lhs.path) @lhs.path "StyledText" [ @words.presTree ] 
   | HoleStyledText     lhs.presTree = presHole @lhs.focusD "StyledText" (Node_HoleStyledText @self @lhs.path) @lhs.path
   | ParseErrStyledText lhs.presTree = presParseErr (Node_ParseErrStyledText @self @lhs.path) @error
 
-SEM StringOrStyled
-  | String
-      lhs.presTree = presentElementTree @lhs.focusD (Node_String @self @lhs.path) @lhs.path "String" [ presentPrimXMLString @string ] 
-  | Styled
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Styled @self @lhs.path) @lhs.path "Styled" [ @style.presTree, @styled.presTree ] 
-  | HoleStringOrStyled     lhs.presTree = presHole @lhs.focusD "StringOrStyled" (Node_HoleStringOrStyled @self @lhs.path) @lhs.path
-  | ParseErrStringOrStyled lhs.presTree = presParseErr (Node_ParseErrStringOrStyled @self @lhs.path) @error
+SEM Word
+  | Word
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Word @self @lhs.path) @lhs.path "Word" [ @parts.presTree ] 
+  | HoleWord     lhs.presTree = presHole @lhs.focusD "Word" (Node_HoleWord @self @lhs.path) @lhs.path
+  | ParseErrWord lhs.presTree = presParseErr (Node_ParseErrWord @self @lhs.path) @error
+
+SEM WordPart
+  | WordPart
+      lhs.presTree = presentElementTree @lhs.focusD (Node_WordPart @self @lhs.path) @lhs.path "WordPart" [ presentPrimXMLString @word ] 
+  | OpenTag
+      lhs.presTree = presentElementTree @lhs.focusD (Node_OpenTag @self @lhs.path) @lhs.path "OpenTag" [ @style.presTree ] 
+  | CloseTag
+      lhs.presTree = presentElementTree @lhs.focusD (Node_CloseTag @self @lhs.path) @lhs.path "CloseTag" [ @style.presTree ] 
+  | HoleWordPart     lhs.presTree = presHole @lhs.focusD "WordPart" (Node_HoleWordPart @self @lhs.path) @lhs.path
+  | ParseErrWordPart lhs.presTree = presParseErr (Node_ParseErrWordPart @self @lhs.path) @error
 
 SEM TextStyle
   | TextBold
@@ -1260,16 +1371,27 @@ SEM List_Task
       lhs.presTree = loc (Node_List_Task @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        presHole @lhs.focusD "List_Task" (Node_HoleList_Task @self @lhs.path) @lhs.path
 
-SEM List_StringOrStyled
-  | List_StringOrStyled
-      lhs.presTree = loc (Node_List_StringOrStyled @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+SEM List_Word
+  | List_Word
+      lhs.presTree = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                        col @elts.pressTree
-  | ParseErrList_StringOrStyled
-      lhs.presTree = loc (Node_List_StringOrStyled @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presParseErr (Node_ParseErrList_StringOrStyled @self @lhs.path) @error
-  | HoleList_StringOrStyled
-      lhs.presTree = loc (Node_List_StringOrStyled @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
-                       presHole @lhs.focusD "List_StringOrStyled" (Node_HoleList_StringOrStyled @self @lhs.path) @lhs.path
+  | ParseErrList_Word
+      lhs.presTree = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presParseErr (Node_ParseErrList_Word @self @lhs.path) @error
+  | HoleList_Word
+      lhs.presTree = loc (Node_List_Word @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presHole @lhs.focusD "List_Word" (Node_HoleList_Word @self @lhs.path) @lhs.path
+
+SEM List_WordPart
+  | List_WordPart
+      lhs.presTree = loc (Node_List_WordPart @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       col @elts.pressTree
+  | ParseErrList_WordPart
+      lhs.presTree = loc (Node_List_WordPart @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presParseErr (Node_ParseErrList_WordPart @self @lhs.path) @error
+  | HoleList_WordPart
+      lhs.presTree = loc (Node_List_WordPart @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
+                       presHole @lhs.focusD "List_WordPart" (Node_HoleList_WordPart @self @lhs.path) @lhs.path
 
 SEM ConsList_Expense
   | Cons_Expense lhs.pressTree  = @head.presTree : @tail.pressTree
@@ -1287,9 +1409,13 @@ SEM ConsList_Task
   | Cons_Task lhs.pressTree  = @head.presTree : @tail.pressTree
   | Nil_Task  lhs.pressTree  = []
 
-SEM ConsList_StringOrStyled
-  | Cons_StringOrStyled lhs.pressTree  = @head.presTree : @tail.pressTree
-  | Nil_StringOrStyled  lhs.pressTree  = []
+SEM ConsList_Word
+  | Cons_Word lhs.pressTree  = @head.presTree : @tail.pressTree
+  | Nil_Word  lhs.pressTree  = []
+
+SEM ConsList_WordPart
+  | Cons_WordPart lhs.pressTree  = @head.presTree : @tail.pressTree
+  | Nil_WordPart  lhs.pressTree  = []
 
 
 
