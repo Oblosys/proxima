@@ -649,7 +649,7 @@ SEM StyledText [ | | str : String ]
 
 SEM StringOrStyled [ | | str : String ]
   | String
-     loc.pres = parsing $ text @string
+     loc.pres = parsing $ StringP @idp  @string
      lhs.str = @string
   | Styled
      loc.pres = parsing $ @style.presStyle @styled.pres

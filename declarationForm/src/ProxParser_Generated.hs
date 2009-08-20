@@ -156,7 +156,7 @@ construct_ParseErrTest (StructuralTk _ _ pres _ _) ~[] = Clip_Test $ parseErr (S
 construct_StyledText tk ~[mClip0] = Clip_StyledText $ reuseStyledText [tk]  (retrieveArg "StyledText" "stringOrStyleds::List_StringOrStyled" mClip0)
 construct_HoleStyledText tk ~[] = Clip_StyledText $ hole
 construct_ParseErrStyledText (StructuralTk _ _ pres _ _) ~[] = Clip_StyledText $ parseErr (StructuralParseErr pres)
-construct_String tk ~[mClip0] = Clip_StringOrStyled $ reuseString [tk]  (retrieveArg "String" "string::String" mClip0)
+construct_String tk ~[mClip0] = Clip_StringOrStyled $ reuseString [tk]  Nothing (retrieveArg "String" "string::String" mClip0)
 construct_Styled tk ~[mClip0,mClip1] = Clip_StringOrStyled $ reuseStyled [tk]  (retrieveArg "Styled" "style::TextStyle" mClip0) (retrieveArg "Styled" "styled::StyledText" mClip1)
 construct_HoleStringOrStyled tk ~[] = Clip_StringOrStyled $ hole
 construct_ParseErrStringOrStyled (StructuralTk _ _ pres _ _) ~[] = Clip_StringOrStyled $ parseErr (StructuralParseErr pres)
@@ -307,10 +307,10 @@ reuseStyledText nodes ma0
            (StyledText a0) -> genericReuse1 StyledText a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseStyledText"
 
-reuseString :: [Token doc Node clip token] -> Maybe String -> StringOrStyled
-reuseString nodes ma0
+reuseString :: [Token doc Node clip token] -> Maybe IDP -> Maybe String -> StringOrStyled
+reuseString nodes ma0 ma1
   = case extractFromTokens extractString defaultString nodes of
-           (String a0) -> genericReuse1 String a0 ma0
+           (String a0 a1) -> genericReuse2 String a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseString"
 
 reuseStyled :: [Token doc Node clip token] -> Maybe TextStyle -> Maybe StyledText -> StringOrStyled
@@ -463,7 +463,7 @@ extractStyledText (Just (Node_StyledText x@(StyledText _) _)) = Just x
 extractStyledText _ = Nothing
 
 extractString :: Maybe Node -> Maybe StringOrStyled
-extractString (Just (Node_String x@(String _) _)) = Just x
+extractString (Just (Node_String x@(String _ _) _)) = Just x
 extractString _ = Nothing
 
 extractStyled :: Maybe Node -> Maybe StringOrStyled
@@ -575,7 +575,7 @@ defaultStyledText :: StyledText
 defaultStyledText = StyledText hole
 
 defaultString :: StringOrStyled
-defaultString = String hole
+defaultString = String NoIDP hole
 
 defaultStyled :: StringOrStyled
 defaultStyled = Styled hole hole

@@ -40,7 +40,7 @@ data Test = Test styledText : StyledText
 
 data StyledText = StyledText stringOrStyleds : [StringOrStyled]
 
-data StringOrStyled = String string : String
+data StringOrStyled = String string : String  {idp:IDP}
                     | Styled style : TextStyle styled : StyledText
 
 data TextStyle = TextBold | TextItalic | TextRed

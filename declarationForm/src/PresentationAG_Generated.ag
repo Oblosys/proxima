@@ -109,7 +109,7 @@ DATA StyledText
   | ParseErrStyledText error:{(ParseError Document Node ClipDoc UserToken)}
 
 DATA StringOrStyled
-  | String string:String
+  | String idp:IDP string:String
   | Styled style:TextStyle styled:StyledText
   | HoleStringOrStyled
   | ParseErrStringOrStyled error:{(ParseError Document Node ClipDoc UserToken)}
@@ -563,7 +563,7 @@ SEM StyledText
 
 SEM StringOrStyled
   | String 
-      lhs.pIdC = @lhs.pIdC + 0
+      lhs.pIdC = @lhs.pIdC + 1
   | Styled 
       style.pIdC = @lhs.pIdC + 0
       styled.pIdC = @style.pIdC

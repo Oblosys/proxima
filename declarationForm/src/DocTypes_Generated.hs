@@ -95,7 +95,7 @@ data StyledText = StyledText List_StringOrStyled
                 | ParseErrStyledText (ParseError Document Node ClipDoc UserToken)
                     deriving (Show, Data, Typeable)
 
-data StringOrStyled = String String
+data StringOrStyled = String IDP String
                     | Styled TextStyle StyledText
                     | HoleStringOrStyled
                     | ParseErrStringOrStyled (ParseError Document Node ClipDoc UserToken)

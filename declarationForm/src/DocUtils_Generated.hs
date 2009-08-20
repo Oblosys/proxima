@@ -16,7 +16,7 @@ import Common.CommonTypes hiding (Clean, Dirty)
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
     TestDoc $
-      Test (StyledText $ toList_StringOrStyled [ String "thisisalittlebitofnot-so-richtext" ])
+      Test (StyledText $ toList_StringOrStyled [ String NoIDP "styledtext" ])--thisisalittlebitofnot-so-richtext" ])
 {-  TaskDoc $
     Tasks (toList_Thing [Thing 1, Thing 2, Thing 3]) (toList_Thing [])True $ toList_Task
       [ BasicTask (Description "Pinpas bestellen") True
@@ -373,7 +373,7 @@ toXMLTest (ParseErrTest error) = EmptyElt "ParseErrTest" []
 toXMLStyledText (StyledText stringOrStyleds) = Elt "StyledText" [] $ toXMLList_StringOrStyled stringOrStyleds
 toXMLStyledText (HoleStyledText) = EmptyElt "HoleStyledText" [] 
 toXMLStyledText (ParseErrStyledText error) = EmptyElt "ParseErrStyledText" []
-toXMLStringOrStyled (String string) = Elt "String" [] $ [toXMLString string]
+toXMLStringOrStyled (String _ string) = Elt "String" [] $ [toXMLString string]
 toXMLStringOrStyled (Styled style styled) = Elt "Styled" [] $ [toXMLTextStyle style] ++ [toXMLStyledText styled]
 toXMLStringOrStyled (HoleStringOrStyled) = EmptyElt "HoleStringOrStyled" [] 
 toXMLStringOrStyled (ParseErrStringOrStyled error) = EmptyElt "ParseErrStringOrStyled" []
@@ -455,7 +455,7 @@ parseXMLCns_Test = Test <$ startTag "Test" <*> parseXML_StyledText<* endTag "Tes
 parseXML_StyledText = parseXMLCns_StyledText <|> parseHoleAndParseErr "StyledText" HoleStyledText
 parseXMLCns_StyledText = StyledText <$ startTag "StyledText" <*> parseXML_List_StringOrStyled<* endTag "StyledText"
 parseXML_StringOrStyled = parseXMLCns_String <|> parseXMLCns_Styled <|> parseHoleAndParseErr "StringOrStyled" HoleStringOrStyled
-parseXMLCns_String = String <$ startTag "String" <*> parseXML_String<* endTag "String"
+parseXMLCns_String = String NoIDP <$ startTag "String" <*> parseXML_String<* endTag "String"
 parseXMLCns_Styled = Styled <$ startTag "Styled" <*> parseXML_TextStyle <*> parseXML_StyledText<* endTag "Styled"
 parseXML_TextStyle = parseXMLCns_TextBold <|> parseXMLCns_TextItalic <|> parseXMLCns_TextRed <|> parseHoleAndParseErr "TextStyle" HoleTextStyle
 parseXMLCns_TextBold = TextBold <$ emptyTag "TextBold"

@@ -756,24 +756,24 @@ instance Editable StyledText Document Node ClipDoc UserToken where
 
 instance Editable StringOrStyled Document Node ClipDoc UserToken where
   select [] x = Clip_StringOrStyled x
-  select (0:p) (String x0) = select p x0
+  select (0:p) (String _ x0) = select p x0
   select (0:p) (Styled x0 x1) = select p x0
   select (1:p) (Styled x0 x1) = select p x1
   select _ _ = Clip_Nothing
 
   paste [] (Clip_StringOrStyled c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on StringOrStyled") x
-  paste (0:p) c (String x0) = String (paste p c x0)
+  paste (0:p) c (String i0 x0) = String i0 (paste p c x0)
   paste (0:p) c (Styled x0 x1) = Styled (paste p c x0) x1
   paste (1:p) c (Styled x0 x1) = Styled x0 (paste p c x1)
   paste _ _ x = x
 
-  alternatives _ = [ ("String {String} "  , Clip_StringOrStyled $ String hole)
+  alternatives _ = [ ("String {String} "  , Clip_StringOrStyled $ String NoIDP hole)
                    , ("Styled {TextStyle} {StyledText} "  , Clip_StringOrStyled $ Styled hole hole)
                    ,("{StringOrStyled}", Clip_StringOrStyled hole)
                    ]
 
-  arity (String x0) = 1
+  arity (String _ x0) = 1
   arity (Styled x0 x1) = 2
   arity _                        = 0
 
