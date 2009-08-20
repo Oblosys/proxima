@@ -201,13 +201,14 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      defaultStyleAttrs = Inh defaultFont defaultTextColor defaultLineColor defaultFillColor defaultBackColor
                              Nothing [] [] 0 0 0 0
                              
-     inheritedAttrs = Inh_Layout { focus_Inh_Layout = foc
+     inheritedAttrs = Inh_Layout { currentStyles_Inh_Layout = []
+                                 , focus_Inh_Layout = foc
                                  , idPCounter_Inh_Layout = idPCounter
                                  , lexer_Inh_Layout = lex
                                  , lloc_Inh_Layout = mNode
                                  , path_Inh_Layout = pth
                                  , pos_Inh_Layout = 0
-                                 , previousCharStyle_Inh_Layout = []
+                                 , previousCharStyles_Inh_Layout = []
                                  , scanStructural_Inh_Layout = (scanStructural sheet)
                                  , scannedFocusEnd_Inh_Layout = Nothing
                                  , scannedFocusStart_Inh_Layout = Nothing
