@@ -123,9 +123,10 @@ SEM Layout
   | StringP
       (lhs.scannedFocusStart,lhs.scannedFocusEnd) =
         let ((startPth,startIndex),(endPth,endIndex)) = @lhs.focus
-        in  ( if startPth == @lhs.path then Just (@lhs.pos+startIndex) else @lhs.scannedFocusStart
-            , if endPth == @lhs.path then Just (@lhs.pos+endIndex) else @lhs.scannedFocusEnd
-            )
+        in  ( if startPth == @lhs.path then Just (@lhs.pos+ @nrOfStyleScanChars+startIndex) else @lhs.scannedFocusStart
+            , if endPth == @lhs.path then Just (@lhs.pos+ @nrOfStyleScanChars+endIndex) else @lhs.scannedFocusEnd
+            ) -- end focus may still be on style chars, but we cannot fix this here. Since the styles may be in a next string.
+              -- eg. if | is the focus:    ["str|", "<style>X"]
   | StructuralP
       lhs.scannedFocusStart = @lhs.scannedFocusStart
       lhs.scannedFocusEnd   = @lhs.scannedFocusEnd
@@ -139,7 +140,7 @@ ATTR Layout [ | | scanChars : {[ScanChar @doc @node @clip @token]} ]
 
 SEM Layout
   | StringP
-      loc.scanChars = styleChangeTags @lhs.previousCharStyles @lhs.currentStyles ++
+      loc.scanChars = @styleScanChars ++
                       map (Char @id NoFocusMark NoFocusMark @lhs.lloc) @text
 
   | RowP
@@ -192,14 +193,19 @@ SEM Layout
       loc.styleAttrs = let (inh,syn) = @attrRule (@lhs.styleAttrs, error "Error in presentation: style depends on synthesized attributes")
                        in  inh
       child.styleAttrs = @styleAttrs
-      child.currentStyles = (if fBold (font @styleAttrs) then [Bold] else []) ++
-                            (if fItalic (font @styleAttrs) then [Italic] else []) ++
-                            (if textColor @styleAttrs == (255,0,0) then [Colored (255,0,0)] else [])
+      child.currentStyles = stylesFromAttrs @styleAttrs
 
   | StringP  
       lhs.previousCharStyles = (@lhs.previousCharStyles `intersect` @lhs.currentStyles) ++ (@lhs.currentStyles \\ @lhs.previousCharStyles)
                                -- make sure that new styles are added after old ones
+
+      loc.styleScanChars = styleChangeTags @lhs.previousCharStyles @lhs.currentStyles
+      loc.nrOfStyleScanChars = length @styleScanChars
 {
+stylesFromAttrs attrs = (if fBold (font attrs) then [Bold] else []) ++
+                        (if fItalic (font attrs) then [Italic] else []) ++
+                        (if textColor attrs == (255,0,0) then [Colored (255,0,0)] else [])
+
 styleChangeTags previousCharStyles currentStyles =
   let endedStyles = dropWhile (`elem` currentStyles) previousCharStyles -- drop the ones that are still valid
   in  map mkEndTag (reverse endedStyles) ++ 

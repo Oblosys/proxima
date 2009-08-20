@@ -212,13 +212,14 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                                  , scanStructural_Inh_Layout = (scanStructural sheet)
                                  , scannedFocusEnd_Inh_Layout = Nothing
                                  , scannedFocusStart_Inh_Layout = Nothing
-                                 , styleAttrs_Inh_Layout = defaultStyleAttrs
+                                 , styleAttrs_Inh_Layout = defaultStyleAttrs -- make sure that this is the same as below
                                  , whitespaceMap_Inh_Layout = whitespaceMap
                                  }
      -- sheet is not used by the AG, so we already pass it to scanStructural, saving an extra attribute
 
      Syn_Layout { idPCounter_Syn_Layout = idPCounter'
                 , pos_Syn_Layout = pos
+                , previousCharStyles_Syn_Layout = lastCharStyles
                 , scanChars_Syn_Layout = scanChars
                 , scannedFocusEnd_Syn_Layout = scannedFocusEnd
                 , scannedFocusStart_Syn_Layout = scannedFocusStart
@@ -226,8 +227,10 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                 , whitespaceMap_Syn_Layout = whitespaceMap'
                 } = wrap_Layout (sem_Layout lay) inheritedAttrs
 
-
-     focusedScanChars = markFocusStartAndEnd scannedFocusStart scannedFocusEnd scanChars 
+     allScanChars = scanChars ++ styleChangeTags lastCharStyles (stylesFromAttrs defaultStyleAttrs)
+                              -- add remaining close tags (if any)
+                 
+     focusedScanChars = markFocusStartAndEnd scannedFocusStart scannedFocusEnd allScanChars 
      -- first, we store the focus in the scanned characters (except if focus is after last char)
 
      groupedScanChars = groupScanChars focusedScanChars
@@ -236,7 +239,7 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      scannedTokens = scanGroups sheet groupedScanChars
      -- scan all groups
       
-     scannedTokensWithLastFocus = addLastCharFocusStartAndEnd scanChars scannedFocusStart scannedFocusEnd $
+     scannedTokensWithLastFocus = addLastCharFocusStartAndEnd allScanChars scannedFocusStart scannedFocusEnd $
                                   scannedTokens
      
      -- store any last char focus in the last token
@@ -261,21 +264,24 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                       f _                = Nothing
      -- finally, remove all whitespace tokens.
      
- in  debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars scanChars) $
+ in  --debug Lay ("Alex scanner:\n" ++ show (scannedFocusStart,scannedFocusEnd)++ stringFromScanChars allScanChars) $
      --debug Lay ("focused scan chars:\n"++showFocusedScanChars focusedScanChars) $
      --debug Lay ("Grouped scan chars:\n"++show groupedScanChars) $
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap' ) $
-     --debug Lay (showScannedTokens scannedTokensIDPs) $
+     debug Lay (showScannedTokens scannedTokensIDPs) $
      
      ( [ParsingTk parser mNode tokens idP']
      , idPCounter''', scannedWhitespaceMap' `Map.union` whitespaceMap'
      , loc (maybe noNode id mNode) $ ParsingP NoIDP parser LexInherited $ RowP NoIDP 0 $ map presFromToken tokens
      )
 
--- group the scanchars in lists of either chars or structurals
 showFocusedScanChars [] = ""
-showFocusedScanChars (Char _ _ _ _ c:scanchars) = "Char: '"++[c]++"'\n"++showFocusedScanChars scanchars     
-showFocusedScanChars (Structural _ _ _ mn _ _:scanchars) = "Structural: '"++show mn++"'\n"++showFocusedScanChars scanchars     
+showFocusedScanChars (Char _ fs fe _ c:scanchars) = "Char: '"++[c]++" "++showFocus fs fe++"'\n"++showFocusedScanChars scanchars     
+showFocusedScanChars (Structural _ fs fe mn _ _:scanchars) = "Structural: '"++show mn++" "++showFocus fs fe++"'\n"++showFocusedScanChars scanchars     
+showFocusedScanChars (Style tags:scanchars) = "Style: "++show tag++"\n"++showFocusedScanChars scanchars     
+
+showFocus fs fe = (if fs == FocusMark then "<" else "_") ++ (if fe == FocusMark then ">" else "_")
+-- group the scanchars in lists of either chars or structurals
 groupScanChars scanChars = groupCharScanChars scanChars
 
 
@@ -287,19 +293,21 @@ markFocusStartAndEnd scannedFocusStart scannedFocusEnd scanChars =
   markFocus markFocusEnd   scannedFocusEnd 
   scanChars
 
+
+
 -- markFocus is parameterized with a function that marks either the focus start or the end in a ScanChar.
+-- styles at the position of the focus are skipped, since styles cannot carry focus
+-- (this is only necessary for focus end, since the ag takes care than focus start is never on a style char)
 markFocus :: (ScanChar doc node clip token -> ScanChar doc node clip token) -> (Maybe Int) ->
              [ScanChar doc node clip token] -> [ScanChar doc node clip token]
 markFocus setFocusStartOrEnd Nothing          scs = scs
 markFocus setFocusStartOrEnd focus@(Just pos) scs = 
   if not $ focusAfterLastChar scs focus 
-  then case splitAt pos scs of
-         (left, focusedChar:right) -> left ++ setFocusStartOrEnd focusedChar : right
-         _                         -> debug Err "PresentationParsing.markFocus: incorrect position" scs
+  then let (left,rest) = splitAt (pos) scs
+       in  case span isStyleScanChar rest of
+             (styleChars, focusedChar:right) -> left ++ styleChars ++ setFocusStartOrEnd focusedChar : right
+             _                 -> debug Err "PresentationParsing.markFocus: incorrect position" scs
   else scs
-
-focusAfterLastChar scs Nothing    = False
-focusAfterLastChar scs (Just pos) = pos == length scs
 
 groupCharScanChars scanChars = groupBy sameScanCharConstr scanChars
  where sameScanCharConstr (Char _ _ _ _ _)         (Char _ _ _ _ _)         = True
@@ -319,7 +327,7 @@ scanCharsOrStructurals sheet pos (group@(scanChar:_):groups) = -- a group is nev
                                                           
       (scannedTokens', pos'') = scanCharsOrStructurals sheet pos' groups
   in  (scannedTokens++scannedTokens', pos'')
-scanCharsOrStructurals sheet pos (group:groups) = debug Lay ("Layout.scanCharsOrStructurals: error"++show group) ([],pos)
+scanCharsOrStructurals sheet pos (group:groups) = debug Err ("Layout.scanCharsOrStructurals: error"++show group) ([],pos)
  
 scanStructurals pos [] = ([], pos)
 scanStructurals pos (structural@(Structural idp _ _ loc tokens lay) : structuralScanChars) = 
@@ -332,6 +340,10 @@ scanStyleTags pos (Style styleTag : styleScanChars) =
   let scannedToken = ScannedToken (Nothing, Nothing) $ StyleTk pos styleTag
       (scannedTokens, pos') = scanStyleTags (pos + 1) styleScanChars
   in  (scannedToken:scannedTokens, pos')
+
+
+focusAfterLastChar scs Nothing    = False
+focusAfterLastChar scs (Just pos) = pos >= (length $ dropWhile isStyleScanChar (reverse scs))
 
 -- If ScannedFocusStart or ScannedFocusEnd is after the last character, it was not recorded in the
 -- scanChars. This function adds it directly to the scanned tokens.
@@ -352,12 +364,14 @@ addLastCharFocusStartAndEnd scanChars scannedFocusStart scannedFocusEnd tokens =
 addLastCharFocus :: (Int -> FocusStartEnd -> FocusStartEnd) -> [ScanChar doc node clip token] -> Maybe Int ->
                     [ ScannedToken doc node clip token ] -> [ ScannedToken doc node clip token ] 
 addLastCharFocus updateStartOrEnd scanChars scannedFocus tokens =
-  if focusAfterLastChar scanChars scannedFocus
-  then case tokens of
-         [] -> []
-         (_:_) -> init tokens ++ [updateFocus (last tokens)]
+  if focusAfterLastChar scanChars scannedFocus  
+  then case span isScannedStyleTk $ reverse tokens of
+         (styleTokens, lastToken : restTokens) -> reverse restTokens ++ [updateFocus lastToken] ++ reverse styleTokens
+         _ -> debug Err "Layout.addLastCharFocus: no last non-style token" []
   else tokens
-  where updateFocus (ScannedWhitespace focusStartEnd ws@(bs,sps)) = 
+  where isScannedStyleTk (ScannedToken _ (StyleTk _ _)) = True
+        isScannedStyleTk _                              = False
+        updateFocus (ScannedWhitespace focusStartEnd ws@(bs,sps)) = 
                      ScannedWhitespace (updateStartOrEnd (bs+sps) focusStartEnd) ws
         updateFocus (ScannedToken focusStartEnd token) =
           case token of
@@ -367,7 +381,7 @@ addLastCharFocus updateStartOrEnd scanChars scannedFocus tokens =
                      ScannedToken (updateStartOrEnd 1 focusStartEnd) token
             ErrorTk _ str _ -> 
                      ScannedToken (updateStartOrEnd (length str) focusStartEnd) token
-            
+        
 
 
 {-
@@ -386,6 +400,7 @@ addIdPs (addedIdPs,idPCounter) [] = ([], addedIdPs, idPCounter)
 addIdPs (addedIdPs,idPCounter) (st: sts) = 
   let (st', addedIdPs', idPCounter') = case st of
                              (ScannedWhitespace _ _) -> (st, addedIdPs, idPCounter)
+                             (ScannedToken f (StyleTk _ _)) -> (st, addedIdPs, idPCounter)
                              (ScannedToken f tk) -> 
                                 case getTokenIDP tk of
                                   NoIDP -> ( ScannedToken f (setTokenIDP (IDP idPCounter) tk)
