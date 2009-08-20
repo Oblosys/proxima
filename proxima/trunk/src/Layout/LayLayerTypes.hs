@@ -35,6 +35,9 @@ isCharScanChar _            = False
 isStructuralScanChar (Structural _ _ _ _ _ _) = True
 isStructuralScanChar _            = False
  
+isStyleScanChar (Style _ ) = True
+isStyleScanChar _          = False
+
 -- Scanned token is used as the return type for the alex scanner. Actual tokens are put
 -- in ScannedToken, and all whitespace is put in ScannedWhitespace. It is related to the preceding
 -- token in the whitespace map. 
