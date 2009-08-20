@@ -139,7 +139,7 @@ ATTR Layout [ | | scanChars : {[ScanChar @doc @node @clip @token]} ]
 
 SEM Layout
   | StringP
-      loc.scanChars = styleChangeTags @lhs.previousCharStyle @lhs.styleAttrs ++
+      loc.scanChars = styleChangeTags @lhs.previousCharStyles @lhs.currentStyles ++
                       map (Char @id NoFocusMark NoFocusMark @lhs.lloc) @text
 
   | RowP
@@ -185,31 +185,26 @@ SEM LayoutList
 
 -- Attribute scanning
 
-ATTR Layout LayoutList [ styleAttrs : {Inherited @doc @clip}| | ]
+ATTR Layout LayoutList [ styleAttrs : {Inherited @doc @clip} currentStyles : {[Style]} | previousCharStyles : {[Style]} | ]
 
 SEM Layout
   | WithP
-      child.styleAttrs = let (inh,syn) = @attrRule (@lhs.styleAttrs, error "Error in presentation: style depends on synthesized attributes")
-                         in  inh
+      loc.styleAttrs = let (inh,syn) = @attrRule (@lhs.styleAttrs, error "Error in presentation: style depends on synthesized attributes")
+                       in  inh
+      child.styleAttrs = @styleAttrs
+      child.currentStyles = (if fBold (font @styleAttrs) then [Bold] else []) ++
+                            (if fItalic (font @styleAttrs) then [Italic] else []) ++
+                            (if textColor @styleAttrs == (255,0,0) then [Colored (255,0,0)] else [])
 
-ATTR Layout LayoutList [ | previousCharStyle : {[Style]} | ]
-
-SEM Layout
-  | StringP
-      lhs.previousCharStyle = (if fBold (font @lhs.styleAttrs) then [Bold] else []) ++
-                              (if fItalic (font @lhs.styleAttrs) then [Italic] else []) ++
-                              (if textColor @lhs.styleAttrs == (255,0,0) then [Colored (255,0,0)] else [])
-
+  | StringP  
+      lhs.previousCharStyles = (@lhs.previousCharStyles `intersect` @lhs.currentStyles) ++ (@lhs.currentStyles \\ @lhs.previousCharStyles)
+                               -- make sure that new styles are added after old ones
 {
-styleChangeTags previousCharStyle styleAttrs = 
-  (if fBold (font styleAttrs) 
-   then if Bold `elem` previousCharStyle then [] else [Style $ StyleTag Bold Start]
-   else if Bold `elem` previousCharStyle then [Style $ StyleTag Bold End] else []) ++
-  (if fItalic (font styleAttrs) 
-   then if Italic `elem` previousCharStyle then [] else [Style $ StyleTag Italic Start]
-   else if Italic `elem` previousCharStyle then [Style $ StyleTag Italic End] else []) ++
-  (if textColor styleAttrs == (255,0,0) 
-   then if (Colored (255,0,0)) `elem` previousCharStyle then [] else [Style $ StyleTag (Colored (255,0,0)) Start]
-   else if (Colored (255,0,0)) `elem` previousCharStyle then [Style $ StyleTag (Colored (255,0,0)) End] else [])
-
+styleChangeTags previousCharStyles currentStyles =
+  let endedStyles = dropWhile (`elem` currentStyles) previousCharStyles -- drop the ones that are still valid
+  in  map mkEndTag (reverse endedStyles) ++ 
+      map mkStartTag (endedStyles `intersect` currentStyles) ++
+      map mkStartTag (currentStyles\\previousCharStyles)
+ where mkStartTag style = Style $ StyleTag style Start
+       mkEndTag style = Style $ StyleTag style End
 }
