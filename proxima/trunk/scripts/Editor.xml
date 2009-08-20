@@ -473,11 +473,23 @@ function keypress(e)
   { loadXMLDoc('SetStyle Bold;');
     return false;
   }
+  if (keyCode==66 && ctrlDown) // ctrl-B
+  { loadXMLDoc('ClearStyle Bold;');
+    return false;
+  }
   if (keyCode==105 && ctrlDown) // ctrl-i
   { loadXMLDoc('SetStyle Italic;');
     return false;
   }
-  if (keyCode==114 && ctrlDown) // ctrl-r
+  if (keyCode==73 && ctrlDown) // ctrl-I
+  { loadXMLDoc('ClearStyle Italic;');
+    return false;
+  }
+  if (keyCode==48 && ctrlDown) // ctrl-0
+  { loadXMLDoc('SetStyle (Colored (0,0,0));');
+    return false;
+  }
+  if (keyCode==49 && ctrlDown) // ctrl-1
   { loadXMLDoc('SetStyle (Colored (255,0,0));');
     return false;
   }

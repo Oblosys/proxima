@@ -352,6 +352,7 @@ data Command = Metrics ((String,Int),(Int,Int,[Int]))
              | Chr (Int,Modifiers)
              | Mouse MouseCommand (Int,Int, Modifiers)
              | SetStyle CommonTypes.Style 
+             | ClearStyle CommonTypes.Style 
              | Find String
              | SetViewedArea CommonTypes.Rectangle
              | ClearMetrics 
@@ -469,6 +470,12 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
     
     SetStyle style ->
       do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ cast (SetStyleLay style :: EditLayout doc enr node clip token)
+         ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+         ; return $ html ++ [setViewedAreaHtml]
+         }
+
+    ClearStyle style ->
+      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ cast (ClearStyleLay style :: EditLayout doc enr node clip token)
          ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
          ; return $ html ++ [setViewedAreaHtml]
          }

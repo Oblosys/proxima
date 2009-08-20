@@ -217,7 +217,7 @@ findLay' str fromPath fromIndex toPath toIndex rootPath lay =
   --debug Prs ("paths "++show fromPath++show toPath) $
   if rootPath < take (length rootPath) fromPath || rootPath > toPath
   then Nothing
-  else -- this does not take into account focus selections of subtrees (but these aren't valid anyway) 
+  else -- this does not take into account focus selections of subs (but these aren't valid anyway) 
    case lay of
     (StringP id str')         -> let searchStr = if rootPath == toPath then take toIndex str' else str'
                                      searchStart = if rootPath == fromPath then fromIndex+1 else 0

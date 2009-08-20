@@ -40,6 +40,7 @@ data EditLayout_ wrapped doc enr node clip token =
   | EnlargeLeftLay
   | EnlargeRightLay
   | SetStyleLay Style
+  | ClearStyleLay Style
   | MouseDownLay PathPres Modifiers Int
   | AddVertexLay [Int] (Int,Int) -- path to the graph and destination position for new vertex
   | AddEdgeLay   [Int] -- path to to-vertex for new edge (from-vertex is assumed to be in focus)
