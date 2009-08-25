@@ -70,7 +70,7 @@ proxima :: ( DocNode node, Show token, Ord token, Show enr, Doc doc, Clip clip, 
            , EvaluationSheet doc enr clip, ReductionSheet doc enr clip
            , Editable doc doc node clip token) =>
            Settings ->
-           PresentationSheet doc enr node clip token -> ParseSheet doc enr node clip token -> -- different comment for testing conflict handling in SmartSVN
+           PresentationSheet doc enr node clip token -> ParseSheet doc enr node clip token ->
            ScannerSheet doc node clip token ->
            DocumentLevel doc clip -> EnrichedDocLevel enr doc ->
            IO ()
