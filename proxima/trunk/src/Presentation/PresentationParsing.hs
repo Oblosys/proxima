@@ -218,7 +218,7 @@ showMessage (Msg expecting position action)
 showPosition :: (DocNode node, Ord token, Show token) =>
                 Maybe (Token doc node clip token) -> String
 showPosition Nothing = "end of input"
-showPosition (Just t) = showToken t
+showPosition (Just t) = tokenString t
 
 showExpecting :: (DocNode node, Ord token, Show token) =>
                  Expecting (Token doc node clip token) -> String
@@ -230,22 +230,14 @@ showExpecting (EOr  (t:ts)) = showExpecting t ++ " or " ++ showExpecting (EOr ts
 showExpecting (ESeq exps)   = concat (map showExpecting exps)
 
 showRange EmptyR      = "the empty range"
-showRange (Range a b) = if a == b then showToken a else showToken a ++ ".." ++ showToken b
+showRange (Range a b) = if a == b then tokenString a else tokenString a ++ ".." ++ tokenString b
 
 showAction :: (DocNode node, Ord token, Show token) =>
               Action (Token doc node clip token) -> String
-showAction (Insert t) = "inserting: " ++ showToken t 
-showAction (Delete t) = "deleting: "  ++ showToken t 
+showAction (Insert t) = "inserting: " ++ tokenString t 
+showAction (Delete t) = "deleting: "  ++ tokenString t 
 showAction (Other t)  = t 
 
-showToken (UserTk p _ str _ _) = show str
-showToken (StructuralTk p _ _ _ _) = "Structural token"
-showToken (ErrorTk p _ _) = "Error token"
-showToken t               = "Internal error: wrong token: "++show t
-
--- TODO:
--- StructuralTk, we could add a description string to StructuralTk, which is set in the parser and
--- shown here.
 
 retrieveTokenPosition errStr messageText =
   case drop' errStr messageText of
