@@ -399,11 +399,18 @@ SEM Field
 SEM Field [ | | val : Int ]
   | Field 
       lhs.val = @val.value
+  | HoleField
+      lhs.val = -1
+  | ParseErrField
+      lhs.val = -1
 
 SEM Row [ | | rowNrs : {[Int]} ]
   | Row
       loc.rowNrs = [@f0.val,@f1.val,@f2.val,@f3.val,@f4.val,@f5.val,@f6.val,@f7.val,@f8.val]
-
+  | HoleRow
+      loc.rowNrs = []
+  | ParseErrRow
+      loc.rowNrs = []
 
 ATTR Field [ rowNrs : {[Int]} | |  ]
 
@@ -429,6 +436,10 @@ SEM Row [ | | rowGroups : {[[Int]]} ]
                       , [@f3.val, @f4.val, @f5.val]
                       , [@f6.val, @f7.val, @f8.val]
                       ]
+  | HoleRow
+      lhs.rowGroups = []
+  | ParseErrRow
+      lhs.rowGroups = []
 
 ATTR Row [ blocks : {([Int],[Int],[Int])} | | ]
 
