@@ -272,7 +272,7 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      
      ( [ParsingTk parser mNode tokens idP']
      , idPCounter''', scannedWhitespaceMap' `Map.union` whitespaceMap'
-     , loc (maybe noNode id mNode) $ ParsingP NoIDP parser LexInherited $ RowP NoIDP 0 $ map presFromToken tokens
+     , loc (maybe noNode id mNode) $ ParsingP NoIDP parser presentationLex $ RowP NoIDP 0 $ map presFromToken tokens
      )
 
 showFocusedScanChars [] = ""
