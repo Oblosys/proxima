@@ -171,6 +171,12 @@ tokenString (GraphTk d es n id) = "<graph token>"
 tokenString (VertexTk i p n id) = "<vertex token>"
 tokenString (ErrorTk _ str _)       = str
                              
+
+-- TODO:
+-- StructuralTk, we could add a description string to StructuralTk, which is set in the parser and
+-- shown here.
+
+
 tokenNode :: Token doc node clip token -> Maybe node                 
 tokenNode (StructuralTk _ n _ _ id) = n
 tokenNode (GraphTk d es n id) = n
