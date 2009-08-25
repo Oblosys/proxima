@@ -151,7 +151,7 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
 
 SEM List_Paragraph
   | List_Paragraph
-      loc.pres = parsing' LexFreeText $
+      loc.pres = parsing' (Lexer 0 NonStyled) $
                    col $ if null (fromList_Paragraph @self) then [formatter [text ""]] else @elts.press
                    -- if paragraph list is empty, we add a dummy text "" to prevent the presentation from getting height 0
                    -- this dummy is parsed as an empty paragraph

@@ -199,7 +199,9 @@ SEM Layout
       lhs.previousCharStyles = (@lhs.previousCharStyles `intersect` @lhs.currentStyles) ++ (@lhs.currentStyles \\ @lhs.previousCharStyles)
                                -- make sure that new styles are added after old ones
 
-      loc.styleScanChars = styleChangeTags @lhs.previousCharStyles @lhs.currentStyles
+      loc.styleScanChars = case @lhs.lexer of
+                             Lexer _ Styled -> [] -- styleChangeTags @lhs.previousCharStyles @lhs.currentStyles
+                             Lexer _ NonStyled -> []  -- will never be LexInherited
       loc.nrOfStyleScanChars = length @styleScanChars
 {
 stylesFromAttrs attrs = (if fBold (font attrs) then [Bold] else []) ++

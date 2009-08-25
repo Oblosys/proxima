@@ -99,14 +99,15 @@ and we cannot tokenize any structural token children.
 
 
 
-
+defaultLexer :: Lexer
+defaultLexer = Lexer 0 NonStyled
 
 tokenizeLay :: (DocNode node, Show token) =>
                ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip token ->
                PresentationLevel doc node clip token -> 
                ([EditPresentation doc enr node clip token], state, LayoutLevel doc node clip token)
 tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
- let (tokens, idPCounter', whitespaceMap, tokenizedPres) = scanStructural sheet (fixFocus focus) LexHaskell Nothing [] idPCounter Map.empty lay 
+ let (tokens, idPCounter', whitespaceMap, tokenizedPres) = scanStructural sheet (fixFocus focus) defaultLexer Nothing [] idPCounter Map.empty lay 
      presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk 0 Nothing tokenizedPres tokens NoIDP)) (whitespaceMap,idPCounter')
  in  (case focus of FocusP (PathP sf si) (PathP ef ei) -> debug Lay ("focus start\n"++ show sf++ show si ++ "focus end\n"++ show ef++ show ei ++"\n")
                     _ -> id
@@ -227,7 +228,9 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                 , whitespaceMap_Syn_Layout = whitespaceMap'
                 } = wrap_Layout (sem_Layout lay) inheritedAttrs
 
-     allScanChars = scanChars ++ styleChangeTags lastCharStyles (stylesFromAttrs defaultStyleAttrs)
+     allScanChars = scanChars ++ case lex of
+                                   Lexer _ Styled -> styleChangeTags lastCharStyles (stylesFromAttrs defaultStyleAttrs)
+                                   Lexer _ NonStyled -> []
                               -- add remaining close tags (if any)
                  
      focusedScanChars = markFocusStartAndEnd scannedFocusStart scannedFocusEnd allScanChars 
