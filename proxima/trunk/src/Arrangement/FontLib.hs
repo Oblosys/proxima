@@ -41,7 +41,7 @@ initFontMetrics = newFontMetricsRef
 -- second time, fonts will be absent again, and
 mkFontMetrics :: Settings -> [Font] -> IO FontMetrics
 mkFontMetrics settings fonts =
- do { putStrLn "Before reading queriedMetrics.txt"
+ do { --putStrLn "Before reading queriedMetrics.txt"
     ; fh <- openFile "queriedMetrics.txt" ReadMode -- readFile and seq gives problems when clearing it in GUI.hs
     ; queriedFontsTxt <- hGetContents fh 
     ; seq (length queriedFontsTxt) $ return ()

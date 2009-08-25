@@ -182,8 +182,8 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
                              
                              ; seq (length responseHTML) $ return ()
-                             ; liftIO $ putStrLn $ "Sending response sent to client: " ++
-                                                   take 10 responseHTML ++ "..."
+                             --; liftIO $ putStrLn $ "Sending response sent to client: " ++
+                             --                      take 10 responseHTML ++ "..."
                              ; modifyResponseW noCache $
                                 ok $ toResponse responseHTML
                              }
