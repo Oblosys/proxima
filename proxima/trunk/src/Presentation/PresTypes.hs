@@ -166,7 +166,7 @@ instance (Ord node, Ord token) => Ord (Token doc node clip token) where
 tokenString :: Token doc node clip token -> String                  
 tokenString (UserTk _ _ s n id)      = s
 tokenString (StructuralTk _ n _ _ id) = "<structural token>"
-tokenString (StyleTk _ _) = "<style token>"
+tokenString (StyleTk _ tag) = "<style token:"++show tag++">"
 tokenString (GraphTk d es n id) = "<graph token>"
 tokenString (VertexTk i p n id) = "<vertex token>"
 tokenString (ErrorTk _ str _)       = str
