@@ -79,3 +79,15 @@ pathPFromPathAFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (c
               _                           -> debug Err ("ArrLayerUtils.pathPFromPathAFormatter: unfolded formatter has wrong stucture, no row") (EmptyA NoIDA 0 0 0 0 0 0 transparent)
   in  fIx : pathPFromPathA' arr (index "ArrLayerUtils.pathPFromPathAFormatter, pres index" press fIx) path
 pathPFromPathAFormatter _                           press path = debug Err ("ArrLayerUtils.pathPFromPathAFormatter: unfolded formatter has wrong stucture, no column") []
+
+
+-- refs are not passed, since they are not used in rendering.
+-- What happens if an empty is used as oldArrangement? Can this happen? And do we need the refs then?
+arrangeWhenFocusedOrViewed rootPath focus absx absy x y w h hrf vrf viewedArea idA arrangement =
+  let (fromPath,toPath) = case focus of
+                    FocusP (PathP f _) (PathP t _) -> if f <= t then (f,t) else (t,f)
+                    _                              -> ([-1],[-1])
+  in  if rootPath >= take (length rootPath) fromPath && rootPath <= toPath ||
+         overlap ((absx,absy),(w,h)) viewedArea then (if rootPath >= take (length rootPath) fromPath && rootPath <= toPath then debug Err ("arrangeinfocus\n"++ show rootPath ++"\n"++ show focus++shallowShowArr arrangement) else id) arrangement else
+          --arrangement 
+          unarrangedA x y w h hrf vrf

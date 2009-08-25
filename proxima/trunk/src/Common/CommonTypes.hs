@@ -73,7 +73,7 @@ isTransparent c  = c == transparent
 
 -- Formatted denotes whether a column originates from a formatter (in which case the argument
 -- denotes the number of elements in each of the rows in the column)
-data Formatted = NF | F [Int] deriving Show 
+data Formatted = NF | F [Int] deriving (Show, Eq) 
 
 -- to determine the outline of a graph node (for drawing the arrows correctly)
 type Outline = Double -> (Int, Int)

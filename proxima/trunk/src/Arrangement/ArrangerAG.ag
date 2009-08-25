@@ -155,6 +155,8 @@ allFonts
 arrangement
 vertex
 unprunedLay 
+rootPath
+focus
 -}
 
 --  For each Nonterminal:
@@ -172,7 +174,6 @@ SEM LayoutList [ || nrOfChildren : Int ]
       lhs.nrOfChildren = 1 + @tl.nrOfChildren
 
 ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color backgroundColor : Color
-            focus : FocusPres
             mouseDown : {Maybe (UpdateDoc doc clip)}
 --            inheritablePopupMenuItems : {[ PopupMenuItem @doc @clip ]}
 --            localPopupMenuItems : {[ PopupMenuItem @doc @clip ]}
@@ -895,22 +896,22 @@ SEM LayoutList
 ATTR Layout [  | | arrangement : {Arrangement @node} ]
 SEM Layout
   | EmptyP
-      lhs.arrangement = arrangeWhenViewed        @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+      lhs.arrangement = arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           EmptyA (IDA @lhs.idCounter) {- (idAFromP @id) -}  @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor
   | StringP 
-      lhs.arrangement = arrangeWhenViewed        @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+      lhs.arrangement = arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           StringA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @text @lhs.textColor @lhs.backgroundColor @lhs.font (cumulativeCharWidths @lhs.fontMetrics @lhs.font @text) -- expensive, but will be evaluated lazily
   | RectangleP
-      lhs.arrangement = arrangeWhenViewed           @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+      lhs.arrangement = arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus    @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           RectangleA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
   | EllipseP
-      lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+      lhs.arrangement = arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus  @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           EllipseA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
   | ImageP
-      lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+      lhs.arrangement = arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           ImageA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @src @style @lhs.lineColor @lhs.backgroundColor
   | PolyP      
-      lhs.arrangement = arrangeWhenViewed                  @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+      lhs.arrangement = arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus           @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           let mkPoint (rx, ry) = ( round (rx * fromIntegral ((@finalWidth-1) `max` 0))
 			                         , round (ry * fromIntegral ((@finalHeight-1) `max` 0)) )
 		                  in  PolyA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef (map mkPoint @pointList) @lineWidth @style @lhs.lineColor @lhs.fillColor @lhs.backgroundColor
@@ -938,7 +939,7 @@ SEM Layout
 						  ))$ 
                         -}
 						--debug Err ("Row in view with #children: "++ show @layoutList.nrOfChildren ++" "++ show @finalWidth ++" "++ show @layoutList.finalWidthList) $
-                          arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+                          arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           RowA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @layoutList.arrangementList
   | ColP 
       lhs.arrangement = {-
@@ -954,13 +955,13 @@ SEM Layout
                           , @lhs.assignedWidth
                               ))$
 	                    -}
-					    arrangeWhenViewed     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+					    arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus     @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           ColA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @formatted @layoutList.arrangementList 
   | OverlayP 
-      lhs.arrangement = arrangeWhenViewed         @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+      lhs.arrangement = arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           OverlayA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor @direction @layoutList.arrangementList
   | GraphP 
-      lhs.arrangement = arrangeWhenViewed       @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
+      lhs.arrangement = arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus @lhs.absx @lhs.absy @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           GraphA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
                                  (length @layoutList.vertices)
                                  ( @layoutList.arrangementList  ++
@@ -968,7 +969,7 @@ SEM Layout
                         -- All edges are arranged, even if the graph is partially in view.
                         -- This could be optimized further, but is probably not worth the effort.
     | VertexP
-      lhs.arrangement = arrangeWhenViewed @lhs.absx @lhs.absy
+      lhs.arrangement = arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus @lhs.absx @lhs.absy
                                          @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea (IDA @lhs.idCounter) {- (idAFromP @id) -} $
                           VertexA (IDA @lhs.idCounter) {- (idAFromP @id) -} @lhs.x @lhs.y 
                                   @finalWidth @finalHeight @finalHRef @finalVRef @lhs.backgroundColor 
@@ -983,8 +984,10 @@ SEM Layout
        -- MatrixPresentation (IDA @lhs.idCounter) {- (idAFromP @id) -} @layoutList.arrangementList @lhs.x @lhs.y finalWidth finalHeight @lhs.backgroundColor
   | AlternativePresentation -- remove the alternative layout
       lhs.arrangement = @layoutList.arrangementList !! @firstFit 
-   -- with node is removed by copy rule
 -}
+
+  | WithP
+      lhs.arrangement = @child.arrangement
   | StructuralP 
       lhs.arrangement = StructuralA (IDA @lhs.idCounter) {- (idAFromP @id) -} @child.arrangement
   | ParsingP 
@@ -1006,17 +1009,17 @@ SEM Layout
                             then --debug Arr ("Failed reuse: "++ show (not (isComplete oldArr))
                                  --           ++ show @lhs.viewedArea ++ show @lhs.oldViewedArea 
                                  --           ++ show (@lhs.x == xA oldArr && @lhs.y == yA oldArr )   ++show oldArr ) $
-                                 arrangeWhenViewed @lhs.absx @lhs.absy
+                                 arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus @lhs.absx @lhs.absy
                                               @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
                                    (if markArrangementBackground then setBGColor red else id) $      -- @finalVRef @finalHRef are taken from the arrangedP node
                                    @unprunedLayHO.arrangement
                             else  
-                                 arrangeWhenViewed @lhs.absx @lhs.absy
+                                 arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus @lhs.absx @lhs.absy
                                               @lhs.x @lhs.y (widthA oldArr) (heightA oldArr) (hRefA oldArr) (vRefA oldArr) {-@finalWidth @finalHeight @finalHRef @finalVRef-} @lhs.viewedArea NoIDA $
                                    (if markArrangementBackground then setBGColor yellow else id) $      -- @finalVRef @finalHRef are taken from the arrangedP node
                                    setXYWHA @lhs.x @lhs.y @finalWidth @finalHeight oldArr 
                           Nothing ->
-                            arrangeWhenViewed @lhs.absx @lhs.absy
+                            arrangeWhenFocusedOrViewed @lhs.rootPath @lhs.focus @lhs.absx @lhs.absy
                                               @lhs.x @lhs.y @finalWidth @finalHeight @finalHRef @finalVRef @lhs.viewedArea NoIDA $
                               (if markArrangementBackground then setBGColor blue else id) $      -- @finalVRef @finalHRef are taken from the arrangedP node
                               @unprunedLayHO.arrangement
@@ -1292,3 +1295,50 @@ SEM LayoutList
       lhs.arrangementList = []
   | Cons 
       lhs.arrangementList = @hd.arrangement : @tl.arrangementList
+
+
+
+
+-- rootPath and focus
+
+SEM Root [ focus : FocusPres | | ]
+  | Root
+      layout.focus = @lhs.focus
+      layout.rootPath = []
+      layout.isFormattedRow = Nothing
+
+SEM Layout [ rootPath : Path focus : FocusPres | | ]
+  | VertexP WithP StructuralP ParsingP LocatorP TagP
+      child.rootPath = @lhs.rootPath ++ [0]
+  | RowP ColP OverlayP GraphP FormatterP
+      layoutList.rootPath = @lhs.rootPath
+      layoutList.ix       = 0
+            
+ATTR LayoutList [ isFormattedCol : {Maybe [Int]} isFormattedRow : {Maybe Int} | | ]
+
+
+SEM Layout
+  | ColP
+      layoutList.isFormattedCol = case @formatted of 
+                                    F rowLengths -> Just $ init $ scanl (+)  0 $ rowLengths
+                                    NF -> Nothing
+  | RowP OverlayP GraphP FormatterP
+      layoutList.isFormattedCol = Nothing
+
+SEM Layout [ isFormattedRow : {Maybe Int} | | ]
+  | RowP
+      layoutList.isFormattedRow = @lhs.isFormattedRow 
+  | ColP OverlayP GraphP FormatterP
+      layoutList.isFormattedRow = Nothing
+
+SEM LayoutList [ rootPath : Path focus : FocusPres ix : Int | | ]
+  | Cons
+      hd.rootPath = if isJust @lhs.isFormattedCol 
+                    then @lhs.rootPath
+		    else case @lhs.isFormattedRow of
+                           Just offset -> @lhs.rootPath ++ [offset + @lhs.ix]
+                           Nothing -> @lhs.rootPath ++ [@lhs.ix]
+      tl.ix       = @lhs.ix + 1
+      hd.isFormattedRow = case @lhs.isFormattedCol of
+                             Just rowLengths -> Just $ index "ArrangerAG.LayoutList.Cons.hd.formatterOffset" rowLengths @lhs.ix
+                             Nothing -> Nothing
