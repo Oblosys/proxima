@@ -39,9 +39,6 @@ padding-right:10px;
 
 
 var xmlhttp;
-var shiftDown = false;
-var ctrlDown = false;
-var altDown = false;
 var mouseDown = false;
 var commandQueue = '';
 
@@ -463,39 +460,39 @@ function keypress(e)
    // keyCode is 0 on Firefox
    
 //  debugAdd('Key is '+keyCode +',' + e.charCode);
-  if (keyCode==102 && ctrlDown) // ctrl-f
+  if (keyCode==102 && e.ctrlKey) // ctrl-f
   { var answer=prompt("Enter search term.");
 // todo: escape answer string
     if (answer) loadXMLDoc('Find "'+answer+'";');
     return false;
   }
-  if (keyCode==98 && ctrlDown) // ctrl-b
+  if (keyCode==98 && e.ctrlKey) // ctrl-b
   { loadXMLDoc('SetStyle Bold;');
     return false;
   }
-  if (keyCode==66 && ctrlDown) // ctrl-B
+  if (keyCode==66 && e.ctrlKey) // ctrl-B
   { loadXMLDoc('ClearStyle Bold;');
     return false;
   }
-  if (keyCode==105 && ctrlDown) // ctrl-i
+  if (keyCode==105 && e.ctrlKey) // ctrl-i
   { loadXMLDoc('SetStyle Italic;');
     return false;
   }
-  if (keyCode==73 && ctrlDown) // ctrl-I
+  if (keyCode==73 && e.ctrlKey) // ctrl-I
   { loadXMLDoc('ClearStyle Italic;');
     return false;
   }
-  if (keyCode==48 && ctrlDown) // ctrl-0
+  if (keyCode==48 && e.ctrlKey) // ctrl-0
   { loadXMLDoc('SetStyle (Colored (0,0,0));');
     return false;
   }
-  if (keyCode==49 && ctrlDown) // ctrl-1
+  if (keyCode==49 && e.ctrlKey) // ctrl-1
   { loadXMLDoc('SetStyle (Colored (255,0,0));');
     return false;
   }
 
   if (e.which != 0 && keyCode != 8 && keyCode != 13) 
-     loadXMLDoc('Chr('+keyCode+','+showModifiers()+');');
+     loadXMLDoc('Chr('+keyCode+','+showModifiers(e)+');');
 // ? is to prevent caching by IE 
 // maybe also check alt, ctrl and  other keys, they seem to generate press events now
    
@@ -513,32 +510,16 @@ function hasNoKeyPress(keyCode)
 
 }
 
-function recordModifiersDown( keyCode )
-{
-  if (keyCode == 16) shiftDown = true;
-  else if (keyCode == 17) ctrlDown = true;
-  else if (keyCode == 18) altDown = true;
-  //debug(shiftDown+' '+ctrlDown+' '+altDown);
-}
-
-function recordModifiersUp( keyCode )
-{
-  if (keyCode == 16) shiftDown = false;
-  else if (keyCode == 17) ctrlDown = false;
-  else if (keyCode == 18) altDown = false;
-  //debug(shiftDown+' '+ctrlDown+' '+altDown);
-}
 
 function keydown(e)
 {
    if (!e) e = event;
    if (e.keyCode==116)
      refresh();
-   recordModifiersDown(e.keyCode);
-  
+ 
    if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
-     loadXMLDoc('Key('+e.keyCode+','+showModifiers()+');');
+     loadXMLDoc('Key('+e.keyCode+','+showModifiers(e)+');');
      if (e.preventDefault) e.preventDefault();
      if (e.stopPropagation) e.stopPropagation();
      return false; // false, so no keyPress event is generated
@@ -552,8 +533,6 @@ function keydown(e)
 
 function keyup(e)
 {
-   if (!e) e = event;
-   recordModifiersUp(e.keyCode);
 }
 
 function ignore(e)
@@ -609,16 +588,16 @@ function mouseHandler(str,e)
 
         draggable = getDraggable(mouseDownPos.x, mouseDownPos.y);
         if ( !draggable )
-        { sendMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y);                     
+        { sendMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y, e);                     
         }
       } // all other mouse actions are ignored when button was not down
       break;
 
     case 1: // button down, no drag
       if (str =='U')
-      { loadXMLDoc( (draggable ? mkMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y) : '') +
+      { loadXMLDoc( (draggable ? mkMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y, e) : '') +
                     // if there's a draggable, the mouse down was not yet sent
-                    mkMouseCommand('MouseUp', posx, posy)   );
+                    mkMouseCommand('MouseUp', posx, posy, e)   );
         draggable = null;
         dragState = 0;
       }
@@ -635,11 +614,11 @@ function mouseHandler(str,e)
           draggedElementClone.style.left = posx-dragOffset.x +'px';
           draggedElementClone.style.top = posy-dragOffset.y +'px';
 
-          sendMouseCommand('MouseDragStart', posx, posy);
+          sendMouseCommand('MouseDragStart', posx, posy, e);
           dragState = 2;
         }
         else
-        { sendMouseCommand('MouseMove', posx, posy);
+        { sendMouseCommand('MouseMove', posx, posy, e);
           dragState = 3;
         }
       } // ignore mouse down (should not occur)
@@ -647,7 +626,7 @@ function mouseHandler(str,e)
 
     case 2: // drag in progress
       if ( str == 'U' )
-      { sendMouseCommand('MouseDrop', posx, posy);
+      { sendMouseCommand('MouseDrop', posx, posy, e);
         draggedElementClone.parentNode.removeChild(draggedElementClone);
         draggedElementClone = null;
         draggable = null;
@@ -661,11 +640,11 @@ function mouseHandler(str,e)
 
     case 3: // dragging on non-dragsource (e.g. extending focus)
       if ( str == 'U' )
-      { sendMouseCommand('MouseUp', posx, posy);
+      { sendMouseCommand('MouseUp', posx, posy, e);
         dragState = 0;
       }
       else if ( str == 'M' )
-      { sendMouseCommand('MouseMove', posx, posy);
+      { sendMouseCommand('MouseMove', posx, posy, e);
       } // ignore mouse down (should not occur)
       break;
   }
@@ -673,12 +652,12 @@ function mouseHandler(str,e)
   return false; // don't let browser handle mouse events
 }
 
-function sendMouseCommand(mouseCommand, x, y)
-{ loadXMLDoc( mkMouseCommand(mouseCommand,x,y) );
+function sendMouseCommand(mouseCommand, x, y, e)
+{ loadXMLDoc( mkMouseCommand(mouseCommand,x,y, e) );
 }
 
-function mkMouseCommand(mouseCommand, x, y)
-{ return 'Mouse '+mouseCommand+'(' + x + ',' + y + ',' + showModifiers() + ');';
+function mkMouseCommand(mouseCommand, x, y, e)
+{ return 'Mouse '+mouseCommand+'(' + x + ',' + y + ',' + showModifiers(e) + ');';
 }
 
 var ie=document.all;
@@ -798,10 +777,10 @@ function getMouseCoordsWithinTarget(event,Element)
         return coords;
 }
 
-function showModifiers()
-{ return '(' + (shiftDown?'True':'False') + ',' +
-               (ctrlDown?'True':'False') + ',' +
-               (altDown?'True':'False') + ')'
+function showModifiers(e )
+{ return '(' + (e.shiftKey?'True':'False') + ',' +
+               (e.ctrlKey?'True':'False') + ',' +
+               (e.altKey?'True':'False') + ')'
 }
 
 // set the viewed area at server side according to size and scroll position of proxima
