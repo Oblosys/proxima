@@ -840,21 +840,27 @@ instance Editable WordPart Document Node ClipDoc UserToken where
 
 instance Editable TextStyle Document Node ClipDoc UserToken where
   select [] x = Clip_TextStyle x
+  select (0:p) (TextColor x0 x1 x2) = select p x0
+  select (1:p) (TextColor x0 x1 x2) = select p x1
+  select (2:p) (TextColor x0 x1 x2) = select p x2
   select _ _ = Clip_Nothing
 
   paste [] (Clip_TextStyle c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on TextStyle") x
+  paste (0:p) c (TextColor x0 x1 x2) = TextColor (paste p c x0) x1 x2
+  paste (1:p) c (TextColor x0 x1 x2) = TextColor x0 (paste p c x1) x2
+  paste (2:p) c (TextColor x0 x1 x2) = TextColor x0 x1 (paste p c x2)
   paste _ _ x = x
 
   alternatives _ = [ ("TextBold "  , Clip_TextStyle $ TextBold)
                    , ("TextItalic "  , Clip_TextStyle $ TextItalic)
-                   , ("TextRed "  , Clip_TextStyle $ TextRed)
+                   , ("TextColor {Int} {Int} {Int} "  , Clip_TextStyle $ TextColor hole hole hole)
                    ,("{TextStyle}", Clip_TextStyle hole)
                    ]
 
   arity (TextBold) = 0
   arity (TextItalic) = 0
-  arity (TextRed) = 0
+  arity (TextColor x0 x1 x2) = 3
   arity _                        = 0
 
   toClip t = Clip_TextStyle t

@@ -123,7 +123,7 @@ DATA WordPart
 DATA TextStyle
   | TextBold
   | TextItalic
-  | TextRed
+  | TextColor r:Int g:Int b:Int
   | HoleTextStyle
   | ParseErrTextStyle error:{(ParseError Document Node ClipDoc UserToken)}
 
@@ -632,19 +632,19 @@ SEM TextStyle
       lhs.pIdC = @lhs.pIdC + 0
   | TextItalic 
       lhs.pIdC = @lhs.pIdC + 0
-  | TextRed 
+  | TextColor 
       lhs.pIdC = @lhs.pIdC + 0
   | TextBold
   | TextItalic
-  | TextRed
+  | TextColor
   | TextBold
       lhs.pres = loc (Node_TextBold @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | TextItalic
       lhs.pres = loc (Node_TextItalic @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
-  | TextRed
-      lhs.pres = loc (Node_TextRed @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+  | TextColor
+      lhs.pres = loc (Node_TextColor @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
   | HoleTextStyle
       lhs.pres = presHole @lhs.focusD "TextStyle" (Node_HoleTextStyle @self @lhs.path) @lhs.path
@@ -949,7 +949,7 @@ SEM WordPart
 SEM TextStyle
   | TextBold lhs.path = @lhs.path
   | TextItalic lhs.path = @lhs.path
-  | TextRed lhs.path = @lhs.path
+  | TextColor lhs.path = @lhs.path
 
 SEM Int_
   | Int_ lhs.path = @lhs.path
@@ -1089,8 +1089,8 @@ SEM TextStyle
       lhs.presXML = presentElementXML @lhs.focusD (Node_TextBold @self @lhs.path) @lhs.path "TextBold" [  ] 
   | TextItalic
       lhs.presXML = presentElementXML @lhs.focusD (Node_TextItalic @self @lhs.path) @lhs.path "TextItalic" [  ] 
-  | TextRed
-      lhs.presXML = presentElementXML @lhs.focusD (Node_TextRed @self @lhs.path) @lhs.path "TextRed" [  ] 
+  | TextColor
+      lhs.presXML = presentElementXML @lhs.focusD (Node_TextColor @self @lhs.path) @lhs.path "TextColor" [ presentPrimXMLInt @r, presentPrimXMLInt @g, presentPrimXMLInt @b ] 
   | HoleTextStyle     lhs.presXML = presHole @lhs.focusD "TextStyle" (Node_HoleTextStyle @self @lhs.path) @lhs.path
   | ParseErrTextStyle lhs.presXML = presParseErr (Node_ParseErrTextStyle @self @lhs.path) @error
 
@@ -1310,8 +1310,8 @@ SEM TextStyle
       lhs.presTree = presentElementTree @lhs.focusD (Node_TextBold @self @lhs.path) @lhs.path "TextBold" [  ] 
   | TextItalic
       lhs.presTree = presentElementTree @lhs.focusD (Node_TextItalic @self @lhs.path) @lhs.path "TextItalic" [  ] 
-  | TextRed
-      lhs.presTree = presentElementTree @lhs.focusD (Node_TextRed @self @lhs.path) @lhs.path "TextRed" [  ] 
+  | TextColor
+      lhs.presTree = presentElementTree @lhs.focusD (Node_TextColor @self @lhs.path) @lhs.path "TextColor" [ presentPrimXMLInt @r, presentPrimXMLInt @g, presentPrimXMLInt @b ] 
   | HoleTextStyle     lhs.presTree = presHole @lhs.focusD "TextStyle" (Node_HoleTextStyle @self @lhs.path) @lhs.path
   | ParseErrTextStyle lhs.presTree = presParseErr (Node_ParseErrTextStyle @self @lhs.path) @error
 

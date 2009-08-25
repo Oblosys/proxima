@@ -490,6 +490,10 @@ function keypress(e)
   { loadXMLDoc('SetStyle (Colored (255,0,0));');
     return false;
   }
+  if (keyCode==50 && e.ctrlKey) // ctrl-2
+  { loadXMLDoc('SetStyle (Colored (0,0,255));');
+    return false;
+  }
 
   if (e.which != 0 && keyCode != 8 && keyCode != 13) 
      loadXMLDoc('Chr('+keyCode+','+showModifiers(e)+');');

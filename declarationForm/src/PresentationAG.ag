@@ -671,9 +671,9 @@ SEM TextStyle [ | | str : String presStyle : {Presentation_Doc_Node_Clip_Token -
   | TextItalic
       lhs.str = "i"
       lhs.presStyle = italic
-  | TextRed
+  | TextColor
       lhs.str = "r"
-      lhs.presStyle = \p -> p `withColor` red
+      lhs.presStyle = \p -> p `withColor` @color
 
 ATTR List_StringOrStyled ConsList_StringOrStyled
      [ | | str USE {++} {[]} : String ]
@@ -688,7 +688,7 @@ SEM TextStyle
       loc.pres = structural $ empty
   | TextItalic
       loc.pres = structural $ empty
-  | TextRed
+  | TextColor
       loc.pres = structural $ empty
 -}
 
@@ -730,12 +730,12 @@ SEM TextStyle
       loc.pres = structural $ empty
   | TextItalic
       loc.pres = structural $ empty
-  | TextRed
+  | TextColor
       loc.pres = structural $ empty
 
 {
 applyStyles [] pres = pres
 applyStyles (TextBold:styles) pres = applyStyles styles (bold pres)
 applyStyles (TextItalic:styles) pres = applyStyles styles (italic pres)
-applyStyles (TextRed:styles) pres = applyStyles styles (pres `withColor` red)
+applyStyles (TextColor r g b:styles) pres = applyStyles styles (pres `withColor` (r,g,b))
 }

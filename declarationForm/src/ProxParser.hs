@@ -51,13 +51,13 @@ pWord' = (\ps -> Word $ toList_WordPart ps) <$>
 
 pWordPart = (\word -> reuseWordPart [] (Just $ getTokenIDP word) (Just $ tokenString word)) <$>
           pToken WordTk
- <|> OpenTag TextBold <$ pStyleTag Bold Start
- <|> OpenTag TextItalic <$ pStyleTag Italic Start
- <|> OpenTag TextRed <$ pStyleTag (Colored (255,0,0)) Start
- <|> CloseTag TextBold <$ pStyleTag Bold End
- <|> CloseTag TextItalic <$ pStyleTag Italic End
- <|> CloseTag TextRed <$ pStyleTag (Colored (255,0,0)) End
-      
+ <|> OpenTag TextBold <$ pStyleTag ScannedBold Start
+ <|> OpenTag TextItalic <$ pStyleTag ScannedItalic Start
+ <|> (\t -> let (r,g,b) = getTokenColor t in OpenTag (TextColor r g b)) <$> pColorTag Start                                
+ <|> CloseTag TextBold <$ pStyleTag ScannedBold End
+ <|> CloseTag TextItalic <$ pStyleTag ScannedItalic End
+ <|> (\t -> let (r,g,b) = getTokenColor t in CloseTag (TextColor r g b)) <$> pColorTag End -- pStyleTag (ScannedColored (0,0,0)) End
+  
 pKey str  = pToken (KeyTk str)
 
 {-
@@ -87,8 +87,11 @@ pWord = tokenString <$> pToken WordTk
 
 
 
-pStyleTag :: Style -> StartOrEnd -> ProxParser (Token Document Node ClipDoc UserToken)
-pStyleTag style startorend = pSym $ StyleTk 0 (StyleTag style startorend)
+pStyleTag :: ScannedStyle -> StartOrEnd -> ProxParser (Token Document Node ClipDoc UserToken)
+pStyleTag style startorend = pSym $ StyleTk 0 (ScannedStyleTag style startorend)
+
+pColorTag :: StartOrEnd -> ProxParser (Token Document Node ClipDoc UserToken)
+pColorTag startOrEnd = pSym (StyleTk 0 (ScannedStyleTag (ScannedColored (0,0,0)) startOrEnd))
 
 pFloat = read . tokenString <$> pToken FloatTk
 

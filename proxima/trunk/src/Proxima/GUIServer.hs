@@ -4,6 +4,7 @@ module Proxima.GUIServer where
 import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debugIO, debugLnIO
                           , Settings (..) )
 import qualified Common.CommonTypes as CommonTypes
+
 import Common.CommonUtils
 import Rendering.RenTypes
 import Layout.LayTypes

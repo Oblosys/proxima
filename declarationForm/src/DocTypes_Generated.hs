@@ -109,7 +109,7 @@ data WordPart = WordPart IDP String
 
 data TextStyle = TextBold
                | TextItalic
-               | TextRed
+               | TextColor Int Int Int
                | HoleTextStyle
                | ParseErrTextStyle (ParseError Document Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
@@ -283,7 +283,7 @@ data Node = NoNode
           | Node_ParseErrWordPart WordPart Path
           | Node_TextBold TextStyle Path
           | Node_TextItalic TextStyle Path
-          | Node_TextRed TextStyle Path
+          | Node_TextColor TextStyle Path
           | Node_HoleTextStyle TextStyle Path
           | Node_ParseErrTextStyle TextStyle Path
           | Node_Int_ Int_ Path
@@ -379,7 +379,7 @@ instance Show Node where
   show (Node_ParseErrWordPart _ _) = "Node_ParseErrWordPart" 
   show (Node_TextBold _ _) = "Node_TextBold" 
   show (Node_TextItalic _ _) = "Node_TextItalic" 
-  show (Node_TextRed _ _) = "Node_TextRed" 
+  show (Node_TextColor _ _) = "Node_TextColor" 
   show (Node_HoleTextStyle _ _) = "Node_HoleTextStyle" 
   show (Node_ParseErrTextStyle _ _) = "Node_ParseErrTextStyle" 
   show (Node_Int_ _ _) = "Node_Int_" 

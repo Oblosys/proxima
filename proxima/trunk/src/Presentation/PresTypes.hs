@@ -87,7 +87,7 @@ type ClipParser doc node clip token = [Token doc node clip token] -> clip
 data Token doc node clip token = 
                UserTk       Position token String (Maybe node) IDP
              | StructuralTk Position (Maybe node) (Presentation doc node clip token) [Token doc node clip token] IDP
-             | StyleTk      Position StyleTag
+             | StyleTk      Position ScannedStyleTag
              | ParsingTk    (Maybe (ClipParser doc node clip token)) (Maybe node)  [Token doc node clip token] IDP -- deriving (Show)
              | GraphTk               Dirty [(Int, Int)] (Maybe node) IDP
              | VertexTk              Int (Int, Int) (Maybe node) IDP
@@ -98,6 +98,33 @@ data Token doc node clip token =
 -- The other tokens are not produced by the scanner, and therefore do not need this field.
 -- The position is only used for children of ParsingTk. StructuralTk children of a StructuralTk all have
 -- position 0
+
+data ScannedStyleTag = ScannedStyleTag ScannedStyle StartOrEnd deriving (Show, Eq, Ord)
+
+data ScannedStyle = ScannedBold | ScannedItalic | ScannedColored Color deriving (Show, Read)
+
+-- special version of Style in which Color x == Color y = True even if x /= y, necessary for UU.Parsing, so we can write one parser for
+-- all colors.
+
+instance Eq ScannedStyle where 
+  ScannedBold       == ScannedBold       = True
+  ScannedItalic     == ScannedItalic     = True
+  ScannedColored c1 == ScannedColored c2 = True
+  _                 == _                 = False
+
+instance Ord ScannedStyle where
+  ScannedBold      <= ScannedBold      = True
+  ScannedItalic    <= ScannedItalic    = True
+  ScannedItalic    <= ScannedBold      = True
+  ScannedColored _ <= ScannedColored _ = True
+  ScannedColored _ <= ScannedItalic    = True
+  ScannedColored _ <= ScannedBold      = True
+  _                <= _                = False
+
+scannedStyleFromStyle Bold = ScannedBold
+scannedStyleFromStyle Italic = ScannedItalic
+scannedStyleFromStyle (Colored c) = ScannedColored c
+
 
 isStyleTk (StyleTk _ _) = True
 isStyleTk _             = False
@@ -184,6 +211,9 @@ tokenNode (VertexTk i p n id) = n
 tokenNode (UserTk _ u s n id)   = n
 tokenNode (StyleTk p t)       = error $ "tokenNode called on Style token ("++show p ++ "):" ++ show t
 tokenNode (ErrorTk _ str _)       = error $ "tokenNode called on error token: " ++ str
+
+getTokenColor (StyleTk _ (ScannedStyleTag (ScannedColored c) _)) = c
+getTokenColor t = debug Err ("getTokenColor called on wrong token:" ++ show t) (-1,-1,-1)
 
 getTokenIDP :: Token doc node clip token -> IDP       
 getTokenIDP (UserTk _ u s n id) = id

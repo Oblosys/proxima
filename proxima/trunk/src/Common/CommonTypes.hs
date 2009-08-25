@@ -93,12 +93,10 @@ defaultTextColor = black
 defaultFont = Font "Verdana" 14 False False False False
 
 
-data StartOrEnd = Start | End deriving (Show, Eq, Ord)
-
-data StyleTag = StyleTag Style StartOrEnd deriving (Show, Eq, Ord)
-
 data Style = Bold | Italic | Colored Color deriving (Show, Read, Eq, Ord)
+-- used by scanner and in gui for commands to set text styles
 
+data StartOrEnd = Start | End deriving (Show, Eq, Ord)
 
 data FillStyle = Solid | Transparent deriving (Show, Eq, Read)
 

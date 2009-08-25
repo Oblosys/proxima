@@ -41,8 +41,8 @@ stringFromScanChars :: [ScanChar doc node clip token] -> String
 stringFromScanChars scs = 
   [ case sc of Char _ _ _ _ c           -> c
                Structural _ _ _ _ _ _ -> '@' -- in the Alex scanner, this is \255, this output is only for show
-               Style (StyleTag _ Start) -> '<' -- in the Alex scanner, this is \255, this output is only for show
-               Style (StyleTag _ End) -> '>' -- in the Alex scanner, this is \255, this output is only for show
+               Style (ScannedStyleTag _ Start) -> '<' -- in the Alex scanner, this is \255, this output is only for show
+               Style (ScannedStyleTag _ End) -> '>' -- in the Alex scanner, this is \255, this output is only for show
   
   | sc <- scs
   ]

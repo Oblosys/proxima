@@ -1,6 +1,6 @@
 module ProxParser_Generated where
 
-import Common.CommonTypes hiding (Dirty (..))
+import Common.CommonTypes hiding (Dirty (..), defaultTextColor)
 import Presentation.PresLayerTypes
 import Presentation.PresLayerUtils
 
@@ -87,7 +87,7 @@ instance Construct Document Node ClipDoc UserToken where
   construct (Node_ParseErrWordPart _ _) = construct_ParseErrWordPart
   construct (Node_TextBold _ _) = construct_TextBold
   construct (Node_TextItalic _ _) = construct_TextItalic
-  construct (Node_TextRed _ _) = construct_TextRed
+  construct (Node_TextColor _ _) = construct_TextColor
   construct (Node_HoleTextStyle _ _) = construct_HoleTextStyle
   construct (Node_ParseErrTextStyle _ _) = construct_ParseErrTextStyle
   construct (Node_Int_ _ _) = construct_Int_
@@ -173,7 +173,7 @@ construct_HoleWordPart tk ~[] = Clip_WordPart $ hole
 construct_ParseErrWordPart (StructuralTk _ _ pres _ _) ~[] = Clip_WordPart $ parseErr (StructuralParseErr pres)
 construct_TextBold tk ~[] = Clip_TextStyle $ reuseTextBold [tk] 
 construct_TextItalic tk ~[] = Clip_TextStyle $ reuseTextItalic [tk] 
-construct_TextRed tk ~[] = Clip_TextStyle $ reuseTextRed [tk] 
+construct_TextColor tk ~[mClip0,mClip1,mClip2] = Clip_TextStyle $ reuseTextColor [tk]  (retrieveArg "TextColor" "r::Int" mClip0) (retrieveArg "TextColor" "g::Int" mClip1) (retrieveArg "TextColor" "b::Int" mClip2)
 construct_HoleTextStyle tk ~[] = Clip_TextStyle $ hole
 construct_ParseErrTextStyle (StructuralTk _ _ pres _ _) ~[] = Clip_TextStyle $ parseErr (StructuralParseErr pres)
 construct_Int_ tk ~[mClip0] = Clip_Int_ $ reuseInt_ [tk]  (retrieveArg "Int_" "value::Int" mClip0)
@@ -357,11 +357,11 @@ reuseTextItalic nodes
            (TextItalic) -> genericReuse0 TextItalic
            _ -> error "Internal error:ProxParser_Generated.reuseTextItalic"
 
-reuseTextRed :: [Token doc Node clip token] -> TextStyle
-reuseTextRed nodes
-  = case extractFromTokens extractTextRed defaultTextRed nodes of
-           (TextRed) -> genericReuse0 TextRed
-           _ -> error "Internal error:ProxParser_Generated.reuseTextRed"
+reuseTextColor :: [Token doc Node clip token] -> Maybe Int -> Maybe Int -> Maybe Int -> TextStyle
+reuseTextColor nodes ma0 ma1 ma2
+  = case extractFromTokens extractTextColor defaultTextColor nodes of
+           (TextColor a0 a1 a2) -> genericReuse3 TextColor a0 a1 a2 ma0 ma1 ma2
+           _ -> error "Internal error:ProxParser_Generated.reuseTextColor"
 
 reuseInt_ :: [Token doc Node clip token] -> Maybe Int -> Int_
 reuseInt_ nodes ma0
@@ -518,9 +518,9 @@ extractTextItalic :: Maybe Node -> Maybe TextStyle
 extractTextItalic (Just (Node_TextItalic x@(TextItalic) _)) = Just x
 extractTextItalic _ = Nothing
 
-extractTextRed :: Maybe Node -> Maybe TextStyle
-extractTextRed (Just (Node_TextRed x@(TextRed) _)) = Just x
-extractTextRed _ = Nothing
+extractTextColor :: Maybe Node -> Maybe TextStyle
+extractTextColor (Just (Node_TextColor x@(TextColor _ _ _) _)) = Just x
+extractTextColor _ = Nothing
 
 extractInt_ :: Maybe Node -> Maybe Int_
 extractInt_ (Just (Node_Int_ x@(Int_ _) _)) = Just x
@@ -636,8 +636,8 @@ defaultTextBold = TextBold
 defaultTextItalic :: TextStyle
 defaultTextItalic = TextItalic
 
-defaultTextRed :: TextStyle
-defaultTextRed = TextRed
+defaultTextColor :: TextStyle
+defaultTextColor = TextColor hole hole hole
 
 defaultInt_ :: Int_
 defaultInt_ = Int_ hole

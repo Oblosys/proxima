@@ -204,13 +204,15 @@ SEM Layout
 {
 stylesFromAttrs attrs = (if fBold (font attrs) then [Bold] else []) ++
                         (if fItalic (font attrs) then [Italic] else []) ++
-                        (if textColor attrs == (255,0,0) then [Colored (255,0,0)] else [])
+                        [Colored $ textColor attrs]
+-- A consequence is that colors are not nested: eg <red>aaa</red><blue>bbb<blue><red>ccc</red> instead of <red>aaa<blue>bbb</blue>ccc<red>
+-- which leads to slightly more tags
 
 styleChangeTags previousCharStyles currentStyles =
   let endedStyles = dropWhile (`elem` currentStyles) previousCharStyles -- drop the ones that are still valid
   in  map mkEndTag (reverse endedStyles) ++ 
       map mkStartTag (endedStyles `intersect` currentStyles) ++
       map mkStartTag (currentStyles\\previousCharStyles)
- where mkStartTag style = Style $ StyleTag style Start
-       mkEndTag style = Style $ StyleTag style End
+ where mkStartTag style = Style $ ScannedStyleTag (scannedStyleFromStyle style) Start
+       mkEndTag style = Style $ ScannedStyleTag (scannedStyleFromStyle style) End
 }

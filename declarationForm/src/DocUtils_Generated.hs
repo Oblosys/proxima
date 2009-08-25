@@ -16,7 +16,7 @@ import Common.CommonTypes hiding (Clean, Dirty)
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
     TestDoc $
-      Test $ StyledText $ toList_Word [ Word $ toList_WordPart [ WordPart NoIDP "bla" ]]
+      Test $ StyledText $ toList_Word [ Word $ toList_WordPart [ WordPart NoIDP "blablablablabla" ]]
 --      Test (StyledText $ toList_StringOrStyled [ String NoIDP "styledtext" ])
 {-  TaskDoc $
     Tasks (toList_Thing [Thing 1, Thing 2, Thing 3]) (toList_Thing [])True $ toList_Task
@@ -64,8 +64,9 @@ toFloat_ x = Float_ x
 instance Eq TextStyle where
   TextBold   == TextBold   = True
   TextItalic == TextItalic = True
-  TextRed    == TextRed    = True
+  TextColor r1 g1 b1 == TextColor r2 g2 b2 = r1 == r2 && g1 == g2 && b1 == b2
   _          == _          = False
+
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
 --------------------------------------------------------------------------
@@ -133,7 +134,7 @@ rankNode (Node_HoleWordPart _ _) = 56
 rankNode (Node_ParseErrWordPart _ _) = 57
 rankNode (Node_TextBold _ _) = 58
 rankNode (Node_TextItalic _ _) = 59
-rankNode (Node_TextRed _ _) = 60
+rankNode (Node_TextColor _ _) = 60
 rankNode (Node_HoleTextStyle _ _) = 61
 rankNode (Node_ParseErrTextStyle _ _) = 62
 rankNode (Node_Int_ _ _) = 63
@@ -230,7 +231,7 @@ instance DocNode Node where
   pathNode (Node_ParseErrWordPart _ pth) = PathD pth
   pathNode (Node_TextBold _ pth) = PathD pth
   pathNode (Node_TextItalic _ pth) = PathD pth
-  pathNode (Node_TextRed _ pth) = PathD pth
+  pathNode (Node_TextColor _ pth) = PathD pth
   pathNode (Node_HoleTextStyle _ pth) = PathD pth
   pathNode (Node_ParseErrTextStyle _ pth) = PathD pth
   pathNode (Node_Int_ _ pth) = PathD pth
@@ -317,7 +318,7 @@ instance DocNode Node where
   typeOfNode (Node_ParseErrWordPart _ _) = BasicType "WordPart"
   typeOfNode (Node_TextBold _ _) = BasicType "TextStyle"
   typeOfNode (Node_TextItalic _ _) = BasicType "TextStyle"
-  typeOfNode (Node_TextRed _ _) = BasicType "TextStyle"
+  typeOfNode (Node_TextColor _ _) = BasicType "TextStyle"
   typeOfNode (Node_HoleTextStyle _ _) = BasicType "TextStyle"
   typeOfNode (Node_ParseErrTextStyle _ _) = BasicType "TextStyle"
   typeOfNode (Node_Int_ _ _) = BasicType "Int_"
@@ -410,7 +411,7 @@ toXMLWordPart (HoleWordPart) = EmptyElt "HoleWordPart" []
 toXMLWordPart (ParseErrWordPart error) = EmptyElt "ParseErrWordPart" []
 toXMLTextStyle (TextBold) = EmptyElt "TextBold" [] 
 toXMLTextStyle (TextItalic) = EmptyElt "TextItalic" [] 
-toXMLTextStyle (TextRed) = EmptyElt "TextRed" [] 
+toXMLTextStyle (TextColor r g b) = Elt "TextColor" [] $ [toXMLInt r] ++ [toXMLInt g] ++ [toXMLInt b]
 toXMLTextStyle (HoleTextStyle) = EmptyElt "HoleTextStyle" [] 
 toXMLTextStyle (ParseErrTextStyle error) = EmptyElt "ParseErrTextStyle" []
 toXMLInt_ (Int_ value) = Elt "Int_" [] $ [toXMLInt value]
@@ -496,10 +497,10 @@ parseXML_WordPart = parseXMLCns_WordPart <|> parseXMLCns_OpenTag <|> parseXMLCns
 parseXMLCns_WordPart = WordPart NoIDP <$ startTag "WordPart" <*> parseXML_String<* endTag "WordPart"
 parseXMLCns_OpenTag = OpenTag <$ startTag "OpenTag" <*> parseXML_TextStyle<* endTag "OpenTag"
 parseXMLCns_CloseTag = CloseTag <$ startTag "CloseTag" <*> parseXML_TextStyle<* endTag "CloseTag"
-parseXML_TextStyle = parseXMLCns_TextBold <|> parseXMLCns_TextItalic <|> parseXMLCns_TextRed <|> parseHoleAndParseErr "TextStyle" HoleTextStyle
+parseXML_TextStyle = parseXMLCns_TextBold <|> parseXMLCns_TextItalic <|> parseXMLCns_TextColor <|> parseHoleAndParseErr "TextStyle" HoleTextStyle
 parseXMLCns_TextBold = TextBold <$ emptyTag "TextBold"
 parseXMLCns_TextItalic = TextItalic <$ emptyTag "TextItalic"
-parseXMLCns_TextRed = TextRed <$ emptyTag "TextRed"
+parseXMLCns_TextColor = TextColor <$ startTag "TextColor" <*> parseXML_Int <*> parseXML_Int <*> parseXML_Int<* endTag "TextColor"
 parseXML_Int_ = parseXMLCns_Int_ <|> parseHoleAndParseErr "Int_" HoleInt_
 parseXMLCns_Int_ = Int_ <$ startTag "Int_" <*> parseXML_Int<* endTag "Int_"
 parseXML_Float_ = parseXMLCns_Float_ <|> parseHoleAndParseErr "Float_" HoleFloat_

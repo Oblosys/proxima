@@ -25,7 +25,7 @@ data ScanChar doc node clip token =
                     , locator :: (Maybe node), tokens :: [Token doc node clip token]
                     , prs :: (Presentation doc node clip token) -- original pres to show in case of parse/scan errors
                     } 
-     | Style        { styleTag :: StyleTag
+     | Style        { styleTag :: ScannedStyleTag
                     }
      deriving Show
 
@@ -48,3 +48,5 @@ data ScannedToken doc node clip token =
 showScannedTokens scannedTokens = "Scanned tokens:\n" ++ concat [ "  " ++ show st ++ "\n" | st <- scannedTokens ]
    
 data FocusMark = FocusMark | NoFocusMark deriving (Eq, Show)
+
+data StyleTag = StyleTag Style StartOrEnd deriving (Show, Eq, Ord)
