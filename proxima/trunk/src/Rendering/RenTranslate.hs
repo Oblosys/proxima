@@ -35,12 +35,12 @@ interpretIO :: (Show doc, Show enr, Show token, Show node) =>
 interpretIO state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
   case editRen of
-    KeySpecialRen UpKey ms        ->
+    KeySpecialRen UpKey ms@(Modifiers False False False) ->
      do { editArr <- tryFocus upFocus Up (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
                        cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
         ; return (editArr, state, renLvl)
         }
-    KeySpecialRen DownKey ms        ->
+    KeySpecialRen DownKey ms@(Modifiers False False False) ->
      do { editArr <- tryFocus downFocus Down (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
                        cast (KeySpecialRen DownKey ms :: EditRendering doc enr node clip token) 
         ; return (editArr, state, renLvl)
@@ -73,11 +73,11 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen (CharKey 'c') (Modifiers False True False) -> ([CopyArr],       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'v') (Modifiers False True False) -> ([PasteArr],      state, renLvl) -- Ctrl-v
     KeySpecialRen (CharKey 'x') (Modifiers False True False) -> ([CutArr],        state, renLvl) -- Ctrl-x
-    KeySpecialRen (CharKey 'c') (Modifiers True True False) -> ([cast (CopyDoc' :: EditDocument' doc enr node clip token)],    state, renLvl) -- Ctrl-f
-    KeySpecialRen (CharKey 'v') (Modifiers True True False) -> ([cast (PasteDoc' :: EditDocument' doc enr node clip token)],   state, renLvl) -- Ctrl-g
-    KeySpecialRen (CharKey 'x') (Modifiers True True False) -> ([cast (CutDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-d
-    KeySpecialRen (CharKey 'z') (Modifiers False True False) -> ([cast (UndoDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-d
-    KeySpecialRen (CharKey 'y') (Modifiers False True False) -> ([cast (RedoDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-d
+    KeySpecialRen (CharKey 'c') (Modifiers True True False) -> ([cast (CopyDoc' :: EditDocument' doc enr node clip token)],    state, renLvl) -- Ctrl-C
+    KeySpecialRen (CharKey 'v') (Modifiers True True False) -> ([cast (PasteDoc' :: EditDocument' doc enr node clip token)],   state, renLvl) -- Ctrl-V
+    KeySpecialRen (CharKey 'x') (Modifiers True True False) -> ([cast (CutDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-X
+    KeySpecialRen (CharKey 'z') (Modifiers False True False) -> ([cast (UndoDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-z
+    KeySpecialRen (CharKey 'y') (Modifiers False True False) -> ([cast (RedoDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-y
     KeySpecialRen UpKey   (Modifiers False False True) -> ([SkipArr 0], state, RenderingLevel (scale*2) c r fr sz debugging ur lmd)
     KeySpecialRen DownKey (Modifiers False False True) -> ([SkipArr 0], state, RenderingLevel (scale/2) c r fr sz debugging ur lmd)
     KeySpecialRen F9Key ms                             -> ([SkipArr 0], state, RenderingLevel scale c r fr sz (not debugging) ur lmd)
