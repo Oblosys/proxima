@@ -60,7 +60,7 @@ SEM Form
                        , @expenses.pres
                        , vSpace 5
                        , row [ img "img/add.png" `withSize` (23,20) `withVRef` 10
-       		               `withMouseDown` insertElementAtEnd (toClip newExpense) (@lhs.path++[2])
+       		       --        `withMouseDown` insertElementAtEnd (toClip newExpense) (@lhs.path++[2])
 			     , hSpace 5
 			     , vRefHalf $ text "add expense" 
 		             , empty `withHStretch` True
@@ -102,7 +102,7 @@ SEM List_Currency [ | | ]
                    col [ row $ intersperse (hSpace 5) @elts.press
                        , vSpace 5
                        , row [ img "img/add.png" `withSize` (23,20) `withVRef` 10
-       		       	       `withMouseDown` addNewCurrency @lhs.path
+       		       	     --  `withMouseDown` addNewCurrency @lhs.path
 			     , hSpace 5
 			     , vRefHalf $ text "add currency" 
 			     ]
@@ -247,7 +247,7 @@ SEM Task
       loc.pres = structural $ showHideCompleted @lhs.showCompleted @completed $
                               row [ hSpace $ 9 + 5
                                   , presentCompleted @completed (not @completed)
-                                      `withMouseDown` flipCompleted @lhs.path @self
+                                   --   `withMouseDown` flipCompleted @lhs.path @self
 
                                   , hSpace 5, vRefHalf $ @description.pres `withColor` if @completed then green else blue]
                               `addPopupItems` 
@@ -257,10 +257,10 @@ SEM Task
   | CompositeTask
       loc.pres = structural $ showHideCompleted @lhs.showCompleted @subtasks.completed $
                               col $ row [ (if @expanded then minusImg else plusImg) `withRef` (0,4)
-                                          `withMouseDown` flipExpanded @lhs.path @self
+                                  --        `withMouseDown` flipExpanded @lhs.path @self
                                         , hSpace 5
                                         , presentCompleted @subtasks.completed @subtasks.notStarted
-                                            `withMouseDown` setCompletedRec (not @subtasks.completed) @lhs.path @self
+                                    --        `withMouseDown` setCompletedRec (not @subtasks.completed) @lhs.path @self
                                         , hSpace 5
                                         , vRefHalf $ @description.pres
                                              `withColor` if @subtasks.completed then green else blue
@@ -648,6 +648,7 @@ SEM Test
       loc.pres = structural $ leftTopMargins 30 40 $
                    col [ row [ text "Rich text: ", @styledText.pres `withFontFam` "Courier" ]
 		     --  , row [ text "Parsed: ", text @styledText.str ]
+                       , withMouseDownBold $ text "bold"  
                        , formatter $ replicate 0 (text "bla") 
                        ]
      styledText.styles = []
