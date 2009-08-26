@@ -200,7 +200,7 @@ SEM Layout
                                -- make sure that new styles are added after old ones
 
       loc.styleScanChars = case @lhs.lexer of
-                             Lexer _ Styled -> [] -- styleChangeTags @lhs.previousCharStyles @lhs.currentStyles
+                             Lexer _ Styled -> styleChangeTags @lhs.previousCharStyles @lhs.currentStyles
                              Lexer _ NonStyled -> []  -- will never be LexInherited
       loc.nrOfStyleScanChars = length @styleScanChars
 {
