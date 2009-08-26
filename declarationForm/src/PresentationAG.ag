@@ -57,7 +57,7 @@ SEM Form
                        , textField 400 @faculty.pres
                        , vSpace 10
                        , text "Expenses" `addPopupItems` 
-                           [ ("Add expense", insertElementAtEnd (toClip newExpense) (@lhs.path++[2]))
+                           [ ("Add expense", docUpd $ insertElementAtEnd (toClip newExpense) (@lhs.path++[2]))
                            ]
                        , @expenses.pres
                        , vSpace 5
@@ -91,9 +91,9 @@ SEM Expense
                        , textField 120 (text $ showCurrency @total ++ " Euro") 
                                        -- Expense.total is total euro amount for one expense
                        ] `addPopupItems` 
-                       [ ("Delete expense", deleteAt @lhs.path)
-		       , ("Move expense up", moveElementUp @lhs.path)
-		       , ("Move expense down", moveElementDown @lhs.path)
+                       [ ("Delete expense", docUpd $ deleteAt @lhs.path)
+		       , ("Move expense up", docUpd $ moveElementUp @lhs.path)
+		       , ("Move expense down", docUpd $ moveElementDown @lhs.path)
 		       ]
                          
                        
@@ -146,7 +146,7 @@ SEM Expense
 {
 
 addCurrencyItems currencies path pres = 
-  pres `addPopupItems` [ ("Change currency to "++name, setCurrencyIx path ix) | (ix, (name, _)) <- zip [0..] currencies ]
+  pres `addPopupItems` [ ("Change currency to "++name, docUpd $ setCurrencyIx path ix) | (ix, (name, _)) <- zip [0..] currencies ]
 
 addNewCurrency :: Path -> UpdateDoc Document ClipDoc
 addNewCurrency path =
@@ -229,7 +229,7 @@ SEM Tasks
 					, @things2.pres
 				        , text "Tasks:"
       	       	 	      	    	`addPopupItems` 
-                                        ([ ("Insert task", insertElementAtEnd (toClip newTask) (@lhs.path++[1]))
+                                        ([ ("Insert task", docUpd $ insertElementAtEnd (toClip newTask) (@lhs.path++[1]))
                                          ] ++ showHideCompletedItem @lhs.path @self)
 					, @tasks.pres `withFontSize` 12
 					]
@@ -253,8 +253,8 @@ SEM Task
 
                                   , hSpace 5, vRefHalf $ @description.pres `withColor` if @completed then green else blue]
                               `addPopupItems` 
- 			      ([ ("Delete task", fixTask @lhs.path . deleteAt @lhs.path)
-			       , ("Insert subtask", changeToComposite @lhs.path)
+ 			      ([ ("Delete task", docUpd $ fixTask @lhs.path . deleteAt @lhs.path)
+			       , ("Insert subtask", docUpd $ changeToComposite @lhs.path)
                                ] ++ mkMoveItems @lhs.path)
   | CompositeTask
       loc.pres = structural $ showHideCompleted @lhs.showCompleted @subtasks.completed $
@@ -267,8 +267,8 @@ SEM Task
                                         , vRefHalf $ @description.pres
                                              `withColor` if @subtasks.completed then green else blue
                                         ] `addPopupItems` 
-                                        ([ ("Delete task", deleteAt @lhs.path)
-					 , ("Insert subtask", insertElementAtEnd (toClip newTask) (@lhs.path++[2]))
+                                        ([ ("Delete task", docUpd $ deleteAt @lhs.path)
+					 , ("Insert subtask", docUpd $ insertElementAtEnd (toClip newTask) (@lhs.path++[2]))
                                          ] ++ mkMoveItems @lhs.path)
  
                                   : if @expanded 
@@ -302,10 +302,11 @@ showHideCompleted showCompleted completed pres =
 
 showHideCompletedItem path (Tasks _ _ showCompleted _) = 
   [ ((if showCompleted then "Hide " else "Show ") ++ " completed tasks"
-    , updateAt path $ \clip ->
-        case clip of
-          Clip_Tasks (Tasks things1 things2 _ tasks) -> toClip $ Tasks things1 things2 (not showCompleted) tasks
-          clip -> clip
+    , docUpd $
+        updateAt path $ \clip ->
+          case clip of
+            Clip_Tasks (Tasks things1 things2 _ tasks) -> toClip $ Tasks things1 things2 (not showCompleted) tasks
+            clip -> clip
     )
   ]
 showHideCompletedItem _ _ = []
@@ -348,7 +349,7 @@ mkMoveItems [] = []
 mkMoveItems path =
  -- if last path > 0 
  -- then 
- [ ("Move task up", moveElementUp path), ("Move task down", moveElementDown path) ]
+ [ ("Move task up", docUpd $ moveElementUp path), ("Move task down", docUpd $ moveElementDown path) ]
 
 
 newTask = BasicTask (Description "") False
@@ -539,15 +540,15 @@ squiggleInvalidField nr rowNrs colNrs blockNrs =
 listTo9Tuple [x0,x1,x2,x3,x4,x5,x6,x7,x8] = (x0,x1,x2,x3,x4,x5,x6,x7,x8)
 
 fieldPopupItems :: Path -> [Int] -> [Int] -> [Int] -> String -> Int -> Int ->
-                   [ PopupMenuItem Document ClipDoc ] 
+                   [ PopupMenuItem Document EnrichedDoc Node ClipDoc UserToken ] 
 fieldPopupItems path rowNrs colNrs blockNrs boardStr row col =
   let validNrs = (([1..9] \\ rowNrs) \\ colNrs) \\ blockNrs
-  in [ (if i == 0 then show "<clear>" else show i, setFieldValue path i) 
+  in [ (if i == 0 then show "<clear>" else show i, docUpd $ setFieldValue path i) 
      | i <- 0:validNrs 
      ] ++ case sudokuHint boardStr row col of
             Just nr -> [ ( "Give hint"
-                         , pasteAt path $ toClip $ Field $ toInt_ nr) ]
-            Nothing -> [ ("No hints, solution is incorrect", id) ]
+                         , docUpd $ pasteAt path $ toClip $ Field $ toInt_ nr) ]
+            Nothing -> [ ("No hints, solution is incorrect", docUpd $ id) ]
 
 setFieldValue path n = pasteAt path $ toClip $ Field $ Int_ n
 
