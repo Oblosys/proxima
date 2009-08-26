@@ -661,9 +661,12 @@ modifyStylePres styleF (FocusP from@(PathP _ _) to@(PathP _ _)) prs =
       modifyStylePres' styleF fromPath fromIndex toPath toIndex [] prs
 modifyStylePres _ _ prs = prs
 
-setStylePresF (FocusP (PathP fp fi) (PathP tp ti)) = if fp == tp 
-                                                     then FocusP (PathP (fp++[1,0]) 0) (PathP (tp++[1,0]) (ti-fi))
-                                                     else FocusP (PathP (fp++[1,0]) 0) (PathP (tp++[0,0]) ti)
+setStylePresF (FocusP from@(PathP _ _) to@(PathP _ _)) = 
+  let PathP fromPath fromIndex = from `min` to
+      PathP toPath toIndex = from `max` to
+  in  if fromPath == toPath 
+      then FocusP (PathP (fromPath++[1,0]) 0) (PathP (toPath++[1,0]) (toIndex-fromIndex))
+      else FocusP (PathP (fromPath++[1,0]) 0) (PathP (toPath++[0,0]) toIndex)
 setStylePresF focus = focus  
 
 clearStylePresF = setStylePresF
