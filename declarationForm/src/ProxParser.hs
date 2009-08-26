@@ -56,25 +56,9 @@ pWordPart = (\word -> reuseWordPart [] (Just $ getTokenIDP word) (Just $ tokenSt
  <|> (\t -> let (r,g,b) = getTokenColor t in OpenTag (TextColor r g b)) <$> pColorTag Start                                
  <|> CloseTag TextBold <$ pStyleTag ScannedBold End
  <|> CloseTag TextItalic <$ pStyleTag ScannedItalic End
- <|> (\t -> let (r,g,b) = getTokenColor t in CloseTag (TextColor r g b)) <$> pColorTag End -- pStyleTag (ScannedColored (0,0,0)) End
+ <|> (\t -> let (r,g,b) = getTokenColor t in CloseTag (TextColor r g b)) <$> pColorTag End
   
 pKey str  = pToken (KeyTk str)
-
-{-
-pStyledText :: ProxParser StyledText
-pStyledText = StyledText . toList_StringOrStyled <$> pList pStringOrStyled 
-
-pStringOrStyled :: ProxParser StringOrStyled
-pStringOrStyled = pString <|> pStyle
-
-pString = (\word -> reuseString [] (Just $ getTokenIDP word) (Just $ tokenString word)) <$>
-          pToken WordTk
-pStyle = (\_ styled _ -> Styled TextBold styled) <$> pStyleTag Bold Start <*> pStyledText <*> pStyleTag Bold End
-     <|> (\_ styled _ -> Styled TextItalic styled) <$> pStyleTag Italic Start <*> pStyledText <*> pStyleTag Italic End
-     <|> (\_ styled _ -> Styled TextRed styled) <$> pStyleTag (Colored (255,0,0)) Start <*> pStyledText <*> pStyleTag (Colored (255,0,0)) End
-
--}
-
 
 pLine = 
       (\spcs wrds -> spcs ++ concat wrds)

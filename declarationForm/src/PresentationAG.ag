@@ -670,62 +670,6 @@ SEM Test
                        ]
      styledText.styles = []
 
-{
-mkButton width label editOp = boxed $ (hAlignCenter label `withWidth` width)
-                              `withMouseDownEx` editOp
-}
-{-
-SEM StyledText [ | | str : String ]
-  | StyledText
-     loc.pres = parsingWithParserLexer pStyledText (Lexer 0 Styled) @self $
-                  @stringOrStyleds.pres
-     lhs.str = @stringOrStyleds.str
-  | ParseErrStyledText
-     lhs.str = "<parse error>"
-
-SEM StringOrStyled [ | | str : String ]
-  | String
-     loc.pres = parsing $ StringP @idp  @string
-     lhs.str = @string
-  | Styled
-     loc.pres = parsing $ @style.presStyle @styled.pres
-     lhs.str = "<" ++ @style.str ++ ">" ++ @styled.str ++ "<" ++ @style.str ++ "/>"
-  | ParseErrStringOrStyled
-     lhs.str = "<parse error>"
-
-SEM List_StringOrStyled [ | | ]
-  | List_StringOrStyled
-      loc.pres = parsing $ row $ @elts.press
-
-
-SEM TextStyle [ | | str : String presStyle : {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} ]
-  | TextBold
-      lhs.str = "b"
-      lhs.presStyle = bold
-  | TextItalic
-      lhs.str = "i"
-      lhs.presStyle = italic
-  | TextColor
-      lhs.str = "r"
-      lhs.presStyle = \p -> p `withColor` @color
-
-ATTR List_StringOrStyled ConsList_StringOrStyled
-     [ | | str USE {++} {[]} : String ]
-{-
-SEM List_TextStyle
-  | List_TextStyle
-      loc.pres = structural $ empty
--}
-
-SEM TextStyle
-  | TextBold
-      loc.pres = structural $ empty
-  | TextItalic
-      loc.pres = structural $ empty
-  | TextColor
-      loc.pres = structural $ empty
--}
-
 ATTR StyledText List_Word ConsList_Word Word List_WordPart ConsList_WordPart WordPart [ | styles : {[TextStyle]} | ]
 
 SEM StyledText
