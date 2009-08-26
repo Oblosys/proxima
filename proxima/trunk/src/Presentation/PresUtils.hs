@@ -4,7 +4,7 @@ import Common.CommonTypes
 import Presentation.PresTypes
 import Layout.LayTypes
 import Common.CommonUtils
- 
+import Proxima.Wrap 
 import Presentation.XprezLib
 import Maybe
 import Data.List
@@ -789,19 +789,19 @@ focusIsOnGraphPres pth      pres                      = debug Err ("PresUtils.fo
 
 -- VVV HACK VVV              will be handled more generally in the future
 -- | Collect the bottom-most mouseDown update function that is added by WithP nodes on path in pres 
-mouseDownDocPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc enr node clip token level -> Maybe (UpdateDoc doc clip)
+mouseDownDocPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc enr node clip token level -> Maybe (Wrapped doc enr node clip token)
 mouseDownDocPres = mouseDownDocPres' Nothing
 
-mouseDownDocPres' :: (DocNode node, Show token) => Maybe (UpdateDoc doc clip) -> [Int] -> PresentationBase doc enr node clip token level -> Maybe (UpdateDoc doc clip)
+mouseDownDocPres' :: (DocNode node, Show token) => Maybe (Wrapped doc enr node clip token) -> [Int] -> PresentationBase doc enr node clip token level -> Maybe (Wrapped doc enr node clip token)
 mouseDownDocPres' upd []       tr                        = upd
 mouseDownDocPres' upd (p:path) (RowP _ _ press)          = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (p:path) (ColP _ _ _ press)          = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (0:path) (OverlayP _ _ press@(pres:_)) = mouseDownDocPres' upd path pres --(last press)
 mouseDownDocPres' upd (p:path) (GraphP _ _ _ _ _ press)  = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (p:path) (VertexP _ _ _ _ _ pres)  = mouseDownDocPres' upd path pres
-mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (let (inh,syn)   = (emptyInh {mouseDown = undefined {- upd -}}, emptySyn)
+mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (let (inh,syn)   = (emptyInh {mouseDown = upd}, emptySyn)
                                                                                   (inh',syn') = w (inh,syn)
-                                                                              in undefined {- mouseDown inh' -} ) path pres
+                                                                              in mouseDown inh' ) path pres
 mouseDownDocPres' upd (p:path) (StructuralP _ pres)      = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (ParsingP _ _ _ pres)         = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (LocatorP _ pres)         = mouseDownDocPres' upd path pres

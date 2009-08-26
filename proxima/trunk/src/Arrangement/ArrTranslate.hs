@@ -111,7 +111,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
         PathA pthA _ ->
           case mouseDownDocPres (pathPFromPathA' arr pres pthA) pres of
               Just upd -> debug UnA ("mouseDownDoc EVENT: Something") 
-                            [cast (UpdateDoc' upd :: EditDocument' doc enr node clip token)]
+                            [ WrapLay upd ]
                             
               Nothing  -> [ SetFocusLay (computeFocus arr pres x y), guaranteeFocusInView] 
         _ ->  debug Err ("UnArranger.mouseDownDoc: empty path ") $ [SkipLay 0]   
