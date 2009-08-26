@@ -221,13 +221,13 @@ SEM Root
     decls.ix = 0
   | Root
       lhs.pres = loc (Node_Root @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleRoot
       lhs.pres = presHole @lhs.focusD "Root" (Node_HoleRoot @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrRoot
       lhs.pres = presParseErr (Node_ParseErrRoot @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM EnrichedDoc
@@ -239,13 +239,13 @@ SEM EnrichedDoc
     root.ix = 0
   | RootEnr
       lhs.pres = loc (Node_RootEnr @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleEnrichedDoc
       lhs.pres = presHole @lhs.focusD "EnrichedDoc" (Node_HoleEnrichedDoc @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrEnrichedDoc
       lhs.pres = presParseErr (Node_ParseErrEnrichedDoc @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
 
 SEM RootE
   | RootE 
@@ -259,13 +259,13 @@ SEM RootE
     idListDecls.ix = 1
   | RootE
       lhs.pres = loc (Node_RootE @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleRootE
       lhs.pres = presHole @lhs.focusD "RootE" (Node_HoleRootE @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrRootE
       lhs.pres = presParseErr (Node_ParseErrRootE @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM Decl
@@ -292,19 +292,19 @@ SEM Decl
     pPPresentation.ix = 0
   | Decl
       lhs.pres = loc (Node_Decl @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | BoardDecl
       lhs.pres = loc (Node_BoardDecl @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | PPPresentationDecl
       lhs.pres = loc (Node_PPPresentationDecl @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleDecl
       lhs.pres = presHole @lhs.focusD "Decl" (Node_HoleDecl @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrDecl
       lhs.pres = presParseErr (Node_ParseErrDecl @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM Ident
@@ -313,13 +313,13 @@ SEM Ident
   | Ident
   | Ident
       lhs.pres = loc (Node_Ident @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleIdent
       lhs.pres = presHole @lhs.focusD "Ident" (Node_HoleIdent @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrIdent
       lhs.pres = presParseErr (Node_ParseErrIdent @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM Exp
@@ -439,55 +439,55 @@ SEM Exp
     exps.ix = 0
   | PlusExp
       lhs.pres = loc (Node_PlusExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | TimesExp
       lhs.pres = loc (Node_TimesExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | DivExp
       lhs.pres = loc (Node_DivExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | PowerExp
       lhs.pres = loc (Node_PowerExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | BoolExp
       lhs.pres = loc (Node_BoolExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | IntExp
       lhs.pres = loc (Node_IntExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | LamExp
       lhs.pres = loc (Node_LamExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | AppExp
       lhs.pres = loc (Node_AppExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | CaseExp
       lhs.pres = loc (Node_CaseExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | LetExp
       lhs.pres = loc (Node_LetExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | IdentExp
       lhs.pres = loc (Node_IdentExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | IfExp
       lhs.pres = loc (Node_IfExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParenExp
       lhs.pres = loc (Node_ParenExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ListExp
       lhs.pres = loc (Node_ListExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ProductExp
       lhs.pres = loc (Node_ProductExp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleExp
       lhs.pres = presHole @lhs.focusD "Exp" (Node_HoleExp @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrExp
       lhs.pres = presParseErr (Node_ParseErrExp @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM Alt
@@ -502,13 +502,13 @@ SEM Alt
     exp.ix = 1
   | Alt
       lhs.pres = loc (Node_Alt @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleAlt
       lhs.pres = presHole @lhs.focusD "Alt" (Node_HoleAlt @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrAlt
       lhs.pres = presParseErr (Node_ParseErrAlt @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM Board
@@ -541,13 +541,13 @@ SEM Board
     r8.ix = 7
   | Board
       lhs.pres = loc (Node_Board @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleBoard
       lhs.pres = presHole @lhs.focusD "Board" (Node_HoleBoard @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrBoard
       lhs.pres = presParseErr (Node_ParseErrBoard @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM BoardRow
@@ -580,13 +580,13 @@ SEM BoardRow
     ch.ix = 7
   | BoardRow
       lhs.pres = loc (Node_BoardRow @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleBoardRow
       lhs.pres = presHole @lhs.focusD "BoardRow" (Node_HoleBoardRow @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrBoardRow
       lhs.pres = presParseErr (Node_ParseErrBoardRow @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM BoardSquare
@@ -613,31 +613,31 @@ SEM BoardSquare
   | Empty
   | Queen
       lhs.pres = loc (Node_Queen @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | King
       lhs.pres = loc (Node_King @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | Bishop
       lhs.pres = loc (Node_Bishop @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | Knight
       lhs.pres = loc (Node_Knight @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | Rook
       lhs.pres = loc (Node_Rook @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | Pawn
       lhs.pres = loc (Node_Pawn @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | Empty
       lhs.pres = loc (Node_Empty @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleBoardSquare
       lhs.pres = presHole @lhs.focusD "BoardSquare" (Node_HoleBoardSquare @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrBoardSquare
       lhs.pres = presParseErr (Node_ParseErrBoardSquare @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM PPPresentation
@@ -649,13 +649,13 @@ SEM PPPresentation
     slides.ix = 1
   | PPPresentation
       lhs.pres = loc (Node_PPPresentation @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HolePPPresentation
       lhs.pres = presHole @lhs.focusD "PPPresentation" (Node_HolePPPresentation @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrPPPresentation
       lhs.pres = presParseErr (Node_ParseErrPPPresentation @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM Slide
@@ -667,13 +667,13 @@ SEM Slide
     itemList.ix = 1
   | Slide
       lhs.pres = loc (Node_Slide @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleSlide
       lhs.pres = presHole @lhs.focusD "Slide" (Node_HoleSlide @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrSlide
       lhs.pres = presParseErr (Node_ParseErrSlide @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM ItemList
@@ -688,13 +688,13 @@ SEM ItemList
     items.ix = 1
   | ItemList
       lhs.pres = loc (Node_ItemList @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleItemList
       lhs.pres = presHole @lhs.focusD "ItemList" (Node_HoleItemList @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrItemList
       lhs.pres = presParseErr (Node_ParseErrItemList @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM ListType
@@ -709,19 +709,19 @@ SEM ListType
   | Alpha
   | Bullet
       lhs.pres = loc (Node_Bullet @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | Number
       lhs.pres = loc (Node_Number @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | Alpha
       lhs.pres = loc (Node_Alpha @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleListType
       lhs.pres = presHole @lhs.focusD "ListType" (Node_HoleListType @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrListType
       lhs.pres = presParseErr (Node_ParseErrListType @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM Item
@@ -742,19 +742,19 @@ SEM Item
     itemList.ix = 0
   | StringItem
       lhs.pres = loc (Node_StringItem @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HeliumItem
       lhs.pres = loc (Node_HeliumItem @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ListItem
       lhs.pres = loc (Node_ListItem @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | HoleItem
       lhs.pres = presHole @lhs.focusD "Item" (Node_HoleItem @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrItem
       lhs.pres = presParseErr (Node_ParseErrItem @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
 
 SEM List_Decl
@@ -771,14 +771,14 @@ SEM List_Decl
   | ParseErrList_Decl lhs.press = []
   | List_Decl
       lhs.pres = loc (Node_List_Decl @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrList_Decl
       lhs.pres = presParseErr (Node_ParseErrList_Decl @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
   | HoleList_Decl
       lhs.pres = presHole @lhs.focusD "Decl" (Node_HoleList_Decl @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
 
 SEM List_Alt
   | List_Alt
@@ -794,14 +794,14 @@ SEM List_Alt
   | ParseErrList_Alt lhs.press = []
   | List_Alt
       lhs.pres = loc (Node_List_Alt @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrList_Alt
       lhs.pres = presParseErr (Node_ParseErrList_Alt @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
   | HoleList_Alt
       lhs.pres = presHole @lhs.focusD "Alt" (Node_HoleList_Alt @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
 
 SEM List_Exp
   | List_Exp
@@ -817,14 +817,14 @@ SEM List_Exp
   | ParseErrList_Exp lhs.press = []
   | List_Exp
       lhs.pres = loc (Node_List_Exp @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrList_Exp
       lhs.pres = presParseErr (Node_ParseErrList_Exp @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
   | HoleList_Exp
       lhs.pres = presHole @lhs.focusD "Exp" (Node_HoleList_Exp @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
 
 SEM List_Slide
   | List_Slide
@@ -840,14 +840,14 @@ SEM List_Slide
   | ParseErrList_Slide lhs.press = []
   | List_Slide
       lhs.pres = loc (Node_List_Slide @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrList_Slide
       lhs.pres = presParseErr (Node_ParseErrList_Slide @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
   | HoleList_Slide
       lhs.pres = presHole @lhs.focusD "Slide" (Node_HoleList_Slide @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
 
 SEM List_Item
   | List_Item
@@ -863,14 +863,14 @@ SEM List_Item
   | ParseErrList_Item lhs.press = []
   | List_Item
       lhs.pres = loc (Node_List_Item @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | ParseErrList_Item
       lhs.pres = presParseErr (Node_ParseErrList_Item @self @lhs.path) @error
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
       lhs.parseErrors = getErrorMessages @error
   | HoleList_Item
       lhs.pres = presHole @lhs.focusD "Item" (Node_HoleList_Item @self @lhs.path) @lhs.path
-                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
 
 SEM ConsList_Decl
   | Cons_Decl
