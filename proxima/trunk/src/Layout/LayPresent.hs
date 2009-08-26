@@ -41,8 +41,7 @@ present state pres (LayoutLevel lay focus dt) (SkipPres' 0) =
   in  (SetLay' (LayoutLevel lay' focus' diffTree), state, pres)  -- we should re present here because of local state
 present state pres lay (SkipPres' i) = (SkipLay' (i-1), state, pres)
 present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres (layout,idCounter)))  = 
-  let -- focusXY = saveFocus focus lay
-      (lay', scannedFocus) = {- normalizeTreePres $ -} detokenizer layout pres
+  let (lay', scannedFocus) = {- normalizeTreePres $ -} detokenizer layout pres
       focus' = 
                  --debug Lay ("Layout map is "++show layout) $
                  --debug Lay ("Scanned focus is "++show scannedFocus) $
@@ -64,12 +63,3 @@ present state pres lay (WrapPres' wrapped) = (unwrap wrapped, state, pres)
 
 
 
- 
-
--- goes wrong if focus is in empty string on left side of column
-saveFocus :: (DocNode node, Show token) => FocusPres -> Layout doc enr node clip token -> ((Int, Int, Bool), (Int, Int, Bool))
-saveFocus NoFocusP _  = ((1,0,True),(1,0,True))
-saveFocus focus pres = debug Err "AFOCUS" (xyFromPath (fromP focus) pres, xyFromPath (toP focus) pres)
-
-restoreFocus :: (DocNode node, Show token) => ((Int, Int, Bool), (Int, Int, Bool)) -> Layout doc enr node clip token -> FocusPres
-restoreFocus (fxy,txy) pres = FocusP (pathFromXY fxy pres) (pathFromXY fxy pres) 
