@@ -250,11 +250,11 @@ SEM Decl
                                         ])
 
                           ) `addPopupItems`  [ if @expanded
-                                               then ( "Collapse: "++strFromIdent @ident.self, toggleExpanded @lhs.path @self)
-                                               else ( "Expand: "++strFromIdent @ident.self, toggleExpanded @lhs.path @self)]
+                                               then ( "Collapse: "++strFromIdent @ident.self, docUpd $ toggleExpanded @lhs.path @self)
+                                               else ( "Expand: "++strFromIdent @ident.self, docUpd $ toggleExpanded @lhs.path @self)]
                             `addPopupItems`  if @lhs.level == 0 then [ if @autoLayout
-                                                                       then ( "Disable Auto Layout", toggleAutoLayout @lhs.path @self)
-                                                                       else ( "Enable Auto Layout", toggleAutoLayout @lhs.path @self) ]
+                                                                       then ( "Disable Auto Layout", docUpd $ toggleAutoLayout @lhs.path @self)
+                                                                       else ( "Enable Auto Layout", docUpd $ toggleAutoLayout @lhs.path @self) ]
                                                                 else []
 
 SEM Ident
@@ -347,10 +347,10 @@ SEM Exp
                    squiggleRanges @lhs.ranges @lhs.path $ addReductionPopupItems @reductionEdit $
                      @ident.pres
                        `addPopupItems`
-                       [( "Jump to declaration of "++show (strFromIdent @ident.self),
-                             navigateTo $ case Map.lookup (strFromIdent @ident.self) @lhs.varsInScope of
-                                            Nothing      -> NoPathD
-                                            Just (pth,_) -> pth)]
+                       [( "Jump to declaration of "++show (strFromIdent @ident.self)
+                        , docUpd $ navigateTo $ case Map.lookup (strFromIdent @ident.self) @lhs.varsInScope of
+                                                  Nothing      -> NoPathD
+                                                  Just (pth,_) -> pth)]
 
 
   | IfExp
@@ -1225,8 +1225,8 @@ SEM PPPresentation
   | PPPresentation loc.pres = structural $
                                  col $ [ row [-- text "View type: ",
                                                 if @viewType
-                                                then (box $ text $ "XML view") `addPopupItems` [("Change to presentation view",toggleViewType @lhs.path @self)]
-                                                else (box $ text $"Presentation view") `addPopupItems` [("Change to XML view",toggleViewType @lhs.path @self)]
+                                                then (box $ text $ "XML view") `addPopupItems` [("Change to presentation view", docUpd $ toggleViewType @lhs.path @self)]
+                                                else (box $ text $"Presentation view") `addPopupItems` [("Change to XML view", docUpd $ toggleViewType @lhs.path @self)]
                                               ]
                                       , vSpace 10
                                       ] ++
@@ -1240,8 +1240,8 @@ SEM PPPresentation
                                           [ @slides.pres2
                                           ]
 
---                                                then (box $ text $ "Edit view") `addPopupItems` [("Change to presentation view",toggleViewType @lhs.path @self)]
---                                                else (box $ text $"Presentation view") `addPopupItems` [("Change to edit view",toggleViewType @lhs.path @self)]
+--                                                then (box $ text $ "Edit view") `addPopupItems` [("Change to presentation view",docUpd $ toggleViewType @lhs.path @self)]
+--                                                else (box $ text $"Presentation view") `addPopupItems` [("Change to edit view",docUpd $ toggleViewType @lhs.path @self)]
 
 --                                          [ row [ text "pres ",key NoIDP "=",text " Presentation ", text " $"]
 --                                          , row [ text "         ", @slides.pres]
@@ -1347,7 +1347,7 @@ SEM Slide
   | Slide lhs.pres2 = loc (Node_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                          slide (text @title)
                                @itemList.pres2
-                         `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                         `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
 
 -- Tricky: need to put an invisible structural presentation of listTypeNode, because
 -- makeStructuralListType expects it
@@ -1365,15 +1365,15 @@ SEM ListType [ || pres2 : Presentation_Doc_Node_Clip_Token typeLoc :  {Presentat
   | Bullet         lhs.pres2 = loc (Node_Bullet @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
                    lhs.typeLoc = \pres -> loc (Node_Bullet @self @lhs.path) $
-                                            pres `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                                            pres `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | Number         lhs.pres2 = loc (Node_Number @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
                    lhs.typeLoc = \pres -> loc (Node_Number @self @lhs.path) $
-                                            pres `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                                            pres `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | Alpha          lhs.pres2 = loc (Node_Alpha @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
                    lhs.typeLoc = \pres -> loc (Node_Alpha @self @lhs.path) $
-                                            pres `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc
+                                            pres `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
 
   | ParseErrListType lhs.typeLoc = id
   | HoleListType lhs.typeLoc = id

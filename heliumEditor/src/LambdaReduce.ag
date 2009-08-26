@@ -1,8 +1,7 @@
--- somehow, app is parsed right associative! Fix this.
 
 -- renaming is not supported yet
 {
---addReductionPopupItems :: [ PopupItem ] -> Presentation node -> Presentation node
+addReductionPopupItems :: [ PopupMenuItem doc enr node clip token ] -> Presentation doc enr node clip token -> Presentation doc enr node clip token
 addReductionPopupItems its pres = addPopupItems pres its
 
 pasteExp :: [Int] -> Exp -> UpdateDoc Document clip
@@ -46,24 +45,24 @@ ensureParens exp = ParenExp NoIDP NoIDP (removeParens exp)
 SEM Exp
   | PlusExp
       loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
-                                 (IntExp idp1 int1, IntExp _ int2) -> [ ("Reduce primitive (+)" , pasteExp @lhs.path (IntExp idp1 (int1+int2)))]
+                                 (IntExp idp1 int1, IntExp _ int2) -> [ ("Reduce primitive (+)" , docUpd $ pasteExp @lhs.path (IntExp idp1 (int1+int2)))]
                                  _                                   -> []
   | TimesExp
       loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
-                                 (IntExp idp1 int1, IntExp _ int2) -> [ ("Reduce primitive (*)" , pasteExp @lhs.path (IntExp idp1 (int1*int2)))]
+                                 (IntExp idp1 int1, IntExp _ int2) -> [ ("Reduce primitive (*)" , docUpd $ pasteExp @lhs.path (IntExp idp1 (int1*int2)))]
                                  _                                   -> []
   | DivExp
       loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
-                                 (IntExp idp1 int1, IntExp _ int2) -> [ ("Reduce primitive div" ,  pasteExp @lhs.path (IntExp idp1 (int1 `div` int2)))]
+                                 (IntExp idp1 int1, IntExp _ int2) -> [ ("Reduce primitive div" , docUpd $ pasteExp @lhs.path (IntExp idp1 (int1 `div` int2)))]
                                  _                                   -> []
   | PowerExp
       loc.reductionEdit = case (removeParens @exp1.self, removeParens @exp2.self) of
-                                 (IntExp idp1 int1, IntExp _ int2) -> [ ("Reduce primitive (^)" , pasteExp @lhs.path (IntExp idp1 (int1^int2)))]
+                                 (IntExp idp1 int1, IntExp _ int2) -> [ ("Reduce primitive (^)" , docUpd $ pasteExp @lhs.path (IntExp idp1 (int1^int2)))]
                                  _                                   -> []
   | AppExp -- pattern matching is not ok in ag
       loc.reductionEdit = case removeParens @exp1.self of
                                   LamExp _ _ ident exp -> [ ("Beta reduce",
-                                                             pasteExp @lhs.path
+                                                             docUpd $ pasteExp @lhs.path
                                                                       (ensureParens (@exp1.lamBody [(strFromIdent ident, @exp2.self)] ))
                                                             )
                                                           ]
@@ -73,7 +72,8 @@ SEM Exp
                              Nothing      -> []
                              Just (PathD pth@(_:_),_) ->
                                [( "Replace by definition"
-                                , \(DocumentLevel d path cl) ->
+                                , docUpd $ 
+                                  \(DocumentLevel d path cl) ->
                                   case selectD (init pth) d of -- pattern matched, so pth is not null
                                     (Clip_Decl (Decl idP0 idP1 idP2 idP3 _ _ _ exp)) ->
                                           let (DocumentLevel d' _ _) =
@@ -87,7 +87,7 @@ SEM Exp
                 -- pth is path of ident, path is current doc focus and @lhs.path is path to identExp
   | IfExp
       loc.reductionEdit = case removeParens @exp1.self of
-                                 BoolExp _ bool -> [("Reduce primitive if" , pasteExp @lhs.path
+                                 BoolExp _ bool -> [("Reduce primitive if" , docUpd $ pasteExp @lhs.path
                                                                                           (if bool then setIDPExp @idP0 @exp2.self
                                                                                                    else setIDPExp @idP0 @exp3.self))]
                                  _                          -> []
@@ -96,7 +96,7 @@ SEM Exp
 
 {- CaseExp   -- Case only matches on variables so reducing is rather useless
    LetExp    -- have to think about this one
-   ParenExp loc.reductionEdit = [] -- ("Remove parens" , pasteExp @lhs.path @exp.self)]
+   ParenExp loc.reductionEdit = [] -- ("Remove parens" , docUpd $ pasteExp @lhs.path @exp.self)]
 -}
 
 -- need higher order ag here
