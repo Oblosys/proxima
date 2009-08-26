@@ -47,7 +47,7 @@ present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres 
                  --debug Lay ("Layout map is "++show layout) $
                  --debug Lay ("Scanned focus is "++show scannedFocus) $
                case (scannedFocus, focus) of
-                 (NoFocusP,               focus       ) -> focus
+                 (NoFocusP,               focus@(FocusP _ _)) -> debug Err "\n\nError: Focus was not restored\n\n"$ focus
                  (FocusP NoPathP NoPathP, FocusP fp tp) -> FocusP fp      tp
                  (FocusP NoPathP tp,      FocusP fp _ ) -> FocusP fp      tp
                  (FocusP fp      NoPathP, FocusP _  tp) -> FocusP fp      tp
