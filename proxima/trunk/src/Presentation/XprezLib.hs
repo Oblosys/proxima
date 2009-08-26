@@ -188,14 +188,12 @@ strikeOut xp = withFont_ xp (\f -> f { fStrikeOut = True })
 
 
 withMouseDown :: forall doc enr node clip token . 
-                 (Wrapable (Wrapped doc enr node clip token) doc enr node clip token) => 
                  Xprez doc enr node clip token -> UpdateDoc doc clip -> Xprez doc enr node clip token
-withMouseDown xp upd = withInh xp (\i -> i { mouseDown = Just $ cast (UpdateDoc' upd :: EditDocument' doc enr node clip token) })
+withMouseDown xp upd = withInh xp (\i -> i { mouseDown = Just $ wrap (UpdateDoc' upd :: EditDocument' doc enr node clip token) })
 
 withMouseDownBold :: forall doc enr node clip token . 
-                 (Wrapable (Wrapped doc enr node clip token) doc enr node clip token) => 
                  Xprez doc enr node clip token -> Xprez doc enr node clip token
-withMouseDownBold xp = withInh xp (\i -> i { mouseDown = Just $ cast (SetStyleLay Bold :: EditLayout doc enr node clip token) })
+withMouseDownBold xp = withInh xp (\i -> i { mouseDown = Just $ wrap (InsertLay 'X' :: EditLayout doc enr node clip token) })
 
 -- this one deletes all inherited popup items
 withInheritablePopupMenuItems :: Xprez doc enr node clip token -> [PopupMenuItem doc clip] -> Xprez doc enr node clip token
