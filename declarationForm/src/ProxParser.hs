@@ -31,7 +31,7 @@ recognizeEnrichedDoc = pStr $
 --      <*> pPrs parseTree
 -}
 
-recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
+recognizeEnrichedDoc :: ListParser Document EnrichedDoc Node ClipDoc UserToken EnrichedDoc
 recognizeEnrichedDoc = pStructural
 
 pDescription :: ProxParser Description
@@ -87,10 +87,10 @@ pWord = tokenString <$> pToken WordTk
 
 
 
-pStyleTag :: ScannedStyle -> StartOrEnd -> ProxParser (Token Document Node ClipDoc UserToken)
+pStyleTag :: ScannedStyle -> StartOrEnd -> ProxParser (Token Document EnrichedDoc Node ClipDoc UserToken)
 pStyleTag style startorend = pSym $ StyleTk 0 (ScannedStyleTag style startorend)
 
-pColorTag :: StartOrEnd -> ProxParser (Token Document Node ClipDoc UserToken)
+pColorTag :: StartOrEnd -> ProxParser (Token Document EnrichedDoc Node ClipDoc UserToken)
 pColorTag startOrEnd = pSym (StyleTk 0 (ScannedStyleTag (ScannedColored (0,0,0)) startOrEnd))
 
 pFloat = read . tokenString <$> pToken FloatTk
