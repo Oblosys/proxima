@@ -88,6 +88,8 @@ arrangeWhenFocusedOrViewed rootPath focus absx absy x y w h hrf vrf viewedArea i
                     FocusP (PathP f _) (PathP t _) -> if f <= t then (f,t) else (t,f)
                     _                              -> ([-1],[-1])
   in  if rootPath >= take (length rootPath) fromPath && rootPath <= toPath ||
-         overlap ((absx,absy),(w,h)) viewedArea then (if rootPath >= take (length rootPath) fromPath && rootPath <= toPath then debug Err ("arrangeinfocus\n"++ show rootPath ++"\n"++ show focus++shallowShowArr arrangement) else id) arrangement else
+         overlap ((absx,absy),(w,h)) viewedArea then 
+--          (if rootPath >= take (length rootPath) fromPath && rootPath <= toPath then debug Err ("arrangeinfocus\n"++ show rootPath ++"\n"++ show focus++shallowShowArr arrangement) else id) 
+          arrangement else
           --arrangement 
           unarrangedA x y w h hrf vrf
