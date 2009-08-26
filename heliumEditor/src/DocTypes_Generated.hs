@@ -35,34 +35,34 @@ data HeliumMessage =
 
 data Document = RootDoc Root
               | HoleDocument
-              | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
+              | ParseErrDocument (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data Root = Root IDP List_Decl
           | HoleRoot
-          | ParseErrRoot (ParseError Document Node ClipDoc UserToken)
+          | ParseErrRoot (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data EnrichedDoc = RootEnr RootE HeliumTypeInfo
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc (ParseError Document Node ClipDoc UserToken)
+                 | ParseErrEnrichedDoc (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                      deriving (Show, Data, Typeable)
 
 data RootE = RootE IDP List_Decl List_Decl
            | HoleRootE
-           | ParseErrRootE (ParseError Document Node ClipDoc UserToken)
+           | ParseErrRootE (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Decl = Decl IDP IDP IDP IDP Bool Bool Ident Exp
           | BoardDecl IDP IDP Board
           | PPPresentationDecl IDP IDP PPPresentation
           | HoleDecl
-          | ParseErrDecl (ParseError Document Node ClipDoc UserToken)
+          | ParseErrDecl (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data Ident = Ident IDP IDP String
            | HoleIdent
-           | ParseErrIdent (ParseError Document Node ClipDoc UserToken)
+           | ParseErrIdent (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Exp = PlusExp IDP Exp Exp
@@ -81,22 +81,22 @@ data Exp = PlusExp IDP Exp Exp
          | ListExp IDP IDP [IDP] List_Exp
          | ProductExp IDP IDP [IDP] List_Exp
          | HoleExp
-         | ParseErrExp (ParseError Document Node ClipDoc UserToken)
+         | ParseErrExp (ParseError Document EnrichedDoc Node ClipDoc UserToken)
              deriving (Show, Data, Typeable)
 
 data Alt = Alt IDP IDP Ident Exp
          | HoleAlt
-         | ParseErrAlt (ParseError Document Node ClipDoc UserToken)
+         | ParseErrAlt (ParseError Document EnrichedDoc Node ClipDoc UserToken)
              deriving (Show, Data, Typeable)
 
 data Board = Board BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow BoardRow
            | HoleBoard
-           | ParseErrBoard (ParseError Document Node ClipDoc UserToken)
+           | ParseErrBoard (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data BoardRow = BoardRow BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare BoardSquare
               | HoleBoardRow
-              | ParseErrBoardRow (ParseError Document Node ClipDoc UserToken)
+              | ParseErrBoardRow (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data BoardSquare = Queen Bool
@@ -107,61 +107,61 @@ data BoardSquare = Queen Bool
                  | Pawn Bool
                  | Empty
                  | HoleBoardSquare
-                 | ParseErrBoardSquare (ParseError Document Node ClipDoc UserToken)
+                 | ParseErrBoardSquare (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                      deriving (Show, Data, Typeable)
 
 data PPPresentation = PPPresentation Bool List_Slide
                     | HolePPPresentation
-                    | ParseErrPPPresentation (ParseError Document Node ClipDoc UserToken)
+                    | ParseErrPPPresentation (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                         deriving (Show, Data, Typeable)
 
 data Slide = Slide String ItemList
            | HoleSlide
-           | ParseErrSlide (ParseError Document Node ClipDoc UserToken)
+           | ParseErrSlide (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data ItemList = ItemList ListType List_Item
               | HoleItemList
-              | ParseErrItemList (ParseError Document Node ClipDoc UserToken)
+              | ParseErrItemList (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data ListType = Bullet
               | Number
               | Alpha
               | HoleListType
-              | ParseErrListType (ParseError Document Node ClipDoc UserToken)
+              | ParseErrListType (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data Item = StringItem String
           | HeliumItem Exp
           | ListItem ItemList
           | HoleItem
-          | ParseErrItem (ParseError Document Node ClipDoc UserToken)
+          | ParseErrItem (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data List_Decl = List_Decl ConsList_Decl
                | HoleList_Decl
-               | ParseErrList_Decl (ParseError Document Node ClipDoc UserToken)
+               | ParseErrList_Decl (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data List_Alt = List_Alt ConsList_Alt
               | HoleList_Alt
-              | ParseErrList_Alt (ParseError Document Node ClipDoc UserToken)
+              | ParseErrList_Alt (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data List_Exp = List_Exp ConsList_Exp
               | HoleList_Exp
-              | ParseErrList_Exp (ParseError Document Node ClipDoc UserToken)
+              | ParseErrList_Exp (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data List_Slide = List_Slide ConsList_Slide
                 | HoleList_Slide
-                | ParseErrList_Slide (ParseError Document Node ClipDoc UserToken)
+                | ParseErrList_Slide (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                     deriving (Show, Data, Typeable)
 
 data List_Item = List_Item ConsList_Item
                | HoleList_Item
-               | ParseErrList_Item (ParseError Document Node ClipDoc UserToken)
+               | ParseErrList_Item (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data ConsList_Decl = Cons_Decl Decl ConsList_Decl

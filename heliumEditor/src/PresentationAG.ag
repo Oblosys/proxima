@@ -179,7 +179,7 @@ pthFrmMsg _ = ([],[],[])
 toMessage (_,str) = HError (lines str) [] [] []
 
 -- if ps1 ++ ps2 ++ ps3 not null then head is link
-presMessage :: HeliumMessage -> Presentation doc Node clip token
+presMessage :: HeliumMessage -> Presentation_Doc_Node_Clip_Token
 presMessage (HError lns ps1 ps2 ps3) = case ps1++ps2++ps3 of []      -> col (map (text) lns) `withColor` errColor
                                                              rng:_   -> col (map (text) lns) `withColor` errColor
                                                                         `link` rng
@@ -192,7 +192,7 @@ errColor = red
 
 SEM List_Decl
   | List_Decl
-      loc.pres = parsing' LexHaskell $
+      loc.pres = parsing $
                    row @elts.press
 
 {-
@@ -427,7 +427,7 @@ error1Color = red
 error2Color = green
 error3Color = red
 
-link :: Xprez doc node clip token -> PathDoc -> Xprez doc node clip token
+link :: Presentation_Doc_Node_Clip_Token -> PathDoc -> Presentation_Doc_Node_Clip_Token
 link xp NoPathD = xp
 link xp path    = xp `withMouseDown` navigateTo path
 
@@ -471,20 +471,20 @@ idP0FromIdent _                    = NoIDP
 
 box xp = overlayReverse [xp, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] Transparent]
 
-op :: IDP -> String -> Xprez doc node clip UserToken
+op :: IDP -> String -> Presentation_Doc_Node_Clip_Token
 op idc str = token idc str `withColor` opCol
 
-key :: IDP -> String -> Xprez doc node clip UserToken
+key :: IDP -> String -> Presentation_Doc_Node_Clip_Token
 key idc str = token idc str `withColor` keyCol
 
 
-sep :: IDP -> String -> Xprez doc node clip UserToken
+sep :: IDP -> String -> Presentation_Doc_Node_Clip_Token
 sep idc str = token idc str `withColor` sepCol
 
-cons :: IDP -> String -> Xprez doc node clip UserToken
+cons :: IDP -> String -> Presentation_Doc_Node_Clip_Token
 cons idc str = token idc str `withColor` consCol
 
-typeD :: IDP -> String -> Xprez doc node clip UserToken
+typeD :: IDP -> String -> Presentation_Doc_Node_Clip_Token
 typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
 token idp str = TokenP idp (UserTk 0 (KeyTk str) str Nothing idp)
@@ -1142,10 +1142,10 @@ SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { 
 ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation_Doc_Node_Clip_Token ]
 
 SEM List_Decl
-  | List_Decl         lhs.idsPres = loc (Node_List_Decl @self @lhs.path) $ parsing' LexHaskell $ presentFocus @lhs.focusD @lhs.path $
+  | List_Decl         lhs.idsPres = loc (Node_List_Decl @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
                                     @elts.idsPres
   | HoleList_Decl     lhs.idsPres = presHole @lhs.focusD "Decls" (Node_HoleList_Decl @self @lhs.path) @lhs.path
-  | ParseErrList_Decl lhs.idsPres = parsing' LexHaskell $ empty
+  | ParseErrList_Decl lhs.idsPres = parsing $ empty
 
 SEM ConsList_Decl
   | Cons_Decl     lhs.idsPres = row [ @head.idsPres, text " ", @tail.idsPres ]

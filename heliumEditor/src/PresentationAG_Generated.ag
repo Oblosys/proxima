@@ -37,29 +37,29 @@ EnrichedDoc  [ focusD : FocusDoc path : Path
 DATA Root
   | Root idP:IDP decls:List_Decl
   | HoleRoot
-  | ParseErrRoot error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrRoot error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA EnrichedDoc
   | RootEnr root:RootE heliumTypeInfo:HeliumTypeInfo
   | HoleEnrichedDoc
-  | ParseErrEnrichedDoc error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrEnrichedDoc error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA RootE
   | RootE idP:IDP decls:List_Decl idListDecls:List_Decl
   | HoleRootE
-  | ParseErrRootE error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrRootE error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Decl
   | Decl idP0:IDP idP1:IDP idP2:IDP idP3:IDP expanded:Bool autoLayout:Bool ident:Ident exp:Exp
   | BoardDecl idP0:IDP idP1:IDP board:Board
   | PPPresentationDecl idP0:IDP idP1:IDP pPPresentation:PPPresentation
   | HoleDecl
-  | ParseErrDecl error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrDecl error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Ident
   | Ident idP0:IDP idP1:IDP string:String
   | HoleIdent
-  | ParseErrIdent error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrIdent error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Exp
   | PlusExp idP0:IDP exp1:Exp exp2:Exp
@@ -78,22 +78,22 @@ DATA Exp
   | ListExp idP0:IDP idP1:IDP ids:{[IDP]} exps:List_Exp
   | ProductExp idP0:IDP idP1:IDP ids:{[IDP]} exps:List_Exp
   | HoleExp
-  | ParseErrExp error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrExp error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Alt
   | Alt idP0:IDP idP1:IDP ident:Ident exp:Exp
   | HoleAlt
-  | ParseErrAlt error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrAlt error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Board
   | Board r1:BoardRow r2:BoardRow r3:BoardRow r4:BoardRow r5:BoardRow r6:BoardRow r7:BoardRow r8:BoardRow
   | HoleBoard
-  | ParseErrBoard error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrBoard error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA BoardRow
   | BoardRow ca:BoardSquare cb:BoardSquare cc:BoardSquare cd:BoardSquare ce:BoardSquare cf:BoardSquare cg:BoardSquare ch:BoardSquare
   | HoleBoardRow
-  | ParseErrBoardRow error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrBoardRow error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA BoardSquare
   | Queen color:Bool
@@ -104,61 +104,61 @@ DATA BoardSquare
   | Pawn color:Bool
   | Empty
   | HoleBoardSquare
-  | ParseErrBoardSquare error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrBoardSquare error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA PPPresentation
   | PPPresentation viewType:Bool slides:List_Slide
   | HolePPPresentation
-  | ParseErrPPPresentation error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrPPPresentation error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Slide
   | Slide title:String itemList:ItemList
   | HoleSlide
-  | ParseErrSlide error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrSlide error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA ItemList
   | ItemList listType:ListType items:List_Item
   | HoleItemList
-  | ParseErrItemList error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrItemList error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA ListType
   | Bullet
   | Number
   | Alpha
   | HoleListType
-  | ParseErrListType error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrListType error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Item
   | StringItem string:String
   | HeliumItem exp:Exp
   | ListItem itemList:ItemList
   | HoleItem
-  | ParseErrItem error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrItem error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Decl
   | List_Decl elts:ConsList_Decl
   | HoleList_Decl
-  | ParseErrList_Decl error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Decl error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Alt
   | List_Alt elts:ConsList_Alt
   | HoleList_Alt
-  | ParseErrList_Alt error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Alt error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Exp
   | List_Exp elts:ConsList_Exp
   | HoleList_Exp
-  | ParseErrList_Exp error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Exp error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Slide
   | List_Slide elts:ConsList_Slide
   | HoleList_Slide
-  | ParseErrList_Slide error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Slide error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Item
   | List_Item elts:ConsList_Item
   | HoleList_Item
-  | ParseErrList_Item error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Item error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA ConsList_Decl
   | Cons_Decl head:Decl tail:ConsList_Decl

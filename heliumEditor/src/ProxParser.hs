@@ -23,25 +23,25 @@ import DocUtils_Generated
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
 
-recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
+recognizeEnrichedDoc :: ProxParser EnrichedDoc
 recognizeEnrichedDoc = pStr $
           (\str rootE -> reuseRootEnr [str] (Just rootE) Nothing)
       <$> pStructuralTk Node_RootEnr
       <*> recognizeRootE
 
-recognizeRootE :: ListParser Document Node ClipDoc UserToken RootE
+recognizeRootE :: ProxParser RootE
 recognizeRootE = pStr $ 
           (\str idlistdecls decls-> reuseRootE [str] Nothing (Just decls) (Just idlistdecls))
       <$> pStructuralTk Node_RootE
       <*> parseIDListList_Decl {- <* (pStr' $ pStructuralTk Node_List_Decl) -}  <*> recognizeList_Decl
                                 {- tree or xml view-}
 
-parseIDListList_Decl :: ListParser Document Node ClipDoc UserToken List_Decl
+parseIDListList_Decl :: ProxParser List_Decl
 parseIDListList_Decl = pPrs $
           (\dcls -> reuseList_Decl [] (Just $ toConsList_Decl dcls)) 
       <$> pList recognizeIDListDecl
              
-recognizeIDListDecl :: ListParser Document Node ClipDoc UserToken Decl
+recognizeIDListDecl :: ProxParser Decl
 recognizeIDListDecl = pStr $
           (\str ident -> reuseDecl [str] Nothing Nothing Nothing Nothing Nothing Nothing (Just ident) Nothing)
       <$> pStructuralTk Node_Decl
@@ -55,7 +55,7 @@ recognizeIDListDecl = pStr $
                   <$> pSym declHoleTk
 -}       
 
-parseIdListIdent :: ListParser Document Node ClipDoc UserToken Ident
+parseIdListIdent :: ProxParser Ident
 parseIdListIdent =  pPrs $
           (\strTk -> reuseIdent [strTk] Nothing Nothing (Just $ tokenString strTk))
       <$> pLIdent 
@@ -212,7 +212,7 @@ parseParenExp = -- maybe we don't want to build a list for (exp), because now we
 
 -- returns list of separator tokens and a List_Exp the List_Exp is not reused through its separator tokens
 -- because these do not belong to List_Exp, but to its parent
-parseList_Exp :: ListParser Document Node ClipDoc UserToken ([Token Document Node ClipDoc UserToken], List_Exp)
+parseList_Exp :: ProxParser ([Token Document EnrichedDoc Node ClipDoc UserToken], List_Exp)
 parseList_Exp =
     (\toksElts -> let (toks, elts) = case toksElts of
                                        Nothing        -> ([], [])
@@ -468,26 +468,26 @@ symTk     = UserTk 0 SymTk "" Nothing (IDP (-1))
 
 -- Basic parsers
 
-pKey :: DocNode node => String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
+pKey :: DocNode node => String -> ListParser doc enr node clip UserToken (Token doc enr node clip UserToken)
 pKey str = pSym  (keyTk str)
 
-pKeyC :: DocNode node => Int -> String -> ListParser doc node clip UserToken (Token doc node clip UserToken)
+pKeyC :: DocNode node => Int -> String -> ListParser doc enr node clip UserToken (Token doc enr node clip UserToken)
 pKeyC c str = pSym  (keyTk str) -- pCSym c (keyTk str)
 
 -- expensive, because we want holes to be inserted, not strings
-pLIdent :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pLIdent :: DocNode node => ListParser doc enr node clip UserToken (Token doc enr node clip UserToken)
 pLIdent = pSym lIdentTk
 
 -- todo return int from pInt, so unsafe intVal does not need to be used anywhere else
-pInt :: DocNode node => ListParser doc node clip UserToken (Token doc node clip UserToken)
+pInt :: DocNode node => ListParser doc enr node clip UserToken (Token doc enr node clip UserToken)
 pInt = pSym  intTk
 
-lIdentVal :: DocNode node => Token doc node clip UserToken -> String
+lIdentVal :: DocNode node => Token doc enr node clip UserToken -> String
 lIdentVal (UserTk _ LIdentTk str _ _) = str
 lIdentVal tk                          = debug Err ("PresentationParser.lIdentVal: no IdentTk " ++ show tk) "x"
 
   
-intVal :: DocNode node => Token doc node clip UserToken -> Int
+intVal :: DocNode node => Token doc enr node clip UserToken -> Int
 intVal (UserTk _ IntTk "" _ _)  = 0   -- may happen on parse error (although not likely since insert is expensive)
 intVal (UserTk _ IntTk str _ _) = read str
 intVal tk              = debug Err ("PresentationParser.intVal: no IntTk " ++ show tk) (-9999)
