@@ -209,6 +209,7 @@ stylesFromAttrs attrs = (if fBold (font attrs) then [Bold] else []) ++
                         [Colored $ textColor attrs]
 -- A consequence is that colors are not nested: eg <red>aaa</red><blue>bbb<blue><red>ccc</red> instead of <red>aaa<blue>bbb</blue>ccc<red>
 -- which leads to slightly more tags
+-- also the starting color tag is not closed
 
 styleChangeTags previousCharStyles currentStyles =
   let endedStyles = dropWhile (`elem` currentStyles) previousCharStyles -- drop the ones that are still valid
