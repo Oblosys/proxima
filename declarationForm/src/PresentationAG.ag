@@ -655,7 +655,7 @@ SEM Test
 {-
 SEM StyledText [ | | str : String ]
   | StyledText
-     loc.pres = parsingWithParser pStyledText @self $
+     loc.pres = parsingWithParserLexer pStyledText (Lexer 0 Styled) @self $
                   @stringOrStyleds.pres
      lhs.str = @stringOrStyleds.str
   | ParseErrStyledText
@@ -708,7 +708,7 @@ ATTR StyledText List_Word ConsList_Word Word List_WordPart ConsList_WordPart Wor
 
 SEM StyledText
   | StyledText 
-      loc.pres = parsingWithParser pStyledText @self $ @words.pres
+      loc.pres = parsingWithParserLexer pStyledText (Lexer 0 Styled) @self $ @words.pres
 
 SEM List_Word
   | List_Word
