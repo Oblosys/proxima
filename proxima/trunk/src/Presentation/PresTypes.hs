@@ -454,8 +454,8 @@ presentation is as big as the presentation, it will always get the focus in that
 data Inherited doc enr node clip token = Inh { font :: Font
                      , textColor :: Color, lineColor :: Color, fillColor, backgroundColor :: Color
                      , mouseDown :: Maybe (Wrapped doc enr node clip token)
-                     , inheritablePopupMenuItems :: [ PopupMenuItem doc clip ]
-                     , localPopupMenuItems :: [ PopupMenuItem doc clip ]
+                     , inheritablePopupMenuItems :: [ PopupMenuItem doc enr node clip token ]
+                     , localPopupMenuItems :: [ PopupMenuItem doc enr node clip token ]
 		     , assignedWidth, assignedHeight :: Int
 		     , assignedVRef, assignedHRef :: Int} deriving Show
 data Synthesized = Syn { vRef, hRef, minWidth, minHeight :: Int
@@ -493,7 +493,7 @@ emptySyn = Syn 0 0 0 0 False False 0 0 0 0
 
 type UpdateDoc doc clip = DocumentLevel doc clip -> DocumentLevel doc clip
 
-type PopupMenuItem doc clip = (String, UpdateDoc doc clip)
+type PopupMenuItem doc enr node clip token = (String, Wrapped doc enr node clip token)
 
 data PathPres = PathP [Int] Int 
               | NoPathP deriving (Show, Eq, Ord)

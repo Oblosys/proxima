@@ -811,12 +811,12 @@ mouseDownDocPres' upd pth      pres                      = debug Err ("PresTypes
 
 
 -- | Collect all popupMenuItems that are added by WithP nodes on path in pres 
-popupMenuItemsPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc enr node clip token level -> [PopupMenuItem doc clip]
+popupMenuItemsPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc enr node clip token level -> [PopupMenuItem doc enr node clip token]
 popupMenuItemsPres path pres = popupMenuItemsPres' ([],[]) path pres
 
 popupMenuItemsPres' :: (DocNode node, Show token) => 
-                       ([PopupMenuItem doc clip],[PopupMenuItem doc clip]) -> [Int] ->
-                       PresentationBase doc enr node clip token level -> [PopupMenuItem doc clip]
+                       ([PopupMenuItem doc enr node clip token],[PopupMenuItem doc enr node clip token]) -> [Int] ->
+                       PresentationBase doc enr node clip token level -> [PopupMenuItem doc enr node clip token]
 popupMenuItemsPres' (local,inhtbl) []       tr             = inhtbl++local
 popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (p:path) (ColP _ _ _ press)        = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)

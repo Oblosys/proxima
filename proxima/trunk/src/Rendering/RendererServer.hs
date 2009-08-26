@@ -61,7 +61,7 @@ renderFocus scale arrDb focus arrangement viewedArea =
 
 mkPopupMenuXY :: (DocNode node, Show token) => Settings ->
                  Layout doc enr node clip token -> Scale -> Arrangement node ->
-                 Int -> Int -> [PopupMenuItem doc clip]
+                 Int -> Int -> [PopupMenuItem doc enr node clip token]
 mkPopupMenuXY settings prs scale arr x' y' =
   let (x,y) = (descaleInt scale x',descaleInt scale y')
       ctxtItems = case point x y arr of

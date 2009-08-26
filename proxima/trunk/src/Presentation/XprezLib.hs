@@ -5,6 +5,7 @@ import Evaluation.DocTypes
 import Evaluation.DocumentEdit
 import Presentation.PresTypes
 import Presentation.PresentationParsing
+import Layout.LayTypes -- for id in parse error tooltips
 import Proxima.Wrap
 import Maybe
 
@@ -114,7 +115,7 @@ presParseErr node (ParsingParseErr idP parseErrs tokens parser) =
            ++ if null finalErrors
               then []
               else [markError (unlines finalErrors) $ row [StringP NoIDP "" `withWidth` 8 ] ]
- where markError str pres = squiggly red pres `addPopupItems` [(str,id)] -- use popup until we have tooltips
+ where markError str pres = squiggly red pres `addPopupItems` [(str, WrappedLayEdit' $ SkipLay' 0)] -- use popup until we have tooltips (remove laytypes input then)
        positionsAndErrors = catMaybes [ case mPos of
                                           Just p -> Just (p, msg)
                                           Nothing -> Nothing
@@ -200,22 +201,22 @@ withMouseDownEx :: forall doc enr node clip token .
 withMouseDownEx xp editop = withInh xp (\i -> i { mouseDown = Just editop })
 
 -- this one deletes all inherited popup items
-withInheritablePopupMenuItems :: Xprez doc enr node clip token -> [PopupMenuItem doc clip] -> Xprez doc enr node clip token
+withInheritablePopupMenuItems :: Xprez doc enr node clip token -> [PopupMenuItem doc enr node clip token] -> Xprez doc enr node clip token
 withInheritablePopupMenuItems xp mis = withInh xp (\i -> i { inheritablePopupMenuItems = mis })
 
-withInheritablePopupMenuItems_ :: Xprez doc enr node clip token -> ([PopupMenuItem doc clip] -> [PopupMenuItem doc clip]) -> Xprez doc enr node clip token
+withInheritablePopupMenuItems_ :: Xprez doc enr node clip token -> ([PopupMenuItem doc enr node clip token] -> [PopupMenuItem doc enr node clip token]) -> Xprez doc enr node clip token
 withInheritablePopupMenuItems_ xp fmis = withInh xp (\i -> i { inheritablePopupMenuItems = fmis (inheritablePopupMenuItems i) })
 
-addPopupItems :: Xprez doc enr node clip token -> [PopupMenuItem doc clip] -> Xprez doc enr node clip token
+addPopupItems :: Xprez doc enr node clip token -> [PopupMenuItem doc enr node clip token] -> Xprez doc enr node clip token
 addPopupItems xp mis = withInheritablePopupMenuItems_ xp (\pmis -> mis++pmis) 
 
-withLocalPopupMenuItems :: Xprez doc enr node clip token -> [PopupMenuItem doc clip] -> Xprez doc enr node clip token
+withLocalPopupMenuItems :: Xprez doc enr node clip token -> [PopupMenuItem doc enr node clip token] -> Xprez doc enr node clip token
 withLocalPopupMenuItems xp mis = withInh xp (\i -> i { localPopupMenuItems = mis })
 
-withLocalPopupMenuItems_ :: Xprez doc enr node clip token -> ([PopupMenuItem doc clip] -> [PopupMenuItem doc clip]) -> Xprez doc enr node clip token
+withLocalPopupMenuItems_ :: Xprez doc enr node clip token -> ([PopupMenuItem doc enr node clip token] -> [PopupMenuItem doc enr node clip token]) -> Xprez doc enr node clip token
 withLocalPopupMenuItems_ xp fmis = withInh xp (\i -> i { localPopupMenuItems = fmis (localPopupMenuItems i) })
 
-addLocalPopupItems :: Xprez doc enr node clip token -> [PopupMenuItem doc clip] -> Xprez doc enr node clip token
+addLocalPopupItems :: Xprez doc enr node clip token -> [PopupMenuItem doc enr node clip token] -> Xprez doc enr node clip token
 addLocalPopupItems xp mis = withLocalPopupMenuItems_ xp (\pmis -> mis++pmis) 
 
 withHRef :: Xprez doc enr node clip token -> Int -> Xprez doc enr node clip token
@@ -366,6 +367,12 @@ mkButton width label editOp = boxed $ (hAlignCenter label `withWidth` width)
                               `withMouseDownEx` editOp
 
                
+docUpd :: UpdateDoc doc clip -> Wrapped doc enr node clip token
+docUpd upd = WrappedDocEdit' $ UpdateDoc' $ upd
+
+mkPopupItemsFromDocUpdates :: [(String, UpdateDoc doc clip)] -> [PopupMenuItem doc enr node clip token]
+mkPopupItemsFromDocUpdates docUpdates = [ (str, docUpd upd) | (str, upd) <- docUpdates ]
+
 presentElementXML :: FocusDoc -> node -> [Int] -> String -> [Presentation doc enr node clip token] -> Presentation doc enr node clip token
 presentElementXML focusD node path tag children =
   loc node $ parsing $ presentFocus focusD path $                  

@@ -376,7 +376,7 @@ handleCommand :: forall doc enr clip node token .
                ,((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token]))
                , IORef (RenderingLevel doc enr node clip token) 
                , IORef CommonTypes.Rectangle 
-               ) -> IORef Bool -> IORef [UpdateDoc doc clip] -> IORef CommonTypes.Rectangle -> Command -> IO [String]
+               ) -> IORef Bool -> IORef [Wrapped doc enr node clip token] -> IORef CommonTypes.Rectangle -> Command -> IO [String]
 handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef command =
   case command of
     Metrics receivedMetrics@(font,_) ->
@@ -398,7 +398,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
                             ]
           -- for separator lines: "<hr></hr>"
         
-        ; writeIORef menuR $ upds
+        ; writeIORef menuR upds
                                 
         ; return [ "<div op='contextMenu' screenX='"++show screenX++"' screenY='"++show screenY++"'>" ++
                    itemsHTML ++ "</div>" ]
@@ -408,7 +408,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
      do { menuItems <- readIORef menuR
         ; let editDoc = index "GUI.handleContextMenuSelect" menuItems selectedItemNr
         ; genericHandler settings handler renderingLvlVar viewedAreaRef () $
-            cast (UpdateDoc' editDoc :: EditDocument' doc enr node clip token)
+            WrapRen editDoc
         }
 
     Key (keyCode,(shiftDown, ctrlDown, altDown)) ->

@@ -73,7 +73,7 @@ emptyRendering = \dc va -> return ()
 
 #else
 
-type GUICommand wrapped doc enr node clip token = Int -> Int -> [PopupMenuItem doc clip]
+type GUICommand wrapped doc enr node clip token = Int -> Int -> [PopupMenuItem doc enr node clip token]
                       
 type Rendering = (Point,Size) -> Writer String ()
                  -- viewed area ((x,y),(w,h))
