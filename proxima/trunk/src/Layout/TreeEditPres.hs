@@ -721,6 +721,8 @@ findLay (EllipseP id _ _ _ _)     =
 -}
 setStyle Bold = \(inh,syn) -> (inh {font = (font inh) {fBold = True}}, syn)
 setStyle Italic = \(inh,syn) -> (inh {font = (font inh) {fItalic = True}}, syn)
+setStyle FontSmaller = \(inh,syn) -> (inh {font = (font inh) {fSize = round (0.8 * fromIntegral (fSize (font inh)))}}, syn)
+setStyle FontLarger = \(inh,syn) -> (inh {font = (font inh) {fSize = round (1.25 * fromIntegral (fSize (font inh)))}}, syn)
 setStyle (Colored c) = \(inh,syn) -> (inh {textColor = c}, syn)
 
 clearStyle Bold = \(inh,syn) -> (inh {font = (font inh) {fBold = False}}, syn)

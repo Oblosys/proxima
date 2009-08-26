@@ -21,8 +21,8 @@ import Common.CommonTypes
                 
 settings = defaultSettings { applicationName = "Travel declaration form"
 
-                           , rendererIncrementality = False
-                           , arrangerIncrementality = False
+                           , rendererIncrementality = True
+                           , arrangerIncrementality = True
 
                                -- use a smaller rectangle as viewed area to see what happens outside it
                            , reducedViewedArea = False            

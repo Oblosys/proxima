@@ -87,6 +87,7 @@ instance Construct Document EnrichedDoc Node ClipDoc UserToken where
   construct (Node_ParseErrWordPart _ _) = construct_ParseErrWordPart
   construct (Node_TextBold _ _) = construct_TextBold
   construct (Node_TextItalic _ _) = construct_TextItalic
+  construct (Node_TextFontSize _ _) = construct_TextFontSize
   construct (Node_TextColor _ _) = construct_TextColor
   construct (Node_HoleTextStyle _ _) = construct_HoleTextStyle
   construct (Node_ParseErrTextStyle _ _) = construct_ParseErrTextStyle
@@ -173,6 +174,7 @@ construct_HoleWordPart tk ~[] = Clip_WordPart $ hole
 construct_ParseErrWordPart (StructuralTk _ _ pres _ _) ~[] = Clip_WordPart $ parseErr (StructuralParseErr pres)
 construct_TextBold tk ~[] = Clip_TextStyle $ reuseTextBold [tk] 
 construct_TextItalic tk ~[] = Clip_TextStyle $ reuseTextItalic [tk] 
+construct_TextFontSize tk ~[mClip0] = Clip_TextStyle $ reuseTextFontSize [tk]  (retrieveArg "TextFontSize" "s::Int" mClip0)
 construct_TextColor tk ~[mClip0,mClip1,mClip2] = Clip_TextStyle $ reuseTextColor [tk]  (retrieveArg "TextColor" "r::Int" mClip0) (retrieveArg "TextColor" "g::Int" mClip1) (retrieveArg "TextColor" "b::Int" mClip2)
 construct_HoleTextStyle tk ~[] = Clip_TextStyle $ hole
 construct_ParseErrTextStyle (StructuralTk _ _ pres _ _) ~[] = Clip_TextStyle $ parseErr (StructuralParseErr pres)
@@ -357,6 +359,12 @@ reuseTextItalic nodes
            (TextItalic) -> genericReuse0 TextItalic
            _ -> error "Internal error:ProxParser_Generated.reuseTextItalic"
 
+reuseTextFontSize :: [Token doc enr Node clip token] -> Maybe Int -> TextStyle
+reuseTextFontSize nodes ma0
+  = case extractFromTokens extractTextFontSize defaultTextFontSize nodes of
+           (TextFontSize a0) -> genericReuse1 TextFontSize a0 ma0
+           _ -> error "Internal error:ProxParser_Generated.reuseTextFontSize"
+
 reuseTextColor :: [Token doc enr Node clip token] -> Maybe Int -> Maybe Int -> Maybe Int -> TextStyle
 reuseTextColor nodes ma0 ma1 ma2
   = case extractFromTokens extractTextColor defaultTextColor nodes of
@@ -518,6 +526,10 @@ extractTextItalic :: Maybe Node -> Maybe TextStyle
 extractTextItalic (Just (Node_TextItalic x@(TextItalic) _)) = Just x
 extractTextItalic _ = Nothing
 
+extractTextFontSize :: Maybe Node -> Maybe TextStyle
+extractTextFontSize (Just (Node_TextFontSize x@(TextFontSize _) _)) = Just x
+extractTextFontSize _ = Nothing
+
 extractTextColor :: Maybe Node -> Maybe TextStyle
 extractTextColor (Just (Node_TextColor x@(TextColor _ _ _) _)) = Just x
 extractTextColor _ = Nothing
@@ -635,6 +647,9 @@ defaultTextBold = TextBold
 
 defaultTextItalic :: TextStyle
 defaultTextItalic = TextItalic
+
+defaultTextFontSize :: TextStyle
+defaultTextFontSize = TextFontSize hole
 
 defaultTextColor :: TextStyle
 defaultTextColor = TextColor hole hole hole

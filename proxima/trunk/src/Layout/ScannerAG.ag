@@ -206,7 +206,7 @@ SEM Layout
 {
 stylesFromAttrs attrs = (if fBold (font attrs) then [Bold] else []) ++
                         (if fItalic (font attrs) then [Italic] else []) ++
-                        [Colored $ textColor attrs]
+                        [Colored $ textColor attrs, FontSize $ fSize (font attrs)]
 -- A consequence is that colors are not nested: eg <red>aaa</red><blue>bbb<blue><red>ccc</red> instead of <red>aaa<blue>bbb</blue>ccc<red>
 -- which leads to slightly more tags
 -- also the starting color tag is not closed

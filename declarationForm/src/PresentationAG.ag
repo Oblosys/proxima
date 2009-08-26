@@ -657,6 +657,10 @@ SEM Test
                              , hSpace 3
 			     , mkButton 15 (italic $ text "I") $ (WrappedLayEdit $ SetStyleLay Italic)
                              , hSpace 3
+			     , mkButton 15 (text "-") $ (WrappedLayEdit $ SetStyleLay FontSmaller)
+                             , hSpace 3
+			     , mkButton 15 (text "+") $ (WrappedLayEdit $ SetStyleLay FontLarger)
+                             , hSpace 3
 			     , mkButton 15 (italic $ text "I"`withColor` lightGray) $ (WrappedLayEdit $ ClearStyleLay Italic)
                              , hSpace 3
 			     , mkButton 15 (text " ") (WrappedLayEdit $ SetStyleLay $ Colored (0,0,0)) `withbgColor` (0,0,0)
@@ -753,6 +757,9 @@ SEM TextStyle
   | TextItalic
       loc.pres = structural $ empty
       lhs.underwater = "i"
+  | TextFontSize
+      loc.pres = structural $ empty
+      lhs.underwater = "s("++show @s++")"
   | TextColor
       loc.pres = structural $ empty
       lhs.underwater = "c("++show @r++","++show @g++","++show @b++")"
@@ -765,5 +772,6 @@ SEM TextStyle
 applyStyles [] pres = pres
 applyStyles (TextBold:styles) pres = applyStyles styles (bold pres)
 applyStyles (TextItalic:styles) pres = applyStyles styles (italic pres)
+applyStyles (TextFontSize s:styles) pres = applyStyles styles (pres `withFontSize` s)
 applyStyles (TextColor r g b:styles) pres = applyStyles styles (pres `withColor` (r,g,b))
 }

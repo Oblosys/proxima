@@ -109,6 +109,7 @@ data WordPart = WordPart IDP String
 
 data TextStyle = TextBold
                | TextItalic
+               | TextFontSize Int
                | TextColor Int Int Int
                | HoleTextStyle
                | ParseErrTextStyle (ParseError Document EnrichedDoc Node ClipDoc UserToken)
@@ -283,6 +284,7 @@ data Node = NoNode
           | Node_ParseErrWordPart WordPart Path
           | Node_TextBold TextStyle Path
           | Node_TextItalic TextStyle Path
+          | Node_TextFontSize TextStyle Path
           | Node_TextColor TextStyle Path
           | Node_HoleTextStyle TextStyle Path
           | Node_ParseErrTextStyle TextStyle Path
@@ -379,6 +381,7 @@ instance Show Node where
   show (Node_ParseErrWordPart _ _) = "Node_ParseErrWordPart" 
   show (Node_TextBold _ _) = "Node_TextBold" 
   show (Node_TextItalic _ _) = "Node_TextItalic" 
+  show (Node_TextFontSize _ _) = "Node_TextFontSize" 
   show (Node_TextColor _ _) = "Node_TextColor" 
   show (Node_HoleTextStyle _ _) = "Node_HoleTextStyle" 
   show (Node_ParseErrTextStyle _ _) = "Node_ParseErrTextStyle" 

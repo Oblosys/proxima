@@ -123,6 +123,7 @@ DATA WordPart
 DATA TextStyle
   | TextBold
   | TextItalic
+  | TextFontSize s:Int
   | TextColor r:Int g:Int b:Int
   | HoleTextStyle
   | ParseErrTextStyle error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
@@ -632,16 +633,22 @@ SEM TextStyle
       lhs.pIdC = @lhs.pIdC + 0
   | TextItalic 
       lhs.pIdC = @lhs.pIdC + 0
+  | TextFontSize 
+      lhs.pIdC = @lhs.pIdC + 0
   | TextColor 
       lhs.pIdC = @lhs.pIdC + 0
   | TextBold
   | TextItalic
+  | TextFontSize
   | TextColor
   | TextBold
       lhs.pres = loc (Node_TextBold @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | TextItalic
       lhs.pres = loc (Node_TextItalic @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
+                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
+  | TextFontSize
+      lhs.pres = loc (Node_TextFontSize @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
   | TextColor
       lhs.pres = loc (Node_TextColor @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
@@ -949,6 +956,7 @@ SEM WordPart
 SEM TextStyle
   | TextBold lhs.path = @lhs.path
   | TextItalic lhs.path = @lhs.path
+  | TextFontSize lhs.path = @lhs.path
   | TextColor lhs.path = @lhs.path
 
 SEM Int_
@@ -1089,6 +1097,8 @@ SEM TextStyle
       lhs.presXML = presentElementXML @lhs.focusD (Node_TextBold @self @lhs.path) @lhs.path "TextBold" [  ] 
   | TextItalic
       lhs.presXML = presentElementXML @lhs.focusD (Node_TextItalic @self @lhs.path) @lhs.path "TextItalic" [  ] 
+  | TextFontSize
+      lhs.presXML = presentElementXML @lhs.focusD (Node_TextFontSize @self @lhs.path) @lhs.path "TextFontSize" [ presentPrimXMLInt @s ] 
   | TextColor
       lhs.presXML = presentElementXML @lhs.focusD (Node_TextColor @self @lhs.path) @lhs.path "TextColor" [ presentPrimXMLInt @r, presentPrimXMLInt @g, presentPrimXMLInt @b ] 
   | HoleTextStyle     lhs.presXML = presHole @lhs.focusD "TextStyle" (Node_HoleTextStyle @self @lhs.path) @lhs.path
@@ -1310,6 +1320,8 @@ SEM TextStyle
       lhs.presTree = presentElementTree @lhs.focusD (Node_TextBold @self @lhs.path) @lhs.path "TextBold" [  ] 
   | TextItalic
       lhs.presTree = presentElementTree @lhs.focusD (Node_TextItalic @self @lhs.path) @lhs.path "TextItalic" [  ] 
+  | TextFontSize
+      lhs.presTree = presentElementTree @lhs.focusD (Node_TextFontSize @self @lhs.path) @lhs.path "TextFontSize" [ presentPrimXMLInt @s ] 
   | TextColor
       lhs.presTree = presentElementTree @lhs.focusD (Node_TextColor @self @lhs.path) @lhs.path "TextColor" [ presentPrimXMLInt @r, presentPrimXMLInt @g, presentPrimXMLInt @b ] 
   | HoleTextStyle     lhs.presTree = presHole @lhs.focusD "TextStyle" (Node_HoleTextStyle @self @lhs.path) @lhs.path

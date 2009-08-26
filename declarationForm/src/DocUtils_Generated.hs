@@ -16,7 +16,9 @@ import Common.CommonTypes hiding (Clean, Dirty)
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
     TestDoc $
-      Test $ StyledText $ toList_Word [ Word $ toList_WordPart [ WordPart NoIDP "blablablablabla" ]]
+      Test $ StyledText $ toList_Word [ Word $ toList_WordPart [ WordPart NoIDP "bla"
+                                                               , OpenTag $ TextColor  255 0 0, WordPart NoIDP "bla", CloseTag $ TextColor 255 0 0
+                                                               , WordPart NoIDP "bla" ]]
 --      Test (StyledText $ toList_StringOrStyled [ String NoIDP "styledtext" ])
 {-  TaskDoc $
     Tasks (toList_Thing [Thing 1, Thing 2, Thing 3]) (toList_Thing [])True $ toList_Task
@@ -63,9 +65,14 @@ toFloat_ x = Float_ x
 
 instance Eq TextStyle where
   TextBold   == TextBold   = True
+  TextBold   == _          = False
   TextItalic == TextItalic = True
+  TextItalic == _          = True
+  TextFontSize s1 == TextFontSize s2 = s1 == s2
+  TextFontSize s1 == _           = False
   TextColor r1 g1 b1 == TextColor r2 g2 b2 = r1 == r2 && g1 == g2 && b1 == b2
-  _          == _          = False
+  TextColor _ _ _    == _  = False
+-- no _ == _ = False case, because then we don't get an error when == has not been implemented for a new TextStyle
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -134,33 +141,34 @@ rankNode (Node_HoleWordPart _ _) = 56
 rankNode (Node_ParseErrWordPart _ _) = 57
 rankNode (Node_TextBold _ _) = 58
 rankNode (Node_TextItalic _ _) = 59
-rankNode (Node_TextColor _ _) = 60
-rankNode (Node_HoleTextStyle _ _) = 61
-rankNode (Node_ParseErrTextStyle _ _) = 62
-rankNode (Node_Int_ _ _) = 63
-rankNode (Node_HoleInt_ _ _) = 64
-rankNode (Node_ParseErrInt_ _ _) = 65
-rankNode (Node_Float_ _ _) = 66
-rankNode (Node_HoleFloat_ _ _) = 67
-rankNode (Node_ParseErrFloat_ _ _) = 68
-rankNode (Node_List_Expense _ _) = 69
-rankNode (Node_HoleList_Expense _ _) = 70
-rankNode (Node_ParseErrList_Expense _ _) = 71
-rankNode (Node_List_Currency _ _) = 72
-rankNode (Node_HoleList_Currency _ _) = 73
-rankNode (Node_ParseErrList_Currency _ _) = 74
-rankNode (Node_List_Thing _ _) = 75
-rankNode (Node_HoleList_Thing _ _) = 76
-rankNode (Node_ParseErrList_Thing _ _) = 77
-rankNode (Node_List_Task _ _) = 78
-rankNode (Node_HoleList_Task _ _) = 79
-rankNode (Node_ParseErrList_Task _ _) = 80
-rankNode (Node_List_Word _ _) = 81
-rankNode (Node_HoleList_Word _ _) = 82
-rankNode (Node_ParseErrList_Word _ _) = 83
-rankNode (Node_List_WordPart _ _) = 84
-rankNode (Node_HoleList_WordPart _ _) = 85
-rankNode (Node_ParseErrList_WordPart _ _) = 86
+rankNode (Node_TextFontSize _ _) = 60
+rankNode (Node_TextColor _ _) = 61
+rankNode (Node_HoleTextStyle _ _) = 62
+rankNode (Node_ParseErrTextStyle _ _) = 63
+rankNode (Node_Int_ _ _) = 64
+rankNode (Node_HoleInt_ _ _) = 65
+rankNode (Node_ParseErrInt_ _ _) = 66
+rankNode (Node_Float_ _ _) = 67
+rankNode (Node_HoleFloat_ _ _) = 68
+rankNode (Node_ParseErrFloat_ _ _) = 69
+rankNode (Node_List_Expense _ _) = 70
+rankNode (Node_HoleList_Expense _ _) = 71
+rankNode (Node_ParseErrList_Expense _ _) = 72
+rankNode (Node_List_Currency _ _) = 73
+rankNode (Node_HoleList_Currency _ _) = 74
+rankNode (Node_ParseErrList_Currency _ _) = 75
+rankNode (Node_List_Thing _ _) = 76
+rankNode (Node_HoleList_Thing _ _) = 77
+rankNode (Node_ParseErrList_Thing _ _) = 78
+rankNode (Node_List_Task _ _) = 79
+rankNode (Node_HoleList_Task _ _) = 80
+rankNode (Node_ParseErrList_Task _ _) = 81
+rankNode (Node_List_Word _ _) = 82
+rankNode (Node_HoleList_Word _ _) = 83
+rankNode (Node_ParseErrList_Word _ _) = 84
+rankNode (Node_List_WordPart _ _) = 85
+rankNode (Node_HoleList_WordPart _ _) = 86
+rankNode (Node_ParseErrList_WordPart _ _) = 87
 
 
 
@@ -231,6 +239,7 @@ instance DocNode Node where
   pathNode (Node_ParseErrWordPart _ pth) = PathD pth
   pathNode (Node_TextBold _ pth) = PathD pth
   pathNode (Node_TextItalic _ pth) = PathD pth
+  pathNode (Node_TextFontSize _ pth) = PathD pth
   pathNode (Node_TextColor _ pth) = PathD pth
   pathNode (Node_HoleTextStyle _ pth) = PathD pth
   pathNode (Node_ParseErrTextStyle _ pth) = PathD pth
@@ -318,6 +327,7 @@ instance DocNode Node where
   typeOfNode (Node_ParseErrWordPart _ _) = BasicType "WordPart"
   typeOfNode (Node_TextBold _ _) = BasicType "TextStyle"
   typeOfNode (Node_TextItalic _ _) = BasicType "TextStyle"
+  typeOfNode (Node_TextFontSize _ _) = BasicType "TextStyle"
   typeOfNode (Node_TextColor _ _) = BasicType "TextStyle"
   typeOfNode (Node_HoleTextStyle _ _) = BasicType "TextStyle"
   typeOfNode (Node_ParseErrTextStyle _ _) = BasicType "TextStyle"
@@ -411,6 +421,7 @@ toXMLWordPart (HoleWordPart) = EmptyElt "HoleWordPart" []
 toXMLWordPart (ParseErrWordPart error) = EmptyElt "ParseErrWordPart" []
 toXMLTextStyle (TextBold) = EmptyElt "TextBold" [] 
 toXMLTextStyle (TextItalic) = EmptyElt "TextItalic" [] 
+toXMLTextStyle (TextFontSize s) = Elt "TextFontSize" [] $ [toXMLInt s]
 toXMLTextStyle (TextColor r g b) = Elt "TextColor" [] $ [toXMLInt r] ++ [toXMLInt g] ++ [toXMLInt b]
 toXMLTextStyle (HoleTextStyle) = EmptyElt "HoleTextStyle" [] 
 toXMLTextStyle (ParseErrTextStyle error) = EmptyElt "ParseErrTextStyle" []
@@ -497,9 +508,10 @@ parseXML_WordPart = parseXMLCns_WordPart <|> parseXMLCns_OpenTag <|> parseXMLCns
 parseXMLCns_WordPart = WordPart NoIDP <$ startTag "WordPart" <*> parseXML_String<* endTag "WordPart"
 parseXMLCns_OpenTag = OpenTag <$ startTag "OpenTag" <*> parseXML_TextStyle<* endTag "OpenTag"
 parseXMLCns_CloseTag = CloseTag <$ startTag "CloseTag" <*> parseXML_TextStyle<* endTag "CloseTag"
-parseXML_TextStyle = parseXMLCns_TextBold <|> parseXMLCns_TextItalic <|> parseXMLCns_TextColor <|> parseHoleAndParseErr "TextStyle" HoleTextStyle
+parseXML_TextStyle = parseXMLCns_TextBold <|> parseXMLCns_TextItalic <|> parseXMLCns_TextFontSize <|> parseXMLCns_TextColor <|> parseHoleAndParseErr "TextStyle" HoleTextStyle
 parseXMLCns_TextBold = TextBold <$ emptyTag "TextBold"
 parseXMLCns_TextItalic = TextItalic <$ emptyTag "TextItalic"
+parseXMLCns_TextFontSize = TextFontSize <$ startTag "TextFontSize" <*> parseXML_Int<* endTag "TextFontSize"
 parseXMLCns_TextColor = TextColor <$ startTag "TextColor" <*> parseXML_Int <*> parseXML_Int <*> parseXML_Int<* endTag "TextColor"
 parseXML_Int_ = parseXMLCns_Int_ <|> parseHoleAndParseErr "Int_" HoleInt_
 parseXMLCns_Int_ = Int_ <$ startTag "Int_" <*> parseXML_Int<* endTag "Int_"

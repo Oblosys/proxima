@@ -93,7 +93,7 @@ defaultTextColor = black
 defaultFont = Font "Verdana" 14 False False False False
 
 
-data Style = Bold | Italic | Colored Color deriving (Show, Read, Eq, Ord)
+data Style = Bold | Italic | FontSmaller | FontLarger | FontSize Int | Colored Color deriving (Show, Read, Eq, Ord)
 -- used by scanner and in gui for commands to set text styles
 
 data StartOrEnd = Start | End deriving (Show, Eq, Ord)

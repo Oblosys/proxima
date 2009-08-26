@@ -101,7 +101,7 @@ data Token doc enr node clip token =
 
 data ScannedStyleTag = ScannedStyleTag ScannedStyle StartOrEnd deriving (Show, Eq, Ord)
 
-data ScannedStyle = ScannedBold | ScannedItalic | ScannedColored Color deriving (Show, Read)
+data ScannedStyle = ScannedBold | ScannedItalic | ScannedFontSize Int | ScannedColored Color deriving (Show, Read)
 
 -- special version of Style in which Color x == Color y = True even if x /= y, necessary for UU.Parsing, so we can write one parser for
 -- all colors.
@@ -109,6 +109,7 @@ data ScannedStyle = ScannedBold | ScannedItalic | ScannedColored Color deriving 
 instance Eq ScannedStyle where 
   ScannedBold       == ScannedBold       = True
   ScannedItalic     == ScannedItalic     = True
+  ScannedFontSize s1 == ScannedFontSize s2 = True
   ScannedColored c1 == ScannedColored c2 = True
   _                 == _                 = False
 
@@ -116,13 +117,18 @@ instance Ord ScannedStyle where
   ScannedBold      <= ScannedBold      = True
   ScannedItalic    <= ScannedItalic    = True
   ScannedItalic    <= ScannedBold      = True
+  ScannedFontSize _ <= ScannedFontSize _ = True
+  ScannedFontSize _ <= ScannedItalic    = True
+  ScannedFontSize _ <= ScannedBold      = True
   ScannedColored _ <= ScannedColored _ = True
+  ScannedColored _ <= ScannedFontSize _ = True
   ScannedColored _ <= ScannedItalic    = True
   ScannedColored _ <= ScannedBold      = True
   _                <= _                = False
 
 scannedStyleFromStyle Bold = ScannedBold
 scannedStyleFromStyle Italic = ScannedItalic
+scannedStyleFromStyle (FontSize s) = ScannedFontSize s
 scannedStyleFromStyle (Colored c) = ScannedColored c
 
 
@@ -211,6 +217,9 @@ tokenNode (VertexTk i p n id) = n
 tokenNode (UserTk _ u s n id)   = n
 tokenNode (StyleTk p t)       = error $ "tokenNode called on Style token ("++show p ++ "):" ++ show t
 tokenNode (ErrorTk _ str _)       = error $ "tokenNode called on error token: " ++ str
+
+getTokenFontSize (StyleTk _ (ScannedStyleTag (ScannedFontSize s) _)) = s
+getTokenFontSize t = debug Err ("getTokenFontSize called on wrong token:" ++ show t) $ 0
 
 getTokenColor (StyleTk _ (ScannedStyleTag (ScannedColored c) _)) = c
 getTokenColor t = debug Err ("getTokenColor called on wrong token:" ++ show t) (-1,-1,-1)

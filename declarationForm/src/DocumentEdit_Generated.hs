@@ -840,6 +840,7 @@ instance Editable WordPart Document EnrichedDoc Node ClipDoc UserToken where
 
 instance Editable TextStyle Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_TextStyle x
+  select (0:p) (TextFontSize x0) = select p x0
   select (0:p) (TextColor x0 x1 x2) = select p x0
   select (1:p) (TextColor x0 x1 x2) = select p x1
   select (2:p) (TextColor x0 x1 x2) = select p x2
@@ -847,6 +848,7 @@ instance Editable TextStyle Document EnrichedDoc Node ClipDoc UserToken where
 
   paste [] (Clip_TextStyle c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on TextStyle") x
+  paste (0:p) c (TextFontSize x0) = TextFontSize (paste p c x0)
   paste (0:p) c (TextColor x0 x1 x2) = TextColor (paste p c x0) x1 x2
   paste (1:p) c (TextColor x0 x1 x2) = TextColor x0 (paste p c x1) x2
   paste (2:p) c (TextColor x0 x1 x2) = TextColor x0 x1 (paste p c x2)
@@ -854,12 +856,14 @@ instance Editable TextStyle Document EnrichedDoc Node ClipDoc UserToken where
 
   alternatives _ = [ ("TextBold "  , Clip_TextStyle $ TextBold)
                    , ("TextItalic "  , Clip_TextStyle $ TextItalic)
+                   , ("TextFontSize {Int} "  , Clip_TextStyle $ TextFontSize hole)
                    , ("TextColor {Int} {Int} {Int} "  , Clip_TextStyle $ TextColor hole hole hole)
                    ,("{TextStyle}", Clip_TextStyle hole)
                    ]
 
   arity (TextBold) = 0
   arity (TextItalic) = 0
+  arity (TextFontSize x0) = 1
   arity (TextColor x0 x1 x2) = 3
   arity _                        = 0
 

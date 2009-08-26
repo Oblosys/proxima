@@ -44,7 +44,7 @@ data WordPart = WordPart word:String { idp : IDP }
           | OpenTag style : TextStyle
           | CloseTag style : TextStyle
 
-data TextStyle = TextBold | TextItalic | TextColor r : Int g : Int b : Int
+data TextStyle = TextBold | TextItalic | TextFontSize s : Int | TextColor r : Int g : Int b : Int
 
 data Int_ = Int_ value : Int
 
