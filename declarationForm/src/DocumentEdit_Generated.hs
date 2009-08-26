@@ -214,7 +214,7 @@ instance Clip ClipDoc where
 -- Editable instances                                                   --
 --------------------------------------------------------------------------
 
-instance Editable EnrichedDoc Document Node ClipDoc UserToken where
+instance Editable EnrichedDoc Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_EnrichedDoc x
   select (0:p) (RootEnr x0) = select p x0
   select _ _ = Clip_Nothing
@@ -246,7 +246,7 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Document Document Node ClipDoc UserToken where
+instance Editable Document Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Document x
   select (0:p) (RootDoc x0) = select p x0
   select _ _ = Clip_Nothing
@@ -278,7 +278,7 @@ instance Editable Document Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable ChoiceDoc Document Node ClipDoc UserToken where
+instance Editable ChoiceDoc Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_ChoiceDoc x
   select (0:p) (FormDoc x0) = select p x0
   select (0:p) (TaskDoc x0) = select p x0
@@ -322,7 +322,7 @@ instance Editable ChoiceDoc Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Form Document Node ClipDoc UserToken where
+instance Editable Form Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Form x
   select (0:p) (Form x0 x1 x2 x3) = select p x0
   select (1:p) (Form x0 x1 x2 x3) = select p x1
@@ -360,7 +360,7 @@ instance Editable Form Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Expense Document Node ClipDoc UserToken where
+instance Editable Expense Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Expense x
   select (0:p) (Expense x0 x1 x2) = select p x0
   select (1:p) (Expense x0 x1 x2) = select p x1
@@ -396,7 +396,7 @@ instance Editable Expense Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Currency Document Node ClipDoc UserToken where
+instance Editable Currency Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Currency x
   select (0:p) (Currency x0 x1) = select p x0
   select (1:p) (Currency x0 x1) = select p x1
@@ -430,7 +430,7 @@ instance Editable Currency Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Tasks Document Node ClipDoc UserToken where
+instance Editable Tasks Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Tasks x
   select (0:p) (Tasks x0 x1 x2 x3) = select p x0
   select (1:p) (Tasks x0 x1 x2 x3) = select p x1
@@ -468,7 +468,7 @@ instance Editable Tasks Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Thing Document Node ClipDoc UserToken where
+instance Editable Thing Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Thing x
   select (0:p) (Thing x0) = select p x0
   select _ _ = Clip_Nothing
@@ -500,7 +500,7 @@ instance Editable Thing Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Task Document Node ClipDoc UserToken where
+instance Editable Task Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Task x
   select (0:p) (BasicTask x0 x1) = select p x0
   select (1:p) (BasicTask x0 x1) = select p x1
@@ -542,7 +542,7 @@ instance Editable Task Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Description Document Node ClipDoc UserToken where
+instance Editable Description Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Description x
   select (0:p) (Description x0) = select p x0
   select _ _ = Clip_Nothing
@@ -574,7 +574,7 @@ instance Editable Description Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Sudoku Document Node ClipDoc UserToken where
+instance Editable Sudoku Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Sudoku x
   select (0:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x0
   select (1:p) (Sudoku x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x1
@@ -622,7 +622,7 @@ instance Editable Sudoku Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Row Document Node ClipDoc UserToken where
+instance Editable Row Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Row x
   select (0:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x0
   select (1:p) (Row x0 x1 x2 x3 x4 x5 x6 x7 x8) = select p x1
@@ -670,7 +670,7 @@ instance Editable Row Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Field Document Node ClipDoc UserToken where
+instance Editable Field Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Field x
   select (0:p) (Field x0) = select p x0
   select _ _ = Clip_Nothing
@@ -702,7 +702,7 @@ instance Editable Field Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Test Document Node ClipDoc UserToken where
+instance Editable Test Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Test x
   select (0:p) (Test x0) = select p x0
   select _ _ = Clip_Nothing
@@ -734,7 +734,7 @@ instance Editable Test Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable StyledText Document Node ClipDoc UserToken where
+instance Editable StyledText Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_StyledText x
   select (0:p) (StyledText x0) = select p x0
   select _ _ = Clip_Nothing
@@ -766,7 +766,7 @@ instance Editable StyledText Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Word Document Node ClipDoc UserToken where
+instance Editable Word Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Word x
   select (0:p) (Word x0) = select p x0
   select _ _ = Clip_Nothing
@@ -798,7 +798,7 @@ instance Editable Word Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable WordPart Document Node ClipDoc UserToken where
+instance Editable WordPart Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_WordPart x
   select (0:p) (WordPart _ x0) = select p x0
   select (0:p) (OpenTag x0) = select p x0
@@ -838,7 +838,7 @@ instance Editable WordPart Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable TextStyle Document Node ClipDoc UserToken where
+instance Editable TextStyle Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_TextStyle x
   select (0:p) (TextColor x0 x1 x2) = select p x0
   select (1:p) (TextColor x0 x1 x2) = select p x1
@@ -878,7 +878,7 @@ instance Editable TextStyle Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Int_ Document Node ClipDoc UserToken where
+instance Editable Int_ Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Int_ x
   select (0:p) (Int_ x0) = select p x0
   select _ _ = Clip_Nothing
@@ -910,7 +910,7 @@ instance Editable Int_ Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Float_ Document Node ClipDoc UserToken where
+instance Editable Float_ Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Float_ x
   select (0:p) (Float_ x0) = select p x0
   select _ _ = Clip_Nothing
@@ -942,7 +942,7 @@ instance Editable Float_ Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable List_Expense Document Node ClipDoc UserToken where
+instance Editable List_Expense Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Expense x
   select (n:p) (List_Expense cxs) =
     let xs = fromConsList_Expense cxs
@@ -988,7 +988,7 @@ instance Editable List_Expense Document Node ClipDoc UserToken where
   removeList n (List_Expense cxs) = Clip_List_Expense $ List_Expense (removeList_Expense n cxs)
   removeList _ xs = Clip_List_Expense $ xs
 
-instance Editable List_Currency Document Node ClipDoc UserToken where
+instance Editable List_Currency Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Currency x
   select (n:p) (List_Currency cxs) =
     let xs = fromConsList_Currency cxs
@@ -1034,7 +1034,7 @@ instance Editable List_Currency Document Node ClipDoc UserToken where
   removeList n (List_Currency cxs) = Clip_List_Currency $ List_Currency (removeList_Currency n cxs)
   removeList _ xs = Clip_List_Currency $ xs
 
-instance Editable List_Thing Document Node ClipDoc UserToken where
+instance Editable List_Thing Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Thing x
   select (n:p) (List_Thing cxs) =
     let xs = fromConsList_Thing cxs
@@ -1080,7 +1080,7 @@ instance Editable List_Thing Document Node ClipDoc UserToken where
   removeList n (List_Thing cxs) = Clip_List_Thing $ List_Thing (removeList_Thing n cxs)
   removeList _ xs = Clip_List_Thing $ xs
 
-instance Editable List_Task Document Node ClipDoc UserToken where
+instance Editable List_Task Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Task x
   select (n:p) (List_Task cxs) =
     let xs = fromConsList_Task cxs
@@ -1126,7 +1126,7 @@ instance Editable List_Task Document Node ClipDoc UserToken where
   removeList n (List_Task cxs) = Clip_List_Task $ List_Task (removeList_Task n cxs)
   removeList _ xs = Clip_List_Task $ xs
 
-instance Editable List_Word Document Node ClipDoc UserToken where
+instance Editable List_Word Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Word x
   select (n:p) (List_Word cxs) =
     let xs = fromConsList_Word cxs
@@ -1172,7 +1172,7 @@ instance Editable List_Word Document Node ClipDoc UserToken where
   removeList n (List_Word cxs) = Clip_List_Word $ List_Word (removeList_Word n cxs)
   removeList _ xs = Clip_List_Word $ xs
 
-instance Editable List_WordPart Document Node ClipDoc UserToken where
+instance Editable List_WordPart Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_WordPart x
   select (n:p) (List_WordPart cxs) =
     let xs = fromConsList_WordPart cxs
@@ -1225,7 +1225,7 @@ instance Editable List_WordPart Document Node ClipDoc UserToken where
 -- Editable instances for Document, EnrichedDoc and primitive types     --
 --------------------------------------------------------------------------
 
-instance Editable Int Document Node ClipDoc UserToken where
+instance Editable Int Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Int x
   select _  _ = Clip_Nothing
   paste [] (Clip_Int c) x = c
@@ -1251,7 +1251,7 @@ instance Editable Int Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Float Document Node ClipDoc UserToken where
+instance Editable Float Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Float x
   select _  _ = Clip_Nothing
   paste [] (Clip_Float c) x = c
@@ -1277,7 +1277,7 @@ instance Editable Float Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Bool Document Node ClipDoc UserToken where
+instance Editable Bool Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Bool x                            
   select _  _ = Clip_Nothing                           
   paste [] (Clip_Bool c) x = c                         
@@ -1303,7 +1303,7 @@ instance Editable Bool Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable String Document Node ClipDoc UserToken where
+instance Editable String Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_String x
   select _  _ = Clip_Nothing
   paste [] (Clip_String c) x = c

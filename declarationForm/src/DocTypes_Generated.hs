@@ -18,12 +18,12 @@ data UserToken = WordTk | KeyTk String | FloatTk | IntTk | SymTk String deriving
 
 data EnrichedDoc = RootEnr ChoiceDoc
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc (ParseError Document Node ClipDoc UserToken)
+                 | ParseErrEnrichedDoc (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                      deriving (Show, Data, Typeable)
 
 data Document = RootDoc ChoiceDoc
               | HoleDocument
-              | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
+              | ParseErrDocument (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data ChoiceDoc = FormDoc Form
@@ -31,127 +31,127 @@ data ChoiceDoc = FormDoc Form
                | SudokuDoc Sudoku
                | TestDoc Test
                | HoleChoiceDoc
-               | ParseErrChoiceDoc (ParseError Document Node ClipDoc UserToken)
+               | ParseErrChoiceDoc (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data Form = Form Description Description List_Expense List_Currency
           | HoleForm
-          | ParseErrForm (ParseError Document Node ClipDoc UserToken)
+          | ParseErrForm (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data Expense = Expense Description Float_ Int
              | HoleExpense
-             | ParseErrExpense (ParseError Document Node ClipDoc UserToken)
+             | ParseErrExpense (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                  deriving (Show, Data, Typeable)
 
 data Currency = Currency Description Float_
               | HoleCurrency
-              | ParseErrCurrency (ParseError Document Node ClipDoc UserToken)
+              | ParseErrCurrency (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data Tasks = Tasks List_Thing List_Thing Bool List_Task
            | HoleTasks
-           | ParseErrTasks (ParseError Document Node ClipDoc UserToken)
+           | ParseErrTasks (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Thing = Thing Int
            | HoleThing
-           | ParseErrThing (ParseError Document Node ClipDoc UserToken)
+           | ParseErrThing (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Task = BasicTask Description Bool
           | CompositeTask Bool Description List_Task
           | HoleTask
-          | ParseErrTask (ParseError Document Node ClipDoc UserToken)
+          | ParseErrTask (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data Description = Description String
                  | HoleDescription
-                 | ParseErrDescription (ParseError Document Node ClipDoc UserToken)
+                 | ParseErrDescription (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                      deriving (Show, Data, Typeable)
 
 data Sudoku = Sudoku Row Row Row Row Row Row Row Row Row
             | HoleSudoku
-            | ParseErrSudoku (ParseError Document Node ClipDoc UserToken)
+            | ParseErrSudoku (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                 deriving (Show, Data, Typeable)
 
 data Row = Row Field Field Field Field Field Field Field Field Field
          | HoleRow
-         | ParseErrRow (ParseError Document Node ClipDoc UserToken)
+         | ParseErrRow (ParseError Document EnrichedDoc Node ClipDoc UserToken)
              deriving (Show, Data, Typeable)
 
 data Field = Field Int_
            | HoleField
-           | ParseErrField (ParseError Document Node ClipDoc UserToken)
+           | ParseErrField (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Test = Test StyledText
           | HoleTest
-          | ParseErrTest (ParseError Document Node ClipDoc UserToken)
+          | ParseErrTest (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data StyledText = StyledText List_Word
                 | HoleStyledText
-                | ParseErrStyledText (ParseError Document Node ClipDoc UserToken)
+                | ParseErrStyledText (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                     deriving (Show, Data, Typeable)
 
 data Word = Word List_WordPart
           | HoleWord
-          | ParseErrWord (ParseError Document Node ClipDoc UserToken)
+          | ParseErrWord (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data WordPart = WordPart IDP String
               | OpenTag TextStyle
               | CloseTag TextStyle
               | HoleWordPart
-              | ParseErrWordPart (ParseError Document Node ClipDoc UserToken)
+              | ParseErrWordPart (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data TextStyle = TextBold
                | TextItalic
                | TextColor Int Int Int
                | HoleTextStyle
-               | ParseErrTextStyle (ParseError Document Node ClipDoc UserToken)
+               | ParseErrTextStyle (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data Int_ = Int_ Int
           | HoleInt_
-          | ParseErrInt_ (ParseError Document Node ClipDoc UserToken)
+          | ParseErrInt_ (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data Float_ = Float_ Float
             | HoleFloat_
-            | ParseErrFloat_ (ParseError Document Node ClipDoc UserToken)
+            | ParseErrFloat_ (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                 deriving (Show, Data, Typeable)
 
 data List_Expense = List_Expense ConsList_Expense
                   | HoleList_Expense
-                  | ParseErrList_Expense (ParseError Document Node ClipDoc UserToken)
+                  | ParseErrList_Expense (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                       deriving (Show, Data, Typeable)
 
 data List_Currency = List_Currency ConsList_Currency
                    | HoleList_Currency
-                   | ParseErrList_Currency (ParseError Document Node ClipDoc UserToken)
+                   | ParseErrList_Currency (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                        deriving (Show, Data, Typeable)
 
 data List_Thing = List_Thing ConsList_Thing
                 | HoleList_Thing
-                | ParseErrList_Thing (ParseError Document Node ClipDoc UserToken)
+                | ParseErrList_Thing (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                     deriving (Show, Data, Typeable)
 
 data List_Task = List_Task ConsList_Task
                | HoleList_Task
-               | ParseErrList_Task (ParseError Document Node ClipDoc UserToken)
+               | ParseErrList_Task (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data List_Word = List_Word ConsList_Word
                | HoleList_Word
-               | ParseErrList_Word (ParseError Document Node ClipDoc UserToken)
+               | ParseErrList_Word (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data List_WordPart = List_WordPart ConsList_WordPart
                    | HoleList_WordPart
-                   | ParseErrList_WordPart (ParseError Document Node ClipDoc UserToken)
+                   | ParseErrList_WordPart (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                        deriving (Show, Data, Typeable)
 
 data ConsList_Expense = Cons_Expense Expense ConsList_Expense

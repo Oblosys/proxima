@@ -37,7 +37,7 @@ EnrichedDoc  [ focusD : FocusDoc path : Path
 DATA EnrichedDoc
   | RootEnr choiceDoc:ChoiceDoc
   | HoleEnrichedDoc
-  | ParseErrEnrichedDoc error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrEnrichedDoc error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA ChoiceDoc
   | FormDoc form:Form
@@ -45,127 +45,127 @@ DATA ChoiceDoc
   | SudokuDoc sudoku:Sudoku
   | TestDoc test:Test
   | HoleChoiceDoc
-  | ParseErrChoiceDoc error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrChoiceDoc error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Form
   | Form name:Description faculty:Description expenses:List_Expense currencies:List_Currency
   | HoleForm
-  | ParseErrForm error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrForm error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Expense
   | Expense description:Description amount:Float_ currencyIx:Int
   | HoleExpense
-  | ParseErrExpense error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrExpense error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Currency
   | Currency name:Description euroRate:Float_
   | HoleCurrency
-  | ParseErrCurrency error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrCurrency error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Tasks
   | Tasks things1:List_Thing things2:List_Thing showCompleted:Bool tasks:List_Task
   | HoleTasks
-  | ParseErrTasks error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrTasks error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Thing
   | Thing nr:Int
   | HoleThing
-  | ParseErrThing error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrThing error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Task
   | BasicTask description:Description completed:Bool
   | CompositeTask expanded:Bool description:Description subtasks:List_Task
   | HoleTask
-  | ParseErrTask error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrTask error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Description
   | Description str:String
   | HoleDescription
-  | ParseErrDescription error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrDescription error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Sudoku
   | Sudoku r0:Row r1:Row r2:Row r3:Row r4:Row r5:Row r6:Row r7:Row r8:Row
   | HoleSudoku
-  | ParseErrSudoku error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrSudoku error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Row
   | Row f0:Field f1:Field f2:Field f3:Field f4:Field f5:Field f6:Field f7:Field f8:Field
   | HoleRow
-  | ParseErrRow error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrRow error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Field
   | Field val:Int_
   | HoleField
-  | ParseErrField error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrField error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Test
   | Test styledText:StyledText
   | HoleTest
-  | ParseErrTest error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrTest error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA StyledText
   | StyledText words:List_Word
   | HoleStyledText
-  | ParseErrStyledText error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrStyledText error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Word
   | Word parts:List_WordPart
   | HoleWord
-  | ParseErrWord error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrWord error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA WordPart
   | WordPart idp:IDP word:String
   | OpenTag style:TextStyle
   | CloseTag style:TextStyle
   | HoleWordPart
-  | ParseErrWordPart error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrWordPart error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA TextStyle
   | TextBold
   | TextItalic
   | TextColor r:Int g:Int b:Int
   | HoleTextStyle
-  | ParseErrTextStyle error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrTextStyle error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Int_
   | Int_ value:Int
   | HoleInt_
-  | ParseErrInt_ error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrInt_ error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Float_
   | Float_ value:Float
   | HoleFloat_
-  | ParseErrFloat_ error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrFloat_ error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Expense
   | List_Expense elts:ConsList_Expense
   | HoleList_Expense
-  | ParseErrList_Expense error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Expense error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Currency
   | List_Currency elts:ConsList_Currency
   | HoleList_Currency
-  | ParseErrList_Currency error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Currency error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Thing
   | List_Thing elts:ConsList_Thing
   | HoleList_Thing
-  | ParseErrList_Thing error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Thing error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Task
   | List_Task elts:ConsList_Task
   | HoleList_Task
-  | ParseErrList_Task error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Task error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Word
   | List_Word elts:ConsList_Word
   | HoleList_Word
-  | ParseErrList_Word error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Word error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_WordPart
   | List_WordPart elts:ConsList_WordPart
   | HoleList_WordPart
-  | ParseErrList_WordPart error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_WordPart error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA ConsList_Expense
   | Cons_Expense head:Expense tail:ConsList_Expense
