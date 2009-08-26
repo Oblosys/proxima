@@ -103,9 +103,9 @@ defaultLexer :: Lexer
 defaultLexer = Lexer 0 NonStyled
 
 tokenizeLay :: (DocNode node, Show token) =>
-               ScannerSheet doc node clip token -> state -> LayoutLevel doc node clip token ->
-               PresentationLevel doc node clip token -> 
-               ([EditPresentation doc enr node clip token], state, LayoutLevel doc node clip token)
+               ScannerSheet doc enr node clip token -> state -> LayoutLevel doc enr node clip token ->
+               PresentationLevel doc enr node clip token -> 
+               ([EditPresentation doc enr node clip token], state, LayoutLevel doc enr node clip token)
 tokenizeLay sheet state layLvl@(LayoutLevel lay focus dt) (PresentationLevel _ (_, idPCounter)) = 
  let (tokens, idPCounter', whitespaceMap, tokenizedPres) = scanStructural sheet (fixFocus focus) defaultLexer Nothing [] idPCounter Map.empty lay 
      presLvl' = PresentationLevel (TokenP NoIDP (StructuralTk 0 Nothing tokenizedPres tokens NoIDP)) (whitespaceMap,idPCounter')
@@ -139,9 +139,9 @@ synthesized attribute tokens: the list of tokens         (constructed at every c
                                                                                    parts could not be reused.)
                       
 -}
-scanStructural :: (DocNode node, Show token) => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) ->
-                  Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap -> Layout doc node clip token ->
-                  ([Token doc node clip token], IDPCounter, WhitespaceMap, Presentation doc node clip token)
+scanStructural :: (DocNode node, Show token) => ScannerSheet doc enr node clip token -> ((Path,Int),(Path,Int)) ->
+                  Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap -> Layout doc enr node clip token ->
+                  ([Token doc enr node clip token], IDPCounter, WhitespaceMap, Presentation doc enr node clip token)
 scanStructural sheet foc lx loc pth idpc wm presentation =
   case presentation of
     ParsingP idP p lx' pres'    -> scanPresentation sheet foc lx loc (pth++[0]) idpc wm idP p lx' pres'
@@ -176,10 +176,10 @@ scanStructural sheet foc lx loc pth idpc wm presentation =
 
 
 scanStructuralList :: (DocNode node, Show token) => 
-                      ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> Lexer ->
+                      ScannerSheet doc enr node clip token -> ((Path,Int),(Path,Int)) -> Lexer ->
                       Maybe node -> Path ->
-                      IDPCounter -> WhitespaceMap -> [Layout doc node clip token] ->
-                      ([Token doc node clip token], IDPCounter, WhitespaceMap, [Presentation doc node clip token])
+                      IDPCounter -> WhitespaceMap -> [Layout doc enr node clip token] ->
+                      ([Token doc enr node clip token], IDPCounter, WhitespaceMap, [Presentation doc enr node clip token])
 scanStructuralList sheet foc lx loc pth idpc wm press = scanStructuralList' sheet foc lx loc pth idpc wm 0 press
  where scanStructuralList' sheet foc lx loc pth idpc wm i []           = ([], idpc, wm, [])
        scanStructuralList' sheet foc lx loc pth idpc wm i (pres:press) = 
@@ -188,10 +188,10 @@ scanStructuralList sheet foc lx loc pth idpc wm press = scanStructuralList' shee
          in  (tokens ++ tokenss, idpc'', wm'', pres':press')
 
 
-scanPresentation :: (DocNode node, Show token) => ScannerSheet doc node clip token -> ((Path,Int),(Path,Int)) -> 
+scanPresentation :: (DocNode node, Show token) => ScannerSheet doc enr node clip token -> ((Path,Int),(Path,Int)) -> 
                     Lexer -> Maybe node -> Path -> IDPCounter -> WhitespaceMap ->
-                    IDP -> Maybe (ClipParser doc node clip token) -> Lexer -> Layout doc node clip token ->
-                    ([Token doc node clip token], IDPCounter, WhitespaceMap, Presentation doc node clip token)
+                    IDP -> Maybe (ClipParser doc enr node clip token) -> Lexer -> Layout doc enr node clip token ->
+                    ([Token doc enr node clip token], IDPCounter, WhitespaceMap, Presentation doc enr node clip token)
 scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
                  parser presentationLex lay =
  let --lay = parsing (row [ structural (row [ text "<", parsing (text "blaa"), text ">"]), text "   " ])
@@ -290,7 +290,7 @@ groupScanChars scanChars = groupCharScanChars scanChars
 
 -- If the focus is after last char, we cannot encode it in the scanChars. In this case, it is added
 -- to the scanned tokens by addLastCharFocusStartAndEnd.
-markFocusStartAndEnd :: (Maybe Int) -> (Maybe Int) -> [ScanChar doc node clip token] -> [ScanChar doc node clip token]
+markFocusStartAndEnd :: (Maybe Int) -> (Maybe Int) -> [ScanChar doc enr node clip token] -> [ScanChar doc enr node clip token]
 markFocusStartAndEnd scannedFocusStart scannedFocusEnd scanChars =
   markFocus markFocusStart scannedFocusStart $
   markFocus markFocusEnd   scannedFocusEnd 
@@ -301,8 +301,8 @@ markFocusStartAndEnd scannedFocusStart scannedFocusEnd scanChars =
 -- markFocus is parameterized with a function that marks either the focus start or the end in a ScanChar.
 -- styles at the position of the focus are skipped, since styles cannot carry focus
 -- (this is only necessary for focus end, since the ag takes care than focus start is never on a style char)
-markFocus :: (ScanChar doc node clip token -> ScanChar doc node clip token) -> (Maybe Int) ->
-             [ScanChar doc node clip token] -> [ScanChar doc node clip token]
+markFocus :: (ScanChar doc enr node clip token -> ScanChar doc enr node clip token) -> (Maybe Int) ->
+             [ScanChar doc enr node clip token] -> [ScanChar doc enr node clip token]
 markFocus setFocusStartOrEnd Nothing          scs = scs
 markFocus setFocusStartOrEnd focus@(Just pos) scs = 
   if not $ focusAfterLastChar scs focus 
@@ -350,8 +350,8 @@ focusAfterLastChar scs (Just pos) = pos >= (length $ dropWhile isStyleScanChar (
 
 -- If ScannedFocusStart or ScannedFocusEnd is after the last character, it was not recorded in the
 -- scanChars. This function adds it directly to the scanned tokens.
-addLastCharFocusStartAndEnd :: [ScanChar doc node clip token] -> Maybe Int ->  Maybe Int ->
-                               [ ScannedToken doc node clip token ]  -> [ ScannedToken doc node clip token ] 
+addLastCharFocusStartAndEnd :: [ScanChar doc enr node clip token] -> Maybe Int ->  Maybe Int ->
+                               [ ScannedToken doc enr node clip token ]  -> [ ScannedToken doc enr node clip token ] 
 addLastCharFocusStartAndEnd scanChars scannedFocusStart scannedFocusEnd tokens =
   addLastCharFocus updateFocusStart scanChars scannedFocusStart $
   addLastCharFocus updateFocusEnd scanChars scannedFocusEnd $
@@ -364,8 +364,8 @@ addLastCharFocusStartAndEnd scanChars scannedFocusStart scannedFocusEnd tokens =
  
 -- addLastCharFocus is parameterized with a function updateStartOrEnd, which takes a focus position and
 -- updates either the start or the end field in FocusStartEnd.
-addLastCharFocus :: (Int -> FocusStartEnd -> FocusStartEnd) -> [ScanChar doc node clip token] -> Maybe Int ->
-                    [ ScannedToken doc node clip token ] -> [ ScannedToken doc node clip token ] 
+addLastCharFocus :: (Int -> FocusStartEnd -> FocusStartEnd) -> [ScanChar doc enr node clip token] -> Maybe Int ->
+                    [ ScannedToken doc enr node clip token ] -> [ ScannedToken doc enr node clip token ] 
 addLastCharFocus updateStartOrEnd scanChars scannedFocus tokens =
   if focusAfterLastChar scanChars scannedFocus  
   then case span isScannedStyleTk $ reverse tokens of
@@ -397,8 +397,8 @@ are not kept in the list. Furthermore, since paste operations clear all idP's we
 need to take into account the idP's of one parsing presentation (rather than the global
 set of idP's)
 -}
-addIdPs :: (Show node, Show token) => (IntSet, Int) -> [ScannedToken doc node clip token] ->
-           ([ScannedToken doc node clip token], IntSet, Int)
+addIdPs :: (Show node, Show token) => (IntSet, Int) -> [ScannedToken doc enr node clip token] ->
+           ([ScannedToken doc enr node clip token], IntSet, Int)
 addIdPs (addedIdPs,idPCounter) [] = ([], addedIdPs, idPCounter)
 addIdPs (addedIdPs,idPCounter) (st: sts) = 
   let (st', addedIdPs', idPCounter') = case st of

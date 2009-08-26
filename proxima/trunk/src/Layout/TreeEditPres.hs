@@ -27,7 +27,7 @@ throw: *** Exception: Prelude.(!!): index too large
 
 -- cut = delete
 -- copy should not do anything when nofocus. 
-copyTree :: (DocNode node, Show token) => FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Layout doc node clip token
+copyTree :: (DocNode node, Show token) => FocusPres -> Layout doc enr node clip token -> Layout doc enr node clip token -> Layout doc enr node clip token
 copyTree NoFocusP clip pres         = (clip{-, NoFocusP -})
 copyTree focus clip pres            = (copyTreePres [] (orderFocusP focus) pres)
 
@@ -47,7 +47,7 @@ deleteTree focus pres =
 
 
 
-normalizePresentation :: (DocNode node, Show token) => Layout doc node clip token -> FocusPres -> (Layout doc node clip token, FocusPres)
+normalizePresentation :: (DocNode node, Show token) => Layout doc enr node clip token -> FocusPres -> (Layout doc enr node clip token, FocusPres)
 normalizePresentation pres NoFocusP = (normalizeTreePres pres, NoFocusP)
 normalizePresentation pres focus = 
   let fxy   = xyFromPath (fromP focus) pres
@@ -75,16 +75,16 @@ splitRowTree path@(PathP pth ix) pres =
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
 
 
-normalizeTreePres :: (DocNode node, Show token) => Layout doc node clip token -> Layout doc node clip token
+normalizeTreePres :: (DocNode node, Show token) => Layout doc enr node clip token -> Layout doc enr node clip token
 normalizeTreePres pres = normalizePres pres
 
-navigateLeftTreePres :: (DocNode node, Show token) => PathPres -> Layout doc node clip token -> FocusPres
+navigateLeftTreePres :: (DocNode node, Show token) => PathPres -> Layout doc enr node clip token -> FocusPres
 navigateLeftTreePres NoPathP pres = NoFocusP
 navigateLeftTreePres path pres =
   let path' = leftNavigatePath path pres
   in  FocusP path' path'
   
-navigateRightTreePres :: (DocNode node, Show token) => PathPres -> Layout doc node clip token -> FocusPres
+navigateRightTreePres :: (DocNode node, Show token) => PathPres -> Layout doc enr node clip token -> FocusPres
 navigateRightTreePres NoPathP pres = NoFocusP
 navigateRightTreePres path pres =
   let path' = rightNavigatePath path pres
@@ -207,7 +207,7 @@ getVertexID (VertexP _ i _ _ _ _) = i
 getVertexID _                     = debug Err "TreeEditPres.getVertexID: graph presentation has incorrect structure" (-1)
 
 
-moveVertexPres :: (DocNode node, Show token) => [Int] -> (Int,Int) -> Layout doc node clip token -> Layout doc node clip token                                     
+moveVertexPres :: (DocNode node, Show token) => [Int] -> (Int,Int) -> Layout doc enr node clip token -> Layout doc enr node clip token                                     
 moveVertexPres (p:ps) pt (RowP id rf press)         = RowP id rf $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (p:ps) pt (ColP id rf f press)       = ColP id rf f $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
 moveVertexPres (p:ps) pt (OverlayP id d press)      = OverlayP id d $ replace "TreeEditPres.moveVertexPres" p press (moveVertexPres ps pt (index "TreeEditPres.moveVertexPres" press p))
@@ -487,7 +487,7 @@ pasteTreePresF NoPathP          _    pres = NoFocusP
 
 -- nicer to give focus of clip and let calling function decide on after paste focus left or right of clip
 
-copyTreePres :: (DocNode node, Show token) => Path -> FocusPres -> Layout doc node clip token -> Layout doc node clip token
+copyTreePres :: (DocNode node, Show token) => Path -> FocusPres -> Layout doc enr node clip token -> Layout doc enr node clip token
 copyTreePres p (FocusP (PathP stp sti) (PathP enp eni)) (StringP id str) = 
   let st = if  stp < p then 0 else sti
       en = if  enp > p then length str else eni               
@@ -506,7 +506,7 @@ copyTreePres p focus          (LocatorP l pres) = LocatorP l (copyTreePres (p++[
 copyTreePres p focus          (TagP t pres) = TagP t (copyTreePres (p++[0]) focus pres)
 copyTreePres p f pr = debug Err("TreeEditPres.copyTreePres: can't handle "++show f++" "++ show pr) $ text "<ERROR>"
 
-copyTreePresList :: (DocNode node, Show token) => Path -> Int -> FocusPres -> [Layout doc node clip token] -> [Layout doc node clip token] 
+copyTreePresList :: (DocNode node, Show token) => Path -> Int -> FocusPres -> [Layout doc enr node clip token] -> [Layout doc enr node clip token] 
 copyTreePresList p i _ [] = []
 copyTreePresList p i focus@(FocusP (PathP stp sti) (PathP enp eni)) (pres:press) = 
                            if   enp < (p++[i])-- take (length p+1) enp < p++[i]

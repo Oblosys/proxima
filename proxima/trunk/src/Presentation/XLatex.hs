@@ -126,10 +126,10 @@ flChar = chr 176
 
 
 
-presType :: String -> Xprez doc node clip token
+presType :: String -> Xprez doc enr node clip token
 presType tpStr = row $ intersperse rightArrow (map text (splitAtArrows "" tpStr))
 
-rightArrow :: Xprez doc node clip token
+rightArrow :: Xprez doc enr node clip token
 rightArrow = text "->" -- text  "\174" `withFontFam` "Symbol"
  -- Symbol font does not seem to load with Gtk2hs, maybe migration to Cairo will solve this
 
@@ -140,10 +140,10 @@ splitAtArrows seg [c]          = [seg++[c]]
 splitAtArrows seg ('-':'>':cs) = seg : splitAtArrows [] cs
 splitAtArrows seg (c:cs)       = splitAtArrows (seg++[c]) cs
 
-presMsg :: String -> Xprez doc node clip token
+presMsg :: String -> Xprez doc enr node clip token
 presMsg tpStr = row $ intersperse wok (map text (splitAtWoks "" tpStr))
 
-wok :: Xprez doc node clip token
+wok :: Xprez doc enr node clip token
 wok = move 0 (-6) $ (shrink . shrink) (text  "\200" `withFontFam` "mt symbol")
 
 

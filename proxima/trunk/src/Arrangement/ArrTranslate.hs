@@ -76,9 +76,9 @@ unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pre
     
 unArrange :: forall doc enr node clip token state .
              (Show doc, Show enr, Show token, Show node, DocNode node, Clip clip, Show clip
-             ,Editable doc doc node clip token) => LocalStateArr -> ArrangementLevel doc node clip token -> LayoutLevel doc node clip token ->
+             ,Editable doc doc enr node clip token) => LocalStateArr -> ArrangementLevel doc enr node clip token -> LayoutLevel doc enr node clip token ->
              EditArrangement doc enr node clip token ->
-             ([EditLayout doc enr node clip token], LocalStateArr, ArrangementLevel doc node clip token)
+             ([EditLayout doc enr node clip token], LocalStateArr, ArrangementLevel doc enr node clip token)
 unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _ _) editArr = 
   debug Arr ("Edit arr is "++show editArr) $
   case editArr of
@@ -262,9 +262,9 @@ indexOfDragSourceTag i (_:arrs) = indexOfDragSourceTag (i+1) arrs
 
 -- mouseDownDocPres and DocumentLevel cause dependency on type DocumentLevel
 mouseDownDoc :: forall doc enr node clip token state .
-                (DocNode node, Show token)  => state -> ArrangementLevel doc node clip token ->
-                Layout doc node clip token -> PathArr -> Int ->
-                ([EditLayout doc enr node clip token], state, ArrangementLevel doc node clip token)  
+                (DocNode node, Show token)  => state -> ArrangementLevel doc enr node clip token ->
+                Layout doc enr node clip token -> PathArr -> Int ->
+                ([EditLayout doc enr node clip token], state, ArrangementLevel doc enr node clip token)  
 mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -- only look at start of focus. focus will be empty
   let pthP = pathPFromPathA' arr layout pthA
   in  case locateTreePres (PathP pthP 0) layout of -- set the document focus
@@ -277,7 +277,7 @@ mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -
 mouseDownDoc state arrLvl layout pathA i =
   debug Err ("UnArranger.mouseDownDoc: empty path ") ([SkipLay 0], state, arrLvl)                                                 
 
-isGraphEdit :: (Show node, Show token) => Int -> Int -> Arrangement node -> Layout doc node clip token ->
+isGraphEdit :: (Show node, Show token) => Int -> Int -> Arrangement node -> Layout doc enr node clip token ->
                Maybe (EditLayout doc enr node clip token)
 isGraphEdit x y arr pres =
       case navigateFocus x y arr of 

@@ -37,34 +37,34 @@ EnrichedDoc  [ focusD : FocusDoc path : Path
 DATA EnrichedDoc
   | RootEnr root:Root
   | HoleEnrichedDoc
-  | ParseErrEnrichedDoc error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrEnrichedDoc error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Root
   | Root graph:Graph caption:String label:String probtables:List_Probtable title:String sections:List_Section
   | HoleRoot
-  | ParseErrRoot error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrRoot error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Section
   | Section title:String paragraphs:List_Paragraph subsections:List_Subsection
   | HoleSection
-  | ParseErrSection error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrSection error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Subsection
   | Subsection title:String paragraphs:List_Paragraph subsubsections:List_Subsubsection
   | HoleSubsection
-  | ParseErrSubsection error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrSubsection error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Subsubsection
   | Subsubsection title:String paragraphs:List_Paragraph
   | HoleSubsubsection
-  | ParseErrSubsubsection error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrSubsubsection error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Paragraph
   | Paragraph words:List_Word
   | SubgraphPara subgraph:Subgraph caption:String label:String
   | ProbtablePara probtable:Probtable
   | HoleParagraph
-  | ParseErrParagraph error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrParagraph error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Word
   | Word idp:IDP word:String
@@ -72,124 +72,124 @@ DATA Word
   | Label label:String
   | LabelRef label:String
   | HoleWord
-  | ParseErrWord error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrWord error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA NodeName
   | NodeName name:String
   | HoleNodeName
-  | ParseErrNodeName error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrNodeName error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Graph
   | Graph dirty:Dirty vertices:List_Vertex edges:List_Edge
   | HoleGraph
-  | ParseErrGraph error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrGraph error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Vertex
   | Vertex name:String shape:Shape id:Int x:Int y:Int
   | HoleVertex
-  | ParseErrVertex error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrVertex error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Shape
   | Circle
   | Square
   | HoleShape
-  | ParseErrShape error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrShape error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Edge
   | Edge from:Int to:Int
   | HoleEdge
-  | ParseErrEdge error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrEdge error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Subgraph
   | Subgraph dirty:Dirty vertices:List_Vertex edges:List_Edge
   | HoleSubgraph
-  | ParseErrSubgraph error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrSubgraph error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Dirty
   | Dirty
   | Clean
   | HoleDirty
-  | ParseErrDirty error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrDirty error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Probtable
   | Probtable id:Int values:List_Value table:Table
   | HoleProbtable
-  | ParseErrProbtable error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrProbtable error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Value
   | Value val:String
   | HoleValue
-  | ParseErrValue error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrValue error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Table
   | Table parents:{[Int]} axes:List_Axis probs:List_Probability
   | HoleTable
-  | ParseErrTable error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrTable error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Axis
   | Axis values:List_Value
   | HoleAxis
-  | ParseErrAxis error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrAxis error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Probability
   | Probability prob:String
   | HoleProbability
-  | ParseErrProbability error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrProbability error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Probtable
   | List_Probtable elts:ConsList_Probtable
   | HoleList_Probtable
-  | ParseErrList_Probtable error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Probtable error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Section
   | List_Section elts:ConsList_Section
   | HoleList_Section
-  | ParseErrList_Section error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Section error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Paragraph
   | List_Paragraph elts:ConsList_Paragraph
   | HoleList_Paragraph
-  | ParseErrList_Paragraph error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Paragraph error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Subsection
   | List_Subsection elts:ConsList_Subsection
   | HoleList_Subsection
-  | ParseErrList_Subsection error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Subsection error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Subsubsection
   | List_Subsubsection elts:ConsList_Subsubsection
   | HoleList_Subsubsection
-  | ParseErrList_Subsubsection error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Subsubsection error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Word
   | List_Word elts:ConsList_Word
   | HoleList_Word
-  | ParseErrList_Word error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Word error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Vertex
   | List_Vertex elts:ConsList_Vertex
   | HoleList_Vertex
-  | ParseErrList_Vertex error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Vertex error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Edge
   | List_Edge elts:ConsList_Edge
   | HoleList_Edge
-  | ParseErrList_Edge error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Edge error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Value
   | List_Value elts:ConsList_Value
   | HoleList_Value
-  | ParseErrList_Value error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Value error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Axis
   | List_Axis elts:ConsList_Axis
   | HoleList_Axis
-  | ParseErrList_Axis error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Axis error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA List_Probability
   | List_Probability elts:ConsList_Probability
   | HoleList_Probability
-  | ParseErrList_Probability error:{(ParseError Document Node ClipDoc UserToken)}
+  | ParseErrList_Probability error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA ConsList_Probtable
   | Cons_Probtable head:Probtable tail:ConsList_Probtable

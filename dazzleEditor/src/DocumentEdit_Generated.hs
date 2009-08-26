@@ -8,7 +8,7 @@ import Evaluation.DocumentEdit
 import Evaluation.DocUtils
 import Presentation.PresTypes hiding (Edge)
 
-instance Editable [Int] Document Node ClipDoc UserToken where
+instance Editable [Int] Document EnrichedDoc Node ClipDoc UserToken where
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
@@ -246,7 +246,7 @@ instance Clip ClipDoc where
 -- Editable instances                                                   --
 --------------------------------------------------------------------------
 
-instance Editable EnrichedDoc Document Node ClipDoc UserToken where
+instance Editable EnrichedDoc Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_EnrichedDoc x
   select (0:p) (RootEnr x0) = select p x0
   select _ _ = Clip_Nothing
@@ -278,7 +278,7 @@ instance Editable EnrichedDoc Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Document Document Node ClipDoc UserToken where
+instance Editable Document Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Document x
   select (0:p) (RootDoc x0) = select p x0
   select _ _ = Clip_Nothing
@@ -310,7 +310,7 @@ instance Editable Document Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Root Document Node ClipDoc UserToken where
+instance Editable Root Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Root x
   select (0:p) (Root x0 x1 x2 x3 x4 x5) = select p x0
   select (1:p) (Root x0 x1 x2 x3 x4 x5) = select p x1
@@ -352,7 +352,7 @@ instance Editable Root Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Section Document Node ClipDoc UserToken where
+instance Editable Section Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Section x
   select (0:p) (Section x0 x1 x2) = select p x0
   select (1:p) (Section x0 x1 x2) = select p x1
@@ -388,7 +388,7 @@ instance Editable Section Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Subsection Document Node ClipDoc UserToken where
+instance Editable Subsection Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Subsection x
   select (0:p) (Subsection x0 x1 x2) = select p x0
   select (1:p) (Subsection x0 x1 x2) = select p x1
@@ -424,7 +424,7 @@ instance Editable Subsection Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Subsubsection Document Node ClipDoc UserToken where
+instance Editable Subsubsection Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Subsubsection x
   select (0:p) (Subsubsection x0 x1) = select p x0
   select (1:p) (Subsubsection x0 x1) = select p x1
@@ -458,7 +458,7 @@ instance Editable Subsubsection Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Paragraph Document Node ClipDoc UserToken where
+instance Editable Paragraph Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Paragraph x
   select (0:p) (Paragraph x0) = select p x0
   select (0:p) (SubgraphPara x0 x1 x2) = select p x0
@@ -502,7 +502,7 @@ instance Editable Paragraph Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Word Document Node ClipDoc UserToken where
+instance Editable Word Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Word x
   select (0:p) (Word _ x0) = select p x0
   select (0:p) (NodeRef x0) = select p x0
@@ -546,7 +546,7 @@ instance Editable Word Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable NodeName Document Node ClipDoc UserToken where
+instance Editable NodeName Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_NodeName x
   select (0:p) (NodeName x0) = select p x0
   select _ _ = Clip_Nothing
@@ -578,7 +578,7 @@ instance Editable NodeName Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Graph Document Node ClipDoc UserToken where
+instance Editable Graph Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Graph x
   select (0:p) (Graph x0 x1 x2) = select p x0
   select (1:p) (Graph x0 x1 x2) = select p x1
@@ -614,7 +614,7 @@ instance Editable Graph Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Vertex Document Node ClipDoc UserToken where
+instance Editable Vertex Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Vertex x
   select (0:p) (Vertex x0 x1 x2 x3 x4) = select p x0
   select (1:p) (Vertex x0 x1 x2 x3 x4) = select p x1
@@ -654,7 +654,7 @@ instance Editable Vertex Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Shape Document Node ClipDoc UserToken where
+instance Editable Shape Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Shape x
   select _ _ = Clip_Nothing
 
@@ -686,7 +686,7 @@ instance Editable Shape Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Edge Document Node ClipDoc UserToken where
+instance Editable Edge Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Edge x
   select (0:p) (Edge x0 x1) = select p x0
   select (1:p) (Edge x0 x1) = select p x1
@@ -720,7 +720,7 @@ instance Editable Edge Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Subgraph Document Node ClipDoc UserToken where
+instance Editable Subgraph Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Subgraph x
   select (0:p) (Subgraph x0 x1 x2) = select p x0
   select (1:p) (Subgraph x0 x1 x2) = select p x1
@@ -756,7 +756,7 @@ instance Editable Subgraph Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Dirty Document Node ClipDoc UserToken where
+instance Editable Dirty Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Dirty x
   select _ _ = Clip_Nothing
 
@@ -788,7 +788,7 @@ instance Editable Dirty Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Probtable Document Node ClipDoc UserToken where
+instance Editable Probtable Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Probtable x
   select (0:p) (Probtable x0 x1 x2) = select p x0
   select (1:p) (Probtable x0 x1 x2) = select p x1
@@ -824,7 +824,7 @@ instance Editable Probtable Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Value Document Node ClipDoc UserToken where
+instance Editable Value Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Value x
   select (0:p) (Value x0) = select p x0
   select _ _ = Clip_Nothing
@@ -856,7 +856,7 @@ instance Editable Value Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Table Document Node ClipDoc UserToken where
+instance Editable Table Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Table x
   select (0:p) (Table x0 x1 x2) = select p x0
   select (1:p) (Table x0 x1 x2) = select p x1
@@ -892,7 +892,7 @@ instance Editable Table Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Axis Document Node ClipDoc UserToken where
+instance Editable Axis Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Axis x
   select (0:p) (Axis x0) = select p x0
   select _ _ = Clip_Nothing
@@ -924,7 +924,7 @@ instance Editable Axis Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Probability Document Node ClipDoc UserToken where
+instance Editable Probability Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Probability x
   select (0:p) (Probability x0) = select p x0
   select _ _ = Clip_Nothing
@@ -956,7 +956,7 @@ instance Editable Probability Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable List_Probtable Document Node ClipDoc UserToken where
+instance Editable List_Probtable Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Probtable x
   select (n:p) (List_Probtable cxs) =
     let xs = fromConsList_Probtable cxs
@@ -1002,7 +1002,7 @@ instance Editable List_Probtable Document Node ClipDoc UserToken where
   removeList n (List_Probtable cxs) = Clip_List_Probtable $ List_Probtable (removeList_Probtable n cxs)
   removeList _ xs = Clip_List_Probtable $ xs
 
-instance Editable List_Section Document Node ClipDoc UserToken where
+instance Editable List_Section Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Section x
   select (n:p) (List_Section cxs) =
     let xs = fromConsList_Section cxs
@@ -1048,7 +1048,7 @@ instance Editable List_Section Document Node ClipDoc UserToken where
   removeList n (List_Section cxs) = Clip_List_Section $ List_Section (removeList_Section n cxs)
   removeList _ xs = Clip_List_Section $ xs
 
-instance Editable List_Paragraph Document Node ClipDoc UserToken where
+instance Editable List_Paragraph Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Paragraph x
   select (n:p) (List_Paragraph cxs) =
     let xs = fromConsList_Paragraph cxs
@@ -1094,7 +1094,7 @@ instance Editable List_Paragraph Document Node ClipDoc UserToken where
   removeList n (List_Paragraph cxs) = Clip_List_Paragraph $ List_Paragraph (removeList_Paragraph n cxs)
   removeList _ xs = Clip_List_Paragraph $ xs
 
-instance Editable List_Subsection Document Node ClipDoc UserToken where
+instance Editable List_Subsection Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Subsection x
   select (n:p) (List_Subsection cxs) =
     let xs = fromConsList_Subsection cxs
@@ -1140,7 +1140,7 @@ instance Editable List_Subsection Document Node ClipDoc UserToken where
   removeList n (List_Subsection cxs) = Clip_List_Subsection $ List_Subsection (removeList_Subsection n cxs)
   removeList _ xs = Clip_List_Subsection $ xs
 
-instance Editable List_Subsubsection Document Node ClipDoc UserToken where
+instance Editable List_Subsubsection Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Subsubsection x
   select (n:p) (List_Subsubsection cxs) =
     let xs = fromConsList_Subsubsection cxs
@@ -1186,7 +1186,7 @@ instance Editable List_Subsubsection Document Node ClipDoc UserToken where
   removeList n (List_Subsubsection cxs) = Clip_List_Subsubsection $ List_Subsubsection (removeList_Subsubsection n cxs)
   removeList _ xs = Clip_List_Subsubsection $ xs
 
-instance Editable List_Word Document Node ClipDoc UserToken where
+instance Editable List_Word Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Word x
   select (n:p) (List_Word cxs) =
     let xs = fromConsList_Word cxs
@@ -1232,7 +1232,7 @@ instance Editable List_Word Document Node ClipDoc UserToken where
   removeList n (List_Word cxs) = Clip_List_Word $ List_Word (removeList_Word n cxs)
   removeList _ xs = Clip_List_Word $ xs
 
-instance Editable List_Vertex Document Node ClipDoc UserToken where
+instance Editable List_Vertex Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Vertex x
   select (n:p) (List_Vertex cxs) =
     let xs = fromConsList_Vertex cxs
@@ -1278,7 +1278,7 @@ instance Editable List_Vertex Document Node ClipDoc UserToken where
   removeList n (List_Vertex cxs) = Clip_List_Vertex $ List_Vertex (removeList_Vertex n cxs)
   removeList _ xs = Clip_List_Vertex $ xs
 
-instance Editable List_Edge Document Node ClipDoc UserToken where
+instance Editable List_Edge Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Edge x
   select (n:p) (List_Edge cxs) =
     let xs = fromConsList_Edge cxs
@@ -1324,7 +1324,7 @@ instance Editable List_Edge Document Node ClipDoc UserToken where
   removeList n (List_Edge cxs) = Clip_List_Edge $ List_Edge (removeList_Edge n cxs)
   removeList _ xs = Clip_List_Edge $ xs
 
-instance Editable List_Value Document Node ClipDoc UserToken where
+instance Editable List_Value Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Value x
   select (n:p) (List_Value cxs) =
     let xs = fromConsList_Value cxs
@@ -1370,7 +1370,7 @@ instance Editable List_Value Document Node ClipDoc UserToken where
   removeList n (List_Value cxs) = Clip_List_Value $ List_Value (removeList_Value n cxs)
   removeList _ xs = Clip_List_Value $ xs
 
-instance Editable List_Axis Document Node ClipDoc UserToken where
+instance Editable List_Axis Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Axis x
   select (n:p) (List_Axis cxs) =
     let xs = fromConsList_Axis cxs
@@ -1416,7 +1416,7 @@ instance Editable List_Axis Document Node ClipDoc UserToken where
   removeList n (List_Axis cxs) = Clip_List_Axis $ List_Axis (removeList_Axis n cxs)
   removeList _ xs = Clip_List_Axis $ xs
 
-instance Editable List_Probability Document Node ClipDoc UserToken where
+instance Editable List_Probability Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_List_Probability x
   select (n:p) (List_Probability cxs) =
     let xs = fromConsList_Probability cxs
@@ -1469,7 +1469,7 @@ instance Editable List_Probability Document Node ClipDoc UserToken where
 -- Editable instances for Document, EnrichedDoc and primitive types     --
 --------------------------------------------------------------------------
 
-instance Editable Int Document Node ClipDoc UserToken where
+instance Editable Int Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Int x
   select _  _ = Clip_Nothing
   paste [] (Clip_Int c) x = c
@@ -1495,7 +1495,7 @@ instance Editable Int Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Float Document Node ClipDoc UserToken where
+instance Editable Float Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Float x
   select _  _ = Clip_Nothing
   paste [] (Clip_Float c) x = c
@@ -1521,7 +1521,7 @@ instance Editable Float Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable Bool Document Node ClipDoc UserToken where
+instance Editable Bool Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Bool x                            
   select _  _ = Clip_Nothing                           
   paste [] (Clip_Bool c) x = c                         
@@ -1547,7 +1547,7 @@ instance Editable Bool Document Node ClipDoc UserToken where
   insertList _ _ _ = Clip_Nothing
   removeList _ _ = Clip_Nothing
 
-instance Editable String Document Node ClipDoc UserToken where
+instance Editable String Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_String x
   select _  _ = Clip_Nothing
   paste [] (Clip_String c) x = c

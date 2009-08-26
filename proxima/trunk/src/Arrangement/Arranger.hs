@@ -21,7 +21,7 @@ import Data.Map (Map)
 
 arrangePresentation :: (Show node, Show token) => Settings ->
                        LocalStateArr -> FontMetricsRef -> FocusPres -> Arrangement node ->
-                       DiffTree -> Layout doc node clip token -> IO (Arrangement node, LocalStateArr)
+                       DiffTree -> Layout doc enr node clip token -> IO (Arrangement node, LocalStateArr)
 arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
 
  do { viewedArea <- readIORef $ getViewedAreaRef state
@@ -54,9 +54,9 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
     ; return (attrTree, state'')
     }
 
-fixed :: (Show node, Show token) => Settings -> FontMetricsRef -> Int -> FocusPres -> Layout doc node clip token -> Layout doc node clip token -> Rectangle -> Rectangle -> 
+fixed :: (Show node, Show token) => Settings -> FontMetricsRef -> Int -> FocusPres -> Layout doc enr node clip token -> Layout doc enr node clip token -> Rectangle -> Rectangle -> 
          Arrangement node -> IO (Arrangement node, Int, Int)
-fixed settings fontMetricsRef idACounter focus (pres :: Layout doc node clip token) (unprunedPres :: Layout doc node clip token) viewedArea oldViewedArea oldArrangement = 
+fixed settings fontMetricsRef idACounter focus (pres :: Layout doc enr node clip token) (unprunedPres :: Layout doc enr node clip token) viewedArea oldViewedArea oldArrangement = 
  mdo { (fontMetrics,arrangement, idACounter', maxFDepth) <- f (fontMetrics,arrangement, idACounter, maxFDepth)
     ; return (arrangement, idACounter', maxFDepth)
     }

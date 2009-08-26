@@ -10,13 +10,13 @@ import Common.CommonUtils
 import Layout.LayUtils
 
 
-castLayToPres :: Layout doc node clip token -> Presentation doc node clip token
+castLayToPres :: Layout doc enr node clip token -> Presentation doc enr node clip token
 castLayToPres = cast
 
-castPresToLay :: Presentation doc node clip token -> Layout doc node clip token
+castPresToLay :: Presentation doc enr node clip token -> Layout doc enr node clip token
 castPresToLay = cast
 
-cast :: PresentationBase doc node clip token level -> PresentationBase doc node clip token level'
+cast :: PresentationBase doc enr node clip token level -> PresentationBase doc enr node clip token level'
 cast (EmptyP id)                = EmptyP id
 cast (StringP id str)           = StringP id str
 cast (ImageP id str st)         = ImageP id str st
@@ -37,7 +37,7 @@ cast (FormatterP id press)      = FormatterP id $ map cast press
 cast (TokenP _ _)               = debug Err "LayLayerUtils.castPresToLay: presentation contains tokens" $ EmptyP NoIDP
 
 
-stringFromScanChars :: [ScanChar doc node clip token] -> String
+stringFromScanChars :: [ScanChar doc enr node clip token] -> String
 stringFromScanChars scs = 
   [ case sc of Char _ _ _ _ c           -> c
                Structural _ _ _ _ _ _ -> '@' -- in the Alex scanner, this is \255, this output is only for show
@@ -49,7 +49,7 @@ stringFromScanChars scs =
 
 -- Retrieve the idp from a list of ScanChars. The returned idp is the idp of the first character that
 -- has an idp, or NoIDP if no character has an idp.
-idPFromScanChars :: [ScanChar doc node clip token] -> IDP
+idPFromScanChars :: [ScanChar doc enr node clip token] -> IDP
 idPFromScanChars [] = NoIDP
 idPFromScanChars (Char (IDP idp) _ _ _ _ : scs) = IDP idp
 idPFromScanChars (Char NoIDP     _ _ _ _ : scs) = idPFromScanChars scs
@@ -60,7 +60,7 @@ idPFromScanChars (Style _ : scs)                = debug Err "LayLayerUtils.idPFr
 
 -- Retrieve the first locator node from a list of scanChars. The returned locator is the locator of the first
 -- character that has one, or Nothing if no character has a locator.
-locFromScanChars :: [ScanChar doc node clip token] -> Maybe node
+locFromScanChars :: [ScanChar doc enr node clip token] -> Maybe node
 locFromScanChars [] = Nothing
 locFromScanChars (Char _ _ _ (Just loc) _ : scs) = Just loc
 locFromScanChars (Char _ _ _ Nothing    _ : scs) = locFromScanChars scs
@@ -85,7 +85,7 @@ hasFocusEndMark scanChar = endFocusMark scanChar == FocusMark
 
 getFocusStartEnd scs = updateFocusStartEnd 0 (Nothing, Nothing) scs
 
-updateFocusStartEnd :: Int -> FocusStartEnd -> [ScanChar doc node clip userToken] -> FocusStartEnd
+updateFocusStartEnd :: Int -> FocusStartEnd -> [ScanChar doc enr node clip userToken] -> FocusStartEnd
 updateFocusStartEnd i (oldFocusStart, oldFocusEnd) cs =
   (getFocusStart i oldFocusStart cs, getFocusEnd i oldFocusEnd cs) 
   

@@ -16,7 +16,7 @@ import DocUtils_Generated
 -- ProxParser type synonym                                              --
 --------------------------------------------------------------------------
 
-type ProxParser a = ListParser Document Node ClipDoc UserToken a
+type ProxParser a = ListParser Document EnrichedDoc Node ClipDoc UserToken a
 
 
 
@@ -24,7 +24,7 @@ type ProxParser a = ListParser Document Node ClipDoc UserToken a
 -- Construct instance                                                   --
 --------------------------------------------------------------------------
 
-instance Construct Document Node ClipDoc UserToken where
+instance Construct Document EnrichedDoc Node ClipDoc UserToken where
   construct NoNode = error $ "ProxParser_Generated.construct not defined on NoNode"
   construct (Node_RootEnr _ _) = construct_RootEnr
   construct (Node_HoleEnrichedDoc _ _) = construct_HoleEnrichedDoc
@@ -233,229 +233,229 @@ construct_ParseErrList_Probability (StructuralTk _ _ pres _ _) ~[] = Clip_List_P
 -- reuse functions                                                      --
 --------------------------------------------------------------------------
 
-reuseRootEnr :: [Token doc Node clip token] -> Maybe Root -> EnrichedDoc
+reuseRootEnr :: [Token doc enr Node clip token] -> Maybe Root -> EnrichedDoc
 reuseRootEnr nodes ma0
   = case extractFromTokens extractRootEnr defaultRootEnr nodes of
            (RootEnr a0) -> genericReuse1 RootEnr a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseRootEnr"
 
-reuseRootDoc :: [Token doc Node clip token] -> Maybe Root -> Document
+reuseRootDoc :: [Token doc enr Node clip token] -> Maybe Root -> Document
 reuseRootDoc nodes ma0
   = case extractFromTokens extractRootDoc defaultRootDoc nodes of
            (RootDoc a0) -> genericReuse1 RootDoc a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseRootDoc"
 
-reuseRoot :: [Token doc Node clip token] -> Maybe Graph -> Maybe String -> Maybe String -> Maybe List_Probtable -> Maybe String -> Maybe List_Section -> Root
+reuseRoot :: [Token doc enr Node clip token] -> Maybe Graph -> Maybe String -> Maybe String -> Maybe List_Probtable -> Maybe String -> Maybe List_Section -> Root
 reuseRoot nodes ma0 ma1 ma2 ma3 ma4 ma5
   = case extractFromTokens extractRoot defaultRoot nodes of
            (Root a0 a1 a2 a3 a4 a5) -> genericReuse6 Root a0 a1 a2 a3 a4 a5 ma0 ma1 ma2 ma3 ma4 ma5
            _ -> error "Internal error:ProxParser_Generated.reuseRoot"
 
-reuseSection :: [Token doc Node clip token] -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
+reuseSection :: [Token doc enr Node clip token] -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsection -> Section
 reuseSection nodes ma0 ma1 ma2
   = case extractFromTokens extractSection defaultSection nodes of
            (Section a0 a1 a2) -> genericReuse3 Section a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseSection"
 
-reuseSubsection :: [Token doc Node clip token] -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsubsection -> Subsection
+reuseSubsection :: [Token doc enr Node clip token] -> Maybe String -> Maybe List_Paragraph -> Maybe List_Subsubsection -> Subsection
 reuseSubsection nodes ma0 ma1 ma2
   = case extractFromTokens extractSubsection defaultSubsection nodes of
            (Subsection a0 a1 a2) -> genericReuse3 Subsection a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseSubsection"
 
-reuseSubsubsection :: [Token doc Node clip token] -> Maybe String -> Maybe List_Paragraph -> Subsubsection
+reuseSubsubsection :: [Token doc enr Node clip token] -> Maybe String -> Maybe List_Paragraph -> Subsubsection
 reuseSubsubsection nodes ma0 ma1
   = case extractFromTokens extractSubsubsection defaultSubsubsection nodes of
            (Subsubsection a0 a1) -> genericReuse2 Subsubsection a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseSubsubsection"
 
-reuseParagraph :: [Token doc Node clip token] -> Maybe List_Word -> Paragraph
+reuseParagraph :: [Token doc enr Node clip token] -> Maybe List_Word -> Paragraph
 reuseParagraph nodes ma0
   = case extractFromTokens extractParagraph defaultParagraph nodes of
            (Paragraph a0) -> genericReuse1 Paragraph a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseParagraph"
 
-reuseSubgraphPara :: [Token doc Node clip token] -> Maybe Subgraph -> Maybe String -> Maybe String -> Paragraph
+reuseSubgraphPara :: [Token doc enr Node clip token] -> Maybe Subgraph -> Maybe String -> Maybe String -> Paragraph
 reuseSubgraphPara nodes ma0 ma1 ma2
   = case extractFromTokens extractSubgraphPara defaultSubgraphPara nodes of
            (SubgraphPara a0 a1 a2) -> genericReuse3 SubgraphPara a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseSubgraphPara"
 
-reuseProbtablePara :: [Token doc Node clip token] -> Maybe Probtable -> Paragraph
+reuseProbtablePara :: [Token doc enr Node clip token] -> Maybe Probtable -> Paragraph
 reuseProbtablePara nodes ma0
   = case extractFromTokens extractProbtablePara defaultProbtablePara nodes of
            (ProbtablePara a0) -> genericReuse1 ProbtablePara a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseProbtablePara"
 
-reuseWord :: [Token doc Node clip token] -> Maybe IDP -> Maybe String -> Word
+reuseWord :: [Token doc enr Node clip token] -> Maybe IDP -> Maybe String -> Word
 reuseWord nodes ma0 ma1
   = case extractFromTokens extractWord defaultWord nodes of
            (Word a0 a1) -> genericReuse2 Word a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseWord"
 
-reuseNodeRef :: [Token doc Node clip token] -> Maybe NodeName -> Word
+reuseNodeRef :: [Token doc enr Node clip token] -> Maybe NodeName -> Word
 reuseNodeRef nodes ma0
   = case extractFromTokens extractNodeRef defaultNodeRef nodes of
            (NodeRef a0) -> genericReuse1 NodeRef a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseNodeRef"
 
-reuseLabel :: [Token doc Node clip token] -> Maybe String -> Word
+reuseLabel :: [Token doc enr Node clip token] -> Maybe String -> Word
 reuseLabel nodes ma0
   = case extractFromTokens extractLabel defaultLabel nodes of
            (Label a0) -> genericReuse1 Label a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseLabel"
 
-reuseLabelRef :: [Token doc Node clip token] -> Maybe String -> Word
+reuseLabelRef :: [Token doc enr Node clip token] -> Maybe String -> Word
 reuseLabelRef nodes ma0
   = case extractFromTokens extractLabelRef defaultLabelRef nodes of
            (LabelRef a0) -> genericReuse1 LabelRef a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseLabelRef"
 
-reuseNodeName :: [Token doc Node clip token] -> Maybe String -> NodeName
+reuseNodeName :: [Token doc enr Node clip token] -> Maybe String -> NodeName
 reuseNodeName nodes ma0
   = case extractFromTokens extractNodeName defaultNodeName nodes of
            (NodeName a0) -> genericReuse1 NodeName a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseNodeName"
 
-reuseGraph :: [Token doc Node clip token] -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Graph
+reuseGraph :: [Token doc enr Node clip token] -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Graph
 reuseGraph nodes ma0 ma1 ma2
   = case extractFromTokens extractGraph defaultGraph nodes of
            (Graph a0 a1 a2) -> genericReuse3 Graph a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseGraph"
 
-reuseVertex :: [Token doc Node clip token] -> Maybe String -> Maybe Shape -> Maybe Int -> Maybe Int -> Maybe Int -> Vertex
+reuseVertex :: [Token doc enr Node clip token] -> Maybe String -> Maybe Shape -> Maybe Int -> Maybe Int -> Maybe Int -> Vertex
 reuseVertex nodes ma0 ma1 ma2 ma3 ma4
   = case extractFromTokens extractVertex defaultVertex nodes of
            (Vertex a0 a1 a2 a3 a4) -> genericReuse5 Vertex a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "Internal error:ProxParser_Generated.reuseVertex"
 
-reuseCircle :: [Token doc Node clip token] -> Shape
+reuseCircle :: [Token doc enr Node clip token] -> Shape
 reuseCircle nodes
   = case extractFromTokens extractCircle defaultCircle nodes of
            (Circle) -> genericReuse0 Circle
            _ -> error "Internal error:ProxParser_Generated.reuseCircle"
 
-reuseSquare :: [Token doc Node clip token] -> Shape
+reuseSquare :: [Token doc enr Node clip token] -> Shape
 reuseSquare nodes
   = case extractFromTokens extractSquare defaultSquare nodes of
            (Square) -> genericReuse0 Square
            _ -> error "Internal error:ProxParser_Generated.reuseSquare"
 
-reuseEdge :: [Token doc Node clip token] -> Maybe Int -> Maybe Int -> Edge
+reuseEdge :: [Token doc enr Node clip token] -> Maybe Int -> Maybe Int -> Edge
 reuseEdge nodes ma0 ma1
   = case extractFromTokens extractEdge defaultEdge nodes of
            (Edge a0 a1) -> genericReuse2 Edge a0 a1 ma0 ma1
            _ -> error "Internal error:ProxParser_Generated.reuseEdge"
 
-reuseSubgraph :: [Token doc Node clip token] -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Subgraph
+reuseSubgraph :: [Token doc enr Node clip token] -> Maybe Dirty -> Maybe List_Vertex -> Maybe List_Edge -> Subgraph
 reuseSubgraph nodes ma0 ma1 ma2
   = case extractFromTokens extractSubgraph defaultSubgraph nodes of
            (Subgraph a0 a1 a2) -> genericReuse3 Subgraph a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseSubgraph"
 
-reuseDirty :: [Token doc Node clip token] -> Dirty
+reuseDirty :: [Token doc enr Node clip token] -> Dirty
 reuseDirty nodes
   = case extractFromTokens extractDirty defaultDirty nodes of
            (Dirty) -> genericReuse0 Dirty
            _ -> error "Internal error:ProxParser_Generated.reuseDirty"
 
-reuseClean :: [Token doc Node clip token] -> Dirty
+reuseClean :: [Token doc enr Node clip token] -> Dirty
 reuseClean nodes
   = case extractFromTokens extractClean defaultClean nodes of
            (Clean) -> genericReuse0 Clean
            _ -> error "Internal error:ProxParser_Generated.reuseClean"
 
-reuseProbtable :: [Token doc Node clip token] -> Maybe Int -> Maybe List_Value -> Maybe Table -> Probtable
+reuseProbtable :: [Token doc enr Node clip token] -> Maybe Int -> Maybe List_Value -> Maybe Table -> Probtable
 reuseProbtable nodes ma0 ma1 ma2
   = case extractFromTokens extractProbtable defaultProbtable nodes of
            (Probtable a0 a1 a2) -> genericReuse3 Probtable a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseProbtable"
 
-reuseValue :: [Token doc Node clip token] -> Maybe String -> Value
+reuseValue :: [Token doc enr Node clip token] -> Maybe String -> Value
 reuseValue nodes ma0
   = case extractFromTokens extractValue defaultValue nodes of
            (Value a0) -> genericReuse1 Value a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseValue"
 
-reuseTable :: [Token doc Node clip token] -> Maybe List_Int -> Maybe List_Axis -> Maybe List_Probability -> Table
+reuseTable :: [Token doc enr Node clip token] -> Maybe List_Int -> Maybe List_Axis -> Maybe List_Probability -> Table
 reuseTable nodes ma0 ma1 ma2
   = case extractFromTokens extractTable defaultTable nodes of
            (Table a0 a1 a2) -> genericReuse3 Table a0 a1 a2 ma0 ma1 ma2
            _ -> error "Internal error:ProxParser_Generated.reuseTable"
 
-reuseAxis :: [Token doc Node clip token] -> Maybe List_Value -> Axis
+reuseAxis :: [Token doc enr Node clip token] -> Maybe List_Value -> Axis
 reuseAxis nodes ma0
   = case extractFromTokens extractAxis defaultAxis nodes of
            (Axis a0) -> genericReuse1 Axis a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseAxis"
 
-reuseProbability :: [Token doc Node clip token] -> Maybe String -> Probability
+reuseProbability :: [Token doc enr Node clip token] -> Maybe String -> Probability
 reuseProbability nodes ma0
   = case extractFromTokens extractProbability defaultProbability nodes of
            (Probability a0) -> genericReuse1 Probability a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseProbability"
 
-reuseList_Probtable :: [Token doc Node clip token] -> Maybe ConsList_Probtable -> List_Probtable
+reuseList_Probtable :: [Token doc enr Node clip token] -> Maybe ConsList_Probtable -> List_Probtable
 reuseList_Probtable nodes ma0
   = case extractFromTokens extractList_Probtable defaultList_Probtable nodes of
            (List_Probtable a0) -> genericReuse1 List_Probtable a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Probtable"
 
-reuseList_Section :: [Token doc Node clip token] -> Maybe ConsList_Section -> List_Section
+reuseList_Section :: [Token doc enr Node clip token] -> Maybe ConsList_Section -> List_Section
 reuseList_Section nodes ma0
   = case extractFromTokens extractList_Section defaultList_Section nodes of
            (List_Section a0) -> genericReuse1 List_Section a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Section"
 
-reuseList_Paragraph :: [Token doc Node clip token] -> Maybe ConsList_Paragraph -> List_Paragraph
+reuseList_Paragraph :: [Token doc enr Node clip token] -> Maybe ConsList_Paragraph -> List_Paragraph
 reuseList_Paragraph nodes ma0
   = case extractFromTokens extractList_Paragraph defaultList_Paragraph nodes of
            (List_Paragraph a0) -> genericReuse1 List_Paragraph a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Paragraph"
 
-reuseList_Subsection :: [Token doc Node clip token] -> Maybe ConsList_Subsection -> List_Subsection
+reuseList_Subsection :: [Token doc enr Node clip token] -> Maybe ConsList_Subsection -> List_Subsection
 reuseList_Subsection nodes ma0
   = case extractFromTokens extractList_Subsection defaultList_Subsection nodes of
            (List_Subsection a0) -> genericReuse1 List_Subsection a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Subsection"
 
-reuseList_Subsubsection :: [Token doc Node clip token] -> Maybe ConsList_Subsubsection -> List_Subsubsection
+reuseList_Subsubsection :: [Token doc enr Node clip token] -> Maybe ConsList_Subsubsection -> List_Subsubsection
 reuseList_Subsubsection nodes ma0
   = case extractFromTokens extractList_Subsubsection defaultList_Subsubsection nodes of
            (List_Subsubsection a0) -> genericReuse1 List_Subsubsection a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Subsubsection"
 
-reuseList_Word :: [Token doc Node clip token] -> Maybe ConsList_Word -> List_Word
+reuseList_Word :: [Token doc enr Node clip token] -> Maybe ConsList_Word -> List_Word
 reuseList_Word nodes ma0
   = case extractFromTokens extractList_Word defaultList_Word nodes of
            (List_Word a0) -> genericReuse1 List_Word a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Word"
 
-reuseList_Vertex :: [Token doc Node clip token] -> Maybe ConsList_Vertex -> List_Vertex
+reuseList_Vertex :: [Token doc enr Node clip token] -> Maybe ConsList_Vertex -> List_Vertex
 reuseList_Vertex nodes ma0
   = case extractFromTokens extractList_Vertex defaultList_Vertex nodes of
            (List_Vertex a0) -> genericReuse1 List_Vertex a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Vertex"
 
-reuseList_Edge :: [Token doc Node clip token] -> Maybe ConsList_Edge -> List_Edge
+reuseList_Edge :: [Token doc enr Node clip token] -> Maybe ConsList_Edge -> List_Edge
 reuseList_Edge nodes ma0
   = case extractFromTokens extractList_Edge defaultList_Edge nodes of
            (List_Edge a0) -> genericReuse1 List_Edge a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Edge"
 
-reuseList_Value :: [Token doc Node clip token] -> Maybe ConsList_Value -> List_Value
+reuseList_Value :: [Token doc enr Node clip token] -> Maybe ConsList_Value -> List_Value
 reuseList_Value nodes ma0
   = case extractFromTokens extractList_Value defaultList_Value nodes of
            (List_Value a0) -> genericReuse1 List_Value a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Value"
 
-reuseList_Axis :: [Token doc Node clip token] -> Maybe ConsList_Axis -> List_Axis
+reuseList_Axis :: [Token doc enr Node clip token] -> Maybe ConsList_Axis -> List_Axis
 reuseList_Axis nodes ma0
   = case extractFromTokens extractList_Axis defaultList_Axis nodes of
            (List_Axis a0) -> genericReuse1 List_Axis a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseList_Axis"
 
-reuseList_Probability :: [Token doc Node clip token] -> Maybe ConsList_Probability -> List_Probability
+reuseList_Probability :: [Token doc enr Node clip token] -> Maybe ConsList_Probability -> List_Probability
 reuseList_Probability nodes ma0
   = case extractFromTokens extractList_Probability defaultList_Probability nodes of
            (List_Probability a0) -> genericReuse1 List_Probability a0 ma0
@@ -749,7 +749,7 @@ defaultList_Probability = List_Probability Nil_Probability
 --------------------------------------------------------------------------
 
 -- return result of the first extraction application in the list that is not Nothing
-extractFromTokens :: (Maybe Node -> Maybe a) -> a -> [Token doc Node clip token] -> a
+extractFromTokens :: (Maybe Node -> Maybe a) -> a -> [Token doc enr Node clip token] -> a
 extractFromTokens extr def []     = def
 extractFromTokens extr def (t:ts) = maybe (extractFromTokens extr def ts) id (extr (tokenNode t))
 

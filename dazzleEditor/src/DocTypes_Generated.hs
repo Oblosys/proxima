@@ -25,39 +25,39 @@ type List_Int = [Int]
 
 data EnrichedDoc = RootEnr Root
                  | HoleEnrichedDoc
-                 | ParseErrEnrichedDoc (ParseError Document Node ClipDoc UserToken)
+                 | ParseErrEnrichedDoc (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                      deriving (Show, Data, Typeable)
 
 data Document = RootDoc Root
               | HoleDocument
-              | ParseErrDocument (ParseError Document Node ClipDoc UserToken)
+              | ParseErrDocument (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data Root = Root Graph String String List_Probtable String List_Section
           | HoleRoot
-          | ParseErrRoot (ParseError Document Node ClipDoc UserToken)
+          | ParseErrRoot (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data Section = Section String List_Paragraph List_Subsection
              | HoleSection
-             | ParseErrSection (ParseError Document Node ClipDoc UserToken)
+             | ParseErrSection (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                  deriving (Show, Data, Typeable)
 
 data Subsection = Subsection String List_Paragraph List_Subsubsection
                 | HoleSubsection
-                | ParseErrSubsection (ParseError Document Node ClipDoc UserToken)
+                | ParseErrSubsection (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                     deriving (Show, Data, Typeable)
 
 data Subsubsection = Subsubsection String List_Paragraph
                    | HoleSubsubsection
-                   | ParseErrSubsubsection (ParseError Document Node ClipDoc UserToken)
+                   | ParseErrSubsubsection (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                        deriving (Show, Data, Typeable)
 
 data Paragraph = Paragraph List_Word
                | SubgraphPara Subgraph String String
                | ProbtablePara Probtable
                | HoleParagraph
-               | ParseErrParagraph (ParseError Document Node ClipDoc UserToken)
+               | ParseErrParagraph (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data Word = Word IDP String
@@ -65,124 +65,124 @@ data Word = Word IDP String
           | Label String
           | LabelRef String
           | HoleWord
-          | ParseErrWord (ParseError Document Node ClipDoc UserToken)
+          | ParseErrWord (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data NodeName = NodeName String
               | HoleNodeName
-              | ParseErrNodeName (ParseError Document Node ClipDoc UserToken)
+              | ParseErrNodeName (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data Graph = Graph Dirty List_Vertex List_Edge
            | HoleGraph
-           | ParseErrGraph (ParseError Document Node ClipDoc UserToken)
+           | ParseErrGraph (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Vertex = Vertex String Shape Int Int Int
             | HoleVertex
-            | ParseErrVertex (ParseError Document Node ClipDoc UserToken)
+            | ParseErrVertex (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                 deriving (Show, Data, Typeable)
 
 data Shape = Circle
            | Square
            | HoleShape
-           | ParseErrShape (ParseError Document Node ClipDoc UserToken)
+           | ParseErrShape (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Edge = Edge Int Int
           | HoleEdge
-          | ParseErrEdge (ParseError Document Node ClipDoc UserToken)
+          | ParseErrEdge (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data Subgraph = Subgraph Dirty List_Vertex List_Edge
               | HoleSubgraph
-              | ParseErrSubgraph (ParseError Document Node ClipDoc UserToken)
+              | ParseErrSubgraph (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
 data Dirty = Dirty
            | Clean
            | HoleDirty
-           | ParseErrDirty (ParseError Document Node ClipDoc UserToken)
+           | ParseErrDirty (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Probtable = Probtable Int List_Value Table
                | HoleProbtable
-               | ParseErrProbtable (ParseError Document Node ClipDoc UserToken)
+               | ParseErrProbtable (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data Value = Value String
            | HoleValue
-           | ParseErrValue (ParseError Document Node ClipDoc UserToken)
+           | ParseErrValue (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Table = Table List_Int List_Axis List_Probability
            | HoleTable
-           | ParseErrTable (ParseError Document Node ClipDoc UserToken)
+           | ParseErrTable (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Axis = Axis List_Value
           | HoleAxis
-          | ParseErrAxis (ParseError Document Node ClipDoc UserToken)
+          | ParseErrAxis (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)
 
 data Probability = Probability String
                  | HoleProbability
-                 | ParseErrProbability (ParseError Document Node ClipDoc UserToken)
+                 | ParseErrProbability (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                      deriving (Show, Data, Typeable)
 
 data List_Probtable = List_Probtable ConsList_Probtable
                     | HoleList_Probtable
-                    | ParseErrList_Probtable (ParseError Document Node ClipDoc UserToken)
+                    | ParseErrList_Probtable (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                         deriving (Show, Data, Typeable)
 
 data List_Section = List_Section ConsList_Section
                   | HoleList_Section
-                  | ParseErrList_Section (ParseError Document Node ClipDoc UserToken)
+                  | ParseErrList_Section (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                       deriving (Show, Data, Typeable)
 
 data List_Paragraph = List_Paragraph ConsList_Paragraph
                     | HoleList_Paragraph
-                    | ParseErrList_Paragraph (ParseError Document Node ClipDoc UserToken)
+                    | ParseErrList_Paragraph (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                         deriving (Show, Data, Typeable)
 
 data List_Subsection = List_Subsection ConsList_Subsection
                      | HoleList_Subsection
-                     | ParseErrList_Subsection (ParseError Document Node ClipDoc UserToken)
+                     | ParseErrList_Subsection (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                          deriving (Show, Data, Typeable)
 
 data List_Subsubsection = List_Subsubsection ConsList_Subsubsection
                         | HoleList_Subsubsection
-                        | ParseErrList_Subsubsection (ParseError Document Node ClipDoc UserToken)
+                        | ParseErrList_Subsubsection (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                             deriving (Show, Data, Typeable)
 
 data List_Word = List_Word ConsList_Word
                | HoleList_Word
-               | ParseErrList_Word (ParseError Document Node ClipDoc UserToken)
+               | ParseErrList_Word (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data List_Vertex = List_Vertex ConsList_Vertex
                  | HoleList_Vertex
-                 | ParseErrList_Vertex (ParseError Document Node ClipDoc UserToken)
+                 | ParseErrList_Vertex (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                      deriving (Show, Data, Typeable)
 
 data List_Edge = List_Edge ConsList_Edge
                | HoleList_Edge
-               | ParseErrList_Edge (ParseError Document Node ClipDoc UserToken)
+               | ParseErrList_Edge (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data List_Value = List_Value ConsList_Value
                 | HoleList_Value
-                | ParseErrList_Value (ParseError Document Node ClipDoc UserToken)
+                | ParseErrList_Value (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                     deriving (Show, Data, Typeable)
 
 data List_Axis = List_Axis ConsList_Axis
                | HoleList_Axis
-               | ParseErrList_Axis (ParseError Document Node ClipDoc UserToken)
+               | ParseErrList_Axis (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
 data List_Probability = List_Probability ConsList_Probability
                       | HoleList_Probability
-                      | ParseErrList_Probability (ParseError Document Node ClipDoc UserToken)
+                      | ParseErrList_Probability (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                           deriving (Show, Data, Typeable)
 
 data ConsList_Probtable = Cons_Probtable Probtable ConsList_Probtable

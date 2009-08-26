@@ -21,32 +21,32 @@ import qualified Data.Map as Map
 
 WRAPPER Layout
 
-DATA Layout doc node clip token
+DATA Layout doc enr node clip token
   | EmptyP      id : IDP
   | StringP     id : IDP text : String
   | ImageP      id : IDP src : String style : ImgStyle
   | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int style : FillStyle
   | RectangleP  id : IDP w, h : Int lineWidth : Int style : FillStyle
   | EllipseP	id : IDP w, h : Int lineWidth : Int style : FillStyle
-  | RowP        id : IDP hRefNr : Int                       presentationList : (LayoutList {doc} {node} {clip} {token})
-  | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : (LayoutList {doc} {node} {clip} {token})
-  | OverlayP    id : IDP direction : Order              presentationList : (LayoutList {doc} {node} {clip} {token})
-  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : (LayoutList {doc} {node} {clip} {token}) 
-  | VertexP     id : IDP i,x,y: Int outline : Outline child : (Layout {doc} {node} {clip} {token})
-  | FormatterP  id : IDP presentationList : (LayoutList {doc} {node} {clip} {token})
-  | WithP       attrRule : (AttrRule {doc} {clip})  child : (Layout {doc} {node} {clip} {token})
-  | StructuralP id : IDP child : (Layout {doc} {node} {clip} {token})
-  | ParsingP    id : IDP parser : {Maybe (ClipParser doc node clip token)} lexer : Lexer child : (Layout {doc} {node} {clip} {token})
-  | LocatorP location : {node} child : (Layout {doc} {node} {clip} {token})
-  | TagP tags : {Tags} child : (Layout {doc} {node} {clip} {token})
+  | RowP        id : IDP hRefNr : Int                       presentationList : (LayoutList {doc} {enr} {node} {clip} {token})
+  | ColP        id : IDP vRefNr : Int formatted : Formatted presentationList : (LayoutList {doc} {enr} {node} {clip} {token})
+  | OverlayP    id : IDP direction : Order              presentationList : (LayoutList {doc} {enr} {node} {clip} {token})
+  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} presentationList : (LayoutList {doc} {enr} {node} {clip} {token}) 
+  | VertexP     id : IDP i,x,y: Int outline : Outline child : (Layout {doc} {enr} {node} {clip} {token})
+  | FormatterP  id : IDP presentationList : (LayoutList {doc} {enr} {node} {clip} {token})
+  | WithP       attrRule : (AttrRule {doc} {enr} {node} {clip} {token})  child : (Layout {doc} {enr} {node} {clip} {token})
+  | StructuralP id : IDP child : (Layout {doc} {enr} {node} {clip} {token})
+  | ParsingP    id : IDP parser : {Maybe (ClipParser doc enr node clip token)} lexer : Lexer child : (Layout {doc} {enr} {node} {clip} {token})
+  | LocatorP location : {node} child : (Layout {doc} {enr} {node} {clip} {token})
+  | TagP tags : {Tags} child : (Layout {doc} {enr} {node} {clip} {token})
   | ArrangedP
 
-TYPE LayoutList doc node clip token = [(Layout {doc} {node} {clip} {token})]
+TYPE LayoutList doc enr node clip token = [(Layout {doc} {enr} {node} {clip} {token})]
 
 ATTR DocNode {node}, Show {token} => Layout LayoutList 
   [ scanStructural : { ((Path,Int),(Path,Int)) ->
-                       Lexer -> Maybe @node -> Path -> IDPCounter -> WhitespaceMap -> Layout @doc @node @clip @token ->
-                       ([Token @doc @node @clip @token], IDPCounter, WhitespaceMap, Presentation @doc @node @clip @token)
+                       Lexer -> Maybe @node -> Path -> IDPCounter -> WhitespaceMap -> Layout @doc @enr @node @clip @token ->
+                       ([Token @doc @enr @node @clip @token], IDPCounter, WhitespaceMap, Presentation @doc @enr @node @clip @token)
                      }
   | | ]
 -- the we pass this function as an argument, since either it has to be defined in this module, which
@@ -136,7 +136,7 @@ SEM Layout
                           
 ATTR Layout LayoutList [ | idPCounter : IDPCounter whitespaceMap : WhitespaceMap | ]
 
-ATTR Layout [ | | scanChars : {[ScanChar @doc @node @clip @token]} ]
+ATTR Layout [ | | scanChars : {[ScanChar @doc @enr @node @clip @token]} ]
 
 SEM Layout
   | StringP
@@ -174,7 +174,7 @@ SEM Layout
   | ArrangedP 
       lhs.scanChars = [] -- will not occur
       
-ATTR LayoutList [ | | scanCharss : {[[ScanChar @doc @node @clip @token]]} ]
+ATTR LayoutList [ | | scanCharss : {[[ScanChar @doc @enr @node @clip @token]]} ]
 
 SEM LayoutList
   | Nil
@@ -186,7 +186,7 @@ SEM LayoutList
 
 -- Attribute scanning
 
-ATTR Layout LayoutList [ styleAttrs : {Inherited @doc @clip} currentStyles : {[Style]} | previousCharStyles : {[Style]} | ]
+ATTR Layout LayoutList [ styleAttrs : {Inherited @doc @enr @node @clip @token} currentStyles : {[Style]} | previousCharStyles : {[Style]} | ]
 
 SEM Layout
   | WithP

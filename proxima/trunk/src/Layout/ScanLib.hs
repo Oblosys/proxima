@@ -40,8 +40,8 @@ type ScannerState = Position
 mkToken = mkTokenEx id
 
 -- the first strf is for manipulating the string that is stored in the token
-mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanChar doc node clip userToken] -> 
-           (ScannedToken doc node clip userToken, ScannerState)
+mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanChar doc enr node clip userToken] -> 
+           (ScannedToken doc enr node clip userToken, ScannerState)
 mkTokenEx strf tokf tokenPos scs = 
   let str = strf $ stringFromScanChars scs
       idp = idPFromScanChars scs
@@ -52,8 +52,8 @@ mkTokenEx strf tokf tokenPos scs =
       , tokenPos + 1
       )
 
-collectWhitespace :: ScannerState -> [ScanChar doc node clip userToken] -> 
-                     (ScannedToken doc node clip userToken, ScannerState)
+collectWhitespace :: ScannerState -> [ScanChar doc enr node clip userToken] -> 
+                     (ScannedToken doc enr node clip userToken, ScannerState)
 collectWhitespace tokenPos scs =
   let whitespaceChars = stringFromScanChars scs
       scannedWhitespace = ( length (filter (=='\n') whitespaceChars)

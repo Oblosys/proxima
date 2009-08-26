@@ -26,8 +26,8 @@ detokenizer wm pres = {- let (l',focusp) = detokenize testWM testPres
                                                                                           ) $
                       -} detokenize wm pres
 
-detokenize :: (DocNode node, Show token) => WhitespaceMap -> Presentation doc node clip token ->
-              (Layout doc node clip token, FocusPres)
+detokenize :: (DocNode node, Show token) => WhitespaceMap -> Presentation doc enr node clip token ->
+              (Layout doc enr node clip token, FocusPres)
 detokenize wm pres@(ParsingP idp pr l _)  = detokenizeParsing wm pres
                                                   
 detokenize wm (EmptyP idp)                = (EmptyP idp, noFocus) 
@@ -89,8 +89,8 @@ detokenizeParsing wm (ParsingP idp pr l pres) =
 -- for col, we do the same as for row. This is because a col may be present in a structuralTk coming
 -- from a presented parse error
 -- TODO: is this ok?
-detokenize' :: (DocNode node, Show token) => WhitespaceMap -> Presentation doc node clip token -> 
-               [[(Layout doc node clip token, FocusPres)]]
+detokenize' :: (DocNode node, Show token) => WhitespaceMap -> Presentation doc enr node clip token -> 
+               [[(Layout doc enr node clip token, FocusPres)]]
 detokenize' wm (StructuralP idp pres)      = let (pres', f) = detokenize wm pres
                                             in  [[(StructuralP idp pres', prependToFocus 0 f)]]
 detokenize' wm (EmptyP idp)                = [[(EmptyP idp, noFocus)]]
@@ -123,8 +123,8 @@ detokenize' wm (FormatterP idp press)      = case detokenizeList' wm 0 press of
 detokenize' wm pr                         = debug Err ("\n\n\nLayout.detokenize': can't handle "++ shallowShowPres pr) [[(castPresToLay pr, noFocus)]]
 
 
-detokenizeList' :: (DocNode node, Show token) => WhitespaceMap -> Int -> [Presentation doc node clip token] -> 
-                   ([Layout doc node clip token], FocusPres)
+detokenizeList' :: (DocNode node, Show token) => WhitespaceMap -> Int -> [Presentation doc enr node clip token] -> 
+                   ([Layout doc enr node clip token], FocusPres)
 detokenizeList' wm i []           = ([], noFocus)
 detokenizeList' wm i (pres:press) = let [laysFs] = case detokenize' wm pres of
                                                              [press] -> [press]
@@ -139,16 +139,16 @@ detokenizeList' wm i (pres:press) = let [laysFs] = case detokenize' wm pres of
                                         (lays ++ lays', combineFocus f1 f2)
 
 
-detokenizeRow' :: (DocNode node, Show token) => WhitespaceMap -> [Presentation doc node clip token] -> 
-                  [[(Layout doc node clip token, FocusPres)]]
+detokenizeRow' :: (DocNode node, Show token) => WhitespaceMap -> [Presentation doc enr node clip token] -> 
+                  [[(Layout doc enr node clip token, FocusPres)]]
 detokenizeRow' wm [] = []
 detokenizeRow' wm (pres:press) =
    combine (detokenize' wm pres) (detokenizeRow' wm press)
   
 
 
-combine :: [[(Layout doc node clip token,FocusPres)]] -> [[(Layout doc node clip token,FocusPres)]] ->
-           [[(Layout doc node clip token, FocusPres)]]
+combine :: [[(Layout doc enr node clip token,FocusPres)]] -> [[(Layout doc enr node clip token,FocusPres)]] ->
+           [[(Layout doc enr node clip token, FocusPres)]]
 combine [] l2 = l2 -- in this case f1 will always be noFocus, so we take f2
 combine l1 [] = l1 -- in this case f2 will always be noFocus, so we take f1
 combine l1 l2 = ( init l1 ++ 
@@ -178,8 +178,8 @@ mapPath f NoPathP = NoPathP
 mapPath f (PathP p i) = PathP (f p) i
 
 
-addWhitespaceToken :: (DocNode node, Show token) => WhitespaceMap -> IDP -> Token doc node clip token -> 
-                      [[(Layout doc node clip token, FocusPres)]]
+addWhitespaceToken :: (DocNode node, Show token) => WhitespaceMap -> IDP -> Token doc enr node clip token -> 
+                      [[(Layout doc enr node clip token, FocusPres)]]
 addWhitespaceToken wm idp (UserTk _ _ str _ _)        = --debug Lay ("Adding whitespace to UserTk "++show idp++":"++show str) $
                                                         addWhitespace False wm Nothing idp (StringP idp str)
 addWhitespaceToken wm idp (StructuralTk _ _ pres _ _) = --debug Lay ("Adding whitespace to StructuralTk "++show idp) $
@@ -191,7 +191,7 @@ addWhitespaceToken wm idp tk@(StyleTk _ _)               = debug Lay "addWhitesp
 
 -- if pres is a structural, we add a "" before and after it, to handle focus. (after is only necessary
 -- if it is the last token and there is no whitespace behind it)                   
-addWhitespace :: Show node => Bool -> WhitespaceMap -> Maybe FocusPres -> IDP -> Layout doc node clip token -> [[(Layout doc node clip token, FocusPres)]]
+addWhitespace :: Show node => Bool -> WhitespaceMap -> Maybe FocusPres -> IDP -> Layout doc enr node clip token -> [[(Layout doc enr node clip token, FocusPres)]]
 addWhitespace isStructural wm mStrFocus NoIDP pres = [surroundWithEmpties isStructural noFocus noFocus $ (pres,noFocus)]
 addWhitespace isStructural wm mStrFocus idp pres = 
   case Map.lookup idp wm  of
@@ -272,7 +272,7 @@ mkStartOrEndFocuss isStructural (breaks, spaces) wFocus tFocus sFocus = -- sFocu
 -- producing whitespace tokens after a lexical error). Hence there will not be any trailing whitespace, but
 -- we do need the whitespacemap for the focus. 
 addWhitespaceErrorToken :: Show node => WhitespaceMap -> IDP -> String ->
-                           [[(Layout doc node clip token, FocusPres)]]
+                           [[(Layout doc enr node clip token, FocusPres)]]
 addWhitespaceErrorToken wm idp str = 
   let lines =  splitAtNewlines str
       focuss = case Map.lookup idp wm  of

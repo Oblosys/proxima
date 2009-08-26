@@ -6,6 +6,7 @@ import Common.CommonUtils
 import Arrangement.ArrLayerTypes
 import Arrangement.ArrLayerUtils
 import Arrangement.FontLib
+import Proxima.Wrap
 import Maybe
 import Debug.Trace
 }
@@ -94,40 +95,40 @@ assign [] _ _ = []
 assign (str:strs) (a:as) (o:os) = (if str then a else o) : assign strs as os
 
 
-data Root doc node clip token = Root (Layout doc node clip token)
+data Root doc enr node clip token = Root (Layout doc enr node clip token)
                       
 -- We don't want AG to generate the Layout data types, so data type generation is turned off.
 -- However, we do need Root
 }
 
-DATA Root doc node clip token
-  | Root layout : (Layout {doc} {node} {clip} {token}) 
+DATA Root doc enr node clip token
+  | Root layout : (Layout {doc} {enr} {node} {clip} {token}) 
 
 
-DATA Layout doc node clip token
+DATA Layout doc enr node clip token
   | EmptyP      id : IDP
   | StringP     id : IDP text : String
   | ImageP      id : IDP src : String style : ImgStyle
   | PolyP       id : IDP pointList : {[ (Float, Float) ]} lineWidth : Int style : FillStyle
   | RectangleP  id : IDP w,h : Int lineWidth : Int style : FillStyle
   | EllipseP	id : IDP w, h : Int lineWidth : Int style : FillStyle
-  | RowP        id : IDP hRefNr : Int layoutList : (LayoutList {doc} {node} {clip} {token})
-  | ColP        id : IDP vRefNr : Int formatted : Formatted layoutList : (LayoutList {doc} {node} {clip} {token})
-  | OverlayP    id : IDP direction : Order layoutList : (LayoutList {doc} {node} {clip} {token})
-  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} layoutList : (LayoutList {doc} {node} {clip} {token}) 
-  | VertexP     id : IDP i,x,y: Int outline : Outline child : (Layout {doc} {node} {clip} {token})
-  | FormatterP  id : IDP layoutList : (LayoutList {doc} {node} {clip} {token})
-  | WithP       attrRule : (AttrRule {doc} {clip})  child : (Layout {doc} {node} {clip} {token})
-  | StructuralP id : IDP child : (Layout {doc} {node} {clip} {token})
-  | ParsingP    id : IDP parser : {Maybe (ClipParser doc node clip token)} lexer : Lexer child : (Layout {doc} {node} {clip} {token})
-  | LocatorP location : {node} child : (Layout {doc} {node} {clip} {token})
-  | TagP tags : {Tags} child : (Layout {doc} {node} {clip} {token})
+  | RowP        id : IDP hRefNr : Int layoutList : (LayoutList {doc} {enr} {node} {clip} {token})
+  | ColP        id : IDP vRefNr : Int formatted : Formatted layoutList : (LayoutList {doc} {enr} {node} {clip} {token})
+  | OverlayP    id : IDP direction : Order layoutList : (LayoutList {doc} {enr} {node} {clip} {token})
+  | GraphP      id : IDP d : Dirty w,h : Int edges : {[(Int,Int)]} layoutList : (LayoutList {doc} {enr} {node} {clip} {token}) 
+  | VertexP     id : IDP i,x,y: Int outline : Outline child : (Layout {doc} {enr} {node} {clip} {token})
+  | FormatterP  id : IDP layoutList : (LayoutList {doc} {enr} {node} {clip} {token})
+  | WithP       attrRule : (AttrRule {doc} {enr} {node} {clip} {token})  child : (Layout {doc} {enr} {node} {clip} {token})
+  | StructuralP id : IDP child : (Layout {doc} {enr} {node} {clip} {token})
+  | ParsingP    id : IDP parser : {Maybe (ClipParser doc enr node clip token)} lexer : Lexer child : (Layout {doc} {enr} {node} {clip} {token})
+  | LocatorP location : {node} child : (Layout {doc} {enr} {node} {clip} {token})
+  | TagP tags : {Tags} child : (Layout {doc} {enr} {node} {clip} {token})
   | ArrangedP
 
 --  | TestPresentation id : IDP  area : Int color : Color
---  | MatrixPresentation id : IDP  m, n : Int layoutList : (LayoutList {doc} {node} {clip} {token})
---  | LayedOutRowP id : IDP  layoutList : (LayoutList {doc} {node} {clip} {token}) w, h : Int offsets :  {[ (Int, Int) ]} -- optimization for laying out text
---  | AlternativePresentation id : IDP  layoutList : (LayoutList {doc} {node} {clip} {token})
+--  | MatrixPresentation id : IDP  m, n : Int layoutList : (LayoutList {doc} {enr} {node} {clip} {token})
+--  | LayedOutRowP id : IDP  layoutList : (LayoutList {doc} {enr} {node} {clip} {token}) w, h : Int offsets :  {[ (Int, Int) ]} -- optimization for laying out text
+--  | AlternativePresentation id : IDP  layoutList : (LayoutList {doc} {enr} {node} {clip} {token})
 
 {-
 structure of layout tree: no children/one child/list of children
@@ -165,7 +166,7 @@ focus
  -- add attributed tree definition
 
 
-TYPE LayoutList doc node clip token = [(Layout {doc} {node} {clip} {token})]
+TYPE LayoutList doc enr node clip token = [(Layout {doc} {enr} {node} {clip} {token})]
 
 SEM LayoutList [ || nrOfChildren : Int ]
   | Nil
@@ -174,7 +175,7 @@ SEM LayoutList [ || nrOfChildren : Int ]
       lhs.nrOfChildren = 1 + @tl.nrOfChildren
 
 ATTR Root [ font : Font textColor : Color lineColor : Color fillColor : Color backgroundColor : Color
-            mouseDown : {Maybe (UpdateDoc doc clip)}
+            mouseDown : {Maybe (Wrapped @doc @enr @node @clip @token)}
 --            inheritablePopupMenuItems : {[ PopupMenuItem @doc @clip ]}
 --            localPopupMenuItems : {[ PopupMenuItem @doc @clip ]}
           || maxFormatterDepth : Int arrangement : {Arrangement @node} ]
@@ -190,7 +191,7 @@ SEM Root
 -- Optimize: maybe we only want to update the attrs that are set by the with rule? Or won't that improve much?
 
 SEM Layout [ font : Font textColor, lineColor, fillColor, backgroundColor : Color
-            mouseDown : {Maybe (UpdateDoc @doc @clip)}
+            mouseDown : {Maybe (Wrapped @doc @enr @node @clip @token)}
 --            popupMenuItems : {[ PopupMenuItem @doc @clip ]}
             | | ]
   | WithP -- note popupItems are not propagated in the AG
@@ -230,7 +231,7 @@ SEM Layout [ font : Font textColor, lineColor, fillColor, backgroundColor : Colo
 -- rest is taken care of by copy rule
 
 ATTR LayoutList [  font : Font textColor, lineColor, fillColor, backgroundColor : Color 
-                 mouseDown : {Maybe (UpdateDoc doc clip)}
+                 mouseDown : {Maybe (Wrapped @doc @enr @node @clip @token)}
 --                 popupMenuItems : {[ PopupMenuItem @doc @clip ]} 
                 | | ]
 
@@ -327,7 +328,7 @@ SEM LayoutList
 -- Unfolding formatters
 SEM Layout
   | FormatterP
-      inst.unfoldedFormatter : (Layout {doc} {node} {clip} {token})
+      inst.unfoldedFormatter : (Layout {doc} {enr} {node} {clip} {token})
       inst.unfoldedFormatter = unfoldFormatter @lhs.assignedWidth @layoutList.minWidthList @layoutList.self
 
 -- char width not ok for more complicated (overlapping) glyphs like ff ligature in tex. 
@@ -1027,7 +1028,7 @@ SEM Layout
                                 -- do we need to set width and height? These should not have changed
                                 -- the last one seems wrong for sure 
   | ArrangedP
-      inst.unprunedLayHO : (Layout {doc} {node} {clip} {token})
+      inst.unprunedLayHO : (Layout {doc} {enr} {node} {clip} {token})
       inst.unprunedLayHO = case @lhs.oldArr of
                               Just oldArr -> 
                                 if overlap ((@lhs.absx,@lhs.absy),(@finalWidth,@finalHeight)) @lhs.viewedArea
@@ -1127,10 +1128,10 @@ SEM LayoutList [ || vertices : {[(Int,Int,Int,Outline)]} ]
       lhs.vertices = @hd.vertex : @tl.vertices
       
 ATTR Show {node}, Show {token} =>
-     Root [ unprunedLay : {Layout @doc @node @clip @token} | | ]
+     Root [ unprunedLay : {Layout @doc @enr @node @clip @token} | | ]
 
 SEM Show {node}, Show {token} =>
-    Layout [ unprunedLay : {Layout @doc @node @clip @token} | | ]
+    Layout [ unprunedLay : {Layout @doc @enr @node @clip @token} | | ]
   | EmptyP StringP ImageP PolyP RectangleP EllipseP ArrangedP 
   | RowP OverlayP GraphP FormatterP
       layoutList.unprunedLayList = {- debug Arr ("Lengths "++show (length (getChildrenP @lhs.unprunedLay))
@@ -1168,7 +1169,7 @@ SEM Show {node}, Show {token} =>
 -- The unprunedLay for @inst.unfoldedFormatter HO attribute is copied directly from its FormatterP parent
        
 SEM Show {node}, Show {token} =>
-    LayoutList [ unprunedLayList : {[Layout @doc @node @clip @token]} | | ]
+    LayoutList [ unprunedLayList : {[Layout @doc @enr @node @clip @token]} | | ]
   | Cons 
       hd.unprunedLay     = head' "ArrangerAG.LayoutList.hd.unPrunedPres" @lhs.unprunedLayList
       tl.unprunedLayList = tail @lhs.unprunedLayList

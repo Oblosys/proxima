@@ -30,7 +30,7 @@ translateIO state low high = castRemainingEditOps $ \editLow ->
 
 interpretIO :: (Show doc, Show enr, Show token, Show node) =>
              LocalStateRen -> RenderingLevel doc enr node clip token ->
-             ArrangementLevel doc node clip token -> EditRendering doc enr node clip token ->
+             ArrangementLevel doc enr node clip token -> EditRendering doc enr node clip token ->
              IO ([EditArrangement doc enr node clip token], LocalStateRen, RenderingLevel doc enr node clip token)
 interpretIO state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
@@ -60,7 +60,7 @@ interpretIO state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
  
 interpret :: (Show doc, Show enr, Show token, Show node) =>
              LocalStateRen -> RenderingLevel doc enr node clip token ->
-             ArrangementLevel doc node clip token -> EditRendering doc enr node clip token ->
+             ArrangementLevel doc enr node clip token -> EditRendering doc enr node clip token ->
              ([EditArrangement doc enr node clip token], LocalStateRen, RenderingLevel doc enr node clip token)
 interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $

@@ -12,18 +12,18 @@ import Evaluation.DocTypes -- for UpdateDocLay
 -- cleaner, as Presentation specific definitions (eg. PresentationLevel) are visible at
 -- LayoutLevel. This is not really a problem, however.
 
-data LayoutLevel doc node clip token = 
-  LayoutLevel (Layout doc node clip token) FocusPres DiffTree deriving Show
+data LayoutLevel doc enr node clip token = 
+  LayoutLevel (Layout doc enr node clip token) FocusPres DiffTree deriving Show
                                                     -- DiffTree is experimental for incrementality
 data EditLayout'_ wrapped doc enr node clip token =
-    SetLay' (LayoutLevel doc node clip token)
+    SetLay' (LayoutLevel doc enr node clip token)
   | SkipLay' Int 
   | WrapLay' wrapped deriving Show
 
 data EditLayout_ wrapped doc enr node clip token =
     SkipLay Int
   | SetFocusLay FocusPres
-  | SetLay (LayoutLevel doc node clip token)
+  | SetLay (LayoutLevel doc enr node clip token)
   | InitLay
   | CloseLay
   | InsertLay Char
@@ -57,11 +57,11 @@ data EditLayout_ wrapped doc enr node clip token =
 
 data Layout_
 
-type Layout doc node clip token = PresentationBase doc node clip token Layout_
+type Layout doc enr node clip token = PresentationBase doc enr node clip token Layout_
 
 -- this guarantees that values containing a TokenP are not of type Layout (see
 -- definition of Presentation.PresTypes.PresentationBase for more information.
 
-type LayoutList doc node clip token = [Layout doc node clip token]
+type LayoutList doc enr node clip token = [Layout doc enr node clip token]
 
 

@@ -31,7 +31,7 @@ orderFocusP NoFocusP         = NoFocusP
 focusStartPathP (FocusP (PathP pth _) _) = pth
 focusStartPathP _                        = []
 
-showPathNodesP :: (Show node, Show token) => Path -> PresentationBase doc node clip token level -> String
+showPathNodesP :: (Show node, Show token) => Path -> PresentationBase doc enr node clip token level -> String
 showPathNodesP []      pres = shallowShowPres pres
 showPathNodesP (p:pth) pres = shallowShowPres pres ++ "\n" ++
                                let children = getChildrenP pres
@@ -39,10 +39,10 @@ showPathNodesP (p:pth) pres = shallowShowPres pres ++ "\n" ++
                                    then showPathNodesP pth (index "PresUtils.showPathNodesP" children p)
                                    else "PresUtils.showPathNodesP: index out of bounds"
                             
-xyFromPath :: (DocNode node, Show token) => PathPres -> Layout doc node clip token -> (Int,Int, Bool)
+xyFromPath :: (DocNode node, Show token) => PathPres -> Layout doc enr node clip token -> (Int,Int, Bool)
 xyFromPath path pres = xyFromPathPres 0 0 path pres
 
-pathFromXY :: (DocNode node, Show token) => (Int,Int,Bool) -> Layout doc node clip token -> PathPres
+pathFromXY :: (DocNode node, Show token) => (Int,Int,Bool) -> Layout doc enr node clip token -> PathPres
 pathFromXY xy pres = pathFromXYPres xy pres
 
 
@@ -58,7 +58,7 @@ pathFromXY xy pres = pathFromXYPres xy pres
 -- a smarter diff for rows and columns may try to approach from both directions.
  
 -- skip WithP StructuralP ParsingP and LocatorP elts
-diffPres :: (DocNode node, Eq token, Show token) => PresentationBase doc node clip token level -> PresentationBase doc node clip token level -> DiffTree
+diffPres :: (DocNode node, Eq token, Show token) => PresentationBase doc enr node clip token level -> PresentationBase doc enr node clip token level -> DiffTree
 
 -- WithP is not handled yet.
 -- Graph is not handled right yet!
@@ -181,7 +181,7 @@ prunePres  va ova (x,y) dt arr pres =
   prunePres' va ova (x,y) dt arr pres
 
 prunePres' :: Show node => Rectangle -> Rectangle -> (Int,Int) -> DiffTree -> Arrangement node ->
-              Presentation doc node clip -> Presentation doc node clip
+              Presentation doc enr node clip -> Presentation doc enr node clip
 prunePres' va ova (x,y) (DiffLeaf False) arr p = p
 prunePres' va ova (x,y) dt arr (WithP wr pres)       = WithP wr       $ prunePres va ova (x,y) dt arr pres
 prunePres' va ova (x,y) dt arr (StructuralP id pres) = StructuralP id $ prunePres va ova (x,y) dt (getChildA "str" arr)pres
@@ -292,7 +292,7 @@ prunePresSpecial va ova (x,y) dt arr                                   pres =
 -- in overlay, only head is normalized
 -- tokens are not normalized
 
-normalizePres :: (DocNode node, Show token) => PresentationBase doc node clip token level -> PresentationBase doc node clip token level
+normalizePres :: (DocNode node, Show token) => PresentationBase doc enr node clip token level -> PresentationBase doc enr node clip token level
 normalizePres pres@(EmptyP               _)            = pres
 normalizePres pres@(StringP              _  str)       = pres
 normalizePres pres@(TokenP               _  _)         = pres
@@ -311,7 +311,7 @@ normalizePres (GraphP id d w h es press)               = GraphP id d w h es $ ma
 normalizePres (VertexP id v x y ol pres)               = VertexP id v x y ol $ normalizePres pres
 normalizePres pr                                       = debug Err ("PresUtils.normalizePres: can't handle "++ show pr) pr
 
-normalizeRow :: (DocNode node, Show token) => [PresentationBase doc node clip token level] -> [PresentationBase doc node clip token level] -- not fixed for refs
+normalizeRow :: (DocNode node, Show token) => [PresentationBase doc enr node clip token level] -> [PresentationBase doc enr node clip token level] -- not fixed for refs
 normalizeRow []                      = []
 normalizeRow (RowP id rf press: row) = normalizeRow (press ++ row)
 -- normalizeRow (StringP id [] : row) = normalizeRow row        -- don't remove empty strings, because row[row []] presents wrongly 
@@ -320,7 +320,7 @@ normalizeRow (StringP id txt : row)  = case normalizeRow row of
                                         row'                  -> StringP id txt : row'
 normalizeRow (pres            : row) = normalizePres pres : normalizeRow row
 
-normalizeCol :: (DocNode node, Show token) => IDP -> Int -> Int -> [PresentationBase doc node clip token level] -> [PresentationBase doc node clip token level] -> PresentationBase doc node clip token level
+normalizeCol :: (DocNode node, Show token) => IDP -> Int -> Int -> [PresentationBase doc enr node clip token level] -> [PresentationBase doc enr node clip token level] -> PresentationBase doc enr node clip token level
 normalizeCol id p rf prs [] = ColP id rf NF (reverse prs) 
 normalizeCol id p rf prs (ColP _ rf' NF press: col) = 
   let rf'' = if p < rf then rf + length press - 1 -- -1 because the col (1) is replaced by length press children 
@@ -330,7 +330,7 @@ normalizeCol id p rf prs (ColP _ rf' NF press: col) =
 normalizeCol id p rf prs (pres            : col) = normalizeCol id (p+1) rf (normalizePres pres:prs) col
 
 -- | Return innermost enclosing locator for path in pres
-locateTreePres :: (DocNode node, Show token) => PathPres -> PresentationBase doc node clip token level -> Maybe node
+locateTreePres :: (DocNode node, Show token) => PathPres -> PresentationBase doc enr node clip token level -> Maybe node
 locateTreePres NoPathP        pres = Nothing
 locateTreePres (PathP path _) pres = locateTreePres' Nothing path pres
 
@@ -408,7 +408,7 @@ c = ColP NoIDP
 widthPres pres = leftWidthPres pres + rightWidthPres pres
 heightPres pres = topHeightPres pres + bottomHeightPres pres
 
-leftWidthPres :: (Show node, Show token) => Layout doc node clip token -> Int
+leftWidthPres :: (Show node, Show token) => Layout doc enr node clip token -> Int
 leftWidthPres (EmptyP _)                = 0
 leftWidthPres (StringP _ str)           = 0
 leftWidthPres (ImageP _ _ _)            = 0
@@ -424,7 +424,7 @@ leftWidthPres (LocatorP _ pres)         = leftWidthPres pres
 leftWidthPres (TagP _ pres)         = leftWidthPres pres
 leftWidthPres pr                        = debug Err ("PresUtils.leftWidthPres: can't handle "++ show pr) 0
 
-rightWidthPres :: (Show node, Show token) => Layout doc node clip token -> Int
+rightWidthPres :: (Show node, Show token) => Layout doc enr node clip token -> Int
 rightWidthPres (EmptyP _)                = 0
 rightWidthPres (StringP _ str)           = length str
 rightWidthPres (ImageP _ _ _)            = 1
@@ -440,7 +440,7 @@ rightWidthPres (LocatorP _ pres)         = rightWidthPres pres
 rightWidthPres (TagP _ pres)         = rightWidthPres pres
 rightWidthPres pr                        = debug Err ("PresUtils.rightWidthPres: can't handle "++ show pr) 0
 
-topHeightPres :: (Show node, Show token) => Layout doc node clip token -> Int
+topHeightPres :: (Show node, Show token) => Layout doc enr node clip token -> Int
 topHeightPres (EmptyP _)                = 0
 topHeightPres (StringP _ str)           = 0
 topHeightPres (ImageP _ _ _)            = 0
@@ -458,7 +458,7 @@ topHeightPres pr                        = debug Err ("PresUtils.topHeightPres: c
 
 
 -- call bottomHeight depth? but then topHeight will be height and we need totalHeight for height
-bottomHeightPres :: (Show node, Show token) => Layout doc node clip token -> Int
+bottomHeightPres :: (Show node, Show token) => Layout doc enr node clip token -> Int
 bottomHeightPres (EmptyP _)                = 0
 bottomHeightPres (StringP _ str)           = 1
 bottomHeightPres (ImageP _ _ _)            = 1
@@ -475,7 +475,7 @@ bottomHeightPres (TagP _ pres)         = bottomHeightPres pres
 bottomHeightPres pr                        = debug Err ("PresUtils.bottomHeightPres: can't handle "++ show pr) 0
 
 -- Bool is for disambiguating end of one string and start of the next. True means at start of string
-pathFromXYPres :: (Show node, Show token) => (Int, Int, Bool) -> Layout doc node clip token -> PathPres
+pathFromXYPres :: (Show node, Show token) => (Int, Int, Bool) -> Layout doc enr node clip token -> PathPres
 pathFromXYPres (x,0,b) (EmptyP _)    = PathP [] x 
 pathFromXYPres (x,0,b) (StringP _ txt)   = if x > length txt 
                                          then debug Err "PresUtils.pathFromXYPres: x>length" $ PathP [] (length txt) 
@@ -515,7 +515,7 @@ pathFromXYCol i (x,y,b) (pres:press) = let h = heightPres pres
 -- give result "", but in a col, the first one should not produce a newline and the second one should
 stringFromPres pres = concatMap (++"\n") (stringFromPres' pres)
 
-stringFromPres' :: (Show node, Show token) => PresentationBase doc node clip token level -> [String]
+stringFromPres' :: (Show node, Show token) => PresentationBase doc enr node clip token level -> [String]
 stringFromPres' (StringP _ str)           = [str]
 stringFromPres' (TokenP _ t)              = [tokenString t]
 stringFromPres' (ImageP _ _ _)            = ["#"]
@@ -531,7 +531,7 @@ stringFromPres' (TagP _ pres)             = stringFromPres' pres
 stringFromPres' pr                        = debug Err ("PresUtils.stringFromPres': can't handle "++ show pr) []
 
 -- this only works for simple column of rows with strings
-presFromString :: String -> PresentationBase doc node clip token level
+presFromString :: String -> PresentationBase doc enr node clip token level
 presFromString str = ColP NoIDP 0 NF . map (StringP NoIDP) $ lines str
 
 
@@ -610,7 +610,7 @@ pathToRightmostLeafList i (pres:press) =
     Just pth -> Just pth
     Nothing  -> fmap (i:) $ pathToRightmostLeaf pres
     
-selectTree :: (Show node, Show token) => Path -> PresentationBase  doc node clip token level -> PresentationBase doc node clip token level
+selectTree :: (Show node, Show token) => Path -> PresentationBase  doc enr node clip token level -> PresentationBase doc enr node clip token level
 selectTree []       tr                        = tr
 selectTree (p:path) (RowP _ _ press)          = selectTree path (index "PresUtils.selectTree" press p)
 selectTree (p:path) (ColP _ _ _ press)        = selectTree path (index "PresUtils.selectTree" press p)
@@ -625,7 +625,7 @@ selectTree (0:path) (TagP _ pres)         = selectTree path pres
 selectTree (p:path) (FormatterP _ press)      = selectTree path (index "PresUtils.selectTree" press p)
 selectTree pth      pres                      = debug Err ("PresUtils.selectTree: can't handle "++show pth++" "++show pres) (StringP NoIDP "unselectable")
 
-pathsToAncestorRightSiblings :: (Show node, Show token) => Path -> Path -> Layout doc node clip token -> [Path]
+pathsToAncestorRightSiblings :: (Show node, Show token) => Path -> Path -> Layout doc enr node clip token -> [Path]
 pathsToAncestorRightSiblings _    []       _                     = []
 pathsToAncestorRightSiblings _    (p:path) (StringP _ _)         = [] 
 pathsToAncestorRightSiblings root (p:path) (RowP _ _ press)      = pathsToAncestorRightSiblings (root++[p]) path (index "PresUtils.pathsToAncestorRightSiblings" press p)
@@ -661,7 +661,7 @@ pathsToAncestorLeftSiblings root pth      pres                  = debug Err ("Pr
 
 
 -- find the nearest ancestor right sibling that has a left-most leaf, and return the path to this leaf
-rightNearestLeafPath :: (Show node, Show token) => Path -> Layout doc node clip token -> Maybe Path
+rightNearestLeafPath :: (Show node, Show token) => Path -> Layout doc enr node clip token -> Maybe Path
 rightNearestLeafPath path pres = 
   case pathsToAncestorRightSiblings [] path pres of
     [] -> Nothing  -- no ancestor right sibling, so we are at the far right of the presentation
@@ -688,13 +688,13 @@ leftNearestLeafPath path pres =
                                 Just leafPth -> Just $ pth ++ leafPth
   
 
-leafLength :: (Show node, Show token) => Layout doc node clip token -> Int
+leafLength :: (Show node, Show token) => Layout doc enr node clip token -> Int
 leafLength (StringP _ str) = length str
 leafLength pres = debug Err ("PresUtils.leafLength: non string leaf"++show pres) 0
 
 -- tricky, in one row [text "12|", text "34"] right navigation must be row [text "12", text "3|4"]
 --         but if there is a column, we want col [text "12", text "|34"]
-rightNavigatePath :: (DocNode node, Show token) => PathPres -> Layout doc node clip token -> PathPres
+rightNavigatePath :: (DocNode node, Show token) => PathPres -> Layout doc enr node clip token -> PathPres
 rightNavigatePath (PathP path offset) pres =
   if offset < leafLength (selectTree path pres) 
   then PathP path (offset+1)
@@ -736,7 +736,7 @@ leftNavigatePath  (PathP path offset) pres =
 -- passedColumn returns true if a column is present from the common prefix of fromPath and toPath to
 -- fromPath and toPath. Meaning that if a column is encountered if we move from fromPath to 
 -- toPath in the shortest way then True is returned.
-passedColumn :: (DocNode node, Show token) => [Int] -> [Int] -> Layout doc node clip token -> Bool
+passedColumn :: (DocNode node, Show token) => [Int] -> [Int] -> Layout doc enr node clip token -> Bool
 passedColumn fromPath toPath pres =
   let commonPath = commonPrefix fromPath toPath
       commonTree = selectTree commonPath pres
@@ -764,11 +764,11 @@ containsColPres (p:path) (FormatterP id press)      = containsColPres path (inde
 containsColPres pth      pr                         = debug Err ("*** PresUtils.containsColPres: can't handle "++show pth++" "++ show pr++"***") False
 
 -- | Return True if the focus is on either a vertex, or an edge (focus on graph, index larger than nr of vertices)
-focusIsOnGraph :: (DocNode node, Show token) => FocusPres -> PresentationBase doc node clip token level -> Bool
+focusIsOnGraph :: (DocNode node, Show token) => FocusPres -> PresentationBase doc enr node clip token level -> Bool
 focusIsOnGraph (FocusP (PathP path _) _) pres = focusIsOnGraphPres path pres
 focusIsOnGraph _ _         = False
 
-focusIsOnGraphPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc node clip token level -> Bool
+focusIsOnGraphPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc enr node clip token level -> Bool
 focusIsOnGraphPres []       (VertexP _ _ _ _ _ _)     = True 
 focusIsOnGraphPres [p]      (GraphP _ _ _ _ _ press)  = if p >= length press then True else False
 focusIsOnGraphPres []        tr                       = False
@@ -789,19 +789,19 @@ focusIsOnGraphPres pth      pres                      = debug Err ("PresUtils.fo
 
 -- VVV HACK VVV              will be handled more generally in the future
 -- | Collect the bottom-most mouseDown update function that is added by WithP nodes on path in pres 
-mouseDownDocPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc node clip token level -> Maybe (UpdateDoc doc clip)
+mouseDownDocPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc enr node clip token level -> Maybe (UpdateDoc doc clip)
 mouseDownDocPres = mouseDownDocPres' Nothing
 
-mouseDownDocPres' :: (DocNode node, Show token) => Maybe (UpdateDoc doc clip) -> [Int] -> PresentationBase doc node clip token level -> Maybe (UpdateDoc doc clip)
+mouseDownDocPres' :: (DocNode node, Show token) => Maybe (UpdateDoc doc clip) -> [Int] -> PresentationBase doc enr node clip token level -> Maybe (UpdateDoc doc clip)
 mouseDownDocPres' upd []       tr                        = upd
 mouseDownDocPres' upd (p:path) (RowP _ _ press)          = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (p:path) (ColP _ _ _ press)          = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (0:path) (OverlayP _ _ press@(pres:_)) = mouseDownDocPres' upd path pres --(last press)
 mouseDownDocPres' upd (p:path) (GraphP _ _ _ _ _ press)  = mouseDownDocPres' upd path (index "PresUtils.mouseDownDocPres'" press p)
 mouseDownDocPres' upd (p:path) (VertexP _ _ _ _ _ pres)  = mouseDownDocPres' upd path pres
-mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (let (inh,syn)   = (emptyInh {mouseDown = upd}, emptySyn)
+mouseDownDocPres' upd (p:path) (WithP w pres)            = mouseDownDocPres' (let (inh,syn)   = (emptyInh {mouseDown = undefined {- upd -}}, emptySyn)
                                                                                   (inh',syn') = w (inh,syn)
-                                                                              in mouseDown inh') path pres
+                                                                              in undefined {- mouseDown inh' -} ) path pres
 mouseDownDocPres' upd (p:path) (StructuralP _ pres)      = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (ParsingP _ _ _ pres)         = mouseDownDocPres' upd path pres
 mouseDownDocPres' upd (p:path) (LocatorP _ pres)         = mouseDownDocPres' upd path pres
@@ -811,12 +811,12 @@ mouseDownDocPres' upd pth      pres                      = debug Err ("PresTypes
 
 
 -- | Collect all popupMenuItems that are added by WithP nodes on path in pres 
-popupMenuItemsPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc node clip token level -> [PopupMenuItem doc clip]
+popupMenuItemsPres :: (DocNode node, Show token) => [Int] -> PresentationBase doc enr node clip token level -> [PopupMenuItem doc clip]
 popupMenuItemsPres path pres = popupMenuItemsPres' ([],[]) path pres
 
 popupMenuItemsPres' :: (DocNode node, Show token) => 
                        ([PopupMenuItem doc clip],[PopupMenuItem doc clip]) -> [Int] ->
-                       PresentationBase doc node clip token level -> [PopupMenuItem doc clip]
+                       PresentationBase doc enr node clip token level -> [PopupMenuItem doc clip]
 popupMenuItemsPres' (local,inhtbl) []       tr             = inhtbl++local
 popupMenuItemsPres' its (p:path) (RowP _ _ press)          = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)
 popupMenuItemsPres' its (p:path) (ColP _ _ _ press)        = popupMenuItemsPres' its path (index "PresUtils.popupMenuItemsPres'" press p)

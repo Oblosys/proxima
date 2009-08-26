@@ -120,8 +120,8 @@ splitNaive start end rows =
                                  in  (leadingRows++[left],right:followingRows)
 
 -- PRECONDITION: nested ParsingP may not be ParsingP (ColP ..)
-nearestParsingColumn :: (Show node, Show token) => Path -> Layout doc node clip token ->
-                        Maybe (Layout doc node clip token, Path)
+nearestParsingColumn :: (Show node, Show token) => Path -> Layout doc enr node clip token ->
+                        Maybe (Layout doc enr node clip token, Path)
 nearestParsingColumn path layout = nearestParsingColumn' [] Nothing path layout
 
 nearestParsingColumn' colPth nearest [] _ = nearest
@@ -141,13 +141,13 @@ nearestParsingColumn' colPth nearest pth lay                        = debug Err 
 
 
 getColumnRows :: (Show node, Show token) => 
-                 Layout doc node clip token -> [[Layout doc node clip token]]
+                 Layout doc enr node clip token -> [[Layout doc enr node clip token]]
 getColumnRows (ColP _ _ _ lays) = map getRowElts lays
  where getRowElts (RowP _ _ lays) = lays
        getRowElts lay = debug Err ("LayUtils.getColumnRows: not a row: "++ show lay) []
 getColumnRows lay = debug Err ("LayUtils.getColumnRows: not a column: "++ show lay) []
 
-gatherDocPaths :: (DocNode node, Show token) => Layout doc node clip token -> [PathDoc]
+gatherDocPaths :: (DocNode node, Show token) => Layout doc enr node clip token -> [PathDoc]
 gatherDocPaths lay = gatherDocPaths' [] lay
 
 gatherDocPaths' paths (EmptyP _)                = paths
@@ -164,7 +164,7 @@ gatherDocPaths' paths lay                       = debug Err ("LayUtils.gatherDoc
 
 dropLeadingWhitespace lays = dropWhile isWhitespace lays
 
-isWhitespace :: (Show node, Show token) => Layout doc node clip token -> Bool
+isWhitespace :: (Show node, Show token) => Layout doc enr node clip token -> Bool
 isWhitespace (EmptyP _)                = True
 isWhitespace (EmptyP _)                = True
 isWhitespace (StringP _ str)           = all isSpace str
@@ -179,7 +179,7 @@ isWhitespace (LocatorP _ lay)          = isWhitespace lay
 isWhitespace (TagP _ lay)          = isWhitespace lay
 isWhitespace lay                        = debug Err ("LayUtils.isWhitespace: can't handle "++ show lay) False
 
-isWhitespaceLR :: (Show node, Show token) => Path -> Layout doc node clip token -> (Bool,Bool)
+isWhitespaceLR :: (Show node, Show token) => Path -> Layout doc enr node clip token -> (Bool,Bool)
 isWhitespaceLR [] (EmptyP _)             = (True,True)
 isWhitespaceLR [p] (StringP _ str)       = let (left,right) = splitAt p str
                                            in  (all isSpace left, all isSpace right)
@@ -212,7 +212,7 @@ findLay _ str lay = findLay' str [] 0 [maxBound] 0 [] lay
 -- [maxBound] 0 is greater than any valid path, so we search until the end of the presentation
 
 
-findLay' :: (Show node, Show token) => String -> Path -> Int -> Path -> Int -> Path -> Layout doc node clip token -> Maybe FocusPres
+findLay' :: (Show node, Show token) => String -> Path -> Int -> Path -> Int -> Path -> Layout doc enr node clip token -> Maybe FocusPres
 findLay' str fromPath fromIndex toPath toIndex rootPath lay =
   --debug Prs ("paths "++show fromPath++show toPath) $
   if rootPath < take (length rootPath) fromPath || rootPath > toPath
@@ -245,7 +245,7 @@ containsStr str substr = contains' 0 str substr
                                            else contains' (pos+1) rest substr 
 
 {-
-findLay :: (Show node, Show token) => PresentationBase doc node clip token level -> FocusPres
+findLay :: (Show node, Show token) => PresentationBase doc enr node clip token level -> FocusPres
 findLay (EmptyP id)               = 
 findLay (StringP id str)          = 
 findLay (TokenP id t)             = 

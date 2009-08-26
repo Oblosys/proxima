@@ -55,7 +55,7 @@ pathAFromPathPFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (p
   in  cIx : rIx : pathAFromPathP' arr (index "ArrLayerUtils.pathAFromPathPFormatter, pres index" press p) path
 pathAFromPathPFormatter _                           press path = debug Err ("ArrLayerUtils.pathAFromPathPFormatter: unfolded formatter has wrong stucture, no column") []
 
-pathPFromPathA' :: (Show node, Show token) => Arrangement node -> Layout doc node clip token -> Path -> Path
+pathPFromPathA' :: (Show node, Show token) => Arrangement node -> Layout doc enr node clip token -> Path -> Path
 pathPFromPathA' arr                             (WithP _ pres)           path     = 0:pathPFromPathA' arr pres path -- add step for with node 
 pathPFromPathA' _                               _                        []       = []
 pathPFromPathA' (RowA _ _ _ _ _ _ _ _ arrs)     (RowP _ _ press)         (p:path) = p:pathPFromPathA' (index "ArrLayerUtils.pathPFromPathA'" arrs p) (index "ArrLayerUtils.pathPFromPathA'" press p) path

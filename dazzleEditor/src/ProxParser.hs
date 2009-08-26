@@ -21,13 +21,13 @@ import DocUtils_Generated
               
 -------------------- Proxima Parser/Structure Recognizer -------------------- 
 
-recognizeEnrichedDoc :: ListParser Document Node ClipDoc UserToken EnrichedDoc
+recognizeEnrichedDoc :: ListParser Document EnrichedDoc Node ClipDoc UserToken EnrichedDoc
 recognizeEnrichedDoc = pStr $ 
           (\str root-> reuseRootEnr [str] (Just root))
       <$> pStructuralTk Node_RootEnr
       <*> recognizeRoot
 
-recognizeRoot :: ListParser Document Node ClipDoc UserToken Root
+recognizeRoot :: ListParser Document EnrichedDoc Node ClipDoc UserToken Root
 recognizeRoot = pStr $
           (\str title graph caption label sections ->
           reuseRoot [str] (Just graph) (Just caption) (Just label) Nothing (Just title) (Just sections))
@@ -59,7 +59,7 @@ recognizeList_Section = pStr $
       <*  pList (pText <* pKey " "))
 -}    
   
-recognizeSection :: ListParser Document Node ClipDoc UserToken Section
+recognizeSection :: ListParser Document EnrichedDoc Node ClipDoc UserToken Section
 recognizeSection = pStrAlt Node_Section $
           (\str t ps ss -> reuseSection [str] (Just t) (Just ps) (Just ss))
       <$> pStructuralTk Node_Section
@@ -72,7 +72,7 @@ recognizeList_Subsection = pStr $
       <$> pStructuralTk Node_List_Subsection
       <*> pList recognizeSubsection
 
-recognizeSubsection :: ListParser Document Node ClipDoc UserToken Subsection
+recognizeSubsection :: ListParser Document EnrichedDoc Node ClipDoc UserToken Subsection
 recognizeSubsection =
   pStrAlt Node_Subsection $
           (\str t ps sss -> reuseSubsection [str] (Just t) (Just ps) (Just sss))
@@ -86,7 +86,7 @@ recognizeList_Subsubsection = pStr $
       <$> pStructuralTk Node_List_Subsubsection
       <*> pList recognizeSubsubsection
 
-recognizeSubsubsection :: ListParser Document Node ClipDoc UserToken Subsubsection
+recognizeSubsubsection :: ListParser Document EnrichedDoc Node ClipDoc UserToken Subsubsection
 recognizeSubsubsection =
   pStrAlt Node_Subsubsection $
           (\str t ps -> reuseSubsubsection [str] (Just t) (Just ps))
@@ -98,7 +98,7 @@ recognizeSubsubsection =
 -- TODO: parsed edges are now on index in vertexlist, fix it so they are on vertex nr
 --       - add vertex nr to VertexP, and take care of indexing in lower layers (so presentation ag
 --         does not have to do this)
-recognizeGraph :: ListParser Document Node ClipDoc UserToken Graph
+recognizeGraph :: ListParser Document EnrichedDoc Node ClipDoc UserToken Graph
 recognizeGraph = pStrVerbose "Graph" $
           (\str gt vs -> reuseGraph [str] (Just $ getGraphTkDirty gt) 
                                    (Just $ List_Vertex $ toConsList_Vertex vs)
@@ -112,7 +112,7 @@ recognizeGraph = pStrVerbose "Graph" $
 
 -- labels in vertex? Or just in presentation?
 -- before we can parse them, the scanner needs to be modified to handle free text
-recognizeVertex :: ListParser Document Node ClipDoc UserToken Vertex
+recognizeVertex :: ListParser Document EnrichedDoc Node ClipDoc UserToken Vertex
 recognizeVertex = pStrVerbose "Vertex" $
           (\str vt lab -> reuseVertex [str] (Just lab) Nothing Nothing
                                   (Just $ getVertexTkX vt) (Just $ getVertexTkY vt))
@@ -124,7 +124,7 @@ recognizeVertex = pStrVerbose "Vertex" $
       <$> pStructuralTk (\_ _ -> NoNode)
       <*> pSym vertexTk
           
-recognizeSubgraph :: ListParser Document Node ClipDoc UserToken Subgraph
+recognizeSubgraph :: ListParser Document EnrichedDoc Node ClipDoc UserToken Subgraph
 recognizeSubgraph = pStrVerbose "Subgraph" $
           (\str gt vs -> reuseSubgraph [str] (Just $ getGraphTkDirty gt)  
                                      (Just $ List_Vertex $ toConsList_Vertex vs)
@@ -135,23 +135,23 @@ recognizeSubgraph = pStrVerbose "Subgraph" $
       <*> pSym graphTk
       <*> pList recognizeVertex
 
-getGraphTkDirty :: Show node => Token doc node clip UserToken -> Dirty
+getGraphTkDirty :: Show node => Token doc enr node clip UserToken -> Dirty
 getGraphTkDirty (GraphTk dirty _ _ _) = if isClean dirty then Clean else Dirty
 getGraphTkDirty tk = debug Err ("ERROR: getGraphTkDirty: called on non GraphTk: "++show tk++"\n") $ Dirty
 
-getGraphTkEdges :: Show node => Token doc node clip UserToken -> [(Int,Int)]
+getGraphTkEdges :: Show node => Token doc enr node clip UserToken -> [(Int,Int)]
 getGraphTkEdges (GraphTk _ edges _ _) = edges
 getGraphTkEdges tk = debug Err ("ERROR: getGraphTkEdges: called on non GraphTk: "++show tk++"\n") $ []
 
-getVertexTkId :: Show node => Token doc node clip UserToken -> Int
+getVertexTkId :: Show node => Token doc enr node clip UserToken -> Int
 getVertexTkId (VertexTk i (x,y) _ _) = i
 getVertexTkId tk = debug Err ("ERROR: getVertexTkId: called on non VertexTk: "++show tk++"\n") $ 0
 
-getVertexTkX :: Show node => Token doc node clip UserToken -> Int
+getVertexTkX :: Show node => Token doc enr node clip UserToken -> Int
 getVertexTkX (VertexTk _ (x,y) _ _) = x
 getVertexTkX tk = debug Err ("ERROR: getVertexTkX: called on non VertexTk: "++show tk++"\n") $ 0
 
-getVertexTkY :: Show node => Token doc node clip UserToken -> Int
+getVertexTkY :: Show node => Token doc enr node clip UserToken -> Int
 getVertexTkY (VertexTk _ (x,y) _ _) = y
 getVertexTkY tk = debug Err ("ERROR: getVertexTkY: called on non VertexTk: "++show tk++"\n") $ 0
 
@@ -231,7 +231,7 @@ pSpaces = concat <$> pList (const " " <$> pKey " " <|> const "" <$> pKey "\n") -
 pText = tokenString <$> pWord
 
 
-recognizeProbtable :: ListParser Document Node ClipDoc UserToken Probtable
+recognizeProbtable :: ListParser Document EnrichedDoc Node ClipDoc UserToken Probtable
 recognizeProbtable = pStrVerbose "Probtable" $
           (\str vals probs -> reuseProbtable [str] Nothing (Just vals) (Just probs))
       <$> pStructuralTk Node_Probtable
@@ -243,7 +243,7 @@ recognizeList_Value = pStr $
       <$> pStructuralTk Node_List_Value
       <*> pList parseValue
       
-parseValue :: ListParser Document Node ClipDoc UserToken Value
+parseValue :: ListParser Document EnrichedDoc Node ClipDoc UserToken Value
 parseValue = pPrs $ Value . tokenString 
       <$> pWord
 {-
@@ -252,11 +252,11 @@ recognizeList_Probability = pStr $
       <$> pStructuralTk Node_List_Probability
       <*> pList parseProbability
 -}    
-parseProbability :: ListParser Document Node ClipDoc UserToken Probability
+parseProbability :: ListParser Document EnrichedDoc Node ClipDoc UserToken Probability
 parseProbability = pPrs $ Probability . tokenString 
       <$> pWord
      
-recognizeTable :: ListParser Document Node ClipDoc UserToken Table
+recognizeTable :: ListParser Document EnrichedDoc Node ClipDoc UserToken Table
 recognizeTable = pStr $ 
           (\str probs -> reuseTable [str] Nothing Nothing (Just $ toList_Probability probs))
       <$> pStructuralTk Node_Table

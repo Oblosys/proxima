@@ -17,7 +17,7 @@ reuse = Nothing
 set = Just
 
 parsePres :: (Show enr, DocNode node, Ord token, Show token) => 
-             ListParser doc node clip token enr -> PresentationBase doc node clip token level -> Maybe enr
+             ListParser doc enr node clip token enr -> PresentationBase doc enr node clip token level -> Maybe enr
 parsePres recognizeEnrichedDoc (TokenP _ (StructuralTk _ _ _ tokens _)) = 
   let (enr,errs) = runParser recognizeEnrichedDoc tokens
   in --debug Err ("Parsing:\n"++concatMap (deepShowTks 0) (tokens) 
@@ -36,8 +36,8 @@ applyDummyParameters nd = nd (error "This should not have happened") []
 
 -- continues parsing on the children inside the structural token. the structural token is put in front
 -- of the children, so reuse can be used on it just like in the normal parsers
---pStr ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
---         ListParser doc node clip token a -> ListParser doc node clip token a
+--pStr ::  (Editable a doc enr node clip token, DocNode node, Ord token, Show token) =>
+--         ListParser doc enr node clip token a -> ListParser doc enr node clip token a
 pStr = pStr' (EmptyP NoIDP)
 
 pStrVerbose str = pStr' (StringP NoIDP str)
@@ -50,7 +50,7 @@ pStr' prs p = unfoldStructure
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- The scoped type variable is necessary to get hole and holeNodeConstr of the same type a.
-addHoleParser :: forall a doc node clip token . (DocNode node, Ord token, Show token, Editable a doc node clip token) => ListParser doc node clip token a -> ListParser doc node clip token a 
+addHoleParser :: forall a doc enr node clip token . (DocNode node, Ord token, Show token, Editable a doc enr node clip token) => ListParser doc enr node clip token a -> ListParser doc enr node clip token a 
 addHoleParser p =
   p <|> hole <$ pStructuralTk (holeNodeConstr :: a -> Path -> node)
   
@@ -96,7 +96,7 @@ f <@> p = undefined
 
 -- is this right?
 pInc :: (DocNode node, Ord token, Show token) => 
-        ListParser doc node clip token a  -> ListParser doc node clip token a
+        ListParser doc enr node clip token a  -> ListParser doc enr node clip token a
 pInc p = pWrap f f' p
  where f'     state@(tk:_) steps k = (state, steps, k)
        f  brr state@(tk:_) steps k = 
@@ -107,7 +107,7 @@ pInc p = pWrap f f' p
 getValIfUnchanged :: token -> Maybe (a, Int)
 getValIfUnchanged = undefined
            
-pSkip :: (DocNode node, Ord token, Show token) => Int -> ListParser doc node clip token ()
+pSkip :: (DocNode node, Ord token, Show token) => Int -> ListParser doc enr node clip token ()
 pSkip n = pMap f f' (pSucceed ())
  where f  brr state steps = (drop n state, val (uncurry brr) steps)
        f' state steps     = (drop n state, steps)
@@ -126,14 +126,14 @@ pSkip n = pMap f f' (pSucceed ())
 
 -}
 
-pStrDirty ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token (a, Dirty) -> ListParser doc node clip token (a, Dirty)
+pStrDirty ::  (Editable a doc enr node clip token, DocNode node, Ord token, Show token) => ListParser doc enr node clip token (a, Dirty) -> ListParser doc enr node clip token (a, Dirty)
 pStrDirty p = pStrExtra Dirty p
 
 
 -- pStrExtra is a variant of pStr that allows an extra parser result to be returned in a tuple.
 -- extraDefault is a default value for this type in case of a parse error.
-pStrExtra ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
-              b -> ListParser doc node clip token (a, b) -> ListParser doc node clip token (a, b)
+pStrExtra ::  (Editable a doc enr node clip token, DocNode node, Ord token, Show token) =>
+              b -> ListParser doc enr node clip token (a, b) -> ListParser doc enr node clip token (a, b)
 pStrExtra extraDefault p = unfoldStructure  
      <$> pSym (StructuralTk 0 Nothing (EmptyP NoIDP) [] NoIDP)
  where unfoldStructure structTk@(StructuralTk _ nd pr tokens _) = 
@@ -145,7 +145,7 @@ pStrExtra extraDefault p = unfoldStructure
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 -- TODO: why do we need the 's in Editable?
-pPrs ::  (Editable a doc node clip token, DocNode node, Ord token, Show token) => ListParser doc node clip token a -> ListParser doc node clip token a
+pPrs ::  (Editable a doc enr node clip token, DocNode node, Ord token, Show token) => ListParser doc enr node clip token a -> ListParser doc enr node clip token a
 pPrs p = unfoldStructure  
      <$> pSym (ParsingTk Nothing Nothing [] NoIDP)
  where unfoldStructure presTk@(ParsingTk _ _ tokens idP) = 
@@ -167,8 +167,8 @@ tokens should get normal idps as soon as they are edited. This is not easy at th
 
 tricky: we have to use
 addInserted :: (DocNode node, Ord token, Show token) =>
-               [Message (Token doc node clip token) (Maybe (Token doc node clip token)) ] ->
-               [Token doc node clip token] -> [Token doc node clip token]
+               [Message (Token doc enr node clip token) (Maybe (Token doc enr node clip token)) ] ->
+               [Token doc enr node clip token] -> [Token doc enr node clip token]
 addInserted messages tokens = foldl  insertAt tokens inserts
  where inserts = catMaybes [ case act of 
                                Insert t -> 
@@ -187,7 +187,7 @@ addInserted messages tokens = foldl  insertAt tokens inserts
 -}
                                        
 mkErrs :: (DocNode node, Ord token, Show token) =>
-         [Message (Token doc node clip token) (Maybe (Token doc node clip token)) ] -> 
+         [Message (Token doc enr node clip token) (Maybe (Token doc enr node clip token)) ] -> 
          [ParseErrorMessage]
 mkErrs []                        = []
 mkErrs (msg@(Msg _ pos _):msgs)  = 
@@ -206,7 +206,7 @@ getTokenPosition _                        = Nothing
 -- (we don't want full tokens in the error message, and a user-friendly Show Token is awkward
 -- for development)
 showMessage :: (DocNode node, Ord token, Show token) =>
-                 Message (Token doc node clip token) (Maybe (Token doc node clip token)) -> String
+                 Message (Token doc enr node clip token) (Maybe (Token doc enr node clip token)) -> String
 showMessage (Msg expecting (Just (ErrorTk _ (c:_) _)) action) = "Lexical error at character "++show c
     -- there will always be at least one offending character
 showMessage (Msg expecting position action)  
@@ -216,12 +216,12 @@ showMessage (Msg expecting position action)
 
 
 showPosition :: (DocNode node, Ord token, Show token) =>
-                Maybe (Token doc node clip token) -> String
+                Maybe (Token doc enr node clip token) -> String
 showPosition Nothing = "end of input"
 showPosition (Just t) = tokenString t
 
 showExpecting :: (DocNode node, Ord token, Show token) =>
-                 Expecting (Token doc node clip token) -> String
+                 Expecting (Token doc enr node clip token) -> String
 showExpecting (ESym t)      = showRange t
 showExpecting (EStr str)    = str
 showExpecting (EOr  [])     = "Nothing expected "
@@ -233,7 +233,7 @@ showRange EmptyR      = "the empty range"
 showRange (Range a b) = if a == b then tokenString a else tokenString a ++ ".." ++ tokenString b
 
 showAction :: (DocNode node, Ord token, Show token) =>
-              Action (Token doc node clip token) -> String
+              Action (Token doc enr node clip token) -> String
 showAction (Insert t) = "inserting: " ++ tokenString t 
 showAction (Delete t) = "deleting: "  ++ tokenString t 
 showAction (Other t)  = t 
@@ -287,7 +287,7 @@ and the node for the first child is (IntExp 1) There is never a ParseErrNode
 
 
 
-newtype ParsePres doc node clip token a b c = ParsePres (Presentation doc node clip token) deriving Show
+newtype ParsePres doc enr node clip token a b c = ParsePres (Presentation doc enr node clip token) deriving Show
 
 -- parsing bits
 
@@ -299,7 +299,7 @@ newtype ParsePres doc node clip token a b c = ParsePres (Presentation doc node c
 
 
 
-instance (DocNode node, Ord token, Show token) => Symbol (Token doc node clip token) where
+instance (DocNode node, Ord token, Show token) => Symbol (Token doc enr node clip token) where
 
 runParser (pp) inp =
       let res = parse pp inp
@@ -311,7 +311,7 @@ runParser (pp) inp =
 
 -- parser for token
 pToken :: (DocNode node, Ord token, Show token) =>
-          token -> ListParser doc node clip token (Token doc node clip token)
+          token -> ListParser doc enr node clip token (Token doc enr node clip token)
 pToken token = pSym $ UserTk 0 token (show token) Nothing (IDP (-1))
 
 
@@ -355,14 +355,14 @@ Longer term
 
 
 
-class Construct doc node clip token where
-  construct :: node -> (Token doc node clip token) -> [Maybe clip] -> clip
+class Construct doc enr node clip token where
+  construct :: node -> (Token doc enr node clip token) -> [Maybe clip] -> clip
 
 
 -- used by Xprez.parsingWithParser. Converts a parser to a ClipParser
 -- does not take into account idP of parsingTk yet (for leading whitespace)
-mkClipParser :: (Editable a doc node clip token, DocNode node, Ord token, Show token) =>
-                ListParser doc node clip token a -> ClipParser doc node clip token
+mkClipParser :: (Editable a doc enr node clip token, DocNode node, Ord token, Show token) =>
+                ListParser doc enr node clip token a -> ClipParser doc enr node clip token
 mkClipParser parser = 
  let clipParser = 
        \tokens ->
@@ -375,9 +375,9 @@ mkClipParser parser =
 {- recognize parses a structural token and recognizes its structure. The parser will succeed
    on any structural token.
 -}
-pStructural :: (Editable a doc node clip token, Clip clip, Construct doc node clip token,
+pStructural :: (Editable a doc enr node clip token, Clip clip, Construct doc enr node clip token,
               DocNode node, Ord token, Show token, Show clip) =>
-             ListParser doc node clip token a
+             ListParser doc enr node clip token a
 pStructural = pStructuralEx Nothing
 
 {- pStructuralConstr only succeeds on a structural node with the constructor specified by nodeConstr
@@ -388,9 +388,9 @@ pStructuralConstr nodeConstr = pStructuralEx (Just nodeConstr)
    Nothing, in which case any structural token is matched, or it can be a Just node constructor,
    in which case the parser only succeeds on a structural token with that constructor.
 -}   
-pStructuralEx :: (Editable a doc node clip token, Clip clip, Construct doc node clip token,
+pStructuralEx :: (Editable a doc enr node clip token, Clip clip, Construct doc enr node clip token,
                 DocNode node, Ord token, Show token, Show clip) =>
-                Maybe (a -> Path -> node) -> ListParser doc node clip token a
+                Maybe (a -> Path -> node) -> ListParser doc enr node clip token a
 pStructuralEx mNodeConstr =  
           (\structuralToken -> --debug Prs ("pStructural on\n"++deepShowTks 0 structuralToken) $
                    let clip = recognizeClip structuralToken
@@ -403,8 +403,8 @@ pStructuralEx mNodeConstr =
           -- During parsing, only the constructor of node is taken into account. The error argument
           -- is never evaluated.
 
-recognizeClip :: (Clip clip, Construct doc node clip token, DocNode node, Show token, Ord token) =>
-             Token doc node clip token -> clip
+recognizeClip :: (Clip clip, Construct doc enr node clip token, DocNode node, Show token, Ord token) =>
+             Token doc enr node clip token -> clip
 recognizeClip strTk@(StructuralTk _ (Just node) _ childTokens _) = 
   --debug Prs ("Recognize on "++show node++" with children"++show childTokens) $
   if isListClip (construct node strTk []) 
@@ -443,7 +443,7 @@ recognizeClip tk@(ParsingTk Nothing _ childTokens _) =
 recognizeClip tk =
   error $ "recognize: Encountered token other than StructuralTk or ParsingTk: " ++ show tk
 
-tokenPath :: (Construct doc node clip token, DocNode node, Show token) => Path -> Token doc node clip token -> (Int, Token doc node clip token)
+tokenPath :: (Construct doc enr node clip token, DocNode node, Show token) => Path -> Token doc enr node clip token -> (Int, Token doc enr node clip token)
 tokenPath parentPath tk =
   let node = case tk of 
                (StructuralTk _ (Just node) _ _ _) -> node
@@ -471,7 +471,7 @@ addChildTokens childTokenGroups (childToken: childTokens) =
      
 -- If the argument is nothing, return Nothing (for reuse), otherwise apply fromClip to the
 -- argument.
-retrieveArg :: (Editable a doc node clip token, Show clip) => 
+retrieveArg :: (Editable a doc enr node clip token, Show clip) => 
                String -> String -> Maybe clip -> Maybe a
 retrieveArg parentCnstrName expectedTypeName (Just clip) =
   case fromClip clip of

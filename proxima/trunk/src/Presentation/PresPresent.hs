@@ -10,7 +10,7 @@ import qualified Data.Map as Map
 import Data.Map (Map)
 
 presentIO :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
-             PresentationLevel doc node clip token -> [EditEnrichedDoc' doc enr node clip token] ->
+             PresentationLevel doc enr node clip token -> [EditEnrichedDoc' doc enr node clip token] ->
              IO ([EditPresentation' doc enr node clip token], LayerStatePres, EnrichedDocLevel enr doc)
 presentIO presentationSheet state high low@(PresentationLevel pres layout) = castRemainingEditOps $ \editHigh ->
   let (editLow, state', high') = present presentationSheet state high low editHigh
@@ -26,7 +26,7 @@ presentIO presentationSheet state high low@(PresentationLevel pres layout) = cas
 -- on document edit, old inserted and deleted from level are reused
 
 present :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
-           PresentationLevel doc node clip token -> EditEnrichedDoc' doc enr node clip token ->
+           PresentationLevel doc enr node clip token -> EditEnrichedDoc' doc enr node clip token ->
            (EditPresentation' doc enr node clip token, LayerStatePres, EnrichedDocLevel enr doc)
 present _ state enrLvl (PresentationLevel pres layout) (SkipEnr' 0) = {-debug Prs ("Present:"++show pres++"\n focus "++show focus)-} 
   (SetPres' (PresentationLevel pres layout), state, enrLvl)  -- we should re present here because of local state
@@ -43,7 +43,7 @@ present _ state enrLvl pres (WrapEnr' wrapped) = (unwrap wrapped, state, enrLvl)
 
 presentEnr :: PresentationSheet doc enr node clip token -> LayerStatePres -> EnrichedDocLevel enr doc ->
               WhitespaceMap -> IDPCounter ->
-              (Presentation doc node clip token, WhitespaceMap, IDPCounter)
+              (Presentation doc enr node clip token, WhitespaceMap, IDPCounter)
 presentEnr presentationSheet state (EnrichedDocLevel enr focusD doc) layM idC = 
       let (layM', idC', pres') = presentationSheet enr doc focusD layM idC
                    -- Bit of a hack, doc is passed to presentationSheet for automatic popups.

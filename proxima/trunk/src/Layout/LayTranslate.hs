@@ -14,8 +14,8 @@ import Proxima.Wrap
 import Evaluation.DocTypes
 
 --translateIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
-translateIO :: (DocNode node, Eq token, Show doc, Show enr, Show token, Show node) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> [EditLayout doc enr node clip token]
-            -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+translateIO :: (DocNode node, Eq token, Show doc, Show enr, Show token, Show node) => ScannerSheet doc enr node clip token -> LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> [EditLayout doc enr node clip token]
+            -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 translateIO scannerSheet state low high = castRemainingEditOps $ \editLow ->
   do { (editsHigh, state', low') <- parseIO scannerSheet state low high editLow
      ; debugLnIO Lay $ "Edit Layout: "++show editLow
@@ -31,7 +31,7 @@ translateIO scannerSheet state low high = castRemainingEditOps $ \editLow ->
 
 
 -- split in monadic and non-monadic part
-parseIO :: (Eq token, Show token, DocNode node, Show doc, Show enr) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> EditLayout doc enr node clip token -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+parseIO :: (Eq token, Show token, DocNode node, Show doc, Show enr) => ScannerSheet doc enr node clip token -> LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> EditLayout doc enr node clip token -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 --parseIO _ state layLvl prsLvl (OpenFileLay str) = openFile str state layLvl prsLvl
 --parseIO _ state layLvl prsLvl (SaveFileLay str) = setUpd NothingUpdated $ saveFile state layLvl prsLvl str 
 parseIO _ state layLvl prsLvl (OpenFileLay str) = return ([OpenFilePres str], state, layLvl)
@@ -51,9 +51,9 @@ parseIO scannerSheet state layLvl@(LayoutLevel pres _ dt) prsLvl (SetFocusLay fo
 parseIO scannerSheet state layLvl prsLvl event = let (editsHigh, state', low') = parse scannerSheet state layLvl prsLvl event
                                                  in  return (editsHigh, state', low')
 
-parse :: (DocNode node, Show token, Eq token, Show doc, Show enr) => ScannerSheet doc node clip token -> LayerStateLay doc node clip token -> 
-         LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> EditLayout doc enr node clip token ->
-         ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+parse :: (DocNode node, Show token, Eq token, Show doc, Show enr) => ScannerSheet doc enr node clip token -> LayerStateLay doc enr node clip token -> 
+         LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> EditLayout doc enr node clip token ->
+         ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 parse _ state layLvl prsLvl (SkipLay i)   = ([SkipPres (i+1)], state, layLvl)
 parse _ state layLvl prsLvl InitLay       = ([InitPres], state, layLvl)
 parse _ state layLvl prsLvl (InsertLay c) = editLay (editInsert c) state layLvl prsLvl
@@ -134,7 +134,7 @@ parse _ state layLvl prsLvl cmd            = debug Err ("LayTranslate.parse: unh
 
 -- if focus is valid, apply editF to the presentation, and try to reparse the presentation 
 --editLay :: 
---            Layout doc node clip token -> Layout doc node clip token -> LayoutLevel doc node clip token -> FocusPres -> (EditPresentation doc enr node clip token, Layout doc node clip token, Layout doc node clip token)
+--            Layout doc enr node clip token -> Layout doc enr node clip token -> LayoutLevel doc enr node clip token -> FocusPres -> (EditPresentation doc enr node clip token, Layout doc enr node clip token, Layout doc enr node clip token)
 
 editLay editF state layLvl@(LayoutLevel pres NoFocusP dt) presLvl = ([SkipPres 0], state, layLvl)
 editLay editF state (LayoutLevel pres focus dt) (PresentationLevel _ (layout, idCounter)) = 
@@ -158,11 +158,11 @@ editLayParse editF scannerSheet state layLvl@(LayoutLevel pres focus dt) prsLvl@
 
 
 -- replace the current layout by pres, focus is reset
-editSet :: Layout doc node clip token -> Layout doc node clip token -> LayoutLevel doc node clip token -> (LayoutLevel doc node clip token, Layout doc node clip token)
+editSet :: Layout doc enr node clip token -> Layout doc enr node clip token -> LayoutLevel doc enr node clip token -> (LayoutLevel doc enr node clip token, Layout doc enr node clip token)
 editSet pres' clip (LayoutLevel pres focus@(FocusP f t) dt) = (LayoutLevel pres' NoFocusP dt, clip)
 
-openFile :: (DocNode node, Show token, Eq token) => String -> LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> 
-            IO ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+openFile :: (DocNode node, Show token, Eq token) => String -> LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> 
+            IO ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 openFile filePath clip layLvl prsLvl =
  do { debugLnIO Lay $ "Opening file: "++filePath
     ; str <- readFile filePath
@@ -170,20 +170,20 @@ openFile filePath clip layLvl prsLvl =
     ; return $ editLay (editSet pres') clip layLvl prsLvl
     }
     
-editInsert :: (DocNode node, Show token) => Char -> Layout doc node clip token -> LayoutLevel doc node clip token -> (LayoutLevel doc node clip token, Layout doc node clip token)
+editInsert :: (DocNode node, Show token) => Char -> Layout doc enr node clip token -> LayoutLevel doc enr node clip token -> (LayoutLevel doc enr node clip token, Layout doc enr node clip token)
 editInsert c clip (LayoutLevel pres focus@(FocusP f t) dt) = 
   let (pres', focus')  = if f==t then (pres,focus) else deleteTree focus pres
       (pres'',focus'') = pasteTree (fromP focus') (text [c]) pres'
   in  (LayoutLevel pres'' focus'' dt, clip)
 
-editCut :: (DocNode node, Show token) => Layout doc node clip token -> LayoutLevel doc node clip token -> (LayoutLevel doc node clip token, Layout doc node clip token)
+editCut :: (DocNode node, Show token) => Layout doc enr node clip token -> LayoutLevel doc enr node clip token -> (LayoutLevel doc enr node clip token, Layout doc enr node clip token)
 editCut clip (LayoutLevel pres focus dt) = 
   let clip' = copyTree focus clip pres                                                                                              
       (pres', focus') = deleteTree focus pres
   in  (LayoutLevel pres' focus' dt, clip')
 
-editCopy :: (DocNode node, Show token) => LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> 
-            ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+editCopy :: (DocNode node, Show token) => LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> 
+            ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 editCopy state layLvl@(LayoutLevel pres NoFocusP dt) doc = ([SkipPres 0], state, layLvl)
 editCopy state layLvl@(LayoutLevel pres focus dt)    doc = 
   let clip' = copyTree focus (getClipboard state) pres                                                                     
@@ -206,7 +206,7 @@ editSplit clip (LayoutLevel pres focus dt) =
 
 
 -- only for column of rows:
-editNormalize :: (DocNode node, Show token) => Layout doc node clip token -> LayoutLevel doc node clip token -> (LayoutLevel doc node clip token, Layout doc node clip token)
+editNormalize :: (DocNode node, Show token) => Layout doc enr node clip token -> LayoutLevel doc enr node clip token -> (LayoutLevel doc enr node clip token, Layout doc enr node clip token)
 editNormalize clip (LayoutLevel pres focus dt) = 
  let (pres', focus') = normalizePresentation pres focus
  in  (LayoutLevel pres' focus' dt, clip)
@@ -230,45 +230,45 @@ editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
     in  (LayoutLevel pres' focus''' dt, clip)
 
 
-editSetStyle :: (DocNode node, Show token) => Style -> Layout doc node clip token -> LayoutLevel doc node clip token ->
-                (LayoutLevel doc node clip token, Layout doc node clip token)
+editSetStyle :: (DocNode node, Show token) => Style -> Layout doc enr node clip token -> LayoutLevel doc enr node clip token ->
+                (LayoutLevel doc enr node clip token, Layout doc enr node clip token)
 editSetStyle style clip (LayoutLevel pres focus dt) = 
  let pres' = setStylePres style focus pres
      focus' = setStylePresF focus
  in  (LayoutLevel pres' focus' dt, clip)
 
-editClearStyle :: (DocNode node, Show token) => Style -> Layout doc node clip token -> LayoutLevel doc node clip token ->
-                (LayoutLevel doc node clip token, Layout doc node clip token)
+editClearStyle :: (DocNode node, Show token) => Style -> Layout doc enr node clip token -> LayoutLevel doc enr node clip token ->
+                (LayoutLevel doc enr node clip token, Layout doc enr node clip token)
 editClearStyle style clip (LayoutLevel pres focus dt) = 
  let pres' = clearStylePres style focus pres
      focus' = clearStylePresF focus
  in  (LayoutLevel pres' focus' dt, clip)
 
 
-navigateLeft :: (DocNode node, Show token) =>  LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> 
-                ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+navigateLeft :: (DocNode node, Show token) =>  LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> 
+                ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 navigateLeft state layLvl@(LayoutLevel pres NoFocusP dt) doc = ([SkipPres 0], state, layLvl)
 navigateLeft state (LayoutLevel pres focus dt) doc =
   let  focus' = navigateLeftTreePres (toP focus) pres
   in  ([SkipPres 0], state, LayoutLevel pres focus' dt)
 
-navigateRight :: (DocNode node, Show token) => LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> 
-                 ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+navigateRight :: (DocNode node, Show token) => LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> 
+                 ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 navigateRight state layLvl@(LayoutLevel pres NoFocusP dt) doc = ([SkipPres 0], state, layLvl)
 navigateRight state (LayoutLevel pres focus dt) doc = 
   let  focus' = navigateRightTreePres (toP focus) pres
   in  ([SkipPres 0], state, LayoutLevel pres focus' dt)
 
-enlargeLeft :: (DocNode node, Show token) => LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> 
-               ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+enlargeLeft :: (DocNode node, Show token) => LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> 
+               ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 enlargeLeft state layLvl@(LayoutLevel pres NoFocusP dt) doc = ([SkipPres 0], state, layLvl)
 enlargeLeft state (LayoutLevel pres focus dt) doc =
   let  focus' = navigateLeftTreePres (toP focus) pres
        focus'' = FocusP (fromP focus) (fromP focus')
   in  ([SkipPres 0], state, LayoutLevel pres focus'' dt)
 
-enlargeRight :: (DocNode node, Show token) => LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> 
-                ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+enlargeRight :: (DocNode node, Show token) => LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> 
+                ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 enlargeRight state layLvl@(LayoutLevel pres NoFocusP dt) doc = ([SkipPres 0], state, layLvl)
 enlargeRight state (LayoutLevel pres focus dt) doc = 
   let  focus' = navigateRightTreePres (toP focus) pres
@@ -283,11 +283,11 @@ enlargeRight state (LayoutLevel pres focus dt) doc =
 
 -- | graphEdit performs a graph edit operation on the layout level and continues by parsing
 --   the layout
-graphEdit :: (Show token, DocNode node) => ScannerSheet doc node clip token ->
-             LayerStateLay doc node clip token -> LayoutLevel doc node clip token ->
-             PresentationLevel doc node clip token ->
-             (LayerStateLay doc node clip token -> LayoutLevel doc node clip token -> (LayerStateLay doc node clip token, LayoutLevel doc node clip token))->
-             ([EditPresentation doc enr node clip token], LayerStateLay doc node clip token, LayoutLevel doc node clip token) 
+graphEdit :: (Show token, DocNode node) => ScannerSheet doc enr node clip token ->
+             LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token ->
+             PresentationLevel doc enr node clip token ->
+             (LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> (LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token))->
+             ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token) 
 graphEdit scannerSheet state layLvl presLvl editFn =
   let (state', layLvl') = editFn state layLvl 
       
@@ -295,8 +295,8 @@ graphEdit scannerSheet state layLvl presLvl editFn =
 
 
 
-addVertex :: (DocNode node, Show token) => [Int] -> (Int, Int) ->  LayerStateLay doc node clip token -> LayoutLevel doc node clip token ->
-             (LayerStateLay doc node clip token, LayoutLevel doc node clip token)
+addVertex :: (DocNode node, Show token) => [Int] -> (Int, Int) ->  LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token ->
+             (LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 addVertex pth (x,y) state (LayoutLevel pres focus dt)  =
   let vertexIDs = getVertexIDs pth pres
       freshID = head' "LayTranslate.addVertex" $ dropWhile (`elem` vertexIDs) [0..]
@@ -320,7 +320,7 @@ deleteInGraph state layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
   let pres' = deleteGraphPres f pres
   in  (state, LayoutLevel pres' NoFocusP dt)
 {-
-openFile :: Layout doc node clip -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> FilePath -> IO (EditPresentation doc enr node clip token, Layout doc node clip, LayoutLevel doc node clip token) 
+openFile :: Layout doc node clip -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> FilePath -> IO (EditPresentation doc enr node clip token, Layout doc node clip, LayoutLevel doc enr node clip token) 
 openFile clip layLvl doc filePath =
  do { debugLnIO Prs "Opening file"
     ; str <- readFile filePath
@@ -328,7 +328,7 @@ openFile clip layLvl doc filePath =
     ; return (SetPres doc', clip', layLvl')
     }
 
-saveFile :: Layout doc node clip -> LayoutLevel doc node clip token -> PresentationLevel doc node clip token -> FilePath -> IO (EditPresentation doc enr node clip token, Layout doc node clip, LayoutLevel doc node clip token)
+saveFile :: Layout doc node clip -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> FilePath -> IO (EditPresentation doc enr node clip token, Layout doc node clip, LayoutLevel doc enr node clip token)
 saveFile clip layLvl doc filePath =
  do { debugLnIO Prs "Saving file"
    -- ; let (src, errsStr) =  span (\l -> not (isPrefixOf "#######" l)) . lines . stringFromPres $ pres

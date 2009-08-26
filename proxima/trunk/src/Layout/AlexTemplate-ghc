@@ -12,7 +12,7 @@ The template was copied from a generated Alex scanner with --ghc.
 -- -----------------------------------------------------------------------------
 -- Proxima wrapper
 
-type ScanChar_ = ScanChar Document Node ClipDoc UserToken
+type ScanChar_ = ScanChar Document EnrichedDoc Node ClipDoc UserToken
 -- ScanChar_ is ScanChar applied to its parameter types. This is necessary, because Alex
 -- cannot handle parameters in the AlexInput type.
 
@@ -21,9 +21,9 @@ type AlexInput  = (Char, [ScanChar_])
 -- The Maybe type in the scanner output is to be able to scan things that do not produce
 -- tokens, such as whitespace.  
 scanner :: ScannerState -> [ScanChar_] -> 
-                  ([ScannedToken Document Node ClipDoc UserToken], ScannerState)
+                  ([ScannedToken Document EnrichedDoc Node ClipDoc UserToken], ScannerState)
 scanner initState scs = go initState ('\n',scs)
-  where go :: ScannerState -> (Char, [ScanChar_]) -> ([ScannedToken Document Node ClipDoc UserToken], ScannerState)
+  where go :: ScannerState -> (Char, [ScanChar_]) -> ([ScannedToken Document EnrichedDoc Node ClipDoc UserToken], ScannerState)
         go state inp@(_,str) =
 	  case alexScan inp 0 of
 		AlexEOF -> ([], state)
