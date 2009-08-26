@@ -286,7 +286,7 @@ data PresentationBase doc enr node clip userToken level where
                    PresentationBase doc enr node clip userToken level 
        OverlayP :: !IDP -> !Order -> ![ (PresentationBase doc enr node clip userToken level) ] ->
                    PresentationBase doc enr node clip userToken level 
-       WithP    :: !(AttrRule doc enr node clip token) -> !(PresentationBase doc enr node clip userToken level) ->
+       WithP    :: !(AttrRule doc enr node clip userToken) -> !(PresentationBase doc enr node clip userToken level) ->
                    PresentationBase doc enr node clip userToken level 
        StructuralP :: !IDP -> !(PresentationBase doc enr node clip userToken level) ->
                    PresentationBase doc enr node clip userToken level 
