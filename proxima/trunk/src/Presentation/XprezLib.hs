@@ -361,6 +361,10 @@ squiggly c xp = overlayReverse [xp, img imgFile `withHeight` 3 `withColor` c]
 squiggle :: Color -> Bool -> Xprez doc enr node clip token -> Xprez doc enr node clip token
 squiggle color condition pres = if condition then squiggly color pres else pres
 
+
+mkButton width label editOp = boxed $ (hAlignCenter label `withWidth` width)
+                              `withMouseDownEx` editOp
+
                
 presentElementXML :: FocusDoc -> node -> [Int] -> String -> [Presentation doc enr node clip token] -> Presentation doc enr node clip token
 presentElementXML focusD node path tag children =
