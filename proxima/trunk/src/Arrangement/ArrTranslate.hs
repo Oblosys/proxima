@@ -35,7 +35,7 @@ unArrangeIO  state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pre
                    in if fw == 0 && fh == 0 -- don't scroll to focus if it is size 0x0
                       then return ()
                       else do { ((x,y),(w,h)) <- readIORef $ getViewedAreaRef state 
-                               ; putStrLn $ "\n\n\nFocus:\n"++show (fx,fy,fw,fh) ++ "\n"
+                               --; putStrLn $ "\n\n\nFocus:\n"++show (fx,fy,fw,fh) ++ "\n"
                                ; print (x,y,w,h)
                                ; writeIORef (getViewedAreaRef state) $
                                    ( ( if fx < x 

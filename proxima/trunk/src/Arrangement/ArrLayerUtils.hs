@@ -72,7 +72,7 @@ pathPFromPathA' arr                             (FormatterP _ press)     path   
 pathPFromPathA' ar                              pr                       pth      = debug Err ("*** ArrLayerUtils.pathPFromPathA': can't handle "++show pth++" "++ shallowShowPres pr++"***") []
 
 -- (cIx,rIx) are the indices in the column of rows and are mapped onto an index in the formatter
-pathPFromPathAFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (cIx:rIx:path) = debug Err ("\n\n\ncol row index is:"++show (cIx,rIx)) $
+pathPFromPathAFormatter (ColA _ _ _ _ _ _ _ _ (F nrOfRowEltss) rowArrs) press (cIx:rIx:path) = -- debug Arr ("\n\n\ncol row index is:"++show (cIx,rIx)) $
   let fIx = sum (take cIx nrOfRowEltss) + rIx
       arr = case index "ArrLayerUtils.pathPFromPathAFormatter" rowArrs cIx of
               (RowA _ _ _ _ _ _ _ _ arrs) -> index "ArrLayerUtils.pathPFromPathAFormatter, arr index" arrs rIx

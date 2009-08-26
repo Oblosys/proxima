@@ -657,7 +657,7 @@ clearStylePres style focus pres = modifyStylePres (clearStyle style) focus pres
 modifyStylePres styleF (FocusP from@(PathP _ _) to@(PathP _ _)) prs = 
   let PathP fromPath fromIndex = from `min` to
       PathP toPath toIndex = from `max` to
-  in  debug Lay ("modifyStylePres "++show styleF++" on "++ show fromPath ++ show toPath) $
+  in  --debug Lay ("modifyStylePres "++show styleF++" on "++ show fromPath ++ show toPath) $
       modifyStylePres' styleF fromPath fromIndex toPath toIndex [] prs
 modifyStylePres _ _ prs = prs
 
