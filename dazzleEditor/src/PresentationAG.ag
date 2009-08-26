@@ -49,7 +49,7 @@ SEM Root
                        , col $ [ row [ parsing $ text @title, empty `withHStretch` True ]
                                        `withFontSize_` (percent 160) 
                                        `addPopupItems`
-                                       [ ("Add Section", insertAtHeadSection @sections.path) ]  
+                                       [ ("Add Section", docUpd $ insertAtHeadSection @sections.path) ]  
                                        `withWidth` 800
                                -- , structural $ col @sections.tocPress
                                , col [ @graph.pres
@@ -83,17 +83,17 @@ SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]
                           , col [ row [ text (@numberStr++"   ")
                                       , parsing $ text @title
                                       ] `withFontSize_` (percent 150)
-                                        `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) 
-                                                        , ("Add Probtable", insertElementAtHead newProbtablePara @paragraphs.path) 
+                                        `addPopupItems` [ ("Add Graph", docUpd $ insertAtHeadSubgraphPara @paragraphs.path) 
+                                                        , ("Add Probtable", docUpd $ insertElementAtHead newProbtablePara @paragraphs.path) 
                                                         ]  
                                         `withHStretch` True 
                                 , @paragraphs.pres
                                 ] `addPopupItems`
-                                  [ ("Add Subsection", insertAtHeadSubsection @subsections.path) ]  
+                                  [ ("Add Subsection", docUpd $ insertAtHeadSubsection @subsections.path) ]  
                           , @subsections.pres `withHStretch` True -- withStretch is necessary when subsections == []
                           ])
-                     `addPopupItems` [ ("Delete Section", deleteAtPath @lhs.path) 
-                                     , ("Add Section", addSection @lhs.path) ]
+                     `addPopupItems` [ ("Delete Section", docUpd $ deleteAtPath @lhs.path) 
+                                     , ("Add Section", docUpd $ addSection @lhs.path) ]
       lhs.tocPres = loc (Node_Section @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                       row [text (@numberStr++"."), parsing $ formatter [text @title]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
@@ -110,16 +110,16 @@ SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                                   , row [ text (@numberStr++"   ")
                                         , parsing $ text @title, empty `withHStretch` True
                                         ] `withFontSize_` (percent 130)
-                                          `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) 
-                                                          , ("Add Probtable", insertElementAtHead newProbtablePara @paragraphs.path) 
+                                          `addPopupItems` [ ("Add Graph", docUpd $ insertAtHeadSubgraphPara @paragraphs.path) 
+                                                          , ("Add Probtable", docUpd $ insertElementAtHead newProbtablePara @paragraphs.path) 
                                                           ]  
                                   , @paragraphs.pres
                                   ] `addPopupItems`
-                                    [ ("Add Subsubsection", insertAtHeadSubsubsection @subsubsections.path) ]  
+                                    [ ("Add Subsubsection", docUpd $ insertAtHeadSubsubsection @subsubsections.path) ]  
                             , @subsubsections.pres `withHStretch` True -- withStretch is necessary when subsubsections == []
                             ])
-                     `addPopupItems` [ ("Delete Subsection", deleteAtPath @lhs.path) 
-                                     , ("Add Subsection", addSubsection @lhs.path) ]
+                     `addPopupItems` [ ("Delete Subsection", docUpd $ deleteAtPath @lhs.path) 
+                                     , ("Add Subsection", docUpd $ addSubsection @lhs.path) ]
       --lhs.tocPres = loc (Node_Subsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text (@numberStr++"."), parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
@@ -137,13 +137,13 @@ SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]
                             , row [ text (@numberStr++"   ")
                                   , parsing $ text @title, empty `withHStretch` True
                                   ] `withFontSize_` (percent 130)  
-                                    `addPopupItems` [ ("Add Graph", insertAtHeadSubgraphPara @paragraphs.path) 
-                                                    , ("Add Probtable", insertElementAtHead newProbtablePara @paragraphs.path) 
+                                    `addPopupItems` [ ("Add Graph", docUpd $ insertAtHeadSubgraphPara @paragraphs.path) 
+                                                    , ("Add Probtable", docUpd $ insertElementAtHead newProbtablePara @paragraphs.path) 
                                                     ]  
                             , @paragraphs.pres
                             ])
-                     `addPopupItems` [ ("Delete Subsubsection", deleteAtPath @lhs.path) 
-                                     , ("Add Subsubsection", addSubsubsection @lhs.path)  ]
+                     `addPopupItems` [ ("Delete Subsubsection", docUpd $ deleteAtPath @lhs.path) 
+                                     , ("Add Subsubsection", docUpd $ addSubsubsection @lhs.path)  ]
       --lhs.tocPres = loc (Node_Subsubsection @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
       --                row [text (@numberStr++"."), text ". ", parsing $ formatter [@title.pres]] `withFontSize_` (percent 130)  
                       -- don't use formatter here
@@ -160,8 +160,8 @@ SEM Paragraph
   | Paragraph
       loc.pres = parsing $
                    @words.pres
-                       `addPopupItems` [ ("Add Graph", addSubgraphPara @lhs.path)
-                                       , ("Add Probtable", addElementAfter newProbtablePara @lhs.path) 
+                       `addPopupItems` [ ("Add Graph", docUpd $ addSubgraphPara @lhs.path)
+                                       , ("Add Probtable", docUpd $ addElementAfter newProbtablePara @lhs.path) 
                                        ]
 
   | SubgraphPara
@@ -176,17 +176,17 @@ SEM Paragraph
                                            , vSpace 20
                                            ]
                          , empty `withHStretch` True ]
-                       `addPopupItems` [ ("Delete Graph", deleteAtPath @lhs.path)
-                                       , ("Add Graph", addSubgraphPara @lhs.path)
-                                       , ("Add Probtable", addElementAfter newProbtablePara @lhs.path) 
-                                       , ("Add Paragraph", addParagraph @lhs.path) ]
+                       `addPopupItems` [ ("Delete Graph", docUpd $ deleteAtPath @lhs.path)
+                                       , ("Add Graph", docUpd $ addSubgraphPara @lhs.path)
+                                       , ("Add Probtable", docUpd $ addElementAfter newProbtablePara @lhs.path) 
+                                       , ("Add Paragraph", docUpd $ addParagraph @lhs.path) ]
   | ProbtablePara
       loc.pres = structural $
                      row [ @probtable.pres, empty `withHStretch` True ]
-                       `addPopupItems` [ ("Delete Probtable", deleteAtPath @lhs.path)
-                                       , ("Add Graph", addSubgraphPara @lhs.path)
-                                       , ("Add Probtable", addElementAfter newProbtablePara @lhs.path) 
-                                       , ("Add Paragraph", addParagraph @lhs.path) ]
+                       `addPopupItems` [ ("Delete Probtable", docUpd $ deleteAtPath @lhs.path)
+                                       , ("Add Graph", docUpd $ addSubgraphPara @lhs.path)
+                                       , ("Add Probtable", docUpd $ addElementAfter newProbtablePara @lhs.path) 
+                                       , ("Add Paragraph", docUpd $ addParagraph @lhs.path) ]
                     
 SEM List_Word
   | List_Word
@@ -277,8 +277,8 @@ SEM Vertex [ || ]
                                                    ]) `withFont'` ("Arial", 6)
                                                 `withbgColor` labelYellow
                                     , glue]
-                           ]) `addPopupItems` ([ ("Circle", setShape @lhs.path Circle @self)
-                                               , ("Square", setShape @lhs.path Square @self)
+                           ]) `addPopupItems` ([ ("Circle", docUpd $ setShape @lhs.path Circle @self)
+                                               , ("Square", docUpd $ setShape @lhs.path Square @self)
                                                ])
 
 {
@@ -302,7 +302,7 @@ SEM Subgraph [||]
                      subEdges = [ (fromV,toV) | (fromV, toV) <- @lhs.edges, fromV `elem` subVertices && toV `elem` subVertices]
                  in  structural $ 
                      (boxed $ graph 375 177 subEdges @vertices.press
-                     `addPopupItems` [ ("Add node " ++ show name, pasteInSubgraph @lhs.path id name @self)
+                     `addPopupItems` [ ("Add node " ++ show name, docUpd $ pasteInSubgraph @lhs.path id name @self)
                                      | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
                                      , id `notElem` (fst . unzip $ @vertices.vertexIDNames)
                                      ])
@@ -326,7 +326,7 @@ SEM Probtable [ | | ]
                                       ]
                               `addLocalPopupItems`
                                   [ ( "Show probtable for "++show name
-                                    , setProbtableID @lhs.path id @self)
+                                    , docUpd $ setProbtableID @lhs.path id @self)
                                   | (name,id) <- zip @lhs.vertexNames @lhs.vertexIDs
                                   ]
       table.nrOfValues = length $ fromList_Value @values.self
@@ -439,7 +439,7 @@ SEM Probability [ total : {[Maybe Double]} | | ]
                                           Nothing -> []
                                           Just v -> if v <= 1.0 
                                                     then [( "Fix probability"
-                                                          , reduceDoc .
+                                                          , docUpd $ reduceDoc .
                                                             pasteAt (Clip_Probability $ Probability $ show $ 1-v) @lhs.path 
                                                           )]
                                                     else []
@@ -447,7 +447,7 @@ SEM Probability [ total : {[Maybe Double]} | | ]
 SEM List_Value
   | List_Value
      loc.pres = structural $ row $ [text "[" `addPopupItems` [ ("Insert value"
-                                                            , reduceDoc .
+                                                            , docUpd $ reduceDoc .
                                                               insertElementAtHead newValue (@lhs.path)
                                                             ) ]] ++
                                 intersperse (text ",") (map incFail @elts.press) ++
@@ -461,8 +461,8 @@ incFail pres = pres {- col [ row [ text "x", empty `withHeight` 10 `withHStretch
 SEM Value
   | Value
       loc.pres = parsing $ text @val
-                   `addPopupItems` [ ("Delete value", reduceDoc . deleteAtPath @lhs.path)
-                                   , ("Insert value after", reduceDoc . addElementAfter newValue @lhs.path) 
+                   `addPopupItems` [ ("Delete value", docUpd $ reduceDoc . deleteAtPath @lhs.path)
+                                   , ("Insert value after", docUpd $ reduceDoc . addElementAfter newValue @lhs.path) 
                                    ]
 
 
