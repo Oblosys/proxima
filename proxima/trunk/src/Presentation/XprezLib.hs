@@ -56,12 +56,17 @@ formatter xps = FormatterP NoIDP xps
 with_ xp f = WithP f xp
 structural xp = StructuralP NoIDP xp
 parsing xp = ParsingP NoIDP Nothing LexInherited xp
-parsing' l xp = ParsingP NoIDP Nothing l xp
 
 parsingWithParser :: (Editable a doc enr node clip token, DocNode node, Ord token, Show token) =>
                      ListParser doc enr node clip token a -> a -> Presentation doc enr node clip token ->
                      Presentation doc enr node clip token
 parsingWithParser parser self pres = ParsingP NoIDP (Just $ mkClipParser $ parser) LexInherited pres
+
+parsingWithParserLexer :: (Editable a doc enr node clip token, DocNode node, Ord token, Show token) =>
+                     ListParser doc enr node clip token a -> Lexer -> a -> Presentation doc enr node clip token ->
+                     Presentation doc enr node clip token
+parsingWithParserLexer parser lexer self pres = ParsingP NoIDP (Just $ mkClipParser $ parser) lexer pres
+
 loc l xp  = LocatorP l xp
 tag t xp = TagP t xp
 
@@ -193,7 +198,7 @@ withMouseDown xp upd = withInh xp (\i -> i { mouseDown = Just $ wrap (UpdateDoc'
 
 withMouseDownBold :: forall doc enr node clip token . 
                  Xprez doc enr node clip token -> Xprez doc enr node clip token
-withMouseDownBold xp = withInh xp (\i -> i { mouseDown = Just $ wrap (InsertLay 'X' :: EditLayout doc enr node clip token) })
+withMouseDownBold xp = withInh xp (\i -> i { mouseDown = Just $ wrap (SetStyleLay Bold :: EditLayout doc enr node clip token) })
 
 -- this one deletes all inherited popup items
 withInheritablePopupMenuItems :: Xprez doc enr node clip token -> [PopupMenuItem doc clip] -> Xprez doc enr node clip token
