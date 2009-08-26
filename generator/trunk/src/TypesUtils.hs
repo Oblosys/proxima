@@ -173,7 +173,7 @@ addHolesParseErrs decls = [ Decl lhsType $ prods ++ case lhsType of
                           | Decl lhsType prods <- decls ]
  where holeParseErr typeName = [ Prod HoleProd ("Hole"++typeName) [] [] 
                                , Prod ParseErrProd ("ParseErr"++typeName) [] 
-                                   [ Field "error"        (CompositeType "ParseError Document Node ClipDoc UserToken") 
+                                   [ Field "error"        (CompositeType "ParseError Document EnrichedDoc Node ClipDoc UserToken") 
                                    ]
                                ]
   

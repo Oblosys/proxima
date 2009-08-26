@@ -129,7 +129,7 @@ genListUtils decls = genBanner "List utility functions" $ concat
   ]
 
 genMisc = genBanner "Miscellaneous" $
-  [ "type Presentation_Doc_Node_Clip_Token = Presentation Document Node ClipDoc UserToken"
+  [ "type Presentation_Doc_Node_Clip_Token = Presentation Document EnrichedDoc Node ClipDoc UserToken"
   , ""
   , "instance Doc Document where"
   , "  initialDoc = initialDocument"
@@ -206,7 +206,7 @@ genMisc = genBanner "Miscellaneous" $
   , "presentPrimXMLFloat :: Float -> Presentation_Doc_Node_Clip_Token"
   , "presentPrimXMLFloat x = text $ \"<Float>\"++show x++\"<Float>\""
   , ""
-  , "presentPrimXMLBool :: Bool -> Presentation doc node clip token"
+  , "presentPrimXMLBool :: Bool -> Presentation_Doc_Node_Clip_Token"
   , "presentPrimXMLBool x = text $ \"<Bool>\"++show x++\"<Bool/>\""
   , ""
   , "presentPrimXMLString :: String -> Presentation_Doc_Node_Clip_Token"

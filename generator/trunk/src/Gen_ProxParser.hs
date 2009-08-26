@@ -25,11 +25,11 @@ generate docType = genProxParserTypeSynonym
   
 
 genProxParserTypeSynonym = genBanner "ProxParser type synonym" $
-  [ "type ProxParser a = ListParser Document Node ClipDoc UserToken a"
+  [ "type ProxParser a = ListParser Document EnrichedDoc Node ClipDoc UserToken a"
   ]
   
 genConstruct decls = genBanner "Construct instance" $
-  [ "instance Construct Document Node ClipDoc UserToken where"
+  [ "instance Construct Document EnrichedDoc Node ClipDoc UserToken where"
   ,   "  construct NoNode = error $ \"ProxParser_Generated.construct not defined on NoNode\""
   ] ++
   [ "  construct (Node_%1 _ _) = construct_%1" <~ [cnstrName] 
@@ -62,7 +62,7 @@ genConstructDecl (Decl lhsType prods) =
   ]
 
 genReuse decls = genBanner "reuse functions" $ concat
-  [ [ "reuse%1 :: [Token doc Node clip token]%2 -> %3"
+  [ [ "reuse%1 :: [Token doc enr Node clip token]%2 -> %3"
     , "reuse%1 nodes%4"
     , "  = case extractFromTokens extract%1 default%1 nodes of"
     , "           %5 -> genericReuse%6 %1%7%4"
@@ -117,7 +117,7 @@ non-generated part).
 -}
 genExtractFromTokens = genBanner "extractFromTokens" $
  [ "-- return result of the first extraction application in the list that is not Nothing"
- , "extractFromTokens :: (Maybe Node -> Maybe a) -> a -> [Token doc Node clip token] -> a"
+ , "extractFromTokens :: (Maybe Node -> Maybe a) -> a -> [Token doc enr Node clip token] -> a"
  , "extractFromTokens extr def []     = def"
  , "extractFromTokens extr def (t:ts) = maybe (extractFromTokens extr def ts) id (extr (tokenNode t))"
  ]

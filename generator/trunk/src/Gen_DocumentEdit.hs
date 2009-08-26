@@ -51,7 +51,7 @@ genEditable decls = genBanner "Editable instances" $
   concatMap genEditableDecl decls
 
 genEditableDecl (Decl (LHSBasicType typeName) prods) = 
-  ["instance Editable %1 Document Node ClipDoc UserToken where"
+  ["instance Editable %1 Document EnrichedDoc Node ClipDoc UserToken where"
   , "  select [] x = Clip_%1 x" 
   ] <~ [typeName] ++
   concatMap genSelect prods ++
@@ -113,7 +113,7 @@ genEditableDecl (Decl (LHSBasicType typeName) prods) =
           "  arity %1 = %2" <~ [ genXPattern prod, show $ length fields ]
 
 genEditableDecl (Decl (LHSListType typeName) prods) = 
-  [ "instance Editable List_%1 Document Node ClipDoc UserToken where"
+  [ "instance Editable List_%1 Document EnrichedDoc Node ClipDoc UserToken where"
   , "  select [] x = Clip_List_%1 x"
   , "  select (n:p) (List_%1 cxs) ="
   , "    let xs = fromConsList_%1 cxs"
@@ -162,7 +162,7 @@ genEditableDecl (Decl (LHSListType typeName) prods) =
   ] <~ [typeName]
 
 genEditableDocEnrichedDocAndPrims = genBanner "Editable instances for Document, EnrichedDoc and primitive types" $
-  [ "instance Editable Int Document Node ClipDoc UserToken where"
+  [ "instance Editable Int Document EnrichedDoc Node ClipDoc UserToken where"
   , "  select [] x = Clip_Int x"
   , "  select _  _ = Clip_Nothing"
   , "  paste [] (Clip_Int c) x = c"
@@ -188,7 +188,7 @@ genEditableDocEnrichedDocAndPrims = genBanner "Editable instances for Document, 
   , "  insertList _ _ _ = Clip_Nothing"
   , "  removeList _ _ = Clip_Nothing"
   , ""
-  , "instance Editable Float Document Node ClipDoc UserToken where"
+  , "instance Editable Float Document EnrichedDoc Node ClipDoc UserToken where"
   , "  select [] x = Clip_Float x"
   , "  select _  _ = Clip_Nothing"
   , "  paste [] (Clip_Float c) x = c"
@@ -214,7 +214,7 @@ genEditableDocEnrichedDocAndPrims = genBanner "Editable instances for Document, 
   , "  insertList _ _ _ = Clip_Nothing"
   , "  removeList _ _ = Clip_Nothing"
   , ""
-  , "instance Editable Bool Document Node ClipDoc UserToken where"
+  , "instance Editable Bool Document EnrichedDoc Node ClipDoc UserToken where"
   , "  select [] x = Clip_Bool x                            "
   , "  select _  _ = Clip_Nothing                           "
   , "  paste [] (Clip_Bool c) x = c                         "
@@ -240,7 +240,7 @@ genEditableDocEnrichedDocAndPrims = genBanner "Editable instances for Document, 
   , "  insertList _ _ _ = Clip_Nothing"
   , "  removeList _ _ = Clip_Nothing"
   , ""
-  , "instance Editable String Document Node ClipDoc UserToken where"
+  , "instance Editable String Document EnrichedDoc Node ClipDoc UserToken where"
   , "  select [] x = Clip_String x"
   , "  select _  _ = Clip_Nothing"
   , "  paste [] (Clip_String c) x = c"
