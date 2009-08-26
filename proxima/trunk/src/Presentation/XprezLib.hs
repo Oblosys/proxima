@@ -5,7 +5,6 @@ import Evaluation.DocTypes
 import Evaluation.DocumentEdit
 import Presentation.PresTypes
 import Presentation.PresentationParsing
-import Layout.LayTypes
 import Proxima.Wrap
 import Maybe
 
@@ -196,9 +195,9 @@ withMouseDown :: forall doc enr node clip token .
                  Xprez doc enr node clip token -> UpdateDoc doc clip -> Xprez doc enr node clip token
 withMouseDown xp upd = withInh xp (\i -> i { mouseDown = Just $ wrap (UpdateDoc' upd :: EditDocument' doc enr node clip token) })
 
-withMouseDownBold :: forall doc enr node clip token . 
-                 Xprez doc enr node clip token -> Xprez doc enr node clip token
-withMouseDownBold xp = withInh xp (\i -> i { mouseDown = Just $ wrap (SetStyleLay Bold :: EditLayout doc enr node clip token) })
+withMouseDownEx :: forall doc enr node clip token . 
+                 Xprez doc enr node clip token -> Wrapped doc enr node clip token -> Xprez doc enr node clip token
+withMouseDownEx xp editop = withInh xp (\i -> i { mouseDown = Just editop })
 
 -- this one deletes all inherited popup items
 withInheritablePopupMenuItems :: Xprez doc enr node clip token -> [PopupMenuItem doc clip] -> Xprez doc enr node clip token
@@ -332,6 +331,12 @@ vRefHalf xp = xp `with_` (\(i,s) -> let refdif = vRef s - assignedHeight i `div`
 
 glue :: Xprez doc enr node clip token
 glue = empty `withHStretch` True `withVStretch` True
+
+hGlue :: Xprez doc enr node clip token
+hGlue = empty `withHStretch` True
+
+vGlue :: Xprez doc enr node clip token
+vGlue = empty `withVStretch` True
 
 boxed :: Xprez doc enr node clip token -> Xprez doc enr node clip token
 boxed p = colR 1 [ hLine, rowR 1 [ vLine, p, vLine ], hLine ]
