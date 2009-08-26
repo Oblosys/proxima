@@ -271,6 +271,7 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      --debug Lay ("focused scan chars:\n"++showFocusedScanChars focusedScanChars) $
      --debug Lay ("Grouped scan chars:\n"++show groupedScanChars) $
      --debug Lay ("whitespaceMap" ++ show scannedWhitespaceMap' ) $
+     --debug Lay ("Lexer:" ++ show lex) $ 
      --debug Lay (showScannedTokens scannedTokensIDPs) $
      
      ( [ParsingTk parser mNode tokens idP']
