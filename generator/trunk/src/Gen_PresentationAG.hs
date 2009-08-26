@@ -117,10 +117,10 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
   concatMap genSemPresProd prods ++
   [ "  | Hole%1"
   , "      lhs.pres = presHole @lhs.focusD \"%1\" (Node_Hole%1 @self @lhs.path) @lhs.path"
-  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
+  , "                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)"                  
   , "  | ParseErr%1"
   , "      lhs.pres = presParseErr (Node_ParseErr%1 @self @lhs.path) @error"
-  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
+  , "                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)"                  
   ] <~ [typeName] ++
   (if typeName /= "EnrichedDoc"
    then ["      lhs.parseErrors = getErrorMessages @error"]
@@ -149,7 +149,7 @@ genSemBasicDecl decls (Decl (LHSBasicType typeName) prods) =
        genSemPresProd (Prod _ cnstrName idpFields fields) =
          [ "  | %1"
          , "      lhs.pres = loc (Node_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres"
-         , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
+         , "                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)"                  
 
 --         , "      loc.pres = empty" --gerbo HACK! for testing
          ] <~ [cnstrName]
@@ -170,14 +170,14 @@ genSemListDecl (Decl (LHSListType typeName) _) =
   , "  | ParseErrList_%1 lhs.press = []"
   , "  | List_%1"
   , "      lhs.pres = loc (Node_List_%1 @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path $ @pres"
-  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
+  , "                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)"                  
   , "  | ParseErrList_%1"
   , "      lhs.pres = presParseErr (Node_ParseErrList_%1 @self @lhs.path) @error"
-  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
+  , "                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)"                  
   , "      lhs.parseErrors = getErrorMessages @error"
   , "  | HoleList_%1"
   , "      lhs.pres = presHole @lhs.focusD \"%1\" (Node_HoleList_%1 @self @lhs.path) @lhs.path"
-  , "                 `withLocalPopupMenuItems` menuD (PathD @lhs.path) @lhs.doc"                  
+  , "                 `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)"                  
   , ""
   ] <~ [typeName]
 
