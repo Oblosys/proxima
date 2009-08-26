@@ -9,6 +9,8 @@ import Presentation.PresLayerUtils
 
 import Presentation.XprezLib
 import Presentation.XLatex hiding (bold)
+import Layout.LayTypes
+import Proxima.Wrap
 
 import Evaluation.DocumentEdit
 
@@ -648,10 +650,30 @@ SEM Test
       loc.pres = structural $ leftTopMargins 30 40 $
                    col [ row [ text "Rich text: ", @styledText.pres `withFontFam` "Courier" ]
 		     --  , row [ text "Parsed: ", text @styledText.str ]
-                       , withMouseDownBold $ text "bold"  
+                       , row [ mkButton 25 (bold $ text "B") $ WrappedLayEdit $ SetStyleLay Bold
+                             , hSpace 3
+			     , mkButton 25 (bold $ text "B" `withColor` lightGray) $ WrappedLayEdit $ ClearStyleLay Bold
+                             , hSpace 3
+			     , mkButton 25 (italic $ text "I") $ (WrappedLayEdit $ SetStyleLay Italic)
+                             , hSpace 3
+			     , mkButton 25 (italic $ text "I"`withColor` lightGray) $ (WrappedLayEdit $ ClearStyleLay Italic)
+                             , hSpace 3
+			     , mkButton 25 (text " ") (WrappedLayEdit $ SetStyleLay $ Colored (0,0,0)) `withbgColor` (0,0,0)
+                             , hSpace 3
+			     , mkButton 25 (text " ") (WrappedLayEdit $ SetStyleLay $ Colored (255,0,0)) `withbgColor` (255,0,0)
+                             , hSpace 3
+			     , mkButton 25 (text " ") (WrappedLayEdit $ SetStyleLay $ Colored (0,255,0)) `withbgColor` (0,255,0)
+                             , hSpace 3
+			     , mkButton 25 (text " ") (WrappedLayEdit $ SetStyleLay $ Colored (0,0,255)) `withbgColor` (0,0,255)
+                             ]
                        , formatter $ replicate 0 (text "bla") 
                        ]
      styledText.styles = []
+
+{
+mkButton width label editOp = boxed $ (hAlignCenter label `withWidth` width)
+                              `withMouseDownEx` editOp
+}
 {-
 SEM StyledText [ | | str : String ]
   | StyledText
