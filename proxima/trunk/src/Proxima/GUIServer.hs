@@ -328,7 +328,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actu
 
 
     ; pendingQueriesTxt <-  readFile "metricsQueries.txt"
-    ; putStrLn $ "About to send following metrics queries to client:\n"++pendingQueriesTxt 
+    --; putStrLn $ "About to send following metrics queries to client:\n"++pendingQueriesTxt 
     ; seq (length pendingQueriesTxt) $ return ()
     ; let pendingQueries = map read $ lines pendingQueriesTxt :: [(String, Int, Bool, Bool)]
           queryHTML = concat [ "<div op='metricsQuery' family='"++fam++"' size='"++show sz++"' "++
