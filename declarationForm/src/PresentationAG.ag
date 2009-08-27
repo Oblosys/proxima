@@ -692,7 +692,7 @@ SEM List_Word
   | List_Word
       loc.pres = parsing $
                    formatter (if null @elts.press then [text ""] 
-                              else intersperse (text " ") @elts.press )
+                              else @elts.styledPress)
                    `withWidth` 800
       lhs.underwater = concat $ intersperse " " @elts.underwaters
        -- for an empty paragraph, we add a dummy word "" so its presentation does not get height 0
@@ -701,11 +701,16 @@ SEM List_Word
   | ParseErrList_Word
       lhs.underwater = ""
 
-SEM ConsList_Word [ | | underwaters : {[String]} ]
+SEM ConsList_Word [ | | underwaters : {[String]} styledPress : {[Presentation_]} isLast : Bool ]
   | Cons_Word
       lhs.underwaters = @head.underwater : @tail.underwaters
+      lhs.styledPress = @head.pres : (if not @tail.isLast then (applyStyles @head.styles (text " ") :) else id) @tail.styledPress
+      lhs.isLast = False
   | Nil_Word
       lhs.underwaters = []
+      lhs.styledPress = []
+      lhs.isLast = True
+
 
 SEM Word 
   | Word 
