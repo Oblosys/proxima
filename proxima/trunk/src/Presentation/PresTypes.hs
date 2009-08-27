@@ -154,7 +154,7 @@ instance (Eq node, Eq token) => Eq (Token doc enr node clip token) where
   UserTk _ u1 _ _ _     == UserTk _ u2 _ _ _     = u1 == u2
   StructuralTk _ Nothing _ _ _    == StructuralTk _ _ _ _ _ = True       -- StructuralTks with no node always match
   StructuralTk _ _ _ _ _          == StructuralTk _ Nothing _ _ _ = True -- StructuralTks with no node always match
-  StructuralTk _ (Just nd1) _ _ _ == StructuralTk _(Just nd2) _ _ _ = nd1 == nd2
+  StructuralTk _ (Just nd1) _ _ _ == StructuralTk _(Just nd2) _ _ _ = nd1 == nd2 -- Eq on Node is based on rankNode
   StyleTk _ tag1  == StyleTk _ tag2 = tag1 == tag2   
   ParsingTk _ _ _ _   == ParsingTk _ _ _ _ = True   
   GraphTk _ _ _ _  == GraphTk _ _ _ _  = True
@@ -167,7 +167,7 @@ instance (Ord node, Ord token) => Ord (Token doc enr node clip token) where
   UserTk _ u1 _ _ _      <= UserTk _ u2 _ _ _    = u1 <= u2
   StructuralTk _ Nothing _ _ _    <= StructuralTk _ _ _ _ _ = True     
   StructuralTk _ _ _ _ _          <= StructuralTk _ Nothing _ _ _ = True
-  StructuralTk _ (Just nd1) _ _ _ <= StructuralTk _ (Just nd2) _ _ _ = nd1 <= nd2
+  StructuralTk _ (Just nd1) _ _ _ <= StructuralTk _ (Just nd2) _ _ _ = nd1 <= nd2 -- Ord on Node is based on rankNode
   StructuralTk _ _ _ _ _ <= UserTk _ _ _ _ _  = True
   StyleTk _ tag1 <= StyleTk _ tag2      = tag1 <= tag2
   StyleTk _ _ <= StructuralTk _ _ _ _ _ = True
