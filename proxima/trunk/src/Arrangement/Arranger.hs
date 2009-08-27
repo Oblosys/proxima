@@ -54,19 +54,27 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
     ; return (attrTree, state'')
     }
 
+
 fixed :: (Show node, Show token) => Settings -> FontMetricsRef -> Int -> FocusPres -> Layout doc enr node clip token -> Layout doc enr node clip token -> Rectangle -> Rectangle -> 
          Arrangement node -> IO (Arrangement node, Int, Int)
 fixed settings fontMetricsRef idACounter focus (pres :: Layout doc enr node clip token) (unprunedPres :: Layout doc enr node clip token) viewedArea oldViewedArea oldArrangement = 
  mdo { (fontMetrics,arrangement, idACounter', maxFDepth) <- f (fontMetrics,arrangement, idACounter, maxFDepth)
-    ; return (arrangement, idACounter', maxFDepth)
-    }
- where f :: (FontMetrics, Arrangement node, Int, Int) ->
+     ; return (arrangement, idACounter', maxFDepth)
+     }
+ 
+ where (focusMinPath,focusMaxPath) = 
+         case focus of
+                FocusP (PathP f _) (PathP t _) -> if f <= t then (f,t) else (t,f)
+                _                              -> ([-1],[-1])
+  
+       f :: (FontMetrics, Arrangement node, Int, Int) ->
             IO (FontMetrics, Arrangement node, Int, Int) -- doc and node are scoped type variables
        f (fontMetrics,_, _, _) = 
          do { let (allFonts, arrangement, idACounter', maxFDepth,_) = -- _ is the self attribute
                     sem_Root (Root pres) [defaultFont]
                                                defaultBackColor defaultFillColor
-                                               focus
+                                               focusMinPath
+                                               focusMaxPath
                                                defaultFont 
                                                fontMetrics
                                                idACounter

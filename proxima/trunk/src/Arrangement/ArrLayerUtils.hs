@@ -83,13 +83,10 @@ pathPFromPathAFormatter _                           press path = debug Err ("Arr
 
 -- refs are not passed, since they are not used in rendering.
 -- What happens if an empty is used as oldArrangement? Can this happen? And do we need the refs then?
-arrangeWhenFocusedOrViewed rootPath focus absx absy x y w h hrf vrf viewedArea idA arrangement =
-  let (fromPath,toPath) = case focus of
-                    FocusP (PathP f _) (PathP t _) -> if f <= t then (f,t) else (t,f)
-                    _                              -> ([-1],[-1])
-  in  if rootPath >= take (length rootPath) fromPath && rootPath <= toPath ||
-         overlap ((absx,absy),(w,h)) viewedArea then 
---          (if rootPath >= take (length rootPath) fromPath && rootPath <= toPath then debug Err ("arrangeinfocus\n"++ show rootPath ++"\n"++ show focus++shallowShowArr arrangement) else id) 
-          arrangement else
-          --arrangement 
-          unarrangedA x y w h hrf vrf
+arrangeWhenFocusedOrViewed rootPath focusMinPath focusMaxPath absx absy x y w h hrf vrf viewedArea idA arrangement =
+  if rootPath >= take (length rootPath) focusMinPath && rootPath <= focusMaxPath ||
+     overlap ((absx,absy),(w,h)) viewedArea 
+  then --(if rootPath >= take (length rootPath) focusMinPath && rootPath <= focusMaxPath 
+       --then debug Err ("arrangeinfocus\n"++ show rootPath ++"\n"++ show focusMinPath++" "++show focusMaxPath++shallowShowArr arrangement) else id) 
+       arrangement 
+  else unarrangedA x y w h hrf vrf
