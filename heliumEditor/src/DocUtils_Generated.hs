@@ -34,10 +34,10 @@ toXMLHeliumTypeInfo _ = Elt "HeliumTypeInfo" [] []
 parseXML_HeliumTypeInfo = ([],[],[]) <$ emptyTag "HeliumTypeInfo"
 
 
-presentXMLHeliumTypeInfo :: HeliumTypeInfo -> Presentation_Doc_Node_Clip_Token
+presentXMLHeliumTypeInfo :: HeliumTypeInfo -> Presentation_
 presentXMLHeliumTypeInfo x = text $ "<HeliumTypeInfo/>"
 
-presentTreeHeliumTypeInfo :: HeliumTypeInfo -> Presentation_Doc_Node_Clip_Token
+presentTreeHeliumTypeInfo :: HeliumTypeInfo -> Presentation_
 presentTreeHeliumTypeInfo x =  mkTreeLeaf False $ text $ "HeliumTypeInfo"
 
 
@@ -699,7 +699,7 @@ removeList_Item n (Cons_Item cx cxs) = Cons_Item cx (removeList_Item (n-1) cxs)
 -- Miscellaneous                                                        --
 --------------------------------------------------------------------------
 
-type Presentation_Doc_Node_Clip_Token = Presentation Document EnrichedDoc Node ClipDoc UserToken
+type Presentation_ = Presentation Document EnrichedDoc Node ClipDoc UserToken
 
 instance Doc Document where
   initialDoc = initialDocument
@@ -761,31 +761,31 @@ parseXML_String  =
 
 -- Xprez XML presentation for primitive types
 
-presentPrimXMLInt :: Int -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLInt :: Int -> Presentation_
 presentPrimXMLInt x = text $ "<Int>"++show x++"<Int/>"
 
-presentPrimXMLFloat :: Float -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLFloat :: Float -> Presentation_
 presentPrimXMLFloat x = text $ "<Float>"++show x++"<Float>"
 
-presentPrimXMLBool :: Bool -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLBool :: Bool -> Presentation_
 presentPrimXMLBool x = text $ "<Bool>"++show x++"<Bool/>"
 
-presentPrimXMLString :: String -> Presentation_Doc_Node_Clip_Token
+presentPrimXMLString :: String -> Presentation_
 presentPrimXMLString x = text $ "<String>"++x++"<String>"
 
 
 -- Xprez tree presentation for primitive types
 
-presentPrimTreeInt :: Int -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeInt :: Int -> Presentation_
 presentPrimTreeInt x =  mkTreeLeaf False $ text $ "Int: "++show x
 
-presentPrimTreeFloat :: Float -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeFloat :: Float -> Presentation_
 presentPrimTreeFloat x =  mkTreeLeaf False $ text $ "Float: "++show x
 
-presentPrimTreeBool :: Bool -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeBool :: Bool -> Presentation_
 presentPrimTreeBool x =  mkTreeLeaf False $ text $ "Bool: "++show x
 
-presentPrimTreeString :: String -> Presentation_Doc_Node_Clip_Token
+presentPrimTreeString :: String -> Presentation_
 presentPrimTreeString x =  mkTreeLeaf False $ text $ "String: "++x
 
 

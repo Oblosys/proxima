@@ -23,7 +23,7 @@ The attribute signature for EnrichedDoc should be:
 
 EnrichedDoc  [ focusD : FocusDoc path : Path
              | pIdC : Int layoutMap : WhitespaceMap
-             | pres : Presentation_Doc_Node_Clip_Token EnrichedDoc 
+             | pres : Presentation_ EnrichedDoc 
              ]
 -}
 }
@@ -191,19 +191,19 @@ ATTR Root EnrichedDoc RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPres
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
 ATTR Root EnrichedDoc RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item
-     [ | | pres : Presentation_Doc_Node_Clip_Token ]
+     [ | | pres : Presentation_ ]
 
 ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
 ATTR Root RootE Decl Ident Exp Alt Board BoardRow BoardSquare PPPresentation Slide ItemList ListType Item List_Decl List_Alt List_Exp List_Slide List_Item
-     [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
+     [ | | ix : Int path : Path presXML : Presentation_ presTree : Presentation_ ]
 
 ATTR List_Decl List_Alt List_Exp List_Slide List_Item ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
-     [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]
+     [ | | press : {[Presentation_]} ]
 
 ATTR ConsList_Decl ConsList_Alt ConsList_Exp ConsList_Slide ConsList_Item
-     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]
+     [ | | pressXML : {[Presentation_]} pressTree : {[Presentation_]} ]
 
 
 

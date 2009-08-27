@@ -179,7 +179,7 @@ pthFrmMsg _ = ([],[],[])
 toMessage (_,str) = HError (lines str) [] [] []
 
 -- if ps1 ++ ps2 ++ ps3 not null then head is link
-presMessage :: HeliumMessage -> Presentation_Doc_Node_Clip_Token
+presMessage :: HeliumMessage -> Presentation_
 presMessage (HError lns ps1 ps2 ps3) = case ps1++ps2++ps3 of []      -> col (map (text) lns) `withColor` errColor
                                                              rng:_   -> col (map (text) lns) `withColor` errColor
                                                                         `link` rng
@@ -427,7 +427,7 @@ error1Color = red
 error2Color = green
 error3Color = red
 
-link :: Presentation_Doc_Node_Clip_Token -> PathDoc -> Presentation_Doc_Node_Clip_Token
+link :: Presentation_ -> PathDoc -> Presentation_
 link xp NoPathD = xp
 link xp path    = xp `withMouseDown` navigateTo path
 
@@ -471,20 +471,20 @@ idP0FromIdent _                    = NoIDP
 
 box xp = overlayReverse [xp, poly [(0,0),(1,0),(1,1),(0,1),(0,0)] Transparent]
 
-op :: IDP -> String -> Presentation_Doc_Node_Clip_Token
+op :: IDP -> String -> Presentation_
 op idc str = token idc str `withColor` opCol
 
-key :: IDP -> String -> Presentation_Doc_Node_Clip_Token
+key :: IDP -> String -> Presentation_
 key idc str = token idc str `withColor` keyCol
 
 
-sep :: IDP -> String -> Presentation_Doc_Node_Clip_Token
+sep :: IDP -> String -> Presentation_
 sep idc str = token idc str `withColor` sepCol
 
-cons :: IDP -> String -> Presentation_Doc_Node_Clip_Token
+cons :: IDP -> String -> Presentation_
 cons idc str = token idc str `withColor` consCol
 
-typeD :: IDP -> String -> Presentation_Doc_Node_Clip_Token
+typeD :: IDP -> String -> Presentation_
 typeD idc str = bold $ presType str `withColor` typeDCol -- idc is never used for type decls.
 
 token idp str = TokenP idp (UserTk 0 (KeyTk str) str Nothing idp)
@@ -1139,7 +1139,7 @@ SEM BoardSquare [ possibleMoves : {[(Int, Int)]} rowNr : Int | focusedPiece : { 
 ------------------------- Identifier list presentation
 --      can we mix pres with idsPres?
 
-ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation_Doc_Node_Clip_Token ]
+ATTR List_Decl ConsList_Decl Decl Ident [ || idsPres : Presentation_ ]
 
 SEM List_Decl
   | List_Decl         lhs.idsPres = loc (Node_List_Decl @self @lhs.path) $ parsing $ presentFocus @lhs.focusD @lhs.path $
@@ -1329,11 +1329,11 @@ slide title body = overlay [
 }
 
 
-ATTR Slide ItemList {- ListType -} Item [ || pres2 : Presentation_Doc_Node_Clip_Token ]
-ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[Presentation_Doc_Node_Clip_Token]} ]
+ATTR Slide ItemList {- ListType -} Item [ || pres2 : Presentation_ ]
+ATTR List_Slide ConsList_Slide List_Item ConsList_Item [ || press2 : {[Presentation_]} ]
 
 -- seems like parse err and hole are wrong
-SEM List_Slide [ || pres2 : Presentation_Doc_Node_Clip_Token ]
+SEM List_Slide [ || pres2 : Presentation_ ]
   | List_Slide
       lhs.pres2 = loc (Node_List_Slide @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col $ intersperse (col [vSpace 4, hLine, vSpace 4]) @elts.press2
@@ -1361,7 +1361,7 @@ SEM ItemList
             items.listType = @listType.self
             items.typeLoc = @listType.typeLoc
 
-SEM ListType [ || pres2 : Presentation_Doc_Node_Clip_Token typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token}]
+SEM ListType [ || pres2 : Presentation_ typeLoc :  {Presentation_ -> Presentation_}]
   | Bullet         lhs.pres2 = loc (Node_Bullet @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                 empty
                    lhs.typeLoc = \pres -> loc (Node_Bullet @self @lhs.path) $
@@ -1380,7 +1380,7 @@ SEM ListType [ || pres2 : Presentation_Doc_Node_Clip_Token typeLoc :  {Presentat
 
 
 -- seems like parse err and hole are wrong
-SEM List_Item [ || pres2 : Presentation_Doc_Node_Clip_Token ]
+SEM List_Item [ || pres2 : Presentation_ ]
   | List_Item
       lhs.pres2 = loc (Node_List_Item @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                    col @elts.press2
@@ -1391,7 +1391,7 @@ SEM List_Item [ || pres2 : Presentation_Doc_Node_Clip_Token ]
 
 
 
-SEM Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} ||  ]
+SEM Item [ listType : ListType typeLoc :  {Presentation_ -> Presentation_} ||  ]
   | StringItem     lhs.pres2 = loc (Node_StringItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
                                  row [itemStart @lhs.ix @lhs.listType @lhs.typeLoc, parsing $ text @string]
   | HeliumItem     lhs.pres2 = loc (Node_HeliumItem @self @lhs.path) $ structural $ presentFocus @lhs.focusD @lhs.path $
@@ -1420,8 +1420,8 @@ SEM ConsList_Slide
   | Cons_Slide lhs.press2 = @head.pres2 : @tail.press2
   | Nil_Slide  lhs.press2 = []
 
-ATTR List_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} || ]
-SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation_Doc_Node_Clip_Token -> Presentation_Doc_Node_Clip_Token} || ]
+ATTR List_Item [ listType : ListType typeLoc :  {Presentation_ -> Presentation_} || ]
+SEM ConsList_Item [ listType : ListType typeLoc :  {Presentation_ -> Presentation_} || ]
   | Cons_Item lhs.press2 = @head.pres2 : @tail.press2
               head.listType = @lhs.listType
               head.typeLoc = @lhs.typeLoc
