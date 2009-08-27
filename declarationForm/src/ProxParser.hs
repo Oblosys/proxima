@@ -80,7 +80,7 @@ pFontSizeTag :: StartOrEnd -> ProxParser (Token Document EnrichedDoc Node ClipDo
 pFontSizeTag startOrEnd = pSym (StyleTk 0 (ScannedStyleTag (ScannedFontSize 0) startOrEnd))
 
 pColorTag :: StartOrEnd -> ProxParser (Token Document EnrichedDoc Node ClipDoc UserToken)
-pColorTag startOrEnd = pSym (StyleTk 0 (ScannedStyleTag (ScannedColored (0,0,0)) startOrEnd))
+pColorTag startOrEnd = pSym (StyleTk 0 (ScannedStyleTag (ScannedColor (0,0,0)) startOrEnd))
 
 pFloat = read . tokenString <$> pToken FloatTk
 

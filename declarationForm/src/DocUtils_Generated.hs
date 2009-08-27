@@ -67,7 +67,7 @@ instance Eq TextStyle where
   TextBold   == TextBold   = True
   TextBold   == _          = False
   TextItalic == TextItalic = True
-  TextItalic == _          = True
+  TextItalic == _          = False
   TextFontSize s1 == TextFontSize s2 = s1 == s2
   TextFontSize s1 == _           = False
   TextColor r1 g1 b1 == TextColor r2 g2 b2 = r1 == r2 && g1 == g2 && b1 == b2

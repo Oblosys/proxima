@@ -651,25 +651,25 @@ SEM Test
       loc.pres = structural $ leftTopMargins 30 40 $
                    col [ row [ text "Rich text: ", @styledText.pres `withFontFam` "Courier" ]
 		       , row [ text "Parsed: ", text @styledText.underwater ]
-                       , row [ mkButton 15 (bold $ text "B") $ WrappedLayEdit $ SetStyleLay Bold
+                       , row [ mkButton 15 (bold $ text "B") $ WrappedLayEdit $ EditStyleLay SetBold
                              , hSpace 3
-			     , mkButton 15 (bold $ text "B" `withColor` lightGray) $ WrappedLayEdit $ ClearStyleLay Bold
+			     , mkButton 15 (bold $ text "B" `withColor` lightGray) $ WrappedLayEdit $ EditStyleLay ClearBold
                              , hSpace 3
-			     , mkButton 15 (italic $ text "I") $ (WrappedLayEdit $ SetStyleLay Italic)
+			     , mkButton 15 (italic $ text "I") $ (WrappedLayEdit $ EditStyleLay SetItalic)
                              , hSpace 3
-			     , mkButton 15 (text "-") $ (WrappedLayEdit $ SetStyleLay FontSmaller)
+			     , mkButton 15 (italic $ text "I"`withColor` lightGray) $ (WrappedLayEdit $ EditStyleLay ClearItalic)
                              , hSpace 3
-			     , mkButton 15 (text "+") $ (WrappedLayEdit $ SetStyleLay FontLarger)
+			     , mkButton 15 (text "-") $ (WrappedLayEdit $ EditStyleLay DecreaseFontSize)
                              , hSpace 3
-			     , mkButton 15 (italic $ text "I"`withColor` lightGray) $ (WrappedLayEdit $ ClearStyleLay Italic)
+			     , mkButton 15 (text "+") $ (WrappedLayEdit $ EditStyleLay IncreaseFontSize)
                              , hSpace 3
-			     , mkButton 15 (text " ") (WrappedLayEdit $ SetStyleLay $ Colored (0,0,0)) `withbgColor` (0,0,0)
+			     , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (0,0,0)) `withbgColor` (0,0,0)
                              , hSpace 3
-			     , mkButton 15 (text " ") (WrappedLayEdit $ SetStyleLay $ Colored (255,0,0)) `withbgColor` (255,0,0)
+			     , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (255,0,0)) `withbgColor` (255,0,0)
                              , hSpace 3
-			     , mkButton 15 (text " ") (WrappedLayEdit $ SetStyleLay $ Colored (0,255,0)) `withbgColor` (0,255,0)
+			     , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (0,255,0)) `withbgColor` (0,255,0)
                              , hSpace 3
-			     , mkButton 15 (text " ") (WrappedLayEdit $ SetStyleLay $ Colored (0,0,255)) `withbgColor` (0,0,255)
+			     , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (0,0,255)) `withbgColor` (0,0,255)
                              ] `withFontSize` 8
                        , formatter $ replicate 0 (text "bla") 
                        ]
