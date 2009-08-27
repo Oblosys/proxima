@@ -75,7 +75,7 @@ SEM List_Section
   | List_Section
       loc.pres = structural $ col @elts.press
       
-SEM Section [||tocPres : Presentation_Doc_Node_Clip_Token ]          
+SEM Section [||tocPres : Presentation_ ]          
   | Section
       loc.numberStr = show @sectionNr
       loc.pres = structural $
@@ -102,7 +102,7 @@ SEM List_Subsection
   | List_Subsection
       loc.pres = structural $ col @elts.press
 
-SEM Subsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
+SEM Subsection [||] --tocPres : Presentation_ ]          
   | Subsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @subsectionNr
       loc.pres = structural $
@@ -129,7 +129,7 @@ SEM List_Subsubsection
       loc.pres = structural $ col @elts.press
 
 
-SEM Subsubsection [||] --tocPres : Presentation_Doc_Node_Clip_Token ]          
+SEM Subsubsection [||] --tocPres : Presentation_ ]          
   | Subsubsection
       loc.numberStr = show @lhs.sectionNr ++ "." ++ show @lhs.subsectionNr ++ "."++ show @subsubsectionNr ++ ". "
       loc.pres = structural $
@@ -739,7 +739,7 @@ SEM Section
   | ParseErrSection lhs.tocPres = presParseErr (Node_Section @self @lhs.path) @error
 
 
-SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip_Token]}]
+SEM List_Section [||tocPress: {[Presentation_]}]
   | List_Section
       lhs.tocPress = map ( loc (Node_List_Section @self @lhs.path) 
                       . presentFocus @lhs.focusD @lhs.path ) 
@@ -749,7 +749,7 @@ SEM List_Section [||tocPress: {[Presentation_Doc_Node_Clip_Token]}]
   | ParseErrList_Section lhs.tocPress = [ presParseErr (Node_List_Section @self @lhs.path) @error ]
 
 -- probably can use a USE here
-SEM ConsList_Section [|| tocPress:{[Presentation_Doc_Node_Clip_Token]}]
+SEM ConsList_Section [|| tocPress:{[Presentation_]}]
   | Cons_Section lhs.tocPress = @head.tocPres : @tail.tocPress
   | Nil_Section      lhs.tocPress = []
 
