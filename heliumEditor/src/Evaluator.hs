@@ -8,7 +8,7 @@ import Evaluation.DocumentEdit
 import DocumentEdit_Generated
 import DocTypes_Generated
 
-import EvaluateTypes
+import EvaluateTypes -- note that helium does not work on pooh because of the 64bit architecture
 --import EvaluateTypesStubs
 
 instance EvaluationSheet Document EnrichedDoc ClipDoc where
