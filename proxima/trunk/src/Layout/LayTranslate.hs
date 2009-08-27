@@ -44,7 +44,7 @@ parseIO scannerSheet state layLvl@(LayoutLevel pres _ dt) prsLvl (SetFocusLay fo
                                                              (LayoutLevel pres focus dt) prsLvl
   in  debug Lay ("\n\n\nDocument focus: "++show pathDoc) $
       return ( [ editHigh1
-               , cast (NavPathDoc' pathDoc :: EditDocument' doc enr node clip token)
+               , castDoc' $ NavPathDoc' pathDoc
                ]
              , state', LayoutLevel pres' focus' dt')
 -}
@@ -98,9 +98,9 @@ parse  scannerSheet state layLvl@( LayoutLevel pres focus dt) prsLvl (FindLay mS
                             Nothing -> error "no previous search term"
   in  debug Prs ("\n\n\n\nFinding "++str) $
       case findLay focus str pres of
-        Nothing     -> ([cast (AlertRen' $ "Search term \"" ++ str ++ "\" not found." :: EditRendering' doc enr node clip token)], state,  layLvl)
+        Nothing     -> ([castRen' $ AlertRen' $ "Search term \"" ++ str ++ "\" not found."], state,  layLvl)
         Just focus' -> debug Prs (show focus') $
-                         ( [SkipPres 0, cast (GuaranteeFocusInViewArr :: EditArrangement doc enr node clip token)]
+                         ( [SkipPres 0, castArr $ GuaranteeFocusInViewArr]
                          , state { getLastSearchTerm = Just str },  LayoutLevel pres focus' dt)
 
 

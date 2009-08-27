@@ -111,7 +111,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
         PathA pthA _ ->
           case mouseDownDocPres (pathPFromPathA' arr pres pthA) pres of
               Just upd -> debug UnA ("mouseDownDoc EVENT: Something") 
-                            [ WrapLay upd ]
+                            [ unwrap upd ]
                             
               Nothing  -> [ SetFocusLay (computeFocus arr pres x y), guaranteeFocusInView] 
         _ ->  debug Err ("UnArranger.mouseDownDoc: empty path ") $ [SkipLay 0]   
@@ -167,7 +167,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
                    (LocatorA n a) -> debug Arr ("dragging"++shallowShowArr a) $ 
                      case pathNode n of
                        PathD srcPath ->
-                         [cast ( UpdateDoc' (\(DocumentLevel d p cl) -> 
+                         [wrap .  UpdateDoc' (\(DocumentLevel d p cl) -> 
                                          DocumentLevel (fst $ deleteD srcPath d) p cl)
                           :: EditDocument' doc enr node clip token)]        
                        NoPathD -> [SkipLay 0]
@@ -274,8 +274,7 @@ mouseDownDoc state arrLvl@(ArrangementLevel arr _ _) layout (PathA pthA _) i = -
   let pthP = pathPFromPathA' arr layout pthA
   in  case locateTreePres (PathP pthP 0) layout of -- set the document focus
         Just node -> case pathNode node of
-                       (PathD pth) -> ( [cast ( UpdateDoc' (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl)
-                                                :: EditDocument' doc enr node clip token)]
+                       (PathD pth) -> ( [castDoc' ( UpdateDoc' (\(DocumentLevel d _ cl) -> DocumentLevel d (PathD pth) cl))]
                                       , state, arrLvl)
                        _                -> ([SkipLay 0], state, arrLvl) -- node has no path
         _         -> ([SkipLay 0], state, arrLvl) -- no locator

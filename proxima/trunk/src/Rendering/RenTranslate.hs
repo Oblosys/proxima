@@ -37,22 +37,22 @@ interpretIO state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
   case editRen of
     KeySpecialRen UpKey ms@(Modifiers False False False) ->
      do { editArr <- tryFocus upFocus Up (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
-                       cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
+                       castRen $ KeySpecialRen UpKey ms
         ; return (editArr, state, renLvl)
         }
     KeySpecialRen DownKey ms@(Modifiers False False False) ->
      do { editArr <- tryFocus downFocus Down (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
-                       cast (KeySpecialRen DownKey ms :: EditRendering doc enr node clip token) 
+                       castRen $ KeySpecialRen DownKey ms
         ; return (editArr, state, renLvl)
         }
     KeySpecialRen UpKey ms@(Modifiers True False False)   -> -- shift down
      do { editArr <- tryFocus enlargeFocusUp Up (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
-                       cast (KeySpecialRen UpKey ms :: EditRendering doc enr node clip token) 
+                       castRen $ KeySpecialRen UpKey ms
         ; return (editArr, state, renLvl)
         }
     KeySpecialRen DownKey ms@(Modifiers True False False) -> -- shift down
      do { editArr <- tryFocus enlargeFocusDown Down (getViewedAreaRefRen state) focus (if debugging then debugArrangement arr else arr) $ 
-                       cast (KeySpecialRen DownKey ms :: EditRendering doc enr node clip token) 
+                       castRen $ KeySpecialRen DownKey ms
         ; return (editArr, state, renLvl)
         }
     _ -> return $ interpret state renLvl arrLvl editRen
@@ -69,23 +69,23 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     CloseRen            -> ([CloseArr],      state, renLvl)
     SkipRen i           -> ([SkipArr (i+1)], state, renLvl)
 -- TODO: make selectors scaleR and debuggingR for RenderingLevel
-    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> ([cast (FindLay Nothing :: EditLayout doc enr node clip token)],       state, renLvl) -- Ctrl-c
+    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> ([castLay $ FindLay Nothing],       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'c') (Modifiers False True False) -> ([CopyArr],       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'v') (Modifiers False True False) -> ([PasteArr],      state, renLvl) -- Ctrl-v
     KeySpecialRen (CharKey 'x') (Modifiers False True False) -> ([CutArr],        state, renLvl) -- Ctrl-x
-    KeySpecialRen (CharKey 'c') (Modifiers True True False) -> ([cast (CopyDoc' :: EditDocument' doc enr node clip token)],    state, renLvl) -- Ctrl-C
-    KeySpecialRen (CharKey 'v') (Modifiers True True False) -> ([cast (PasteDoc' :: EditDocument' doc enr node clip token)],   state, renLvl) -- Ctrl-V
-    KeySpecialRen (CharKey 'x') (Modifiers True True False) -> ([cast (CutDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-X
-    KeySpecialRen (CharKey 'z') (Modifiers False True False) -> ([cast (UndoDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-z
-    KeySpecialRen (CharKey 'y') (Modifiers False True False) -> ([cast (RedoDoc' :: EditDocument' doc enr node clip token)],     state, renLvl) -- Ctrl-y
+    KeySpecialRen (CharKey 'c') (Modifiers True True False) -> ([castDoc' $ CopyDoc'],    state, renLvl) -- Ctrl-C
+    KeySpecialRen (CharKey 'v') (Modifiers True True False) -> ([castDoc' $ PasteDoc'],   state, renLvl) -- Ctrl-V
+    KeySpecialRen (CharKey 'x') (Modifiers True True False) -> ([castDoc' $ CutDoc'],     state, renLvl) -- Ctrl-X
+    KeySpecialRen (CharKey 'z') (Modifiers False True False) -> ([castDoc' $ UndoDoc'],     state, renLvl) -- Ctrl-z
+    KeySpecialRen (CharKey 'y') (Modifiers False True False) -> ([castDoc' $ RedoDoc'],     state, renLvl) -- Ctrl-y
     KeySpecialRen UpKey   (Modifiers False False True) -> ([SkipArr 0], state, RenderingLevel (scale*2) c r fr sz debugging ur lmd)
     KeySpecialRen DownKey (Modifiers False False True) -> ([SkipArr 0], state, RenderingLevel (scale/2) c r fr sz debugging ur lmd)
     KeySpecialRen F9Key ms                             -> ([SkipArr 0], state, RenderingLevel scale c r fr sz (not debugging) ur lmd)
 
-    KeySpecialRen UpKey (Modifiers False True False)    -> ([cast (NavUpDoc' :: EditDocument' doc enr node clip token)], state, renLvl) -- Ctrl
-    KeySpecialRen DownKey (Modifiers False True False)  -> ([cast (NavDownDoc' :: EditDocument' doc enr node clip token)], state, renLvl) -- Ctrl
-    KeySpecialRen LeftKey (Modifiers False True False)  -> ([cast (NavLeftDoc' :: EditDocument' doc enr node clip token)], state, renLvl) -- Ctrl
-    KeySpecialRen RightKey (Modifiers False True False) -> ([cast (NavRightDoc' :: EditDocument' doc enr node clip token)], state, renLvl) -- Ctrl
+    KeySpecialRen UpKey (Modifiers False True False)    -> ([castDoc' $ NavUpDoc'], state, renLvl) -- Ctrl
+    KeySpecialRen DownKey (Modifiers False True False)  -> ([castDoc' $ NavDownDoc'], state, renLvl) -- Ctrl
+    KeySpecialRen LeftKey (Modifiers False True False)  -> ([castDoc' $ NavLeftDoc'], state, renLvl) -- Ctrl
+    KeySpecialRen RightKey (Modifiers False True False) -> ([castDoc' $ NavRightDoc'], state, renLvl) -- Ctrl
     KeySpecialRen LeftKey (Modifiers True False False)  -> ([EnlargeLeftArr], state, renLvl) -- Shift
     KeySpecialRen RightKey (Modifiers True False False) -> ([EnlargeRightArr], state, renLvl) -- Shift
     
@@ -95,7 +95,7 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen LeftKey ms      -> ([LeftArr], state, renLvl)
     KeySpecialRen RightKey ms     -> ([RightArr], state, renLvl)
     KeySpecialRen F1Key ms        -> ([ParseArr], state, renLvl)
-    KeySpecialRen F2Key ms        -> ([cast (EvaluateDoc' :: EditDocument' doc enr node clip token)]
+    KeySpecialRen F2Key ms        -> ([castDoc' $ EvaluateDoc']
                                      , state, renLvl)
     KeySpecialRen F5Key ms        -> ([RedrawArr], state, renLvl)
 

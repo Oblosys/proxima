@@ -17,7 +17,7 @@ import Control.Exception
 import Data.Char
 import System.Directory
 {- HAppS -}
-import HAppS.Server
+import HAppS.Server hiding (unwrap)
 import HAppS.Server.SimpleHTTP
 import HAppS.State
 import System.Environment
@@ -368,9 +368,7 @@ handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR ac
     Nothing  -> error ("Syntax error in command: "++eventStr) 
 
 
--- sig is necessary to scope type vars in cast    
-handleCommand :: forall doc enr clip node token .
-               (Show token, Show node, Show enr, Show doc) => 
+handleCommand :: (Show token, Show node, Show enr, Show doc) => 
                (Settings
                ,((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token]))
                , IORef (RenderingLevel doc enr node clip token) 
@@ -407,7 +405,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
      do { menuItems <- readIORef menuR
         ; let editDoc = index "GUI.handleContextMenuSelect" menuItems selectedItemNr
         ; genericHandler settings handler renderingLvlVar viewedAreaRef () $
-            WrapRen editDoc
+            unwrap editDoc
         }
 
     Key (keyCode,(shiftDown, ctrlDown, altDown)) ->
@@ -469,13 +467,15 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
              }
     
     EditStyle style ->
-      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ cast (EditStyleLay style :: EditLayout doc enr node clip token)
+      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
+                     castLay $ EditStyleLay style
          ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
          ; return $ html ++ [setViewedAreaHtml]
          }
 
     Find str ->
-      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ cast (FindLay (Just str) :: EditLayout doc enr node clip token)
+      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
+                     castLay $ FindLay (Just str)
          ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
          ; return $ html ++ [setViewedAreaHtml]
          }
@@ -494,7 +494,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
         ; fh <- openFile "queriedMetrics.txt" WriteMode -- TODO: clearing this file should be done after Metrics are read in FontLib.hs
         ; hClose fh
         ; genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
-            cast (ClearMetricsArr :: EditArrangement doc enr node clip token)
+            castArr $ ClearMetricsArr
         }
      
 genericHandler :: (Show token, Show node, Show enr, Show doc) => Settings ->

@@ -175,13 +175,12 @@ onKeyboard settings handler renderingLvlVar buffer viewedAreaRef window vp canva
              }
     }
 
-popupMenuHandler :: forall doc enr clip node token .
-                    Settings ->
+popupMenuHandler :: Settings ->
                     ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
                     IORef (RenderingLevel doc enr node clip token) -> IORef (Maybe Pixmap) -> IORef CommonTypes.Rectangle -> Window -> Viewport -> DrawingArea ->
                     ((DocumentLevel doc clip) -> (DocumentLevel doc clip)) -> IO ()
 popupMenuHandler settings handler renderingLvlVar buffer viewedAreaRef window vp canvas editDoc =
- do { let editRendering = cast (UpdateDoc' editDoc :: EditDocument' doc enr node clip token)
+ do { let editRendering = castDoc' $ UpdateDoc editDoc
     ; genericHandler settings handler renderingLvlVar viewedAreaRef (buffer, window, vp, canvas) editRendering                 
     }
 

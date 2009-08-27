@@ -411,9 +411,7 @@ tryFocus computeFocus dir viewedAreaRef focus arr editop =
          do { ((x,y),(w,h)) <- readIORef viewedAreaRef
             ; return $ if (dir == Up && y > 0) ||
                           (dir == Down && y+h < heightA arr) then 
-                         [ cast (ScrollViewedAreaArr dir :: EditArrangement doc enr node clip token)
-                         , editop
-                         ]
+                         [ castArr $ ScrollViewedAreaArr dir, editop ]
                        else [ SkipArr 0 ]
             }
 

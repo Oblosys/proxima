@@ -198,3 +198,21 @@ castRemainingEditOpsRedirect :: ( Wrapable editOp doc enr node clip token
                                 , Wrapable editOp' doc enr node clip token ) =>
                                 [editOp] -> (editOp -> editOp') -> [editOp']
 castRemainingEditOpsRedirect (editOp:editOps) redirect = redirect editOp : map cast editOps
+
+
+
+-- specialized versions of cast. These may be more useful, as the normal version
+-- often requires a type signature on the cast edit op, (sometimes also requiring scoped type vars)
+
+castDoc = unwrap . WrappedDocEdit   
+castEnr = unwrap . WrappedEnrEdit  
+castPres = unwrap . WrappedPresEdit 
+castLay = unwrap . WrappedLayEdit  
+castArr = unwrap . WrappedArrEdit  
+castRen = unwrap . WrappedRenEdit  
+castDoc' = unwrap . WrappedDocEdit' 
+castEnr' = unwrap . WrappedEnrEdit' 
+castPres' = unwrap . WrappedPresEdit'
+castLay' = unwrap . WrappedLayEdit' 
+castArr' = unwrap . WrappedArrEdit' 
+castRen' = unwrap . WrappedRenEdit' 
