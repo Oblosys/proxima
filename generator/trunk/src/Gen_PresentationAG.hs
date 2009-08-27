@@ -50,7 +50,7 @@ genPresentationSheet = genBanner "presentationSheet" $
   , ""
   , "EnrichedDoc  [ focusD : FocusDoc path : Path"
   , "             | pIdC : Int layoutMap : WhitespaceMap"
-  , "             | pres : Presentation_Doc_Node_Clip_Token EnrichedDoc "
+  , "             | pres : Presentation_ EnrichedDoc "
   , "             ]"
   , "-}"
   , "}" 
@@ -77,21 +77,21 @@ genAttr decls = genBanner "Attr declarations" $
   , "     [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]"
   , ""  -- Document is for popups, will be removed in the future
   , "ATTR %2" -- all types including EnrichedDoc except lists and conslists
-  , "     [ | | pres : Presentation_Doc_Node_Clip_Token ]"
+  , "     [ | | pres : Presentation_ ]"
   , ""
   ] ++ if null (removeEnrichedDocDecl (addListDecls decls)) then [] else
   [ "ATTR %3"  -- all types except EnrichedDoc, including lists and conslists
   , "     [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]"
   , ""
   , "ATTR %4" -- all types except EnrichedDoc, including lists
-  , "     [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]"
+  , "     [ | | ix : Int path : Path presXML : Presentation_ presTree : Presentation_ ]"
   , ""
   ] ++ if null listTypeNames then [] else
   [ "ATTR %5" -- all lists and conslists
-  , "     [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]"
+  , "     [ | | press : {[Presentation_]} ]"
   , ""
   , "ATTR %6"  -- all conslists
-  , "     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]"
+  , "     [ | | pressXML : {[Presentation_]} pressTree : {[Presentation_]} ]"
   , ""
   ]) <~ [ separateBy " " $ getAllDeclaredTypeNames (addConsListDecls (addListDecls decls))
         , separateBy " " $ getAllDeclaredTypeNames (addListDecls decls)

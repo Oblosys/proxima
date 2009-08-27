@@ -23,7 +23,7 @@ The attribute signature for EnrichedDoc should be:
 
 EnrichedDoc  [ focusD : FocusDoc path : Path
              | pIdC : Int layoutMap : WhitespaceMap
-             | pres : Presentation_Doc_Node_Clip_Token EnrichedDoc 
+             | pres : Presentation_ EnrichedDoc 
              ]
 -}
 }
@@ -203,19 +203,19 @@ ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Thing Task Description Su
      [ doc : Document focusD : FocusDoc path : Path |  pIdC : Int whitespaceMap : WhitespaceMap | ]
 
 ATTR EnrichedDoc ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText Word WordPart TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_Word List_WordPart
-     [ | | pres : Presentation_Doc_Node_Clip_Token ]
+     [ | | pres : Presentation_ ]
 
 ATTR ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText Word WordPart TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_Word List_WordPart ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_Word ConsList_WordPart
      [ ix : Int | | parseErrors USE {++} {[]} : {[ParseErrorMessage]} ]
 
 ATTR ChoiceDoc Form Expense Currency Tasks Thing Task Description Sudoku Row Field Test StyledText Word WordPart TextStyle Int_ Float_ List_Expense List_Currency List_Thing List_Task List_Word List_WordPart
-     [ | | ix : Int path : Path presXML : Presentation_Doc_Node_Clip_Token presTree : Presentation_Doc_Node_Clip_Token ]
+     [ | | ix : Int path : Path presXML : Presentation_ presTree : Presentation_ ]
 
 ATTR List_Expense List_Currency List_Thing List_Task List_Word List_WordPart ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_Word ConsList_WordPart
-     [ | | press : {[Presentation_Doc_Node_Clip_Token]} ]
+     [ | | press : {[Presentation_]} ]
 
 ATTR ConsList_Expense ConsList_Currency ConsList_Thing ConsList_Task ConsList_Word ConsList_WordPart
-     [ | | pressXML : {[Presentation_Doc_Node_Clip_Token]} pressTree : {[Presentation_Doc_Node_Clip_Token]} ]
+     [ | | pressXML : {[Presentation_]} pressTree : {[Presentation_]} ]
 
 
 
