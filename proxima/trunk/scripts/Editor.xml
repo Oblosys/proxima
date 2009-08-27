@@ -75,7 +75,7 @@ function init()
 //    setRefreshTimer(10);
     refresh();
 //    alert('before');
-//    debugAdd('Metrics: '+queryFont("Times New Roman", 12));
+//    debugAdd('Metrics: '+queryFont("Times New Roman", 12, false, false));
 //    alert('after');
     setViewedAreaServer();
     loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
@@ -100,14 +100,15 @@ function initFont()
   fontElt.innerHTML=lines;
 }
 
-function queryFont(fontFamily, fontSize)
+function queryFont(fontFamily, fontSize, isBold, isItalic)
 {
   initFont() // firefox does not update bounding divs on style update, so we need to init every time :-(
   
   var fontElt = document.getElementById('font');
   fontElt.style.fontFamily = fontFamily;
   fontElt.style.fontSize = fontSize+'pt';
-
+  fontElt.style.fontWeight = isBold ? "bold" : "normal"
+  fontElt.style.fontStyle = isItalic ? "italic" : "normal"
 
   var enclosing = document.getElementById('enclosing');
   var baselineElt = document.getElementById('baseline');
@@ -115,7 +116,10 @@ function queryFont(fontFamily, fontSize)
   var height = font.offsetHeight;
   var baseline = baselineElt.offsetTop - font.offsetTop;
 
-  var metrics = '(("'+fontFamily+'",'+fontSize+'),('+height + ',' + baseline + ',';
+  var metrics = '(("'+fontFamily+'",'+fontSize+','+
+                (isBold ? 'True' : 'False') +',' + 
+                (isItalic ? 'True' : 'False') + 
+                '),('+height + ',' + baseline + ',';
   var linesElt = fontElt.childNodes[0];
   var widths = '%5b'; // escaped '['
   for (var childNr = 0; childNr <= endRange - beginRange; childNr++)
@@ -388,7 +392,12 @@ function updateTree(update)
   else if (op == 'metricsQuery')
   { var family = update.getAttribute('family');
     var size = update.getAttribute('size');
-    var metrics = queryFont(family,size);
+    var isBold = update.getAttribute('isBold') == 'True';
+    var isItalic = update.getAttribute('isItalic') == 'True';
+    //alert(family+size+isBold+isItalic);    
+    // strange: allowing this alert screws up the rendering!
+    
+    var metrics = queryFont(family,size,isBold,isItalic);
     //debugAdd('query is Metrics'+metrics+';');
     loadXMLDoc('Metrics'+metrics+';');
   }

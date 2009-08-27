@@ -328,10 +328,14 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actu
 
 
     ; pendingQueriesTxt <-  readFile "metricsQueries.txt"
+    ; putStrLn $ "About to send following metrics queries to client:\n"++pendingQueriesTxt 
     ; seq (length pendingQueriesTxt) $ return ()
-    ; let pendingQueries = map read $ lines pendingQueriesTxt :: [(String, Int)]
-          queryHTML = concat [ "<div op='metricsQuery' family='"++fam++"' size='"++show sz++"'></div>" 
-                             | (fam,sz) <- pendingQueries]
+    ; let pendingQueries = map read $ lines pendingQueriesTxt :: [(String, Int, Bool, Bool)]
+          queryHTML = concat [ "<div op='metricsQuery' family='"++fam++"' size='"++show sz++"' "++
+                               "isBold='"++ show isBold ++"' "++
+                               "isItalic='"++ show isItalic ++"' "++
+                               "></div>" 
+                             | (fam,sz,isBold,isItalic) <- pendingQueries]
                       ++ if null pendingQueries then "" else "<div op='refresh'></div>"
 
     
@@ -346,7 +350,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actu
                                    ++queryHTML++"</div>"            
     }
         
-data Command = Metrics ((String,Int),(Int,Int,[Int]))
+data Command = Metrics ((String,Int,Bool,Bool),(Int,Int,[Int]))
              | ContextMenuRequest ((Int,Int),(Int,Int))
              | ContextMenuSelect Int  
              | Key (Int,Modifiers)

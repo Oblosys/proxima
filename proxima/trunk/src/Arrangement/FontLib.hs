@@ -46,7 +46,7 @@ mkFontMetrics settings fonts =
     ; queriedFontsTxt <- hGetContents fh 
     ; seq (length queriedFontsTxt) $ return ()
     ; hClose fh
-    ; let queriedFonts :: [((String, Int),(Int,Int,[Int]))]
+    ; let queriedFonts :: [((String, Int,Bool,Bool),(Int,Int,[Int]))]
             = map read $ lines queriedFontsTxt
     ; let alreadyQueried = catMaybes $ map (lookupFont queriedFonts) fonts
 --    ; putStrLn "check 1"
@@ -55,7 +55,7 @@ mkFontMetrics settings fonts =
     ; seq (length pendingQueriesTxt) $ return ()
     ; let pendingQueries = map read $ lines pendingQueriesTxt 
           newQueries  = fonts \\ (map fst alreadyQueried)
-          queryTuples = [ (fFamily font, fSize font) | font <- newQueries ]
+          queryTuples = [ (fFamily font, fSize font, fBold font, fItalic font) | font <- newQueries ]
           newQueryTuples = queryTuples \\ pendingQueries
           
 --    ; putStrLn "check 3"
@@ -72,7 +72,7 @@ mkFontMetrics settings fonts =
 -- fonts are stored in the Map with these attributes set to False.
  where mkFontMetric (f,(h,b,ws)) = 
          (f {fUnderline = False, fStrikeOut = False}, (h, b, listArray (0,223) [ w `div` 1000 | w <- ws])) 
-       lookupFont queries font = case lookup (fFamily font, fSize font)  queries of
+       lookupFont queries font = case lookup (fFamily font, fSize font, fBold font, fItalic font) queries of
                                    Nothing -> Nothing
                                    Just metrics -> Just (font, metrics)
 
