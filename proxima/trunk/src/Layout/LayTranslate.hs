@@ -74,8 +74,7 @@ parse scannerSheet state layLvl@(LayoutLevel pres f _) prsLvl RightDeleteLay =
   then graphEdit scannerSheet state layLvl prsLvl deleteInGraph
   else editLay editRightDelete state layLvl prsLvl
 
-parse scannerSheet state layLvl prsLvl (SetStyleLay style) = editLayParse (editSetStyle style) scannerSheet state layLvl prsLvl 
-parse scannerSheet state layLvl prsLvl (ClearStyleLay style) = editLayParse (editClearStyle style) scannerSheet state layLvl prsLvl 
+parse scannerSheet state layLvl prsLvl (EditStyleLay style) = editLayParse (editEditStyle style) scannerSheet state layLvl prsLvl 
 
 parse _ state layLvl prsLvl LeftLay   = navigateLeft state layLvl prsLvl 
 parse _ state layLvl prsLvl RightLay  = navigateRight state layLvl prsLvl
@@ -230,18 +229,11 @@ editRightDelete clip layLvl@(LayoutLevel pres focus@(FocusP f t) dt) =
     in  (LayoutLevel pres' focus''' dt, clip)
 
 
-editSetStyle :: (DocNode node, Show token) => Style -> Layout doc enr node clip token -> LayoutLevel doc enr node clip token ->
+editEditStyle :: (DocNode node, Show token) => StyleEdit -> Layout doc enr node clip token -> LayoutLevel doc enr node clip token ->
                 (LayoutLevel doc enr node clip token, Layout doc enr node clip token)
-editSetStyle style clip (LayoutLevel pres focus dt) = 
- let pres' = setStylePres style focus pres
-     focus' = setStylePresF focus
- in  (LayoutLevel pres' focus' dt, clip)
-
-editClearStyle :: (DocNode node, Show token) => Style -> Layout doc enr node clip token -> LayoutLevel doc enr node clip token ->
-                (LayoutLevel doc enr node clip token, Layout doc enr node clip token)
-editClearStyle style clip (LayoutLevel pres focus dt) = 
- let pres' = clearStylePres style focus pres
-     focus' = clearStylePresF focus
+editEditStyle style clip (LayoutLevel pres focus dt) = 
+ let pres' = editStylePres style focus pres
+     focus' = editStylePresF focus
  in  (LayoutLevel pres' focus' dt, clip)
 
 

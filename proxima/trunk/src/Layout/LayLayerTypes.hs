@@ -49,4 +49,7 @@ showScannedTokens scannedTokens = "Scanned tokens:\n" ++ concat [ "  " ++ show s
    
 data FocusMark = FocusMark | NoFocusMark deriving (Eq, Show)
 
+
+data Style = Bold | Italic | FontSize Int | Color Color deriving (Show, Read, Eq, Ord)
+
 data StyleTag = StyleTag Style StartOrEnd deriving (Show, Eq, Ord)

@@ -39,8 +39,7 @@ data EditLayout_ wrapped doc enr node clip token =
   | RightLay
   | EnlargeLeftLay
   | EnlargeRightLay
-  | SetStyleLay Style
-  | ClearStyleLay Style
+  | EditStyleLay StyleEdit
   | MouseDownLay PathPres Modifiers Int
   | AddVertexLay [Int] (Int,Int) -- path to the graph and destination position for new vertex
   | AddEdgeLay   [Int] -- path to to-vertex for new edge (from-vertex is assumed to be in focus)
@@ -65,3 +64,6 @@ type Layout doc enr node clip token = PresentationBase doc enr node clip token L
 type LayoutList doc enr node clip token = [Layout doc enr node clip token]
 
 
+data StyleEdit = SetBold | ClearBold | SetItalic | ClearItalic | DecreaseFontSize | IncreaseFontSize |
+                 {- SetFontSize Int | -} SetColor Color deriving (Show, Read, Eq, Ord)
+                                                                 

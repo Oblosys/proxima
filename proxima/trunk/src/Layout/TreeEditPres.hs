@@ -651,8 +651,7 @@ splitRowTreePresPth editable (p:path) (FormatterP id press) =
 splitRowTreePresPth editable pth pr = debug Err ("*** TreeEditPres.splitRowTreePresPth: can't handle "++show pth++" "++ show pr++"***") Right []
 -- should return a NoFocusP here
 
-setStylePres style focus pres = modifyStylePres (setStyle style) focus pres
-clearStylePres style focus pres = modifyStylePres (clearStyle style) focus pres
+editStylePres styleEdit focus pres = modifyStylePres (setStyle styleEdit) focus pres
 
 modifyStylePres styleF (FocusP from@(PathP _ _) to@(PathP _ _)) prs = 
   let PathP fromPath fromIndex = from `min` to
@@ -661,15 +660,14 @@ modifyStylePres styleF (FocusP from@(PathP _ _) to@(PathP _ _)) prs =
       modifyStylePres' styleF fromPath fromIndex toPath toIndex [] prs
 modifyStylePres _ _ prs = prs
 
-setStylePresF (FocusP from@(PathP _ _) to@(PathP _ _)) = 
+editStylePresF (FocusP from@(PathP _ _) to@(PathP _ _)) = 
   let PathP fromPath fromIndex = from `min` to
       PathP toPath toIndex = from `max` to
   in  if fromPath == toPath 
       then FocusP (PathP (fromPath++[1,0]) 0) (PathP (toPath++[1,0]) (toIndex-fromIndex))
       else FocusP (PathP (fromPath++[1,0]) 0) (PathP (toPath++[0,0]) toIndex)
-setStylePresF focus = focus  
+editStylePresF focus = focus  
 
-clearStylePresF = setStylePresF
 
 
 -- todo: should only fix stuff in the Parsing subtree that the focus is in
@@ -719,14 +717,14 @@ findLay (EllipseP id _ _ _ _)     =
     (RowP id rf press)        = 
     (VertexP _ _ x y _  pres) -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
 -}
-setStyle Bold = \(inh,syn) -> (inh {font = (font inh) {fBold = True}}, syn)
-setStyle Italic = \(inh,syn) -> (inh {font = (font inh) {fItalic = True}}, syn)
-setStyle FontSmaller = \(inh,syn) -> (inh {font = (font inh) {fSize = round (0.8 * fromIntegral (fSize (font inh)))}}, syn)
-setStyle FontLarger = \(inh,syn) -> (inh {font = (font inh) {fSize = round (1.25 * fromIntegral (fSize (font inh)))}}, syn)
-setStyle (Colored c) = \(inh,syn) -> (inh {textColor = c}, syn)
+setStyle SetBold = \(inh,syn) -> (inh {font = (font inh) {fBold = True}}, syn)
+setStyle ClearBold = \(inh,syn) -> (inh {font = (font inh) {fBold = False}}, syn)
+setStyle SetItalic = \(inh,syn) -> (inh {font = (font inh) {fItalic = True}}, syn)
+setStyle ClearItalic = \(inh,syn) -> (inh {font = (font inh) {fItalic = False}}, syn)
+setStyle DecreaseFontSize = \(inh,syn) -> (inh {font = (font inh) {fSize = round (0.8 * fromIntegral (fSize (font inh)))}}, syn)
+setStyle IncreaseFontSize = \(inh,syn) -> (inh {font = (font inh) {fSize = round (1.25 * fromIntegral (fSize (font inh)))}}, syn)
+setStyle (SetColor c) = \(inh,syn) -> (inh {textColor = c}, syn)
 
-clearStyle Bold = \(inh,syn) -> (inh {font = (font inh) {fBold = False}}, syn)
-clearStyle Italic = \(inh,syn) -> (inh {font = (font inh) {fItalic = False}}, syn)
 
 
 

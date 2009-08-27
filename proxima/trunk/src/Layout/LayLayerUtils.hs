@@ -94,3 +94,10 @@ getFocusStart i oldFocusStart (c:cs) = if hasFocusStartMark c then Just i else g
 
 getFocusEnd i oldFocusEnd []     = Nothing
 getFocusEnd i oldFocusEnd (c:cs) = if hasFocusEndMark c then Just i else getFocusEnd (i+1) oldFocusEnd cs
+
+
+scannedStyleFromStyle Bold = ScannedBold
+scannedStyleFromStyle Italic = ScannedItalic
+scannedStyleFromStyle (FontSize s) = ScannedFontSize s
+scannedStyleFromStyle (Color c) = ScannedColor c
+
