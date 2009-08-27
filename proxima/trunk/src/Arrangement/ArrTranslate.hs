@@ -125,10 +125,15 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
 --    MouseDownArr x y ms@(Modifiers False False True) i -> -- alt down 
     MouseDownArr x y ms@(Modifiers False True False) i -> -- ctrl down 
           mouseDownDoc state arrLvl pres (navigateFocus x y arr) i
-    MouseDragArr x y ms@(Modifiers False False False)  ->
-      ( [SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres), guaranteeFocusInView]
-      , state, arrLvl ) -- does not occur
-                            
+    MouseDragArr x y ms@(Modifiers False False False)  -> -- only set focus end if there is no mousedown action specified here
+                                                          -- TODO: only set focus if in same parsing element as focus start
+      case navigateFocus x y arr of
+        PathA pthA _ ->
+          case mouseDownDocPres (pathPFromPathA' arr pres pthA) pres of
+              Nothing -> ( [SetFocusLay (focusPFromFocusA (enlargeFocusXY focus x y arr) arr pres), guaranteeFocusInView]
+                         , state, arrLvl )
+              _       -> ([SkipLay 0], state, arrLvl)
+        _ -> ([SkipLay 0], state, arrLvl)
     MouseUpArr x y ms     -> ([ParseLay], state, arrLvl) 
     
     DragStartArr x y -> debug Arr "Drag started" $
