@@ -5,7 +5,7 @@
 > import System.Cmd
 > import System.Exit
 > 
-> main = defaultMainWithHooks (defaultUserHooks { preBuild = runMake } )
+> main = defaultMainWithHooks (simpleUserHooks { preBuild = runMake } )
 
 > runMake args buildflags = 
 >   do putStrLn "Proxima pre-build hook: executing 'make generate presenter'"
