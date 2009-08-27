@@ -22,7 +22,7 @@ import Data.Maybe
 
 
 -- use different structure to make lookup more efficient? Or is this a waste of time
-type FontMetrics = Map Font (Int, Int, Array Int Int)
+type FontMetrics = Map Font (Int, Int, Array Int Float)
 
 type FontMetricsRef = IORef FontMetrics
 
@@ -71,7 +71,7 @@ mkFontMetrics settings fonts =
 -- Because Underline and strikeOut have no influence on the metrics, all
 -- fonts are stored in the Map with these attributes set to False.
  where mkFontMetric (f,(h,b,ws)) = 
-         (f {fUnderline = False, fStrikeOut = False}, (h, b, listArray (0,223) [ w `div` 1000 | w <- ws])) 
+         (f {fUnderline = False, fStrikeOut = False}, (h, b, listArray (0,223) [ fromIntegral w / 1000 | w <- ws])) 
        lookupFont queries font = case lookup (fFamily font, fSize font, fBold font, fItalic font) queries of
                                    Nothing -> Nothing
                                    Just metrics -> Just (font, metrics)
@@ -142,7 +142,7 @@ fontDescriptionFromProximaFont (Font fFam fSiz fBld fUnderln fItlc fStrkt) =
 
 -- | Lookup the metrics for font. Because Underline and strikeOut have no influence on the metrics, all 
 -- fonts are stored in the Map with these attributes set to False.
-metricsLookup :: Font -> FontMetrics -> (Int, Int, Array Int Int)
+metricsLookup :: Font -> FontMetrics -> (Int, Int, Array Int Float)
 metricsLookup font fontMetrics = 
   -- debug Err ("looking up: " ++ show (fSize font) ++ " " ++ (fFamily font)) $
   case Map.lookup (font {fUnderline = False, fStrikeOut = False}) fontMetrics  of
@@ -158,7 +158,7 @@ textWidth :: FontMetrics -> Font -> String -> Int
 textWidth fms f str = let (h,b,ws) = metricsLookup f fms
                           toWidth c = let i = ord c 
                                       in  if i < 32 then 0 else ws ! (ord c - 32)
-                      in sum (map toWidth str)
+                      in round $ sum (map toWidth str)
 -- round (fromInt (length str) * charWidth fs)
 
 -- Is it accurate enough to add the widhts of the characters? The width of the string might
@@ -168,7 +168,7 @@ cumulativeCharWidths :: FontMetrics -> Font -> String -> [Int]
 cumulativeCharWidths fms f str = let (h,b,ws) = metricsLookup f fms
                                      toWidth c = let i = ord c 
                                                  in  if i < 32 then 0 else ws ! (ord c - 32)
-                                 in  scanl (+) 0 (map toWidth str)
+                                 in  map round $ scanl (+) 0 (map toWidth str)
 
 charHeight :: FontMetrics -> Font -> Int
 charHeight fms f  = let (h,b,ws) = metricsLookup f fms
