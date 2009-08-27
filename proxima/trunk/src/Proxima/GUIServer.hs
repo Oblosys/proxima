@@ -173,7 +173,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
 
   , dir "handle" 
    [ withData (\cmds -> [ method GET $ 
-                          do { liftIO $ putStrLn $ "Command received " ++ take 10 (show cmds)
+                          do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
                       
                              ; responseHTML <- 
                                  liftIO $ catchExceptions $ handleCommands params initR menuR actualViewedAreaRef
@@ -182,8 +182,8 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
                              
                              ; seq (length responseHTML) $ return ()
-                             --; liftIO $ putStrLn $ "Sending response sent to client: " ++
-                             --                      take 10 responseHTML ++ "..."
+                             ; liftIO $ putStrLn $ "Sending response sent to client:\n" ++
+                                                   take 160 responseHTML ++ "..."
                              ; modifyResponseW noCache $
                                 ok $ toResponse responseHTML
                              }
@@ -200,7 +200,7 @@ catchExceptions io =
                   "###########################################" 
           
           ; putStrLn exceptionText
-          ; let responseHTML = "<div id='updates'><div id='exception' op='exception' text='"++filter (/='\'') exceptionText++"'></div></div>"
+          ; let responseHTML = "<div id='updates'><div id='alert' op='alert' text='"++filter (/='\'') exceptionText++"'></div></div>"
                 
           ; return responseHTML
           }
@@ -523,6 +523,10 @@ genericHandler settings handler renderingLvlVar viewedAreaRef () evt =
        process (WrapRen' w) = do { htmlRenderings <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ Proxima.Wrap.unwrap w
                                  ; return $ htmlRenderings
                                  }
+       process (AlertRen' str) = return [ "<div id='alert' op='alert' text='"++
+                                          filter (/='\'') str ++"'></div>" 
+                                        ]
+       -- TODO: clear any following updates to client? The alert will prevent them from being processed for a while.
        process (SetRen' renderingLvl''@(RenderingLevel scale _ renderingHTML _ (newW,newH) _ updRegions _)) =
          do { (RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
             ; writeIORef renderingLvlVar renderingLvl''

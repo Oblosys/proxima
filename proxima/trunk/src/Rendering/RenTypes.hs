@@ -26,6 +26,7 @@ data RenderingLevel_ wrapped doc enr node clip token =
                                                    
 data EditRendering'_ wrapped doc enr node clip token =
     SetRen' (RenderingLevel_ wrapped doc enr node clip token)
+  | AlertRen' String
   | SkipRen' Int
   | WrapRen' wrapped deriving Show
 

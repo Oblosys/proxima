@@ -405,7 +405,7 @@ function updateTree(update)
   { refresh();
     loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
   }
-  else if (op == 'exception')
+  else if (op == 'alert')
   { alert (update.getAttribute('text'));
   }
   else alert ('Unknown command: '+op); 
