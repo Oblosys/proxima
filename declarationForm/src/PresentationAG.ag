@@ -649,7 +649,7 @@ moveElementDown path =
 SEM Test
   | Test
       loc.pres = structural $ leftTopMargins 30 40 $
-                   col [ row [ text "Rich text: ", @styledText.pres `withFontFam` "Courier" ]
+                   col [ row [ text "Styled text: ", @styledText.pres ]
 		       , row [ text "Parsed: ", text @styledText.underwater ]
                        , row [ mkButton 15 (bold $ text "B") $ WrappedLayEdit $ EditStyleLay SetBold
                              , hSpace 3
