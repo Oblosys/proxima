@@ -717,10 +717,10 @@ findLay (EllipseP id _ _ _ _)     =
     (RowP id rf press)        = 
     (VertexP _ _ x y _  pres) -> findLay' str fromPath fromIndex toPath toIndex (rootPath ++ [0]) pres
 -}
-setStyle SetBold = \(inh,syn) -> (inh {font = (font inh) {fBold = True}}, syn)
-setStyle ClearBold = \(inh,syn) -> (inh {font = (font inh) {fBold = False}}, syn)
-setStyle SetItalic = \(inh,syn) -> (inh {font = (font inh) {fItalic = True}}, syn)
-setStyle ClearItalic = \(inh,syn) -> (inh {font = (font inh) {fItalic = False}}, syn)
+setStyle SetBold          = \(inh,syn) -> (inh {font = (font inh) {fBold = True}},    syn)
+setStyle ClearBold        = \(inh,syn) -> (inh {font = (font inh) {fBold = False}},   syn)
+setStyle SetItalic        = \(inh,syn) -> (inh {font = (font inh) {fItalic = True}},  syn)
+setStyle ClearItalic      = \(inh,syn) -> (inh {font = (font inh) {fItalic = False}}, syn)
 setStyle DecreaseFontSize = \(inh,syn) -> (inh {font = (font inh) {fSize = round (0.8 * fromIntegral (fSize (font inh)))}}, syn)
 setStyle IncreaseFontSize = \(inh,syn) -> (inh {font = (font inh) {fSize = round (1.25 * fromIntegral (fSize (font inh)))}}, syn)
 setStyle (SetColor c) = \(inh,syn) -> (inh {textColor = c}, syn)
