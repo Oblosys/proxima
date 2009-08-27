@@ -9,7 +9,7 @@ import Layout.Scanner
 
 import Layout.TreeEditPres
 import Arrangement.ArrTypes
-
+import Rendering.RenTypes
 import Proxima.Wrap
 import Evaluation.DocTypes
 
@@ -99,7 +99,7 @@ parse  scannerSheet state layLvl@( LayoutLevel pres focus dt) prsLvl (FindLay mS
                             Nothing -> error "no previous search term"
   in  debug Prs ("\n\n\n\nFinding "++str) $
       case findLay focus str pres of
-        Nothing     -> ([SkipPres 0], state,  layLvl)
+        Nothing     -> ([cast (AlertRen' $ "Search term \"" ++ str ++ "\" not found." :: EditRendering' doc enr node clip token)], state,  layLvl)
         Just focus' -> debug Prs (show focus') $
                          ( [SkipPres 0, cast (GuaranteeFocusInViewArr :: EditArrangement doc enr node clip token)]
                          , state { getLastSearchTerm = Just str },  LayoutLevel pres focus' dt)
