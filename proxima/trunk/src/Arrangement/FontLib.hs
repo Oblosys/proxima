@@ -71,7 +71,7 @@ mkFontMetrics settings fonts =
 -- Because Underline and strikeOut have no influence on the metrics, all
 -- fonts are stored in the Map with these attributes set to False.
  where mkFontMetric (f,(h,b,ws)) = 
-         (f {fUnderline = False, fStrikeOut = False}, (h, b, listArray (0,223) [ w `div` 10 | w <- ws])) 
+         (f {fUnderline = False, fStrikeOut = False}, (h, b, listArray (0,223) [ w `div` 1000 | w <- ws])) 
        lookupFont queries font = case lookup (fFamily font, fSize font)  queries of
                                    Nothing -> Nothing
                                    Just metrics -> Just (font, metrics)

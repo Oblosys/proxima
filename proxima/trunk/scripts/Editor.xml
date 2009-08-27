@@ -92,9 +92,9 @@ function initFont()
   var lines = '<div id=\'lines\' style=\'position:absolute;"\'>';
   for (var c=beginRange; c<=endRange; c++)
   { var ch = c == 38 ? '&amp;' 
-           : c == 60 ? '&amp;' 
-           : c == 62 ? '&lt;' : String.fromCharCode(c);
-    lines = lines + '<div style=\'position:absolute\'>'+replicate(10,ch)+'</div>';
+           : c == 60 ? '&lt;' 
+           : c == 62 ? '&gt;' : String.fromCharCode(c);
+    lines = lines + '<div style=\'position:absolute\'>'+replicate(1000,ch)+'</div>';
   }
   lines += '</div><div id="enclosing" style="position:absolute"><span id="text">X</span><span id="baseline" style="height:0px;font-size:0px">baseline</span></div>';
   fontElt.innerHTML=lines;
