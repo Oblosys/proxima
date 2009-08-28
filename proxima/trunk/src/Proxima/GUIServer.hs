@@ -391,13 +391,12 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
     -- Current structure of handlers causes focus to be repainted after context request
     -- this is not really a problem though
     ContextMenuRequest ((proxX,proxY),(screenX,screenY)) ->
-     do { (RenderingLevel _ makePopupMenuHTML _ _ _ _ _ _)  <- readIORef renderingLvlVar
-        
-        ; html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $
+     do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $
                     castLay ParseLay
         ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
         
-                                                                    
+        ; (RenderingLevel _ makePopupMenuHTML _ _ _ _ _ _)  <- readIORef renderingLvlVar
+                                                                   
         ; let (itemStrs,upds) = unzip $ makePopupMenuHTML proxX proxY
               itemsHTML = concat 
                             [ "<div class='menuItem' item='"++show i++"'>"++item++"</div>"
