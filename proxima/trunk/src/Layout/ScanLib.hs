@@ -17,12 +17,14 @@ Some scanner functionality could not be factorized and can be found in AlexTempl
 
 module Layout.ScanLib ( module Layout.ScanLib
                       , module Maybe
+                      , module Common.DebugLevels
                       , module Layout.LayLayerTypes
                       , module Layout.LayLayerUtils
                       , module Map
                       )  where
 
 import Common.CommonTypes
+import Common.DebugLevels
 import Layout.LayLayerTypes
 import Layout.LayLayerUtils hiding (empty)
 import qualified Data.Map as Map hiding (mapMaybe, (!))

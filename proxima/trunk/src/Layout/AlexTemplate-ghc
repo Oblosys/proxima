@@ -18,14 +18,16 @@ type ScanChar_ = ScanChar Document EnrichedDoc Node ClipDoc UserToken
 
 type AlexInput  = (Char, [ScanChar_])
 
--- The Maybe type in the scanner output is to be able to scan things that do not produce
--- tokens, such as whitespace.  
+-- the scanner does not yet return the lexerState (or start code). Thus, style or structural tokens will break stateful scanning
+-- such as in strings
+
 scanner :: ScannerState -> [ScanChar_] -> 
                   ([ScannedToken Document EnrichedDoc Node ClipDoc UserToken], ScannerState)
-scanner initState scs = go initState ('\n',scs)
+scanner initState scs = debug Lay ("scanning on "++stringFromScanChars scs++" state: "++show initState) $ 
+                        go initState ('\n',scs)
   where go :: ScannerState -> (Char, [ScanChar_]) -> ([ScannedToken Document EnrichedDoc Node ClipDoc UserToken], ScannerState)
         go state@(startCode,pos) inp@(_,str) =
-	  case alexScan inp 0 of
+	  case alexScan inp startCode of
 		AlexEOF -> ([], state)
 		AlexError (_,remaining) -> ( [ScannedToken (getFocusStartEnd remaining)
 		                                           (ErrorTk pos (stringFromScanChars str) NoIDP) ]

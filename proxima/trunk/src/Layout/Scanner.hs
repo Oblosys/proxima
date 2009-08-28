@@ -323,9 +323,10 @@ scanGroups sheet lex groupedScanChars =
                      _                  -> defaultLexerState -- will not occur because defaultLexer is passed to 
                                                              -- scanStructural in tokenizeLay, above
                      
-  in  fst $ scanCharsOrStructurals sheet (lexerState,0) groupedScanChars
+  in  fst $ scanCharsOrStructurals sheet (lexerState,0 {- position is 0 -}) groupedScanChars
 
--- for now, the Alex scanner does not return a lexerState (or startCode in Alex terminology)
+-- the scanner does not yet return the lexerState (or start code). Thus, style or structural tokens will break stateful scanning
+-- such as in strings
 scanCharsOrStructurals sheet state [] = ([],state)
 scanCharsOrStructurals sheet state@(lexerState,pos) (group@(scanChar:_):groups) = -- a group is never empty
   let (scannedTokens, state') = case scanChar of 
