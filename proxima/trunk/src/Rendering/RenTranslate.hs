@@ -95,7 +95,7 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     KeySpecialRen DeleteKey ms    -> ([RightDeleteArr], state, renLvl)
     KeySpecialRen LeftKey ms      -> ([LeftArr], state, renLvl)
     KeySpecialRen RightKey ms     -> ([RightArr], state, renLvl)
-    KeySpecialRen F1Key ms        -> ([ParseArr], state, renLvl)
+    KeySpecialRen F1Key ms        -> ([castLay ParseLay], state, renLvl)
     KeySpecialRen F2Key ms        -> ([castDoc' $ EvaluateDoc']
                                      , state, renLvl)
     KeySpecialRen F5Key ms        -> ([RedrawArr], state, renLvl)

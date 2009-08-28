@@ -392,6 +392,12 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
     -- this is not really a problem though
     ContextMenuRequest ((proxX,proxY),(screenX,screenY)) ->
      do { (RenderingLevel _ makePopupMenuHTML _ _ _ _ _ _)  <- readIORef renderingLvlVar
+        
+        ; html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $
+                    castLay ParseLay
+        ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+        
+                                                                    
         ; let (itemStrs,upds) = unzip $ makePopupMenuHTML proxX proxY
               itemsHTML = concat 
                             [ "<div class='menuItem' item='"++show i++"'>"++item++"</div>"
@@ -401,7 +407,8 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
         
         ; writeIORef menuR upds
                                 
-        ; return [ "<div op='contextMenu' screenX='"++show screenX++"' screenY='"++show screenY++"'>" ++
+        ; return $ html ++ [setViewedAreaHtml] ++
+                   [ "<div op='contextMenu' screenX='"++show screenX++"' screenY='"++show screenY++"'>" ++
                    itemsHTML ++ "</div>" ]
         }
     

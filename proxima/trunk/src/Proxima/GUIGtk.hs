@@ -20,6 +20,7 @@ import Common.CommonTypes ( DebugLevel (..), debug, showDebug, showDebug', debug
 import qualified Common.CommonTypes as CommonTypes
 import Rendering.RenTypes
 import Rendering.RenUtils
+import Layout.LayTypes
 import Common.CommonUtils
 import Proxima.Wrap
 import Evaluation.DocTypes (DocumentLevel, EditDocument'_ (..))
@@ -478,7 +479,7 @@ backupDocumentHandler settings handler renderingLvlVar buffer viewedAreaRef wind
  do { let editRendering = SaveFileRen backupFilename 
  
       -- Parse and save
-    ; genericHandler settings handler renderingLvlVar viewedAreaRef (buffer, window, vp, canvas) ((KeySpecialRen CommonTypes.F1Key (CommonTypes.Modifiers False False False))) 
+    ; genericHandler settings handler renderingLvlVar viewedAreaRef (buffer, window, vp, canvas) (castLay ParseLay)) 
     ; genericHandler settings handler renderingLvlVar viewedAreaRef (buffer, window, vp, canvas) editRendering 
     ; return True
     }

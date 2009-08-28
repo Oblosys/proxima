@@ -90,6 +90,9 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     InitArr               -> ([InitLay],               state, arrLvl) 
     CloseArr              -> ([CloseLay],              state, arrLvl) 
     CutArr                -> ([CutLay, guaranteeFocusInView],                state, arrLvl)
+    
+    -- guaranteeFocusInView should be done in Lay, because now we cannot cast edit ops directly to lay
+    
     CopyArr               -> ([CopyLay],               state, arrLvl)
     PasteArr              -> ([PasteLay, guaranteeFocusInView],              state, arrLvl)
     DeleteArr             -> ([DeleteLay, guaranteeFocusInView],             state, arrLvl)
@@ -101,7 +104,6 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     EnlargeLeftArr        -> ([EnlargeLeftLay, guaranteeFocusInView],        state, arrLvl)
     EnlargeRightArr       -> ([EnlargeRightLay, guaranteeFocusInView],       state, arrLvl)
     NormalizeArr          -> ([NormalizeLay],          state, arrLvl)
-    ParseArr              -> ([ParseLay, guaranteeFocusInView],              state, arrLvl)
     RedrawArr             -> ([SkipLay 0],             state, (ArrangementLevel emptyA focus p))
     Test2Arr              -> ([Test2Lay],              state, arrLvl)
     KeyCharArr c          -> ([InsertLay c, guaranteeFocusInView],           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
@@ -181,7 +183,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     WrapArr wrapped       -> ([unwrap wrapped],        state, arrLvl)
     _                     -> ([SkipLay 0],             state, arrLvl) 
 
-guaranteeFocusInView = cast (GuaranteeFocusInViewArr :: EditArrangement doc enr node clip token)
+guaranteeFocusInView = castArr GuaranteeFocusInViewArr
     
 docEditDrop arr srcX srcY dstX dstY = 
   case -- showDebug' Arr "\n\ndragsource" $ 

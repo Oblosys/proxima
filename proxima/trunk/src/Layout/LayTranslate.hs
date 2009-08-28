@@ -10,6 +10,7 @@ import Layout.Scanner
 import Layout.TreeEditPres
 import Arrangement.ArrTypes
 import Rendering.RenTypes
+import Layout.LayTypes
 import Proxima.Wrap
 import Evaluation.DocTypes
 
@@ -89,7 +90,8 @@ parse scannerSheet state layLvl@(LayoutLevel pres f dt) prsLvl (MoveVertexLay pt
   in  ([SkipPres 0], state', layLvl')
 parse scannerSheet state layLvl prsLvl NormalizeLay       = editLay editNormalize state layLvl prsLvl
 
-parse scannerSheet state layLvl prsLvl ParseLay = tokenizeLay scannerSheet state layLvl prsLvl
+parse scannerSheet state layLvl prsLvl ParseLay = let (editOps, state', layLvl') = tokenizeLay scannerSheet state layLvl prsLvl
+                                                  in  (editOps ++ [ castArr GuaranteeFocusInViewArr ], state', layLvl')
 parse  scannerSheet state layLvl@( LayoutLevel pres focus dt) prsLvl (FindLay mStr) = 
   let str = case mStr of
               Just str -> str

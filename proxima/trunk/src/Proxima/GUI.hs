@@ -17,6 +17,7 @@ import Data.IORef
 import Common.CommonTypes
 import Common.CommonUtils
 import Rendering.RenTypes
+import Layout.LayTypes
 import Proxima.Wrap
 
 #ifdef SERVER
@@ -52,7 +53,7 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
       
     ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params (OpenFileRen defaultDocumentFilename)
       
-    ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params (KeySpecialRen F1Key (Modifiers False False False))
+    ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params (castLay ParseLay)
      
     ; startEventLoop (settings,handler,renderingLvlVar,viewedAreaRef)
   
