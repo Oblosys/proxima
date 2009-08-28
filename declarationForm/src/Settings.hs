@@ -29,6 +29,6 @@ settings = defaultSettings { applicationName = "Travel declaration form"
 
                                -- updated parts of the rendering are surrounded by red rectangles
                            , markUpdatedRenderingArea = False
-                           , serverPort = 8081
+                           , serverPort = 8082
                            }
            
