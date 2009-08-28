@@ -1,0 +1,1 @@
+ssh pooh.zoo.cs.uu.nl "PATH=\$HOME/.cabal/bin/:\$HOME/ghc/bin:\$PATH; /home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohUpdateAndRestartEditors"
