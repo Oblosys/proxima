@@ -99,9 +99,6 @@ and we cannot tokenize any structural token children.
 
 
 
-defaultLexer :: Lexer
-defaultLexer = Lexer 0 NonStyled
-
 tokenizeLay :: (DocNode node, Show token) =>
                ScannerSheet doc enr node clip token -> state -> LayoutLevel doc enr node clip token ->
                PresentationLevel doc enr node clip token -> 
@@ -230,8 +227,8 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
 
      allScanChars = scanChars ++ case lex of
                                    Lexer _ Styled -> styleChangeTags lastCharStyles (stylesFromAttrs defaultStyleAttrs)
-                                   Lexer _ NonStyled -> []
-                              -- add remaining close tags (if any)
+                                   _              -> []
+                                   -- add remaining close tags (if any)
                  
      focusedScanChars = markFocusStartAndEnd scannedFocusStart scannedFocusEnd allScanChars 
      -- first, we store the focus in the scanned characters (except if focus is after last char)
@@ -239,7 +236,7 @@ scanPresentation sheet foc inheritedLex mNode pth idPCounter whitespaceMap idP
      groupedScanChars = groupScanChars focusedScanChars
      -- group the scanned characters in lists of either characters or structurals    
      
-     scannedTokens = scanGroups sheet groupedScanChars
+     scannedTokens = scanGroups sheet lex groupedScanChars
      -- scan all groups
       
      scannedTokensWithLastFocus = addLastCharFocusStartAndEnd allScanChars scannedFocusStart scannedFocusEnd $
@@ -305,7 +302,7 @@ markFocusStartAndEnd scannedFocusStart scannedFocusEnd scanChars =
 markFocus :: (ScanChar doc enr node clip token -> ScanChar doc enr node clip token) -> (Maybe Int) ->
              [ScanChar doc enr node clip token] -> [ScanChar doc enr node clip token]
 markFocus setFocusStartOrEnd Nothing          scs = scs
-markFocus setFocusStartOrEnd focus@(Just pos) scs = 
+markFocus setFocusStartOrEnd focus@(Just pos) scs =
   if not $ focusAfterLastChar scs focus 
   then let (left,rest) = splitAt (pos) scs
        in  case span isStyleScanChar rest of
@@ -320,17 +317,25 @@ groupCharScanChars scanChars = groupBy sameScanCharConstr scanChars
        sameScanCharConstr _                        _                        = False
        
 -- scan each group either with the scanner sheet or by creating structural tokens
-scanGroups sheet groupedScanChars = fst $ scanCharsOrStructurals sheet 0 groupedScanChars
+scanGroups sheet lex groupedScanChars =
+  let lexerState = case lex of
+                     Lexer lexerState _ -> lexerState
+                     _                  -> defaultLexerState -- will not occur because defaultLexer is passed to 
+                                                             -- scanStructural in tokenizeLay, above
+                     
+  in  fst $ scanCharsOrStructurals sheet (lexerState,0) groupedScanChars
 
-scanCharsOrStructurals sheet pos [] = ([],pos)
-scanCharsOrStructurals sheet pos (group@(scanChar:_):groups) = -- a group is never empty
-  let (scannedTokens, pos') = case scanChar of 
-                                Char _ _ _ _ _         -> let (sts, ((),p)) = sheet ((), pos) group in (sts,p)
-                                Structural _ _ _ _ _ _ -> scanStructurals pos group
-                                Style _                -> scanStyleTags pos group                          
-                                                          
-      (scannedTokens', pos'') = scanCharsOrStructurals sheet pos' groups
-  in  (scannedTokens++scannedTokens', pos'')
+-- for now, the Alex scanner does not return a lexerState (or startCode in Alex terminology)
+scanCharsOrStructurals sheet state [] = ([],state)
+scanCharsOrStructurals sheet state@(lexerState,pos) (group@(scanChar:_):groups) = -- a group is never empty
+  let (scannedTokens, state') = case scanChar of 
+                                Char _ _ _ _ _         -> sheet state group
+                                Structural _ _ _ _ _ _ -> let (ts,p) = scanStructurals pos group in (ts, (lexerState,p))
+                                Style _                -> let (ts,p) = scanStyleTags pos group   in (ts, (lexerState,p))
+                                -- these last two don't need or change the lexerState, so we don't pass it                                                          
+                                
+      (scannedTokens', state'') = scanCharsOrStructurals sheet state' groups
+  in  (scannedTokens++scannedTokens', state'')
 scanCharsOrStructurals sheet pos (group:groups) = debug Err ("Layout.scanCharsOrStructurals: error"++show group) ([],pos)
  
 scanStructurals pos [] = ([], pos)

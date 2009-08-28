@@ -322,14 +322,11 @@ type VRefNr = Int
 type VertexID = Int
 type Edge = (VertexID, VertexID)
 
--- This datatype will be in the non-generic part of Proxima in the future. (when an extensible scanner is available)
 -- LexInherited can be used if higher in the presentation tree the lexer is already defined.
 data Lexer = Lexer LexerState StyledOrNonStyled
            | LexInherited deriving Show
--- Lexer info is not passed on to arrangement, since scanning takes place on the presentation datatype
--- and does not involve the arrangement.
 
-type LexerState = Int -- not in use yet, will be used to denote starting state for Alex scanner
+type LexerState = Int -- Alex calls this a start code
 
 data StyledOrNonStyled = Styled | NonStyled deriving Show
 

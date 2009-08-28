@@ -12,12 +12,17 @@ data LayerStateLay doc enr node clip token = LayerStateLay { getClipboard :: (La
 -- is this  layer local state, instead of level local state? It is focus related, so probably, it should be 
 -- local to LayoutLevel, just like the focus
 
-type ScannerState = ((), Position)
-                 -- (Scanner state, token position)
+type ScannerState = (LexerState, Int)
 
 type ScannerSheet doc enr node clip token = 
       (ScannerState -> [ScanChar doc enr node clip token] -> ([ScannedToken doc enr node clip token], ScannerState))
       
+defaultLexer :: Lexer
+defaultLexer = Lexer defaultLexerState NonStyled
+
+defaultLexerState = 0
+
+
 data ScanChar doc enr node clip token = 
        Char         { idp :: IDP, startFocusMark :: FocusMark, endFocusMark :: FocusMark
                     , locator :: (Maybe node)
