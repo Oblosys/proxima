@@ -325,7 +325,7 @@ scanGroups sheet groupedScanChars = fst $ scanCharsOrStructurals sheet 0 grouped
 scanCharsOrStructurals sheet pos [] = ([],pos)
 scanCharsOrStructurals sheet pos (group@(scanChar:_):groups) = -- a group is never empty
   let (scannedTokens, pos') = case scanChar of 
-                                Char _ _ _ _ _         -> sheet pos group
+                                Char _ _ _ _ _         -> let (sts, ((),p)) = sheet ((), pos) group in (sts,p)
                                 Structural _ _ _ _ _ _ -> scanStructurals pos group
                                 Style _                -> scanStyleTags pos group                          
                                                           

@@ -34,22 +34,19 @@ alexGetChar (_, Structural _ _ _ _ _ _ : cs) = Just ('\255', ('\255', cs))
 
 alexInputPrevChar (c,_) = c
 
-type ScannerState = Position
-                 -- token position
-
 mkToken = mkTokenEx id
 
 -- the first strf is for manipulating the string that is stored in the token
 mkTokenEx :: (String->String) -> (String -> userToken) -> ScannerState -> [ScanChar doc enr node clip userToken] -> 
            (ScannedToken doc enr node clip userToken, ScannerState)
-mkTokenEx strf tokf tokenPos scs = 
+mkTokenEx strf tokf (startCode,tokenPos) scs = 
   let str = strf $ stringFromScanChars scs
       idp = idPFromScanChars scs
       loc = locFromScanChars scs
       userToken = tokf str
                                                    
   in  ( ScannedToken (getFocusStartEnd scs) $ UserTk tokenPos userToken str loc idp
-      , tokenPos + 1
+      , (startCode,tokenPos + 1)
       )
 
 collectWhitespace :: ScannerState -> [ScanChar doc enr node clip userToken] -> 

@@ -6,15 +6,17 @@ import Common.CommonTypes
 --import PresTypes -- already imported via LayoutTypes
 import Layout.LayTypes
 
-
 data LayerStateLay doc enr node clip token = LayerStateLay { getClipboard :: (Layout doc enr node clip token) -- clipboard
                                                        , getLastSearchTerm :: (Maybe String)
                                                        }
 -- is this  layer local state, instead of level local state? It is focus related, so probably, it should be 
 -- local to LayoutLevel, just like the focus
 
+type ScannerState = ((), Position)
+                 -- (Scanner state, token position)
+
 type ScannerSheet doc enr node clip token = 
-      (Int -> [ScanChar doc enr node clip token] -> ([ScannedToken doc enr node clip token], Int))
+      (ScannerState -> [ScanChar doc enr node clip token] -> ([ScannedToken doc enr node clip token], ScannerState))
       
 data ScanChar doc enr node clip token = 
        Char         { idp :: IDP, startFocusMark :: FocusMark, endFocusMark :: FocusMark

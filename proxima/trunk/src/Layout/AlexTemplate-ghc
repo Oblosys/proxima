@@ -24,12 +24,12 @@ scanner :: ScannerState -> [ScanChar_] ->
                   ([ScannedToken Document EnrichedDoc Node ClipDoc UserToken], ScannerState)
 scanner initState scs = go initState ('\n',scs)
   where go :: ScannerState -> (Char, [ScanChar_]) -> ([ScannedToken Document EnrichedDoc Node ClipDoc UserToken], ScannerState)
-        go state inp@(_,str) =
+        go state@(startCode,pos) inp@(_,str) =
 	  case alexScan inp 0 of
 		AlexEOF -> ([], state)
 		AlexError (_,remaining) -> ( [ScannedToken (getFocusStartEnd remaining)
-		                                           (ErrorTk state (stringFromScanChars str) NoIDP) ]
-		                           , state)              -- state is current position
+		                                           (ErrorTk pos (stringFromScanChars str) NoIDP) ]
+		                           , state)
 		AlexSkip  inp' len     -> go state inp'
 		AlexToken inp' len act -> let (scannedToken, state') = act state (take len str)
 		                              (scannedTokens, state'') = go state' inp'
