@@ -69,7 +69,7 @@ openFile fileName =
                        ; debugLnIO Err $ show $ take 2 errs
                        ; return $ Nothing
                        }
-    } `catch` \ioError -> do { putStr $ "**** IO Error ****\n" ++ show ioError; return Nothing }
+    } `catch` \ioError -> do { putStr $ "File not found: "++fileName++", using default document instead.\n" ++ show ioError; return Nothing }
 
 parseEither pp inp =
       let res = parseString pp inp
