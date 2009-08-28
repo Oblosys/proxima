@@ -1,0 +1,32 @@
+# script to be run on pooh, for updating, recompiling, and starting all test editors
+
+killall DazzleEditor
+killall HeliumEditor
+killall DeclarationForm
+# the last four editors share the same executable name
+
+cd /home/martijn/proxima/dazzleEditor
+cabal configure
+cabal build
+cd /home/martijn/proxima/heliumEditor
+cabal configure
+cabal build
+cd /home/martijn/proxima/declarationForm
+cabal configure
+cabal build
+cd /home/martijn/proxima/taskEditor
+cabal configure
+cabal build
+cd /home/martijn/proxima/sudokuEditor
+cabal configure
+cabal build
+cd /home/martijn/proxima/styledText
+cabal configure
+cabal build
+
+/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima dazzleEditor DazzleEditor
+/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima heliumEditor HeliumEditor
+/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima declarationForm DeclarationForm
+/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima taskEditor DeclarationForm
+/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima sudoku DeclarationForm
+/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima styledText DeclarationForm

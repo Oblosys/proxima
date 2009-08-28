@@ -1,0 +1,6 @@
+# script to be run on pooh, for starting a proxima editor in the appropriate directory
+# $1 is the name of the directory, $2 is the name of the executable
+
+echo starting /home/martijn/proxima/$1/dist/build/$2/$2
+cd /home/martijn/proxima/$1
+nohup dist/build/$2/$2  < /dev/null > output.txt 2>&1 &
