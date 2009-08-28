@@ -1,0 +1,429 @@
+<RootDoc>
+  <SudokuDoc>
+    <Sudoku>
+      <Row>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="3"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="2"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="5"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="7"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+      </Row>
+      <Row>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="7"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+      </Row>
+      <Row>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="6"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="3"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+      </Row>
+      <Row>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="2"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="3"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="9"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="1"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+      </Row>
+      <Row>
+        <Field>
+          <Int_>
+            <Integer val="9"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="1"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="4"/>
+          </Int_>
+        </Field>
+      </Row>
+      <Row>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="5"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="7"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="2"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="8"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+      </Row>
+      <Row>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="9"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="3"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+      </Row>
+      <Row>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="4"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+      </Row>
+      <Row>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="4"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="5"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="8"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="6"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+        <Field>
+          <Int_>
+            <Integer val="0"/>
+          </Int_>
+        </Field>
+      </Row>
+    </Sudoku>
+  </SudokuDoc>
+</RootDoc>

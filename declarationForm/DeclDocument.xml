@@ -1,0 +1,46 @@
+<RootDoc>
+  <FormDoc>
+    <Form>
+      <Description>
+        <String>Martijn</String>
+      </Description>
+      <Description>
+        <String>Informatica</String>
+      </Description>
+      <Expense>
+        <Description>
+          <String>Koffie</String>
+        </Description>
+        <Float_>
+          <Float val="1.0"/>
+        </Float_>
+        <Integer val="0"/>
+      </Expense>
+      <Expense>
+        <Description>
+          <String>Caipirinha</String>
+        </Description>
+        <Float_>
+          <Float val="3.0"/>
+        </Float_>
+        <Integer val="1"/>
+      </Expense>
+      <Currency>
+        <Description>
+          <String>Real</String>
+        </Description>
+        <Float_>
+          <Float val="0.345715"/>
+        </Float_>
+      </Currency>
+      <Currency>
+        <Description>
+          <String>Dollar</String>
+        </Description>
+        <Float_>
+          <Float val="0.790938"/>
+        </Float_>
+      </Currency>
+    </Form>
+  </FormDoc>
+</RootDoc>
