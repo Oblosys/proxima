@@ -25,6 +25,15 @@
         </Float_>
         <Integer val="1"/>
       </Expense>
+      <Integer val="0"/>
+      <Currency>
+        <Description>
+          <String>Euro</String>
+        </Description>
+        <Float_>
+          <Float val="1.0"/>
+        </Float_>
+      </Currency>
       <Currency>
         <Description>
           <String>Real</String>

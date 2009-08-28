@@ -10,13 +10,13 @@ $digit = 0-9
 $char = .#[\n\ ]
 
 tokens :-
-  \n                              { mkToken $ \s -> KeyTk s }
-  \                               { mkToken $ \s -> KeyTk s }
---  [0-9]+                        { mkToken $ \s -> IntToken }
---  [\(\)]                        { mkToken $ \s -> SymToken s }
-  $digit+(\.$digit+)?             { mkToken $ \s -> FloatTk }
-  $char+                          { mkToken $ \s -> WordTk }
-
+<0> \n                                  { mkToken $ \s -> KeyTk " " }
+<float> \n                              { mkToken $ \s -> KeyTk s }
+<float> \                               { mkToken $ \s -> KeyTk s }
+<float> $digit+(\.$digit+)?             { mkToken $ \s -> FloatTk }
+<descr> \n                              { mkToken $ \s -> KeyTk " " }
+<descr> \                               { mkToken $ \s -> KeyTk s }
+<descr> $char+                          { mkToken $ \s -> WordTk }
 {
 }
 --  in case of a lexical error from Alex, just add a single quote here. (total should be even)

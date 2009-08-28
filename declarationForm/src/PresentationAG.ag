@@ -233,7 +233,7 @@ showCurrency f =
 
 SEM Description [ | | strVal : String ]
   | Description
-      loc.pres = parsingWithParser pDescription @self $ text @str
+      loc.pres = parsingWithParserLexer pDescription (Lexer 1 NonStyled) @self $ text @str
       lhs.strVal = @str
   | HoleDescription
       lhs.strVal = "{Description}"
@@ -242,6 +242,17 @@ SEM Description [ | | strVal : String ]
 
 
 
+
+-- TODO: move this one to library
+
+SEM Float_ [ | | floatVal : Float ]
+  | Float_
+      loc.pres = parsingWithParserLexer pFloat_ (Lexer 2 NonStyled) @self $ text (show @value)
+      lhs.floatVal = @value
+  | HoleFloat_
+      lhs.floatVal = 0
+  | ParseErrFloat_
+      lhs.floatVal = 0
 
 SEM List_Thing
   | List_Thing
@@ -589,17 +600,6 @@ setFieldValue path n = pasteAt path $ toClip $ Field $ Int_ n
 }
 
 
-
--- TODO: move these to library
-
-SEM Float_ [ | | floatVal : Float ]
-  | Float_
-      loc.pres = parsingWithParser pFloat_ @self $ text (show @value)
-      lhs.floatVal = @value
-  | HoleFloat_
-      lhs.floatVal = 0
-  | ParseErrFloat_
-      lhs.floatVal = 0
 
 {
 -- TODO: move these to library
