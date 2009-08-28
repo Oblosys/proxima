@@ -324,25 +324,27 @@ instance Editable ChoiceDoc Document EnrichedDoc Node ClipDoc UserToken where
 
 instance Editable Form Document EnrichedDoc Node ClipDoc UserToken where
   select [] x = Clip_Form x
-  select (0:p) (Form x0 x1 x2 x3) = select p x0
-  select (1:p) (Form x0 x1 x2 x3) = select p x1
-  select (2:p) (Form x0 x1 x2 x3) = select p x2
-  select (3:p) (Form x0 x1 x2 x3) = select p x3
+  select (0:p) (Form x0 x1 x2 x3 x4) = select p x0
+  select (1:p) (Form x0 x1 x2 x3 x4) = select p x1
+  select (2:p) (Form x0 x1 x2 x3 x4) = select p x2
+  select (3:p) (Form x0 x1 x2 x3 x4) = select p x3
+  select (4:p) (Form x0 x1 x2 x3 x4) = select p x4
   select _ _ = Clip_Nothing
 
   paste [] (Clip_Form c) _ = c
   paste [] c x = debug Err ("Type error: pasting "++show c++" on Form") x
-  paste (0:p) c (Form x0 x1 x2 x3) = Form (paste p c x0) x1 x2 x3
-  paste (1:p) c (Form x0 x1 x2 x3) = Form x0 (paste p c x1) x2 x3
-  paste (2:p) c (Form x0 x1 x2 x3) = Form x0 x1 (paste p c x2) x3
-  paste (3:p) c (Form x0 x1 x2 x3) = Form x0 x1 x2 (paste p c x3)
+  paste (0:p) c (Form x0 x1 x2 x3 x4) = Form (paste p c x0) x1 x2 x3 x4
+  paste (1:p) c (Form x0 x1 x2 x3 x4) = Form x0 (paste p c x1) x2 x3 x4
+  paste (2:p) c (Form x0 x1 x2 x3 x4) = Form x0 x1 (paste p c x2) x3 x4
+  paste (3:p) c (Form x0 x1 x2 x3 x4) = Form x0 x1 x2 (paste p c x3) x4
+  paste (4:p) c (Form x0 x1 x2 x3 x4) = Form x0 x1 x2 x3 (paste p c x4)
   paste _ _ x = x
 
-  alternatives _ = [ ("Form {Description} {Description} {List_Expense} {List_Currency} "  , Clip_Form $ Form hole hole hole hole)
+  alternatives _ = [ ("Form {Description} {Description} {List_Expense} {Int} {List_Currency} "  , Clip_Form $ Form hole hole hole hole hole)
                    ,("{Form}", Clip_Form hole)
                    ]
 
-  arity (Form x0 x1 x2 x3) = 4
+  arity (Form x0 x1 x2 x3 x4) = 5
   arity _                        = 0
 
   toClip t = Clip_Form t

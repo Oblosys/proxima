@@ -5,7 +5,7 @@ data ChoiceDoc = FormDoc form : Form
                | SudokuDoc sudoku : Sudoku
                | TestDoc test : Test
 
-data Form = Form name :  Description faculty :  Description expenses : [Expense] currencies : [Currency]
+data Form = Form name :  Description faculty :  Description expenses : [Expense] baseCurrency : Int currencies : [Currency]
 
 data Expense = Expense description :  Description amount : Float_ currencyIx : Int
 

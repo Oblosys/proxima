@@ -127,7 +127,7 @@ construct_SudokuDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseSudokuDoc [tk]  (retrie
 construct_TestDoc tk ~[mClip0] = Clip_ChoiceDoc $ reuseTestDoc [tk]  (retrieveArg "TestDoc" "test::Test" mClip0)
 construct_HoleChoiceDoc tk ~[] = Clip_ChoiceDoc $ hole
 construct_ParseErrChoiceDoc (StructuralTk _ _ pres _ _) ~[] = Clip_ChoiceDoc $ parseErr (StructuralParseErr pres)
-construct_Form tk ~[mClip0,mClip1,mClip2,mClip3] = Clip_Form $ reuseForm [tk]  (retrieveArg "Form" "name::Description" mClip0) (retrieveArg "Form" "faculty::Description" mClip1) (retrieveArg "Form" "expenses::List_Expense" mClip2) (retrieveArg "Form" "currencies::List_Currency" mClip3)
+construct_Form tk ~[mClip0,mClip1,mClip2,mClip3,mClip4] = Clip_Form $ reuseForm [tk]  (retrieveArg "Form" "name::Description" mClip0) (retrieveArg "Form" "faculty::Description" mClip1) (retrieveArg "Form" "expenses::List_Expense" mClip2) (retrieveArg "Form" "baseCurrency::Int" mClip3) (retrieveArg "Form" "currencies::List_Currency" mClip4)
 construct_HoleForm tk ~[] = Clip_Form $ hole
 construct_ParseErrForm (StructuralTk _ _ pres _ _) ~[] = Clip_Form $ parseErr (StructuralParseErr pres)
 construct_Expense tk ~[mClip0,mClip1,mClip2] = Clip_Expense $ reuseExpense [tk]  (retrieveArg "Expense" "description::Description" mClip0) (retrieveArg "Expense" "amount::Float_" mClip1) (retrieveArg "Expense" "currencyIx::Int" mClip2)
@@ -245,10 +245,10 @@ reuseTestDoc nodes ma0
            (TestDoc a0) -> genericReuse1 TestDoc a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseTestDoc"
 
-reuseForm :: [Token doc enr Node clip token] -> Maybe Description -> Maybe Description -> Maybe List_Expense -> Maybe List_Currency -> Form
-reuseForm nodes ma0 ma1 ma2 ma3
+reuseForm :: [Token doc enr Node clip token] -> Maybe Description -> Maybe Description -> Maybe List_Expense -> Maybe Int -> Maybe List_Currency -> Form
+reuseForm nodes ma0 ma1 ma2 ma3 ma4
   = case extractFromTokens extractForm defaultForm nodes of
-           (Form a0 a1 a2 a3) -> genericReuse4 Form a0 a1 a2 a3 ma0 ma1 ma2 ma3
+           (Form a0 a1 a2 a3 a4) -> genericReuse5 Form a0 a1 a2 a3 a4 ma0 ma1 ma2 ma3 ma4
            _ -> error "Internal error:ProxParser_Generated.reuseForm"
 
 reuseExpense :: [Token doc enr Node clip token] -> Maybe Description -> Maybe Float_ -> Maybe Int -> Expense
@@ -451,7 +451,7 @@ extractTestDoc (Just (Node_TestDoc x@(TestDoc _) _)) = Just x
 extractTestDoc _ = Nothing
 
 extractForm :: Maybe Node -> Maybe Form
-extractForm (Just (Node_Form x@(Form _ _ _ _) _)) = Just x
+extractForm (Just (Node_Form x@(Form _ _ _ _ _) _)) = Just x
 extractForm _ = Nothing
 
 extractExpense :: Maybe Node -> Maybe Expense
@@ -592,7 +592,7 @@ defaultTestDoc :: ChoiceDoc
 defaultTestDoc = TestDoc hole
 
 defaultForm :: Form
-defaultForm = Form hole hole hole hole
+defaultForm = Form hole hole hole hole hole
 
 defaultExpense :: Expense
 defaultExpense = Expense hole hole hole

@@ -34,7 +34,7 @@ data ChoiceDoc = FormDoc Form
                | ParseErrChoiceDoc (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                    deriving (Show, Data, Typeable)
 
-data Form = Form Description Description List_Expense List_Currency
+data Form = Form Description Description List_Expense Int List_Currency
           | HoleForm
           | ParseErrForm (ParseError Document EnrichedDoc Node ClipDoc UserToken)
               deriving (Show, Data, Typeable)

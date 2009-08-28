@@ -15,12 +15,12 @@ import Common.CommonTypes hiding (Clean, Dirty)
 
 initialDocument :: IO Document
 initialDocument = return $ RootDoc $
-    TestDoc $
+{-    TestDoc $
       Test $ StyledText $ toList_Word [ Word $ toList_WordPart [ WordPart NoIDP "bla"
                                                                , OpenTag $ TextColor  255 0 0, WordPart NoIDP "bla", CloseTag $ TextColor 255 0 0
                                                                , WordPart NoIDP "bla" ]]
 --      Test (StyledText $ toList_StringOrStyled [ String NoIDP "styledtext" ])
-{-  TaskDoc $
+-}{-  TaskDoc $
     Tasks (toList_Thing [Thing 1, Thing 2, Thing 3]) (toList_Thing [])True $ toList_Task
       [ BasicTask (Description "Pinpas bestellen") True
       , CompositeTask True (Description "Declaratie editor bouwen") $ toList_Task
@@ -32,18 +32,20 @@ initialDocument = return $ RootDoc $
           ]         
       ]       
 -}                        
-{-  
+  
   FormDoc                 (Form (Description "Martijn") (Description "Informatica") 
                              (toList_Expense 
                                [ Expense (Description "Koffie") (Float_ 1) 0
                                , Expense (Description "Caipirinha") (Float_ 3) 1
                                ])
+                              0
                              (toList_Currency
-                               [ Currency (Description "Real")   (Float_ 0.345715)
+                               [ Currency (Description "Euro")   (Float_ 1.0)
+                               , Currency (Description "Real")   (Float_ 0.345715)
                                , Currency (Description "Dollar") (Float_ 0.790938)
                                ])
                            )
--}  
+  
 {-  
 SudokuDoc $ Sudoku 
     (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 3)  (Field $ toInt_ 2) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 5) (Field $ toInt_ 7) (Field $ toInt_ 0)) 
@@ -374,7 +376,7 @@ toXMLChoiceDoc (SudokuDoc sudoku) = Elt "SudokuDoc" [] $ [toXMLSudoku sudoku]
 toXMLChoiceDoc (TestDoc test) = Elt "TestDoc" [] $ [toXMLTest test]
 toXMLChoiceDoc (HoleChoiceDoc) = EmptyElt "HoleChoiceDoc" [] 
 toXMLChoiceDoc (ParseErrChoiceDoc error) = EmptyElt "ParseErrChoiceDoc" []
-toXMLForm (Form name faculty expenses currencies) = Elt "Form" [] $ [toXMLDescription name] ++ [toXMLDescription faculty] ++ toXMLList_Expense expenses ++ toXMLList_Currency currencies
+toXMLForm (Form name faculty expenses baseCurrency currencies) = Elt "Form" [] $ [toXMLDescription name] ++ [toXMLDescription faculty] ++ toXMLList_Expense expenses ++ [toXMLInt baseCurrency] ++ toXMLList_Currency currencies
 toXMLForm (HoleForm) = EmptyElt "HoleForm" [] 
 toXMLForm (ParseErrForm error) = EmptyElt "ParseErrForm" []
 toXMLExpense (Expense description amount currencyIx) = Elt "Expense" [] $ [toXMLDescription description] ++ [toXMLFloat_ amount] ++ [toXMLInt currencyIx]
@@ -478,7 +480,7 @@ parseXMLCns_TaskDoc = TaskDoc <$ startTag "TaskDoc" <*> parseXML_Tasks<* endTag 
 parseXMLCns_SudokuDoc = SudokuDoc <$ startTag "SudokuDoc" <*> parseXML_Sudoku<* endTag "SudokuDoc"
 parseXMLCns_TestDoc = TestDoc <$ startTag "TestDoc" <*> parseXML_Test<* endTag "TestDoc"
 parseXML_Form = parseXMLCns_Form <|> parseHoleAndParseErr "Form" HoleForm
-parseXMLCns_Form = Form <$ startTag "Form" <*> parseXML_Description <*> parseXML_Description <*> parseXML_List_Expense <*> parseXML_List_Currency<* endTag "Form"
+parseXMLCns_Form = Form <$ startTag "Form" <*> parseXML_Description <*> parseXML_Description <*> parseXML_List_Expense <*> parseXML_Int <*> parseXML_List_Currency<* endTag "Form"
 parseXML_Expense = parseXMLCns_Expense <|> parseHoleAndParseErr "Expense" HoleExpense
 parseXMLCns_Expense = Expense <$ startTag "Expense" <*> parseXML_Description <*> parseXML_Float_ <*> parseXML_Int<* endTag "Expense"
 parseXML_Currency = parseXMLCns_Currency <|> parseHoleAndParseErr "Currency" HoleCurrency

@@ -48,7 +48,7 @@ DATA ChoiceDoc
   | ParseErrChoiceDoc error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Form
-  | Form name:Description faculty:Description expenses:List_Expense currencies:List_Currency
+  | Form name:Description faculty:Description expenses:List_Expense baseCurrency:Int currencies:List_Currency
   | HoleForm
   | ParseErrForm error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
@@ -296,12 +296,12 @@ SEM Form
       name.path  = @lhs.path++[0]
       faculty.path  = @lhs.path++[1]
       expenses.path  = @lhs.path++[2]
-      currencies.path  = @lhs.path++[3]
+      currencies.path  = @lhs.path++[4]
   | Form
     name.ix = 0
     faculty.ix = 1
     expenses.ix = 2
-    currencies.ix = 3
+    currencies.ix = 4
   | Form
       lhs.pres = loc (Node_Form @self @lhs.path) $ presentFocus @lhs.focusD @lhs.path @pres
                  `withLocalPopupMenuItems` (mkPopupItemsFromDocUpdates $ menuD (PathD @lhs.path) @lhs.doc)
@@ -1004,7 +1004,7 @@ SEM ChoiceDoc
 
 SEM Form
   | Form
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Form @self @lhs.path) @lhs.path "Form" [ @name.presXML, @faculty.presXML, @expenses.presXML, @currencies.presXML ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Form @self @lhs.path) @lhs.path "Form" [ @name.presXML, @faculty.presXML, @expenses.presXML, presentPrimXMLInt @baseCurrency, @currencies.presXML ] 
   | HoleForm     lhs.presXML = presHole @lhs.focusD "Form" (Node_HoleForm @self @lhs.path) @lhs.path
   | ParseErrForm lhs.presXML = presParseErr (Node_ParseErrForm @self @lhs.path) @error
 
@@ -1227,7 +1227,7 @@ SEM ChoiceDoc
 
 SEM Form
   | Form
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Form @self @lhs.path) @lhs.path "Form" [ @name.presTree, @faculty.presTree, @expenses.presTree, @currencies.presTree ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Form @self @lhs.path) @lhs.path "Form" [ @name.presTree, @faculty.presTree, @expenses.presTree, presentPrimXMLInt @baseCurrency, @currencies.presTree ] 
   | HoleForm     lhs.presTree = presHole @lhs.focusD "Form" (Node_HoleForm @self @lhs.path) @lhs.path
   | ParseErrForm lhs.presTree = presParseErr (Node_ParseErrForm @self @lhs.path) @error
 

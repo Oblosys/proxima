@@ -68,7 +68,7 @@ SEM Form
 		             , empty `withHStretch` True
                              , col [ empty `withSize` (120,2) `withbgColor` black
                                    , vSpace 5
-                                   , textField 120 (text $ showCurrency @expenses.total ++ " Euro")
+                                   , textField 120 (text $ showCurrency @expenses.total ++ " " ++ @baseCurrencyName)
                                    ] `withVRef` (10)
 			     ]
                        , vSpace 15
@@ -86,10 +86,11 @@ SEM Expense
                        , hSpace 5
                        , textField 60 @amount.pres
                        , hSpace 5
-                       , textField 80 $ (text $ fst $ index "Expense.pres" @lhs.allCurrencies @currencyIx)
+                       , textField 80 $ (text $ if null @lhs.allCurrencies then ""
+                                                else fst $ index "Expense.pres" @lhs.allCurrencies @currencyIx)
                        , hSpace 10
-                       , textField 120 (text $ showCurrency @total ++ " Euro") 
-                                       -- Expense.total is total euro amount for one expense
+                       , textField 120 (text $ showCurrency @total ++ " " ++ @lhs.baseCurrencyName) 
+                                       -- Expense.total is total euro base currency amount for one expense
                        ] `addPopupItems` 
                        [ ("Delete expense", docUpd $ deleteAt @lhs.path)
 		       , ("Move expense up", docUpd $ moveElementUp @lhs.path)
@@ -116,11 +117,23 @@ SEM Currency
       loc.pres = structural $ col [ textField 120 @name.pres
                                   , vSpace 4
 				  , textField 120 @euroRate.pres
-                                  ]
+                                  ] `addPopupItems`
+                                  [ ("Change base currency to "++ @name.strVal
+                                    , changeBaseCurrency @lhs.formPath @lhs.ix) ]
 
+
+ATTR List_Expense ConsList_Expense Expense [ baseCurrencyName : String | | ]
+
+ATTR List_Currency ConsList_Currency Currency [ formPath : Path | | ]
+  
+SEM Form
+  | Form
+      loc.baseCurrencyName = if null @currencies.allCurrencies then ""
+                             else fst $ index "Form.baseCurrencyName" @currencies.allCurrencies @baseCurrency
+      currencies.formPath = @lhs.path
 
 -- currency names and rates are put in synthesized attribute that is inherited to Expenses
-  
+
 ATTR List_Currency ConsList_Currency Currency
      [ | | allCurrencies USE {++} {[]} : {[(String,Float)]} ]
 
@@ -141,7 +154,8 @@ ATTR List_Expense ConsList_Expense Expense
                          
 SEM Expense
   | Expense
-      loc.total = @amount.floatVal * (snd $ index "Expense.total" @lhs.allCurrencies @currencyIx)
+      loc.total = @amount.floatVal * (if null @lhs.allCurrencies then 0
+                                      else snd $ index "Expense.total" @lhs.allCurrencies @currencyIx)
         
 {
 
@@ -155,6 +169,25 @@ addNewCurrency path =
 newExpense = Expense (Description "") (Float_ 0) 0
   
 newCurrency = Clip_Currency $ Currency (Description "new") (Float_ 0.0)
+
+changeBaseCurrency formPath newBase = 
+   docUpd $ updateAt formPath $ \clip ->
+              case clip of
+                Clip_Form (Form name faculty expenses oldBase listCurrency) ->
+                  let (names,currencyRates) = unzip $
+                                           [ (name,currencyRate) 
+                                           | Currency name currencyRate <- fromList_Currency listCurrency ]
+                      newBaseRate = float_val $ index "changeBaseCurrency" currencyRates newBase
+		      currencyRates' = map (\fl -> Float_ $ float_val fl / newBaseRate) currencyRates
+		      listCurrencies' = toList_Currency [ Currency name currency | (name,currency) <- zip names currencyRates' ]
+                  in  if newBaseRate == 0 
+                      then clip
+                      else toClip $ Form name faculty expenses newBase listCurrencies'
+                clip -> clip
+    where float_val (Float_ f) = f
+          float_val _          = 0
+  
+
 
 setCurrencyIx :: Path -> Int -> UpdateDoc Document ClipDoc
 setCurrencyIx path newCurrencyIx= 
@@ -388,13 +421,15 @@ SEM Field
   | Field
       loc.pres = structural $ boxed (col [ empty `withVStretch` True
                                          , row [ empty `withHStretch` True
-			                       , bold $ squiggleInvalidField @val.value @lhs.rowNrs @lhs.colNrs @lhs.blockNrs $ 
+			                       , bold $ 
                                                  @val.pres
       	       	 	            	         `withColor` black
 					       , empty `withHStretch` True
 				               ]
       	       	 	      	         , empty `withVStretch` True
-				         ]  `withSize` (35,35)) `withColor` darkGrey
+				         ]  `withSize` (35,35)) `withColor` darkGrey 
+                                            `withbgColor` (if isValidField @val.value @lhs.rowNrs @lhs.colNrs @lhs.blockNrs 
+                                                           then white else red) 
                               `addPopupItems` 
 			      fieldPopupItems @lhs.path @lhs.rowNrs @lhs.colNrs @lhs.blockNrs
                                               @lhs.inhBoardStr @lhs.rowNr @lhs.colNr 
@@ -529,13 +564,11 @@ SEM Row
 
       
 {
-
-squiggleInvalidField nr rowNrs colNrs blockNrs =
-  squiggle green $
-    nr /= 0 &&
-    (length (filter (==nr) rowNrs) > 1 ||
-     length (filter (==nr) colNrs) > 1 ||
-     length (filter (==nr) blockNrs) > 1) 
+isValidField nr rowNrs colNrs blockNrs =
+  nr == 0 ||
+  length (filter (==nr) rowNrs) <= 1 &&
+  length (filter (==nr) colNrs) <= 1 &&
+  length (filter (==nr) blockNrs) <= 1
   
 listTo9Tuple [x0,x1,x2,x3,x4,x5,x6,x7,x8] = (x0,x1,x2,x3,x4,x5,x6,x7,x8)
 
