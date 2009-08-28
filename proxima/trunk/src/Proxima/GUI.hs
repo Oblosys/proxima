@@ -31,8 +31,6 @@ import Proxima.GUIGtk
 initialWindowSize :: (Int, Int)
 initialWindowSize = (900, 760)
 
-documentFilename = "Document.xml"
-
 startGUI :: (Show doc, Show enr, Show node, Show token) =>
             Settings ->
             ((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token])) ->
@@ -52,7 +50,7 @@ startGUI settings handler viewedAreaRef (initRenderingLvl, initEvent) =
     ; params <- withCatch $ initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize)
     ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params initEvent
       
-    ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params (OpenFileRen "Document.xml")
+    ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params (OpenFileRen defaultDocumentFilename)
       
     ; withCatch $ genericHandler settings handler renderingLvlVar viewedAreaRef params (KeySpecialRen F1Key (Modifiers False False False))
      

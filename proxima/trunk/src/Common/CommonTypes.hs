@@ -20,6 +20,7 @@ import System.IO.Unsafe
 
 import Text.Show.Functions
 
+defaultDocumentFilename = "Document.xml"
 
 type Path = [Int]
 

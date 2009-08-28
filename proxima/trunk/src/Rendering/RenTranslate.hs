@@ -6,7 +6,7 @@ import Rendering.RenLayerUtils
 import Proxima.Wrap
 import Evaluation.DocTypes 
 import Layout.LayTypes
-
+import Evaluation.EnrTypes
 import Data.Char
 import Control.Exception
 -- import IOExts
@@ -69,8 +69,9 @@ interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
     CloseRen            -> ([CloseArr],      state, renLvl)
     SkipRen i           -> ([SkipArr (i+1)], state, renLvl)
 -- TODO: make selectors scaleR and debuggingR for RenderingLevel
-    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> ([castLay $ FindLay Nothing],       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'c') (Modifiers False True False) -> ([CopyArr],       state, renLvl) -- Ctrl-c
+    KeySpecialRen (CharKey 'g') (Modifiers False True False) -> ([castLay $ FindLay Nothing],       state, renLvl) -- Ctrl-c
+    KeySpecialRen (CharKey 's') (Modifiers False True False) -> ([castEnr $ SaveFileEnr defaultDocumentFilename],       state, renLvl) -- Ctrl-c
     KeySpecialRen (CharKey 'v') (Modifiers False True False) -> ([PasteArr],      state, renLvl) -- Ctrl-v
     KeySpecialRen (CharKey 'x') (Modifiers False True False) -> ([CutArr],        state, renLvl) -- Ctrl-x
     KeySpecialRen (CharKey 'c') (Modifiers True True False) -> ([castDoc' $ CopyDoc'],    state, renLvl) -- Ctrl-C
