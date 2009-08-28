@@ -46,12 +46,11 @@ replace callerName i xs x = case splitAt i xs of
                    (left, _: right) -> left ++ [x] ++ right
                    _                -> debug Err ("**** CommonUtils.replace (called by "++callerName++"): index out of bounds") xs
 
--- scaling seems to be rather expensive. For now it is turned off.
 scaleInt :: Double -> Int -> Int
-scaleInt scale x = x -- round (fromIntegral x * scale)  
+scaleInt scale x = round (fromIntegral x * scale)  
 
 descaleInt :: Double -> Int -> Int
-descaleInt scale x = x -- round (fromIntegral x / scale)
+descaleInt scale x = round (fromIntegral x / scale)
 
 -- Compute angle of the line (fromx,fromy) (tox,toy), result lies in [0..2*pi>
 computeAngle :: Int -> Int -> Int -> Int -> Double
