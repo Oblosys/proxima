@@ -713,7 +713,7 @@ ATTR StyledText List_Word Word List_Word List_WordPart WordPart TextStyle [ | | 
 
 SEM StyledText
   | StyledText 
-      loc.pres = parsingWithParserLexer pStyledText (Lexer 0 Styled) @self $ @words.pres
+      loc.pres = parsingWithParserLexer pStyledText (Lexer (Lex.descr) Styled) @self $ @words.pres
       lhs.underwater = @words.underwater
   | HoleStyledText
       lhs.underwater = ""
