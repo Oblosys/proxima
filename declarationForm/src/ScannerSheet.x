@@ -10,7 +10,7 @@ $digit = 0-9
 $char = .#[\n\ ]
 
 tokens :-
-<0> \n                                  { mkToken $ \s -> KeyTk " " }
+<0> \n                                  { mkToken $ \s -> KeyTk " " } -- at least one rule for 0 is required by Alex
 <float> \n                              { mkToken $ \s -> KeyTk s }
 <float> \                               { mkToken $ \s -> KeyTk s }
 <float> $digit+(\.$digit+)?             { mkToken $ \s -> FloatTk }
