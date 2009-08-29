@@ -31,7 +31,12 @@ generate docType = genPresentationSheet
 -- instead of removing documentDecl, we should actually recursively determine all used AG types from EnrichedDoc
 
 genPresentationSheet = genBanner "presentationSheet" $
-  [ "WRAPPER Root"
+  [ "imports"
+  , "{"
+  , "import ScannerSheetHS as Lex"
+  , "}"
+  , ""
+  , "WRAPPER Root"
   , ""
   , "{"
   , "-- type PresentationSheet doc enr node clip token = "
