@@ -153,7 +153,9 @@ pPrs p = unfoldStructure
          in  if null errs 
              then res 
              else debug Err ("ERROR: Parse error"++(show errs)) $
-                  parseErr (ParsingParseErr idP (mkErrs errs) tokens (mkClipParser p))
+                  parseErr (ParsingParseErr idP (mkErrs errs) tokens 
+                           (debug Err "pPrs: lexer not specified in parse error, better use parsingWithParserLexer method" LexInherited) (mkClipParser LexInherited p))
+             -- the lexer is not available here. But pPrs is kind of obsolete anyway
        unfoldStructure _ = error "NewParser.pStr structural parser returned non structural token.."
 
 {-
@@ -362,14 +364,14 @@ class Construct doc enr node clip token where
 -- used by Xprez.parsingWithParser. Converts a parser to a ClipParser
 -- does not take into account idP of parsingTk yet (for leading whitespace)
 mkClipParser :: (Editable a doc enr node clip token, DocNode node, Ord token, Show token) =>
-                ListParser doc enr node clip token a -> ClipParser doc enr node clip token
-mkClipParser parser = 
+                Lexer -> ListParser doc enr node clip token a -> ClipParser doc enr node clip token
+mkClipParser lexer parser = 
  let clipParser = 
        \tokens ->
          let (res, errs) = runParser parser tokens
          in  toClip $ if null errs then res 
                       else debug Prs ("Presentation parser:\n"++(show errs)) $ 
-                             parseErr (ParsingParseErr NoIDP (mkErrs errs) tokens clipParser)
+                             parseErr (ParsingParseErr NoIDP (mkErrs errs) tokens lexer clipParser)
  in  clipParser
 
 {- recognize parses a structural token and recognizes its structure. The parser will succeed

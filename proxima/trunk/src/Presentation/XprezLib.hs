@@ -60,12 +60,12 @@ parsing xp = ParsingP NoIDP Nothing LexInherited xp
 parsingWithParser :: (Editable a doc enr node clip token, DocNode node, Ord token, Show token) =>
                      ListParser doc enr node clip token a -> a -> Presentation doc enr node clip token ->
                      Presentation doc enr node clip token
-parsingWithParser parser self pres = ParsingP NoIDP (Just $ mkClipParser $ parser) LexInherited pres
+parsingWithParser parser self pres = ParsingP NoIDP (Just $ mkClipParser LexInherited parser) LexInherited pres
 
 parsingWithParserLexer :: (Editable a doc enr node clip token, DocNode node, Ord token, Show token) =>
                      ListParser doc enr node clip token a -> Lexer -> a -> Presentation doc enr node clip token ->
                      Presentation doc enr node clip token
-parsingWithParserLexer parser lexer self pres = ParsingP NoIDP (Just $ mkClipParser $ parser) lexer pres
+parsingWithParserLexer parser lexer self pres = ParsingP NoIDP (Just $ mkClipParser lexer parser) lexer pres
 
 loc l xp  = LocatorP l xp
 tag t xp = TagP t xp
@@ -105,8 +105,8 @@ presHole focus typeStr nd pth = loc nd $
        
 presParseErr node (StructuralParseErr pres) =
   loc node $ structural $ pres `withbgColor` whiteSmoke
-presParseErr node (ParsingParseErr idP parseErrs tokens parser) =
-  loc node $ ParsingP idP (Just parser) LexInherited $ 
+presParseErr node (ParsingParseErr idP parseErrs tokens lexer parser) =
+  loc node $ ParsingP idP (Just parser) lexer $ 
      row $ [ (case lookup i positionsAndErrors of
                Nothing -> id
                Just msg -> markError msg 
