@@ -6,21 +6,27 @@ killall DeclarationForm
 # the last four editors share the same executable name
 
 cd /home/martijn/proxima/dazzleEditor
+svn update
 cabal configure
 cabal build
 cd /home/martijn/proxima/heliumEditor
+svn update
 cabal configure
 cabal build
 cd /home/martijn/proxima/declarationForm
+svn update
 cabal configure
 cabal build
 cd /home/martijn/proxima/taskEditor
+svn update
 cabal configure
 cabal build
 cd /home/martijn/proxima/sudokuEditor
+svn update
 cabal configure
 cabal build
 cd /home/martijn/proxima/styledText
+svn update
 cabal configure
 cabal build
 
