@@ -74,10 +74,7 @@ function init()
 
 //    setRefreshTimer(10);
     refresh();
-//    alert('before');
-//    debugAdd('Metrics: '+queryFont("Times New Roman", 12, false, false));
-//    alert('after');
-    setViewedAreaServer();
+   setViewedAreaServer();
     loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
 }
 
@@ -101,8 +98,8 @@ function initFont()
 }
 
 function queryFont(fontFamily, fontSize, isBold, isItalic)
-{
-  initFont() // firefox does not update bounding divs on style update, so we need to init every time :-(
+{ //debugAdd('Font query: '+fontFamily+fontSize+isBold+isItalic);
+  initFont(); // firefox does not update bounding divs on style update, so we need to init every time :-(
   
   var fontElt = document.getElementById('font');
   fontElt.style.fontFamily = fontFamily;
