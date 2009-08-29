@@ -24,7 +24,6 @@ import Evaluation.DocTypes (DocumentLevel (..))
 import DocTypes_Generated
 import DocUtils_Generated
 import DocumentEdit_Generated
-
 import ProxParser   
 
 import Sudoku hiding (fst3, snd3, thd3)
@@ -233,7 +232,7 @@ showCurrency f =
 
 SEM Description [ | | strVal : String ]
   | Description
-      loc.pres = parsingWithParserLexer pDescription (Lexer 1 NonStyled) @self $ text @str
+      loc.pres = parsingWithParserLexer pDescription (Lexer Lex.descr NonStyled) @self $ text @str
       lhs.strVal = @str
   | HoleDescription
       lhs.strVal = "{Description}"
@@ -247,7 +246,7 @@ SEM Description [ | | strVal : String ]
 
 SEM Float_ [ | | floatVal : Float ]
   | Float_
-      loc.pres = parsingWithParserLexer pFloat_ (Lexer 2 NonStyled) @self $ text (show @value)
+      loc.pres = parsingWithParserLexer pFloat_ (Lexer Lex.float NonStyled) @self $ text (show @value)
       lhs.floatVal = @value
   | HoleFloat_
       lhs.floatVal = 0
