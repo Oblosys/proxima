@@ -154,29 +154,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
                       Nothing -> [SkipLay 0]
                       Just upd -> [cast upd]
            _ -> [SkipLay 0]
-     {- 
-      (case getLastMousePress state of
-        Just (x',y') -> 
-         case point x' y' arr of
-          Nothing -> debug Err ("No path for drag source at "++show (x',y')) $ SkipLay 0 
-          Just completeDragPath ->
-           let pathToDraggable = getPathToDraggable completeDragPath arr
-           in  debug Arr ("Drag ended " ++ show (selectTreeA pathToDraggable arr)) $
-             case (\(_,_,x)->x) $ selectTreeA pathToDraggable arr of 
-                   VertexA _ _ _ _ _ _ _ _ _ _ -> MoveVertexLay (pathPFromPathA' arr pres pathToDraggable ) (x-x',y-y')
-                   -- for vertex we don't want the tag included, for others maybe we do
-                   -- figure out how to do this
-                   (LocatorA n a) -> debug Arr ("dragging"++shallowShowArr a) $ 
-                     case pathNode n of
-                       PathD srcPath ->
-                         [wrap .  UpdateDoc' (\(DocumentLevel d p cl) -> 
-                                         DocumentLevel (fst $ deleteD srcPath d) p cl)
-                          :: EditDocument' doc enr node clip token)]        
-                       NoPathD -> [SkipLay 0]
-                   _ -> [SkipLay 0]
-        _ -> [SkipLay 0] -- no last mouse press, does not occur
--}      
-     , state { getLastMousePress = Nothing }, arrLvl) 
+      , state { getLastMousePress = Nothing }, arrLvl) 
       
     OpenFileArr str       -> ([OpenFileLay str],       state, arrLvl) 
     SaveFileArr str       -> ([SaveFileLay str],       state, arrLvl) 
