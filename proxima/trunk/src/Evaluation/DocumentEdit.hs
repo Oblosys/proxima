@@ -134,7 +134,7 @@ alternativesD :: (Editable doc doc enr node clip token, Clip clip) => Path -> do
 alternativesD p d = alternativesClip (select p d)
 
  
-moveDocPathD :: (Editable doc doc enr node clip token, Clip clip, Show clip) => Path -> Path -> Int -> doc -> doc
+moveDocPathD :: (Editable doc doc enr node clip token, Clip clip, Show clip, Show doc) => Path -> Path -> Int -> doc -> doc
 moveDocPathD [] targetListPath index doc = error "Move with empty source path."
 moveDocPathD sourcePath targetListPath index doc =
   let (tgtPath,tgtIx) =
@@ -153,4 +153,5 @@ moveDocPathD sourcePath targetListPath index doc =
       (doc',_) = deleteD sourcePath doc
       (doc'') = debug Arr ("move to " ++ show (tgtPath, tgtIx)) $
                 insertListD tgtPath tgtIx source doc'
-  in  doc''
+  in  debug Eva ("Document move\n"++show doc ++ show doc'') $
+      doc''
