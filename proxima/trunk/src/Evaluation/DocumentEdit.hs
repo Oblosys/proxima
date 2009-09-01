@@ -153,5 +153,5 @@ moveDocPathD sourcePath targetListPath index doc =
       (doc',_) = deleteD sourcePath doc
       (doc'') = debug Arr ("move to " ++ show (tgtPath, tgtIx)) $
                 insertListD tgtPath tgtIx source doc'
-  in  debug Eva ("Document move\n"++show doc ++ show doc'') $
+  in  --debug Eva ("Document move\n"++show doc ++ "\n\n" ++ show doc'') $
       doc''
