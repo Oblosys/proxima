@@ -26,13 +26,13 @@ import Control.Monad.Writer hiding (when)
 render scale arrDb diffTree arrangement viewedArea =
  do { -- seq (walk arrangement) $ return ()        -- maybe this is not necessary anymore, now the datastructure is strict
     --; putStrLn $ "Rendering on viewedArea " ++ show viewedArea
-    --; putStrLn $ "DiffTree is " ++ show diffTree
-    --; debugLnIO Ren ("Arrangement is "++show arrangement)
-    --; debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
+    -- debugLnIO Err ("The updated rectangle is: "++show (updatedRectArr diffTree arrangement))
     --; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
     -- cannot use these IO regions anymore
     
-    ; renderArr arrDb scale origin viewedArea Nothing (Just [0]) diffTree arrangement
+    ; --debug Ren ("DiffTree is " ++ show diffTree) $
+      --debug Ren ("Arrangement is "++show arrangement) $
+      renderArr arrDb scale origin viewedArea Nothing (Just [0]) diffTree arrangement
     }
 
 
@@ -98,6 +98,8 @@ htmlPath pth = "<div id='path'>"++stepsHTML++"</div>"
 
 
 {- inUpdate is True when renderArr is inside a replace update -}
+
+-- first we handle the arrangements which are not rendered and hence should not cause changes to the rootPath (Maybe Path)
 renderArr :: Show node => Bool -> Scale -> (Int,Int) ->
                            (Point, Size) -> Maybe Tags -> Maybe Path -> DiffTree -> Arrangement node ->
                            Writer String ()    
@@ -119,16 +121,16 @@ renderArr o s (lux, luy) v mt m (DiffLeaf d)        (LocatorA _ arr) =
            renderArr o s (lux, luy) v mt m (DiffLeaf d) arr
 renderArr o s (lux, luy) v mt m _                   (LocatorA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
-{-  maybe to tag stuff here
-renderArr o s (lux, luy) v mt m (DiffNode _ _ [dt]) (TagA _ arr) =
-           renderArr o s (lux, luy) v mt m dt arr
-renderArr o s (lux, luy) v mt m (DiffLeaf d)        (TagA _ arr) =
-           renderArr o s (lux, luy) v mt m (DiffLeaf d) arr
+renderArr o s (lux, luy) v mt m (DiffNode _ _ [dt]) (TagA tags arr) =
+           renderArr o s (lux, luy) v (Just tags) m dt arr
+renderArr o s (lux, luy) v mt m (DiffLeaf d)        (TagA tags arr) =
+           renderArr o s (lux, luy) v (Just tags) m (DiffLeaf d) arr
 renderArr o s (lux, luy) v mt m _                   (TagA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
--}
+
 renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
- do { -- debugLnIO Err (shallowShowArr arrangement ++":"++ show (isCleanDT diffTree));
+ do { debug Ren (shallowShowArr arrangement ++":"++ show (isSelfCleanDT diffTree)++":"++ show (isCleanDT diffTree)) $
+        return ()
      --if True then return () else    -- uncomment this line to skip rendering
                                        
     ; if (isSelfCleanDT diffTree)  -- if self is clean, only render its children (if present)
@@ -292,6 +294,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
         ; polyHTML' id 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
         }
 
+
+       
   
   -- TODO these cases are probably never reached
     (StructuralA id arr) -> 
@@ -319,15 +323,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
         ; renderArr arrDb scale (lux, luy) viewedArea mt Nothing (head' "Renderer.renderArr" childDiffTrees) arr
         }
 
-    (TagA tags arr) ->
-     do { let childDiffTrees = case diffTree of
-                                 DiffLeaf c     -> repeat $ DiffLeaf c
-                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderArr arrDb scale (lux, luy) viewedArea (Just tags) Nothing (head' "Renderer.renderArr" childDiffTrees) arr
-        }
-
     _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
-        
+
 {-
   ; when arrDb $
       renderID scale (lux+xA arrangement) (luy+yA arrangement) (idA arrangement)      
