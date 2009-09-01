@@ -294,37 +294,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
         ; polyHTML' id 0 0 0 0 [ptHTML1, ptHTML2, (rlx', rly')] (scaleInt scale lw' `max` 1) lColor lColor
         }
 
-
-       
-  
-  -- TODO these cases are probably never reached
-    (StructuralA id arr) -> 
-     do { let (x,y,w,h)=( lux+scaleInt scale (xA arr), luy+scaleInt scale (yA arr) 
-                        , scaleInt scale (widthA arr), scaleInt scale (heightA arr) )
-        ; let childDiffTrees = case diffTree of
-                                 DiffLeaf c     -> repeat $ DiffLeaf c
-                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderArr arrDb scale (lux, luy) viewedArea mt Nothing (head' "Renderer.renderArr" childDiffTrees) arr
-        }
-    
-    (ParsingA id arr) ->
-     do { let (x,y,w,h)=( lux+scaleInt scale (xA arr), luy+scaleInt scale (yA arr) 
-                        , scaleInt scale (widthA arr), scaleInt scale (heightA arr) )
-        ; let childDiffTrees = case diffTree of
-                                 DiffLeaf c     -> repeat $ DiffLeaf c
-                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderArr arrDb scale (lux, luy) viewedArea mt Nothing (head' "Renderer.renderArr" childDiffTrees) arr
-        }
-
-    (LocatorA _ arr) ->
-     do { let childDiffTrees = case diffTree of
-                                 DiffLeaf c     -> repeat $ DiffLeaf c
-                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
-        ; renderArr arrDb scale (lux, luy) viewedArea mt Nothing (head' "Renderer.renderArr" childDiffTrees) arr
-        }
-
-    _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
-
+--    _ ->  return () --dcDrawText dc ("unimplemented arrangement: "++shallowShowArr arrangement) (pt lux luy)
+-- rather get an exception during development
 {-
   ; when arrDb $
       renderID scale (lux+xA arrangement) (luy+yA arrangement) (idA arrangement)      
