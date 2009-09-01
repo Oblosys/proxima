@@ -22,6 +22,7 @@ initialDocument =
     ; return $ RootDoc $ Root NoIDP (ParseErrList_Decl 
                                        (ParsingParseErr NoIDP []
                                        [ ErrorTk 0 fileContents NoIDP ] 
+                                       (Lexer 0 NonStyled)
                                        (error "DocUtils.generated.initialDocument: No clipparser specified")))
     }
     -- by putting the text in a parse error node, we don't need to specify a textual parser. Instead,
