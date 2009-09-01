@@ -23,7 +23,9 @@ import Evaluation.DocTypes (DocumentLevel (..))
 import DocTypes_Generated
 import DocUtils_Generated
 import DocumentEdit_Generated
+}
 
+{
 -- inserts the elements from the list, overwriting existing old values
 mapInsertList :: Ord k => [(k,a)] -> Map k a -> Map k a
 mapInsertList lst m = Map.union (Map.fromList lst) m 
