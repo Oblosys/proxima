@@ -4,6 +4,11 @@
 -- presentationSheet                                                    --
 --------------------------------------------------------------------------
 
+imports
+{
+import ScannerSheetHS as Lex
+}
+
 WRAPPER Root
 
 {
