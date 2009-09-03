@@ -406,14 +406,22 @@ newTask = BasicTask (Description "") False
 
 SEM Sudoku
   | Sudoku
-      loc.pres = structural $ col [ hLine `withColor` darkGrey
-      	       	 	      	  , @r0.pres, @r1.pres, @r2.pres
-      	       	 	      	  , hLine `withColor` darkGrey
-				  , @r3.pres, @r4.pres, @r5.pres
-				  , hLine `withColor` darkGrey
-				  , @r6.pres, @r7.pres, @r8.pres
-				  , hLine `withColor` darkGrey
-				  , vSpace 30
+      loc.pres = structural $ row [ hSpace 15
+                                  , col [ vSpace 5
+				    	, hAlignCenter $ text "Sudoku solver" `withFontSize` 20
+				    	, vSpace 15
+				    	, hLine `withColor` darkGrey
+      	       	 	      	        , @r0.pres, @r1.pres, @r2.pres
+      	       	 	      	  	, hLine `withColor` darkGrey
+				  	, @r3.pres, @r4.pres, @r5.pres
+				  	, hLine `withColor` darkGrey
+				  	, @r6.pres, @r7.pres, @r8.pres
+				  	, hLine `withColor` darkGrey
+				  	, vSpace 30
+				  	, hAlignCenter $
+					    mkButton 140 (text "Clear") $
+                                              docUpd $ updateAt @lhs.path $ const emptySudoku      
+                                        ]
 				  ]
 
 
@@ -530,7 +538,7 @@ SEM Row
 -- not quite an unboxed int, due to empty presentation for 0
 SEM Int_ [ | | value : Int ]
   | Int_
-      loc.pres = parsingWithParser pInt_ @self $ text $ if @value == 0 then "" else show @value
+      loc.pres = parsingWithParserLexer pField (Lexer (Lex.int) NonStyled) @self $ text $ if @value == 0 then "" else show @value
       lhs.value = @value
   | HoleInt_
       lhs.value = 0
@@ -574,6 +582,20 @@ SEM Row
 
       
 {
+emptySudoku :: ClipDoc
+emptySudoku = toClip $
+  Sudoku 
+    (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)) 
+    (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)) 
+    (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)) 
+    (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)) 
+    (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)) 
+    (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)) 
+    (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)) 
+    (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)) 
+    (Row (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)  (Field $ toInt_ 0) (Field $ toInt_ 0) (Field $ toInt_ 0)) 
+
+
 isValidField nr rowNrs colNrs blockNrs =
   nr == 0 ||
   length (filter (==nr) rowNrs) <= 1 &&
