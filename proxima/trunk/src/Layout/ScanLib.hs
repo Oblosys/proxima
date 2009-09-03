@@ -20,7 +20,6 @@ module Layout.ScanLib ( module Layout.ScanLib
                       , module Common.DebugLevels
                       , module Layout.LayLayerTypes
                       , module Layout.LayLayerUtils
-                      , module Map
                       )  where
 
 import Common.CommonTypes
