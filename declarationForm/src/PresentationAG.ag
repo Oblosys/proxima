@@ -406,23 +406,22 @@ newTask = BasicTask (Description "") False
 
 SEM Sudoku
   | Sudoku
-      loc.pres = structural $ row [ hSpace 15
-                                  , col [ vSpace 5
-				    	, hAlignCenter $ text "Sudoku solver" `withFontSize` 20
-				    	, vSpace 15
-				    	, hLine `withColor` darkGrey
-      	       	 	      	        , @r0.pres, @r1.pres, @r2.pres
-      	       	 	      	  	, hLine `withColor` darkGrey
-				  	, @r3.pres, @r4.pres, @r5.pres
-				  	, hLine `withColor` darkGrey
-				  	, @r6.pres, @r7.pres, @r8.pres
-				  	, hLine `withColor` darkGrey
-				  	, vSpace 30
-				  	, hAlignCenter $
-					    mkButton 140 (text "Clear") $
-                                              docUpd $ updateAt @lhs.path $ const emptySudoku      
-                                        ]
-				  ]
+      loc.pres = structural $ leftTopMargins 15 5 $
+                   col [ hAlignCenter $ text "Sudoku solver" `withFontSize` 20
+		       , vSpace 15
+		       , hLine `withColor` darkGrey
+      	       	       , @r0.pres, @r1.pres, @r2.pres
+      	       	       , hLine `withColor` darkGrey
+		       , @r3.pres, @r4.pres, @r5.pres
+		       , hLine `withColor` darkGrey
+		       , @r6.pres, @r7.pres, @r8.pres
+		       , hLine `withColor` darkGrey
+		       , vSpace 30
+		       , hAlignCenter $
+		           mkButton 140 (text "Clear") $
+                             docUpd $ updateAt @lhs.path $ const emptySudoku      
+                       ]
+				  
 
 
 SEM Row
@@ -703,44 +702,62 @@ moveElementDown path =
 SEM Test
   | Test
       loc.pres = structural $ leftTopMargins 30 40 $
-                   col [ row [ text "Styled text: ", @styledText.pres ]
-		       , row [ text "Parsed: ", text @styledText.underwater ]
-                       , row [ mkButton 15 (bold $ text "B") $ WrappedLayEdit $ EditStyleLay SetBold
-                             , hSpace 3
-			     , mkButton 15 (bold $ text "B" `withColor` lightGray) $ WrappedLayEdit $ EditStyleLay ClearBold
-                             , hSpace 3
-			     , mkButton 15 (italic $ text "I") $ (WrappedLayEdit $ EditStyleLay SetItalic)
-                             , hSpace 3
-			     , mkButton 15 (italic $ text "I"`withColor` lightGray) $ (WrappedLayEdit $ EditStyleLay ClearItalic)
-                             , hSpace 3
-			     , mkButton 15 (text "-") $ (WrappedLayEdit $ EditStyleLay DecreaseFontSize)
-                             , hSpace 3
-			     , mkButton 15 (text "+") $ (WrappedLayEdit $ EditStyleLay IncreaseFontSize)
-                             , hSpace 3
-			     , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (0,0,0)) `withbgColor` (0,0,0)
-                             , hSpace 3
-			     , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (255,0,0)) `withbgColor` (255,0,0)
-                             , hSpace 3
-			     , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (0,255,0)) `withbgColor` (0,255,0)
-                             , hSpace 3
-			     , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (0,0,255)) `withbgColor` (0,0,255)
-                             ] `withFontSize` 8
-                       , formatter $ replicate 0 (text "bla") 
-                       ]
+                   col [ hAlignCenter $ text "Text with style" `withFontSize` 20
+		       , vSpace 15
+                       , 
+		   row [ vLine
+		       , col [ hLine
+                       	     , vSpace 2
+		       	     , row [ hSpace 2, mkButtonRow ]
+		       	     , vSpace 2
+		       	     , hLine
+		       	     , @styledText.pres
+		       	     , hLine
+		       	     , @styledText.underwater `withFont'` ("Courier", 8)
+		       	     	   	              `withbgColor` lightGrey
+                       	     , hLine
+		       	     ]
+		       , vLine
+		       ]
+		       ]
      styledText.styles = []
-
+{
+mkButtonRow = row [ mkButton 15 (bold $ text "B") $ WrappedLayEdit $ EditStyleLay SetBold
+                  , hSpace 3
+		  , mkButton 15 (bold $ text "B" `withColor` lightGray) $ WrappedLayEdit $ EditStyleLay ClearBold
+                  , hSpace 3
+		  , mkButton 15 (italic $ text "I") $ (WrappedLayEdit $ EditStyleLay SetItalic)
+                  , hSpace 3
+		  , mkButton 15 (italic $ text "I"`withColor` lightGray) $ (WrappedLayEdit $ EditStyleLay ClearItalic)
+                  , hSpace 3
+		  , mkButton 15 (text "-") $ (WrappedLayEdit $ EditStyleLay DecreaseFontSize)
+                  , hSpace 3
+		  , mkButton 15 (text "+") $ (WrappedLayEdit $ EditStyleLay IncreaseFontSize)
+                  , hSpace 3
+		  , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (0,0,0)) `withbgColor` (0,0,0)
+                  , hSpace 3
+		  , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (255,0,0)) `withbgColor` (255,0,0)
+                  , hSpace 3
+		  , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (0,255,0)) `withbgColor` (0,255,0)
+                  , hSpace 3
+		  , mkButton 15 (text " ") (WrappedLayEdit $ EditStyleLay $ SetColor (0,0,255)) `withbgColor` (0,0,255)
+                  , empty `withHStretch` True
+		  , mkButton 40 (text "Parse") (WrappedLayEdit $ castLay ParseLay)
+		  ] `withFontSize` 8
+                       
+}
 ATTR StyledText List_Word ConsList_Word Word List_WordPart ConsList_WordPart WordPart [ | styles : {[TextStyle]} | ]
 
-ATTR StyledText List_Word Word List_Word List_WordPart WordPart TextStyle [ | | underwater : String ]
+ATTR StyledText List_Word Word List_Word List_WordPart WordPart TextStyle [ | | underwater : Presentation_ ]
 
 SEM StyledText
   | StyledText 
       loc.pres = parsingWithParserLexer pStyledText (Lexer (Lex.descr) Styled) @self $ @words.pres
       lhs.underwater = @words.underwater
   | HoleStyledText
-      lhs.underwater = ""
+      lhs.underwater = empty
   | ParseErrStyledText
-      lhs.underwater = ""
+      lhs.underwater = empty
 
 SEM List_Word
   | List_Word
@@ -748,17 +765,19 @@ SEM List_Word
                    formatter (if null @elts.press then [text ""] 
                               else @elts.styledPress)
                    `withWidth` 800
-      lhs.underwater = concat $ intersperse " " @elts.underwaters
+      lhs.underwater = formatter (if null @elts.underwaters then [text ""] 
+                              else @elts.underwaters)
        -- for an empty paragraph, we add a dummy word "" so its presentation does not get height 0
   | HoleList_Word
-      lhs.underwater = ""
+      lhs.underwater = empty
   | ParseErrList_Word
-      lhs.underwater = ""
+      lhs.underwater = empty
 
-SEM ConsList_Word [ | | underwaters : {[String]} styledPress : {[Presentation_]} isLast : Bool ]
+-- need styledPress to apply correct styles to the spaces
+SEM ConsList_Word [ | | underwaters : {[Presentation_]} styledPress : {[Presentation_]} isLast : Bool ]
   | Cons_Word
-      lhs.underwaters = @head.underwater : @tail.underwaters
       lhs.styledPress = @head.pres : (if not @tail.isLast then (applyStyles @head.styles (text " ") :) else id) @tail.styledPress
+      lhs.underwaters = @head.underwater : (if not @tail.isLast then (applyStyles @head.styles (text " ") :) else id) @tail.underwaters
       lhs.isLast = False
   | Nil_Word
       lhs.underwaters = []
@@ -771,20 +790,20 @@ SEM Word
       loc.pres = parsing $ @parts.pres
       lhs.underwater = @parts.underwater
   | HoleWord
-      lhs.underwater = ""
+      lhs.underwater = empty
   | ParseErrWord
-      lhs.underwater = ""
+      lhs.underwater = empty
 
 SEM List_WordPart
   | List_WordPart
       loc.pres = parsing $ row $ @elts.press
-      lhs.underwater = concat @elts.underwaters
+      lhs.underwater = row $ @elts.underwaters
   | HoleList_WordPart
-      lhs.underwater = ""
+      lhs.underwater = empty
   | ParseErrList_WordPart
-      lhs.underwater = ""
+      lhs.underwater = empty
 
-SEM ConsList_WordPart [ | | underwaters : {[String]} ]
+SEM ConsList_WordPart [ | | underwaters : {[Presentation_]} ]
   | Cons_WordPart
       lhs.underwaters = @head.underwater : @tail.underwaters
   | Nil_WordPart
@@ -794,38 +813,38 @@ SEM WordPart [ || ]
   | WordPart
       loc.pres = parsing $
                    applyStyles @lhs.styles $ row [ StringP @idp @word ]
-      lhs.underwater = @word
+      lhs.underwater = applyStyles @lhs.styles $ row [ text @word ]
 
   | OpenTag
       loc.pres = empty
       lhs.styles = @lhs.styles ++ [@style.self]
-      lhs.underwater = "<"++ @style.underwater++">"
+      lhs.underwater = bold $ row [text "<", @style.underwater, text ">"]
   | CloseTag
       loc.pres = empty
       lhs.styles = @lhs.styles \\ [@style.self]
-      lhs.underwater = "</"++ @style.underwater++">"
+      lhs.underwater = bold $ row [text "</", @style.underwater, text ">"]
   | HoleWordPart
-      lhs.underwater = ""
+      lhs.underwater = empty
   | ParseErrWordPart
-      lhs.underwater = ""
+      lhs.underwater = empty
       
 SEM TextStyle
   | TextBold
       loc.pres = structural $ empty
-      lhs.underwater = "b"
+      lhs.underwater = text "b"
   | TextItalic
       loc.pres = structural $ empty
-      lhs.underwater = "i"
+      lhs.underwater = text "i"
   | TextFontSize
       loc.pres = structural $ empty
-      lhs.underwater = "s("++show @s++")"
+      lhs.underwater = text $ "s("++show @s++")"
   | TextColor
       loc.pres = structural $ empty
-      lhs.underwater = "c("++show @r++","++show @g++","++show @b++")"
+      lhs.underwater = text $ "c("++show @r++","++show @g++","++show @b++")"
   | HoleTextStyle
-      lhs.underwater = ""
+      lhs.underwater = empty
   | ParseErrTextStyle
-      lhs.underwater = ""
+      lhs.underwater = empty
 
 {
 applyStyles [] pres = pres
