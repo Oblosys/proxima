@@ -23,7 +23,7 @@ type AlexInput  = (Char, [ScanChar_])
 
 scanner :: ScannerState -> [ScanChar_] -> 
                   ([ScannedToken Document EnrichedDoc Node ClipDoc UserToken], ScannerState)
-scanner initState scs = debug Lay ("scanning on "++stringFromScanChars scs++" state: "++show initState) $ 
+scanner initState scs = -- debug Lay ("scanning on "++stringFromScanChars scs++" state: "++show initState) $ 
                         go initState ('\n',scs)
   where go :: ScannerState -> (Char, [ScanChar_]) -> ([ScannedToken Document EnrichedDoc Node ClipDoc UserToken], ScannerState)
         go state@(startCode,pos) inp@(_,str) =
