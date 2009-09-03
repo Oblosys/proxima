@@ -82,11 +82,15 @@ pFontSizeTag startOrEnd = pSym (StyleTk 0 (ScannedStyleTag (ScannedFontSize 0) s
 pColorTag :: StartOrEnd -> ProxParser (Token Document EnrichedDoc Node ClipDoc UserToken)
 pColorTag startOrEnd = pSym (StyleTk 0 (ScannedStyleTag (ScannedColor (0,0,0)) startOrEnd))
 
+pFloat :: ProxParser Float
 pFloat = read . tokenString <$> pToken FloatTk
 
-pInt_ :: ProxParser Int_
-pInt_ = toInt_ . round
-  <$> pFloat
+pInt :: ProxParser Int
+pInt = read . tokenString <$> pToken IntTk
+
+pField :: ProxParser Int_
+pField = toInt_
+  <$> pInt
   <|> pSucceed (toInt_ 0)
   
 pFloat_ :: ProxParser Float_
