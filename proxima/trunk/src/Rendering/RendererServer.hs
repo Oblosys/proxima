@@ -129,7 +129,7 @@ renderArr o s (lux, luy) v mt m _                   (TagA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
 
 renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
- do { debug Ren (shallowShowArr arrangement ++":"++ show (isSelfCleanDT diffTree)++":"++ show (isCleanDT diffTree)) $
+ do { --debug Ren (shallowShowArr arrangement ++"renderArr on: "++ show (isSelfCleanDT diffTree)++":"++ show (isCleanDT diffTree)) $
         return ()
      --if True then return () else    -- uncomment this line to skip rendering
                                        
