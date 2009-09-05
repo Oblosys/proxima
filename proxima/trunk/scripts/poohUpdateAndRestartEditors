@@ -21,7 +21,7 @@ cd /home/martijn/proxima/taskEditor
 svn update
 cabal configure
 cabal build
-cd /home/martijn/proxima/sudokuEditor
+cd /home/martijn/proxima/sudoku
 svn update
 cabal configure
 cabal build
