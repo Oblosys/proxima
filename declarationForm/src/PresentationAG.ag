@@ -252,7 +252,7 @@ SEM Float_ [ | | floatVal : Float ]
       lhs.floatVal = 0
   | ParseErrFloat_
       lhs.floatVal = 0
-
+{-
 SEM List_Thing
   | List_Thing
       loc.pres = structural $ dropTarget Vertical $
@@ -263,27 +263,31 @@ SEM List_Thing
 SEM Thing
   | Thing
       loc.pres = structural $ row [ img "img/add.png" `withSize` (23,20) `withRef` (0,16), text (" "++show @nr) ]
+-}
 
 SEM Tasks
   | Tasks
-      loc.pres = structural $ row [ hSpace 4
-      	       	 	      	  , col [ @things1.pres
-				        , vSpace 20
-					, @things2.pres
-				        , text "Tasks:"
-      	       	 	      	    	`addPopupItems` 
-                                        ([ ("Insert task", docUpd $ insertElementAtEnd (toClip newTask) (@lhs.path++[1]))
-                                         ] ++ showHideCompletedItem @lhs.path @self)
-					, @tasks.pres `withFontSize` 12
-					]
-				  ]
+      loc.pres = structural $ leftTopMargins 5 5 $
+                   col [ hAlignCenter $ text "Task-list editor"
+                       , vSpace 20
+           
+                               --   @things1.pres
+		               -- , vSpace 20
+		      	       -- , @things2.pres
+		       , text "Tasks:"
+      	       	           `addPopupItems` 
+                             ([ ("Insert task", docUpd $ insertElementAtEnd (toClip newTask) (@lhs.path++[1]))
+                              ] ++ showHideCompletedItem @lhs.path @self)
+		       , @tasks.pres `withFontSize` 12
+		       ]
+		       
 
 SEM List_Task
   | List_Task
       loc.pres = structural $ dropTarget Vertical $
-                   row [ text "subtasks:"
-                       , col $ map dragSource @elts.press
-                       ]
+                   -- row [ text "subtasks:"
+                        col $ map dragSource @elts.press
+                       
 --      loc.pres = structural $ draggableCol @elts.press
 		      
 
@@ -343,12 +347,12 @@ SEM Task
 showHideCompleted showCompleted completed pres = 
   if showCompleted || not completed then pres else empty
 
-showHideCompletedItem path (Tasks _ _ showCompleted _) = 
+showHideCompletedItem path (Tasks {- _ _ -} showCompleted _) = 
   [ ((if showCompleted then "Hide " else "Show ") ++ " completed tasks"
     , docUpd $
         updateAt path $ \clip ->
           case clip of
-            Clip_Tasks (Tasks things1 things2 _ tasks) -> toClip $ Tasks things1 things2 (not showCompleted) tasks
+            Clip_Tasks (Tasks {- things1 things2 -} _ tasks) -> toClip $ Tasks {- things1 things2 -} (not showCompleted) tasks
             clip -> clip
     )
   ]

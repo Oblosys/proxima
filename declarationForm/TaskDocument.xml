@@ -1,15 +1,6 @@
 <RootDoc>
   <TaskDoc>
     <Tasks>
-      <Thing>
-        <Integer val="1"/>
-      </Thing>
-      <Thing>
-        <Integer val="2"/>
-      </Thing>
-      <Thing>
-        <Integer val="3"/>
-      </Thing>
       <Bool val="True"/>
       <BasicTask>
         <Description>
