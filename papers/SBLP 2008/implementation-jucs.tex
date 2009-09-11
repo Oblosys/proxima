@@ -1,4 +1,5 @@
 \documentclass{article}[10pt]
+\usepackage{pdfsync}
 \usepackage[a4paper]{geometry}
 \usepackage{jucs2e}
 \usepackage{graphicx,url}
@@ -68,7 +69,6 @@ In order to support editing on both the document structure and the presentation,
 
 To illustrate the scanning and parsing process, we focus on a small example. Figure~\ref{fig:graphicalDecl} shows a declaration that has a mixed textual and graphical presentation. The fraction and the exponentiation both have a graphical presentation, which we will refer to as a {\em structural} presentation. A textual presentation, on the other hand, is denoted by the term {\em sequential} presentation. 
 
-\enlargethispage{\baselineskip}
 The figure shows that a sequential presentation may contain structural presentations (e.g.\ the sequential presentation of the declaration contains a structural fraction), and vice versa. The fraction, for example, has sequential presentations for the numerator and the denominator (the latter containing a structural presentation again for $3^2$).
 
 
@@ -95,8 +95,6 @@ Summarizing, we have two kinds of presentations:
 
 
 After the presentation of a document has been edited, the modified presentation needs to be mapped back onto the document. However, due to the mix of structural and sequential presentations, conventional parsing methods cannot readily be used. In this paper, we show how the Proxima scanner and parser co-operate in this reverse mapping. 
-
-\enlargethispage{\baselineskip}
 
 Figure~\ref{fig:scanResult} shows the result of the Proxima scanner when it is applied to the presentation in Figure~\ref{fig:graphicalDecl}. It consists of a nested structure of \p{SequentialTk} tokens and \p{StructuralTk} tokens that matches the structure of the presentation. Textual tokens are represented by \p{UserTk} tokens. Each token has a unique number, which is denoted by a subscript, and is referred to as its {\em presentation identity}. Presentation identities have type \p{IDP} and are used to associate a token with its white space. In addition to a sequence of tokens that represent its children, a structural token also contains a reference to the structured-document fragment it represents (denoted by the parameter \p{loc}). The document fragment is necessary, because a structural presentation does not always contain enough information to reconstruct the document tree. In the \p{scannedDecl} value, we represent the location reference by the document subtree. (A \p{SequentialTk} token also contains a \p{loc} parameter, as well as a parser, but for brevity, these are not shown in the value.) Together with the tokens, the scanner produces a {\em white-space map}: a mapping between a token's presentation identity and its trailing white space.
 
@@ -169,7 +167,6 @@ A data level in Proxima is not simply an intermediate value in the presentation 
 \o {\bf Enriched Document:} The document attributed with derived values and structures, such as the type of a function or a table of contents, typically computed by an attribute grammar~\cite{reps84synGen}.
 
 \o{\bf Presentation:} A logical description of the presentation of the document, consisting of rows and columns of presentation elements with attributes. The presentation also supports formatting based on available space (e.g.\ line breaking).
-\pagebreak
 \o{\bf Layout:} A presentation with explicit white space, which does not contain tokens.
 
 \o{\bf Arrangement:} A formatted layout with absolute size and position information.
