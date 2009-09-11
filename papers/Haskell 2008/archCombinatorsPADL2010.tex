@@ -1,8 +1,9 @@
-\documentclass[preprint,natbib]{llncs}
+\documentclass{llncs}
 
 \usepackage{amsmath}
 \usepackage{../Utils}
-
+\newcommand{\sds}[1]{{\textcolor{blue}\small\marginpar{#1}}}
+\renewcommand{\emph}[1]{{\em #1}}
 \begin{document}
 
 %\conferenceinfo{Haskell Symposium '08}{September 25, 2008, Victoria, British Columbia, Canada.} 
@@ -21,18 +22,17 @@
 %           {\{martijn,doaitse\}@cs.uu.nl}
 
 \author{Martijn M. Schrage\inst{1} \and S. Doaitse Swierstra\inst{2}}
-\institute{Oblomov Systems, Utrecht \email{martijn@cs.uu.nl}
-\and Department of Computer Science, Utrecht University\email{doaitse@cs.uu.nl}}
+\institute{Oblomov Systems, Utrecht, \email{martijn@cs.uu.nl}
+\and Department of Computer Science, Utrecht University, \email{doaitse@cs.uu.nl}}
 
 \maketitle
 
 \begin{abstract}
 We define a domain specific embedded language in Haskell for describing
 layered software architectures which maintain bidirectional dependencies. By using a typed programming
-language to describe the architecture, the type correctness of its components
+language to describe the architecture, the correct composition of its components
 is guaranteed by the type checker of the language. Because, contrary to the situation with typical Architecture Description Languages, the
-description is part of the implementation of the
-system, the implementation is guaranteed to comply with the architecture, and the architecture is guaranteed to comply with the implementation.
+description is part of the implementation they are guaranteed to comply with each other.
 \end{abstract}
 
 % \category{D.2.11} {Software Engineering}
@@ -54,483 +54,128 @@ f hor vert = (hor, vert) is chosen in thesis. result is a bit weird because vert
 
 \section{Introduction}\label{sect:introduction}
 
-In this paper we develop a set of Haskell combinators for describing architectures of layered systems. Although designed with a layered editor in mind, we claim this approach to be applicable to many kinds of layered architectures. The combinators have been successfully used in the implementation of the generic editor Proxima~\cite{Schrage04Proxima}, as well as for a system providing web-interfaces to databases. 
+In their survey~\cite{medvidovic00ADLs} of architecture description languages (ADL), three essential components of an architecture description are identified: a description of the (interface of the) \emph{components}, a description of the \emph{connectors}, and a description of the architectural \emph{configuration}. They claim that the focus on conceptual architecture and explicit treatment of connectors as first-class entities differentiate architecture description languages from, amongst others, programming languages. We claim the opposite, and show how a \emph{collection of Haskell functions} can be combined into a component, how the \emph{parameter and result types} of these functions represent the connectors, and how configurations can be described by Haskell expressions built with the use of \emph{architectural combinators}. We substantiate our claim by developing a set of Haskell combinators for describing architectures of layered systems. Although designed with a layered editor in mind, we claim this approach to be applicable to many kinds of architectures. The combinators have been successfully used in the implementation of the generic editor Proxima~\cite{Schrage04Proxima}.
 
-Describing an architecture in an real programming language not only makes it possible to describe the interfaces of the components of the system, and how they are to be composed, but also enables us to smoothly extend this high-level description into a real implementation, without having to maintain several views on our system, with all its problems of diverging versions. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components.
+Describing an architecture in an real programming language not only makes it possible to describe the interfaces of the components of the system, and how they are to be composed, but also enables us to smoothly extend this high-level description into a real implementation, without having to maintain several views on our system, with all its problems of diverging versions. Because the architecture description in Haskell is a program in itself, the system can be instantiated by providing implementations for each of the components. By embedding our architecture description language~\cite{hudak98DSLs} inside a general purpose programming language,we can reuse the syntax, semantics, implementation code, software tools, as well as the look-and-feel. Besides this we can easily combine the language with other embedded languages in the same program.
 
-In their survey of architecture description languages~\cite{medvidovic00ADLs}, Medvidovic and Taylor identify three essential components of an architecture description: a description of the (interface of the) components, a description of the connectors, and a description of the architectural configuration. They claim that the focus on {\em conceptual} architecture and explicit treatment of connectors as first-class entities differentiate architecture description languages from, amongst others, programming languages. However, Haskell offers possibilities for describing the main components of an architecture, while incorporating  these components as part of the program itself. Furthermore, by using abstraction, the description of the architecture can be focused on the conceptual architecture, while the details are left to the actual components.
-
-As argued by Hudak~\cite{hudak98DSLs}, higher-order typed functional languages offer excellent possibilities for embedding domain-specific languages. Embedding a domain-specific language facilitates reuse of syntax, semantics, implementation code, software tools, as well as look-and-feel. In this paper we develop a DSEL in Haskell for describing layered editor architectures. We use records that contain functions to describe the components of the architecture. The connectors are combinators, and the configurations are programs (functions) that consist of combinators and components. 
-
-In this paper we give three implementation models for layered architectures. First, in Section~\ref{sect:simpleEditor}, we introduce a simplified layered editor architecture and, in section~\ref{sect:layerInHaskell}, explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In Section~\ref{sect:simple} the connection is straightforward, with little abstraction. This is used as a basis in Section~\ref{sect:ncp} as a base to develop a more abstract combinator implementation that uses nested pairs. In Section~\ref{sect:hidden}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sect:lib} develops a small generic library for building the architecture-specific combinators of Section~\ref{sect:hidden}. The combinators from this section require two minimal function definitions for instantiating a specific architecture. In Section~\ref{sect:typeClass}, we exploit the type system to automatically provide these definitions, based solely on the types of the layer interface. Section~\ref{sect:proxima} shows how the architecture combinators are used to describe (and implement) the architecture of the Proxima editor. And, finally, Section~\ref{sect:conclusions} discusses future work and concludes.
+\sds{add summary}
+% In this paper we give three implementation models for layered architectures. First, in Section~\ref{sect:simpleEditor}, we introduce a simplified layered editor architecture and, in section~\ref{sect:layerInHaskell}, explore how its main components can be modeled in Haskell. Then we proceed to connect the components. In Section~\ref{sect:simple} the connection is straightforward, with little abstraction. This is used as a basis in Section~\ref{sect:ncp} as a base to develop a more abstract combinator implementation that uses nested pairs. In Section~\ref{sect:hidden}, we present another set of combinators, which employ a form of state hiding to improve on the previous set. Section~\ref{sect:lib} develops a small generic library for building the architecture-specific combinators of Section~\ref{sect:hidden}. The combinators from this section require two minimal function definitions for instantiating a specific architecture. In Section~\ref{sect:typeClass}, we exploit the type system to automatically provide these definitions, based solely on the types of the layer interface. Section~\ref{sect:proxima} shows how the architecture combinators are used to describe (and implement) the architecture of the Proxima editor. And, finally, Section~\ref{sect:conclusions} discusses future work and concludes.
 			
 			
 			
 \section{A simple editor}\label{sect:simpleEditor}
 
-The architecture description combinators in this paper have been designed for the generic presentation-oriented structure editor Proxima. Proxima supports editing on the document structure as well as on its presentation, which has given rise to its layered architecture. A typical feature of the architecture is that each layer maintains its own local state, which is used to store information that does not have a logical place on the other layers. An example of this is white space, which is part of the presentation of a program source, but does not fit well in the abstract syntax tree. 
+The architecture description combinators in this paper have been designed for the generic presentation-oriented structure editor Proxima. Proxima supports editing on the document structure as well as on its presentation, which has given rise to its layered architecture. A typical feature of the architecture is that each layer maintains its own local state, which is used to store information that does not have a logical place on the other layers. Examples are white space, visibility toggles, alignment information, formattig directives, and unfolding status. 
 
-Because of the complexity of the actual Proxima architecture, we introduce a simple layered architecture for a presentation-oriented editor to explain the architecture description methods in the next sections. Although the architecture is simple, it contains the essential features of the Proxima architecture. 
-
-
-Figure~\ref{simpleeditprocess} depicts the editing process for our simple editor. The editor keeps track of a document (\p{doc}), which is mapped onto a presentation (\p{pres}). The presentation process is split into $n$ steps: $\mathtt{present}_1 \dots \mathtt{present}_{n}$, each step takes care of a specific subtask, such as computing a set of layout alternatives, computing minimal and maximal sizes, negotiation between objects to be displayed about the available screen space, keeping track of white space which was explicitly entered by the user but which does not play a role at the document level and keeping track of explicit representation choices --toggling visibility, alignment, unfolding status-- made by the user in the course of the editing process. At the bottom of the figure, the presentation is shown to a user, who provides an edit gesture (\p{gest}) in response. The edit gesture is mapped onto a document update (\p{upd}) by $\mathtt{interpret}_{n} \dots \mathtt{interpret}_1$, which is then applied to the document. In the next cycle, the updated document is presented again. Note that some of the editing gestures effectively turn out to be identity operations at the top level, since some of them will be handled at an intermediate level, and will result in an update of the state maintained at that level.
-
-
-A layer consists of a pair of $\mathtt{present}_i$ and $\mathtt{interpret}_i$ functions, which we refer to as {\em layer functions}. Besides the vertical data flow for presentation and interpretation, we thus may also have horizontal data flow that stays within the layer. Horizontal data flow is used to maintain state in a layer; this state component is passed along between all  computations taking place in a layer.
-
-
-Figure~\ref{simplesinglelayer} shows the data flow for a single layer with two examples of horizontal data flow. The result \p{map} of the function \p{present} is passed on to \p{interpret} and represents information about where things are mapped on the screen. Furthermore, a \p{state} parameter is passed to \p{present} as well as \p{interpret}, and may be updated by \p{interpret}. Note that the \p{state} parameter of \p{present} is the result of \p{interpret} in the previous edit step. Because of the sequential nature of the edit steps, we only consider horizontal data flow that goes from left to right.
-
-
-
-
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{images/EditCycles}
-\caption{Two cycles in the editing process.}\label{simpleeditprocess} 
-\end{figure}
-
-
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{images/SingleLayer}
-\caption{A single layer.}\label{simplesinglelayer} 
-\end{figure}
-
-
-
-
-
-%																
-%																
-%																
-\section{A layer in Haskell} \label{sect:layerInHaskell}
-
-In the coming sections, we explore the possibilities of describing the layered architecture from the previous section in Haskell. There are two aspects to modeling a layered architecture in Haskell: the building blocks, which are the layer functions, and the connections between the building blocks. Before discussing how to model the connections between the layers, we focus of the functions within a layer.
-
-A layer function takes  horizontal as well as vertical arguments and returns both  horizontal and vertical results. To make the difference between horizontal and vertical data explicit, we introduce a type synonym for layer functions.
-
-
-
-%code Layers.hs
-\begin{small}
-\begin{verbatim}
-type LayerFn horArgs vertArg horRess vertRes =
-       horArgs -> vertArg -> (vertRes, horRess)
-\end{verbatim}
-\end{small}
-
-
-
-Each layer is represented by a record containing all the layer functions: in our case \p{present} and \p{interpret}. The types of the layer functions follow directly from Figure~\ref{simplesinglelayer}.  If we  put these functions directly in a record, we  get:
-
-%code Layers.hs
-\begin{small}
-\begin{verbatim}
-data Simple state map doc pres gest upd =
-       Simple { present   :: LayerFn state doc 
-                                     map pres
-              , interpret :: LayerFn (map,state) gest
-                                     state upd
-              }
-\end{verbatim}
-\end{small}
-
-
-However, this is not entirely what we want. To simplify the horizontal connection between layer functions, we prefer a normalized data type in which the horizontal result type (\p{horRes}) of a layer function matches the horizontal argument type (\p{horArg}) of the next layer function. For our example, this implies that the horizontal result of \p{present} has the same type as the horizontal argument of \p{interpret} and vice versa (since the result of \p{interpret} is the argument of \p{present} in the next edit cycle). Figure~\ref{wrapped} shows the data flow for the layer functions in the normalized type \p{Simple}. Because the conversion to a normalized type is straightforward, we do not show it here. The definition of the normalized \p{Simple} is:
-
-\begin{small}
-\begin{verbatim}
-data Simple state map doc pres gest upd =
-       Simple { present   :: LayerFn state doc 
-                                     (map, state) pres
-              , interpret :: LayerFn (map, state) gest
-                                     state upd
-              }
-\end{verbatim}
-\end{small}
-
-Although a \p{Simple} layer consists of two layer functions, the final combinator library presented in this paper abstracts over this number and can be used for layers with arbitrary numbers of layer functions.
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{images/NormalizedLayer}
-\caption{Data flow in a normalized layer.}\label{wrapped} 
-\end{figure}
-
-			
-\section{Method 1: Explicitly connecting the components} \label{sect:simple}
-
-Now that the layers have been modeled, we need to realize the vertical data flow by connecting the layer functions. The document must be fed into the layers at the top, yielding the presentation at the bottom, and similarly, the edit gesture must be fed into the bottom layer, yielding the document update. The most straightforward way of tying everything together is to explicitly write down the selection and application of each of the functions in each of the layers. This will be the first approach, followed by gradually more abstract approaches in sections~\ref{sect:ncp} to \ref{sect:lib}.
-
-We give an example edit loop that explicitly connects three layers: \p{layer1}, \p{layer2}, and \p{layer3} of type \p{Simple}. The data flow between the layer functions is shown in Figure~\ref{explicit}. Note that we might look at the code below as a textual representation of this picture, and that vice versa we might compute such a picture out of the code. At the bottom of the figure, the presentation is shown to the user, and an edit gesture is obtained, which we represent in the code with two functions \p{showRendering :: Rendering -> IO ()} and \p{getGesture :: IO Gesture}. At the top of the figure, the document is updated, which we model with a function \p{updateDocument :: Update -> Document -> IO Document}. The Haskell code for the edit loop is:
-
-
+Because of the complexity of the actual Proxima architecture, we introduce a simple layered architecture for a presentation-oriented editor to explain the architecture description methods. Although the architecture is simple, it contains the essential features of the Proxima architecture. In Figure \ref{explicit} we show the flow of data in a typical Proxima implementatation. On the top left we see the input of type \p{doc}, which is mapped by a sequence of \p{present} functions onto a presentation \p{pres3}. This presentation is shown on the screen, after which the user inputs a gesture \p{gest3}, which is mapped back by a sequence of \p{interpret} functions onto an updated document \p{update}. At each level we see state information (for the \p{interpret} function typically also containing a \p{map} to keep track of where things end up on the screen), being passed on horizontally. The states at each level resulting from the \p{interpret} functions are used in the next editing cycle, and so are fed back at the left of the picture.
+  
 \begin{figure}
 \includegraphics[width=\columnwidth]{images/LayersDataFlow}
 \caption{Data flow in and between layers.} \label{explicit} 
-\end{figure}
+\end{figure}														
 
-%code from Explicit.hs
-\begin{small}
-\begin{verbatim}
-editLoop (layer1, layer2, layer3) states doc = 
-  loop states doc where
-  loop (state1, state2, state3) doc = 
-   do { let (pres1,(map1,state1')) = 
-              present layer1 state1 doc
-      ; let (pres2,(map2,state2')) = 
-              present layer2 state2 pres1
-      ; let (pres3,(map3,state3')) = 
-              present layer3 state3 pres2
-
-      ; showRendering pres3
-      ; gest3 <- getGesture
-
-      ; let (gest2,state3'')  = 
-              interpret layer3 (map3, state3') gest3
-      ; let (gest1,state2'')  =
-              interpret layer2 (map2, state2') gest2
-      ; let (update,state1'') = 
-              interpret layer1 (map1, state1') gest1
-      
-      ; let doc' = updateDocument update doc
-      ; loop (state1'', state2'', state3'') doc'
-      }
-\end{verbatim}
-\end{small}
-
-The following function \p{main} calls \p{editLoop} with the correct parameters.
-\newpage
-
-%code from Explicit.hs
-\begin{small}
-\begin{verbatim}
-main layer1 layer2 layer3 = 
- do { states <- initStates
-    ; doc <- initDoc 
-    ; editLoop (layer1, layer2, layer3) states doc
-    }
-\end{verbatim}
-\end{small}
-
-The functions \p{initStates} and \p{initDoc} provide the initial values for \p{states} and \p{doc}, and are left unspecified. The layers of the editor are arguments of the \p{main} function. An editor can now be instantiated by applying the function \p{main} to three \p{Simple} values each implementing a different layer. The type system verifies that the implemented layer functions have the correct type signatures.
-
-A disadvantage of the implementation of the edit loop sketched in this section is that the patterns of the data flow are not very transparent. The fact that the state parameters are horizontal parameters and that the presentation is a vertical parameter is not immediately clear from the program code. Moreover, explicitly encoding the standard patterns for upward and downward vertical parameters, increases the chance of errors. Finally, the number of layers is hard coded in the implementation. If the system is extended with an extra layer, variables have to be renamed. If each type appearing in the layers is distinct, the type checker catches mistakes. However, type checking will not detect two equally typed variables accidentally being swapped. the goal of the coming sections is to gradually abstract from the current, very explicit description of the problem.
-
-
-%																
-%																
-%																
-\section{Method 2: Nested pairs}\label{sect:ncp}
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{images/NestedPairs}
-\caption{Horizontal nested pairs for a downward step.}\label{ncp} 
-\end{figure}
-
-
-%\note{Ref to Doaitse Pablo?} 
-In this section we abstract from the horizontal and vertical data-flow patterns in the edit loop of the previous section, by using combinators for combining layers. In the main loop, we call the layer functions of the combined layer, rather than explicitly calling each layer function in the main loop. The combinators also make the data flow more explicit. The direction of the vertical parameter is made apparent by the choice of combinator, rather than explicitly threading it through the function applications.
-
-Similar to function composition ($f \cdot g$), we develop a \p{combine} combinator that takes two layers and returns a combined layer. The layer functions of the combined layer are compositions of the layer functions in the layers that are combined.
-
-In the method described in this section, each of the functions in the combined layer not only takes a vertical argument and returns a vertical result, but it also takes a collection of horizontal arguments (one for each layer) and returns a collection of horizontal results (one from each layer). The \p{combine} combinator takes care of distributing the horizontal arguments to the corresponding layers, and also collects the horizontal results. The combined layer provides layer functions of type \p{LayerFn horArgC vertArg horResC vertRes}. The parameters \p{horArgC} and \p{horResC} stand for the types of the collections of horizontal parameters and results. Figure~\ref{ncp} sketches the data flow in the combined layer. Only one layer function with a downward vertical parameter is shown.
-
-Because the types of the horizontal parameters are typically not of the same type, we cannot use a list to represent the collections. Moreover, we wish to be able to determine at compile time whether the collection contains the required number of elements. A tuple or cartesian product is more suitable for the task but has the disadvantage that its components cannot be accessed in a compositional way. Hence, we use a nested cartesian product to represent the horizontal parameters and results. 
-
-We only use left-associatively nested products in this section: 
-\p{(\dots((e$_1$,e$_2$),e$_3$), \dots ), e$_n$)}, although this will not be enforced by the combinators; as long as the structure of the argument and result products is the same, which is guaranteed by the way the \p{combine} combinator is used, the precise structure does not matter.
-
-
-We first define two combinators for composing layer functions: a downward combinator \p{composeDown} (for \p{present}) and a upward combinator \p{composeUp} (for \p{interpret}). A downward vertical parameter passes through the higher layer first, whereas an upward vertical parameter passes through the lower layer first. Figure~\ref{composeDownUp} shows the data flow for the two combinators. 
-
-The combinator \p{composeDown} composes two layers \p{higher} and \p{lower} by feeding the intermediate vertical result of \p{h} into \p{l}. At the same time, the horizontal parameters for \p{higher} and \p{lower} are taken from the horizontal parameter to the combined layer (which is a tuple), and the horizontal result for the combined layer is formed by tupling the horizontal results of \p{higher} and \p{lower}. 
-
-%code from NCP.hs
-\begin{small}
-\begin{verbatim}
-composeDown :: LayerFn horArgU arg horResU intr ->
-               LayerFn horArgL intr horResL res ->
-               LayerFn (horArgU, horArgL) arg 
-                       (horResU, horResL) res
-composeDown upper lower = 
-  \(horArgU, horArgL) arg ->                                           
-    let (interm, horResU) = upper horArgU arg
-        (res, horResL)    = lower horArgL interm            
-    in  (res, (horResU,horResL))
-\end{verbatim}
-\end{small}
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{images/ComposeDown}
-\includegraphics[width=\columnwidth]{images/ComposeUp}
-\caption{\p{composeDown} and \p{composeUp}} \label{composeDownUp} 
-\end{figure}
-
-
-The definition of \p{composeUp} is analogous to \p{composeDown}. Its type is:
-
-\begin{small}
-\begin{verbatim}
-composeUp :: LayerFn horArgU intr horResU res ->
-             LayerFn horArgL arg horResL intr ->
-             LayerFn (horArgU, horArgL) arg
-                     (horResU, horResL) res
-\end{verbatim}
-\end{small}
-
-\head{Combining layers}
-
-Using \p{composeUp} and \p{composeDown}, we can now define a combinator to combine \p{Simple} layers. 
-
-
-First, we need to define a new data type for combined layers. Although the composition of two layer functions is a layer function itself, we cannot use type \p{Simple} to represent a combined layer, because the types for the horizontal parameters do not match.  For \p{Simple}, the horizontal parameter of \p{present} has type \p{state}, and its result has type \p{(map, state)}. In contrast, the horizontal parameter of \p{present} in the composed layer is a nested pair of states and its result is a nested pair of \p{map} and \p{state} tuples. 
-
-We introduce a type \p{LayerC} as a more general version of \p{Simple}. Because we cannot easily denote a nested pair structure in a Haskell type declaration, we leave the structure of the horizontal parameters unspecified. The parameter \p{states} represents the nested pair of \p{state} values, and the parameter \p{mapsStates} represents the nested pair of \p{map} and \p{state} tuples.
-
-\begin{small}
-\begin{verbatim}
-data LayerC states mapsStates doc pres gest upd =
-       LayerC { presentC ::   
-                  LayerFn states doc mapsStates pres
-              , interpretC :: 
-                  LayerFn mapsStates gest states upd
-              }
-\end{verbatim}
-\end{small}
-
-The trivial function \p{lift} takes a layer of type \p{Simple} and returns a \p{LayerC} layer.
-
-\begin{small}
-\begin{verbatim}
-lift :: Simple a b c d e f -> LayerC a (b,a) c d e f
-lift simple = 
-  LayerC { presentC = present simple
-         , interpretC = interpret simple
-         }
-\end{verbatim}
-\end{small}
-
-The \p{combine} combinator is defined by using the appropriate \p{compose} combinator on each of the layer functions. 
-
-\begin{small}
-\begin{verbatim}
-combine :: LayerC a b c d e f -> LayerC g h d i j e -> 
-           LayerC (a,g) (b,h) c i j f
-combine upper lower =
-  LayerC { presentC = composeDown (presentC upper) 
-                                  (presentC lower)
-         , interpretC = composeUp (interpretC upper) 
-                                  (interpretC lower)
-         }
-\end{verbatim}
-\end{small}
-
-
-\head{Simple editor}
-
-The main editor loop from the previous section now reads:
- 
-\begin{small}
-\begin{verbatim}
-editLoop layers states doc = loop states doc
- where loop states doc = 
-        do { let (pres, mapsStates) = 
-                   presentC layers states doc
-           
-           ; showRendering pres
-           ; gest <- getGesture
- 
-           ; let (update, states') = 
-                   interpretC layers mapsStates gest
-       
-           ; let doc' = updateDocument update doc
-           ; loop states' doc'
-           }
-\end{verbatim}
-\end{small}
-
-The \p{main} function is almost the same as in the previous section, except that instead of a 3-tuple of layers, the combined layers are passed to \p{editLoop}. 
-
-\begin{small}
-\begin{verbatim}
-main layer1 layer2 layer3 = 
- do { (state1, state2, state3) <- initStates
-    ; doc <- initDoc 
-    ; let layers = lift layer1 `combine` lift layer2 
-                               `combine` lift  layer3
-    ; editLoop layers ((state1, state2), state3) doc
-    }
-\end{verbatim}
-\end{small}
-
-\head{Conclusions}
-
-The nested pairs solution is more compositional than the approach of the previous section and most of the data flow is hidden from the main loop. However, the horizontal parameters are passed all the way through the composite layer, and are visible in the main loop, which is not where they conceptually belong. Moreover, the type of the composite layer is parameterized with all the types appearing in the layers, leading to large type signatures.
-
-
-
-
-%																
-%																
-%																
-\section{Method 3: Hidden parameters} \label{sect:hidden}
-
-%Not fully abstracted factorized version of combinators primarily
-%for explaining the model. Next section has more abstraction
-%but is also harder to understand.
- 
-In the previous section, the horizontal results that are computed on evaluation of a combined layer function are returned explicitly and passed as arguments to the next layer function. In this section we take an alternative approach, which we explain with an example.  Recall that with the nested pairs method, each combined layer function returns a collection of horizontal results together with its vertical result:
-
-\noindent
-\dots\\
-{\small \tt  let (pres, mapsStates) = presentC layers states doc }\\
-\dots\\
-{\small \tt let (update, states') = interpretC layers mapsStates gest}\\
-\dots
-
-In contrast, the hidden-parameter method does not return a collection of horizontal results, but a function that has already been partially applied to the horizontal results; the state is stored in the closure which is thus formed.
-
-\noindent
-\dots\\
-{\small \tt let (pres, interpretStep) = presentStep doc}\\
-\dots\\
-{\small \tt let (update, presentStep') = interpretStep gest}\\
-\dots
-
-The code that is shown is not entirely accurate, but it gives the general idea. Together with the presentation, \p{presentStep} returns a function \p{interpretStep} for computing the document update. The layer functions in \p{interpretStep} have already been partially applied to the horizontal results from the presentation step. Thus, the horizontal parameters are now entirely hidden from the main loop, the main editor loop becomes more transparent and the type of a combined layer becomes simpler since the types for the horizontal parameters are internalized.
-
-
-\head{Type definitions}
-
-The type of the layer is described by the following type: 
-\p{(Doc -> (Pres, Gest -> (Upd, Doc -> (Pres, Gest -> (Upd, \dots)))))}.  Unfortunately, we cannot use a type declaration: 
-
-\begin{small}
-\begin{verbatim}
-type Layer = (Doc -> (Pres, Gest -> (Upd, Layer)))
-\end{verbatim}
-\end{small}
-
-
-because Haskell does not allow recursive type synonyms. Hence, we need to use a \p{newtype} declaration, with the disadvantage that values of the type have to be wrapped with constructor functions.
+\section{A Layer in Haskell} \label{sect:layerInHaskell}
+A Proxima layer can be seen as an architectural component, something typically represented as a box with connectors in a graphical architecture description language. We will compose the box out of functions, and the arguments and results of these function will constitue the connectors. In our editor example a layer first ``communicates'' by accepting a document to be presented, internally maps this documents onto something which is presented at an output port connected to the lower layer while updating its internal state, next accepts a gesture from the lower layer, and presents an updated document to the layer above, possibly again updating its internal state. So besides having the connector types following from the types of the arguments and results of the internal functions, we also have a ``protocol'', i.e. an order in which the communication takes place at the connectors. 
+If we capture this protocol of a Proxima layer in a type we get (forced to use a \p{newtype} since Haskell does not allow recursive types):
 
 \begin{small}
 \begin{verbatim}
 newtype Layer doc pres gest upd = 
-          Layer ( doc -> 
-                   ( pres, 
-                       ( gest -> 
-                           ( upd 
-                           , Layer doc pres gest upd))))
+          Layer ( doc -> ( pres, ( gest -> ( upd , 
+          Layer doc pres gest upd))))
 \end{verbatim}
 \end{small}
 
-We now define two combinators for constructing and combining \p{Layer} values: \p{lift} converts  a \p{Simple} layer to a hidden-parameter layer of type \p{Layer}, and \p{combine} combines two layers of type \p{Layer}. Both combinators in this section are specific to the \p{Simple} type. In the next section, we define a library to construct \p{lift} and \p{combine} for arbitrary layers.
+Note that the type of the internal state, which is irrelevant from an architectural point of view, is invisible from this type.
 
 
-\head{Definition of \p{lift}}
+%  \p{lift} converts  a \p{Simple} layer to a hidden-parameter layer of type \p{Layer}, and \p{combine} combines two layers of type \p{Layer}. Both combinators in this section are specific to the \p{Simple} type. In the next section, we define a library to construct \p{lift} and \p{combine} for arbitrary layers.
 
-The combinator \p{lift} takes a \p{Simple} layer and returns a \p{Layer}:
+
+% \head{Definition of \p{lift}}
+
+% The combinator \p{lift} takes a \p{Simple} layer and returns a \p{Layer}:
+
+% \begin{small}
+% \begin{verbatim}
+% lift :: Simple state map doc pres gest upd ->
+%         state -> Layer doc pres gest upd
+% lift simple state = presStep state 
+%  where presStep state = Layer $
+%          \doc ->  let (pres, (map,state)) = 
+%                         present simple state doc                                         
+%                   in  (pres, intrStep (map,state))
+%        intrStep (map,state) =
+%          \gest -> let (upd, state') = 
+%                         interpret simple (map,state) gest                     
+%                   in  (upd, presStep state')
+% \end{verbatim}%$
+% \end{small}
+% %\marginpar{state -> init omgedoopt}
+
+% Besides \p{layer}, \p{lift} gets a second parameter, \p{init}, which is the initial value of the horizontal parameter. The data flow pattern of the horizontal parameters is encoded entirely in the definition of \p{lift}. Moreover, the \p{state} type is not visible in the result of \p{lift}. Thus, once the initial horizontal state is passed to the lifted layer, it is no longer visible outside this layer; the \p{lift} combinator takes care of passing around the horizontal parameters between the layer functions, and also to the next edit cycle. 
+
+
+% \head{Definition of \p{combine}}
+ To combine layers, we define a combinator \p{combine}, which gets two layers as arguments: a higher layer and a lower layer. The type of \p{combine} is:
 
 \begin{small}
 \begin{verbatim}
-lift :: Simple state map doc pres gest upd ->
-        state -> Layer doc pres gest upd
-lift simple state = presStep state 
- where presStep state = Layer $
-         \doc ->  let (pres, (map,state)) = 
-                        present simple state doc                                         
-                  in  (pres, intrStep (map,state))
-       intrStep (map,state) =
-         \gest -> let (upd, state') = 
-                        interpret simple (map,state) gest                     
-                  in  (upd, presStep state')
-\end{verbatim}%$
-\end{small}
-%\marginpar{state -> init omgedoopt}
-
-Besides \p{layer}, \p{lift} gets a second parameter, \p{init}, which is the initial value of the horizontal parameter. The data flow pattern of the horizontal parameters is encoded entirely in the definition of \p{lift}. Moreover, the \p{state} type is not visible in the result of \p{lift}. Thus, once the initial horizontal state is passed to the lifted layer, it is no longer visible outside this layer; the \p{lift} combinator takes care of passing around the horizontal parameters between the layer functions, and also to the next edit cycle. 
-
-
-\head{Definition of \p{combine}}
-
-To combine layers, we define a combinator \p{combine}, which gets two layers as arguments: a higher layer and a lower layer. The type of \p{combine} is:
-
-\begin{small}
-\begin{verbatim}
-combine :: Layer high med emed ehigh -> 
-           Layer med low elow emed -> 
+combine :: Layer high med emed ehigh -> Layer med low elow emed -> 
            Layer high low elow ehigh
 \end{verbatim}
 \end{small}
 
 The reason for the order of the type variables is that for each pair of variables, the first type is an argument type and the second type  a result type. Hence, the first step in the combined layer is a function \p{high -> low}, which is the composition of a function \p{high -> med} in the higher layer and a function \p{med -> low} in the lower. On the other hand, the second step goes upward.  Thus, the function \p{elow -> ehigh} in the combined layer is the reverse composition of functions \p{elow -> emed} and \p{emed -> ehigh} in the higher and lower layers
   
-The implementation of combine is just plumbing to get the parameters at the right places. The direction of the vertical parameters is encoded in the definition of \p{combine}. 
-
+The implementation of combine is a straightforward --completely controlled by the types-- plumbing to get the parameters at the right places. The direction of the vertical parameters is encoded in the definition of \p{combine}. 
 
 \begin{small}
 \begin{verbatim}
-combine = presStep
- where presStep (Layer upr) (Layer lwr) = Layer $ 
-           \high -> let (med, uprIntr) = upr high
-                        (low, lwrIntr) = lwr med
-                    in  (low, intrStep uprIntr lwrIntr)
-       intrStep upr lwr = 
-           \elow -> let (emed, lwrPres) = lwr elow
-                        (ehigh, uprPres) = upr emed
-                    in  (ehigh, presStep uprPres lwrPres)
+combine (Layer upr) (Layer lwr) = Layer $ exec upr lwr
+ where exec upr lwr =  \high -> let (med, uprIntr) = upr high
+                                    (low, lwrIntr) = lwr med
+                                in  (low, 
+                       \elow -> let (emed, lwr)  = lwrIntr elow
+                                    (ehigh, upr) = uprIntr emed
+                                in  (ehigh, exec upr lwr)
 \end{verbatim}%$
 \end{small}
 
-
-\head{Simple editor}
-
-The edit loop of the simple editor no longer contains references to the horizontal parameters. Furthermore, the combined layer is called \p{presentStep} instead of \p{layers} to reflect that it represents the presentation step of the computation.
+The edit loop of the simple editor uses a combined component by following its presented \p{Layer} protocol:
 
 \begin{small}
 \begin{verbatim}
 editLoop (Layer presentStep) doc = 
- do { let (pres , interpretStep) = presentStep doc
-    
+ do { let (pres , interpretStep) = presentStep doc    
     ; showRendering pres
-    ; gesture <- getGesture
-    
-    ; let (update, presentStep') = interpretStep gesture
-    
-    ; let doc' = updateDocument update doc
-    
+    ; gesture <- getGesture    
+    ; let (update, presentStep') = interpretStep gesture    
+    ; let doc' = updateDocument update doc    
     ; editLoop presentStep' doc'
     }
 \end{verbatim}
 \end{small}
 
-In the \p{main} function, the combined layer is created by lifting the layers together with their initial states and using \p{combine} to put them together.
+% In the \p{main} function, the combined layer is created by lifting the layers together with their initial states and using \p{combine} to put them together.
 
-\begin{small}
-\begin{verbatim}
-main layer1 layer2 layer3) =
- do { (init1, init2, init3) <- initStates
-    ; doc <- initDoc 
-    ; let layers = lift layer1 init1 `combine` 
-                   lift layer2 init2 `combine`
-                   lift layer3 init3
-    ; editLoop layers doc
-    }
-\end{verbatim}
-\end{small}
+% \begin{small}
+% \begin{verbatim}
+% main layer1 layer2 layer3) =
+%  do { (init1, init2, init3) <- initStates
+%     ; doc <- initDoc 
+%     ; let layers = lift layer1 init1 `combine` 
+%                    lift layer2 init2 `combine`
+%                    lift layer3 init3
+%     ; editLoop layers doc
+%     }
+% \end{verbatim}
+% \end{small}
 
-\head{Conclusions}
+% \head{Conclusions}
 
-The hidden-parameter model hides the data flow of the horizontal parameters from the main loop of the system. Furthermore, the types of the horizontal parameters, as well as the intermediate vertical parameters, are hidden from the type of the composed layer. Thus, both horizontal and vertical data flow are made more transparent. 
+% The hidden-parameter model hides the data flow of the horizontal parameters from the main loop of the system. Furthermore, the types of the horizontal parameters, as well as the intermediate vertical parameters, are hidden from the type of the composed layer. Thus, both horizontal and vertical data flow are made more transparent. 														
 
-%\note{monads arrows?} \note{relation to existential types. arrows?} 
-
-
-%																
-%																
-%																
 \section{Developing a library for architecture descriptions} \label{sect:lib}
 
 In this section, we develop a small library for constructing \p{lift} and \p{combine} combinators for layered architectures having an arbitrary number of layer functions. We refer to these combinators as {\em meta combinators} because they are used to construct combinators.
@@ -540,21 +185,10 @@ The \p{lift} and \p{combine} combinators from the previous section are just one 
 Looking at the definitions of \p{lift} and \p{combine} in the previous section, we see that they both consist of two parts: one for each step in the layer. Both functions define a local function for each of the layer functions in the layer. In both \p{lift} and \p{combine} for the \p{Simple} layer type, these local functions are called \p{presStep} and \p{intrStep}. 
 
 We derive the meta combinators by starting with the combinators from the previous section and gradually factoring out all step-specific aspects. We end with a combinator that is constructed out of a collection of simple building blocks (or meta combinators). 
-
-
-
- 
-%																
 \subsection{Type definitions} \label{subsecttypedef}
-
-\bc
-oude todo{voor de eerste zin stond weer een kriebellijntje; ja, het type Layer heeft maar een constructor, en hier meb je het over "its constructors"; ik heb je oude paragraaf uitgecommentarieerd. Volgens mij bedoel je iets als:}
-
-
 
 In the \p{Layer} type introduced in the previous section, the fact that we are dealing with two steps is explicitly encoded in the type. When dealing with more step-functions in a layer this type will get even more complicated. Since we do not want to ask from the user of the library to write  down such types explicitly, we start out by looking for a way of constructing such complicated types out of types which describe just a single step-function.
 \ec
-
 
 The \p{Layer} type poses a problem if we want to construct a library for building \p{lift} and \p{combine} functions, since somehow its constructors need to be added to and removed by the combinators. One solution is to create a type class for the constructor and deconstructor functions, but this complicates the types and requires a user to provide an instance of this class. Therefore, we introduce a compositional representation of a layer type that makes use of simple types defined in the library.
 
@@ -571,8 +205,7 @@ Using GADT's one might even make the fact that a step function should be seen as
 
 \begin{small}
 \begin{verbatim}
-newtype Step :: * -> * -> * where
-  Step :: (a -> (b, ns)) -> Step (a -> b) ns
+newtype Step :: * -> * -> * where Step :: (a -> (b, ns)) -> Step (a -> b) ns
 \end{verbatim}
 \end{small}
 \ec
@@ -608,8 +241,7 @@ With these type combinators, we can now express \p{Layer} in a compositional and
 
 \begin{small}
 \begin{verbatim}
-type Layer doc pers gest upd = 
-  Fix (Step doc pres :.: Step gest upd :.: NilStep)
+type Layer doc pers gest upd = Fix (Step doc pres :.: Step gest upd :.: NilStep)
 \end{verbatim}
 \end{small}
 
@@ -629,42 +261,25 @@ First we develop a meta combinator for the \p{lift} function. We start with the 
 \begin{verbatim}
 lift simple state = step1 state 
  where step1 hArg = Fix . Comp . Step $
-         \vArg -> let (pres, hRes) = 
-                       present simple hArg vArg
-                  in  (pres, step2 hRes)
+         \vArg -> mapSnd step2 (present simple hArg vArg)
        step2 hArg = Comp . Step $
-         \vArg -> let (upd, hRes) = 
-                        interpret simple hArg vArg
-                  in  (upd, lNilStep hRes)
+         \vArg -> mapSns lNilStep (interpret simple hArg vArg)
        lNilStep hRes = NilStep $ step1 hRes
 \end{verbatim}%$
 \end{small}
 
 The definitions of the local functions \p{step1} and \p{step2} contain mutually-recursive references, thus hard-coding their position in the sequence of steps. We eliminate this positional information in the definitions by supplying the next step as a parameter to each function. The \p{lNilStep} no longer needs to be a local function.
 
-%first drop state
-%param now step1 gets step2 as param. but step2 has step1. instead of infinite
-%definition lift layer = step1 (step2 (step1 ...., we make the observation that
-%lift layer is step1 with the correct parameters, and hence pass lift layer as
-%the parameter to step2, yielding the following finite definition:</comment></p> 
-%\note{Johan: (over \p{lift layer} hieronder) "hier introduceer je een fixed point. Misschien iet meer woorden aan besteden?"} 
-% ref: Augustson ICFP??
-      
-      
+     
 \begin{small} % lift1
 \begin{verbatim}
-lift :: Simple state map doc pres gest upd -> 
-        state -> Layer doc pres gest upd
+lift :: Simple state map doc pres gest upd -> state -> Layer doc pres gest upd
 lift simple state =  
   step1 (step2 (lNilStep (lift simple))) state
  where step1 next hArg = Fix . Comp . Step $
-         \vArg -> let (pres, hRes) = 
-                        present simple hArg vArg
-                  in  (pres, next hRes)
+         \vArg -> mapSnd next (present simple hArg vArg)
        step2 next hArg = Comp . Step $
-         \vArg -> let (upd, hRes) = 
-                        interpret simple hArg vArg
-                  in  (upd, next  hRes)
+         \vArg -> mapSnd next (interpret simple hArg vArg)
 
 lNilStep next hRes = NilStep $ next hRes
 \end{verbatim}%$
@@ -674,9 +289,7 @@ Next we  capture the \p{Comp} and \p{Step} constructors and the lambda expressio
 
 \begin{small} % lift2
 \begin{verbatim}
-liftStep f next horArgs = Comp . Step $ 
-  \vArg -> let (vertRes, horRes) = f horArgs vArg
-           in  (vertRes, next horRes)
+liftStep f next horArgs = Comp . Step $ mapSnd next .(f horArgs)
 \end{verbatim}%$
 \end{small}
 
@@ -684,12 +297,9 @@ liftStep f next horArgs = Comp . Step $
 
 \begin{small} % lift2
 \begin{verbatim}
-lift simple state =
-  step1 (step2 (lNilStep (lift simple))) state
- where step1 next hArg = 
-         Fix $ liftStep (present simple) next hArg
-       step2 next hArg =
-         liftStep (interpret simple) next hArg 
+lift simple state = Fix $ step1 (step2 (lNilStep (lift simple))) state
+ where step1 next hArg = liftStep (present simple)   next hArg
+       step2 next hArg = liftStep (interpret simple) next hArg 
 \end{verbatim}%$
 \end{small}
 
@@ -708,8 +318,7 @@ lift layer = (step1 . step2 . lNilStep) (lift layer)
 
 \begin{small}
 \begin{verbatim}
-fix a = let fixa = a fixa
-        in  fixa
+fix a = let fixa = a fixa in  fixa
 \end{verbatim}
 \end{small}
 
@@ -717,11 +326,9 @@ we get our next version of \p{lift}:
 
 \begin{small} % lift4
 \begin{verbatim}
-lift simple = fix (step1 . step2 . lNilStep)
- where step1 next hArg = Fix $
-         liftStep (present simple) next hArg
-       step2 next hArg =
-         liftStep (interpret simple) next hArg
+lift simple = fix (Fix. step1 . step2 . lNilStep)
+ where step1 next hArg = liftStep (present simple) next hArg
+       step2 next hArg = liftStep (interpret simple) next hArg
 \end{verbatim}
 \end{small}%$
 
