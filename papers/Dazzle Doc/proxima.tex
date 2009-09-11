@@ -1,0 +1,181 @@
+
+\documentclass[preprint,natbib]{sigplanconf}
+
+\usepackage{amsmath}
+\usepackage{../Utils}
+
+\begin{document}
+
+\conferenceinfo{Haskell Symposium '08}{September 25, 2008, Victoria, British Columbia, Canada.} 
+\copyrightyear{2008} 
+\copyrightdata{[to be supplied]} 
+
+\titlebanner{Draft, to be submitted to Haskell Symposium '08}        % These are ignored unless
+\preprintfooter{\version}   % 'preprint' option specified.
+
+\title{Proxima}
+%\subtitle{}
+
+\authorinfo{Martijn M. Schrage \and S. Doaitse Swierstra}
+           {Utrecht University}
+           {\{martijn,doaitse\}@cs.uu.nl}
+
+\maketitle
+
+\begin{abstract}
+This is the text of the abstract.
+\end{abstract}
+
+\category{CR-number}{subcategory}{third-level}
+
+\terms
+Languages, Human Factors, Documentation
+
+\keywords
+keyword1, keyword2
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\bl
+\o Proxima
+\o what is proxima
+\el
+
+\bl
+\o Proxima is used to create editor
+\el
+\bl
+\o Contributions:
+\o Simple creation of editor for active documents
+\o provides easy syncing and static checks, as well as nice UI
+\el
+
+This paper ...
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Documenting Bayesian networks}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o Bayesian networks are ...
+\o For creating them, we have Dazzle
+\o Dazzle~\cite{schrage05Dazzle}
+\o development is complex process
+\o During development, choice on arrows, based on expert interviews
+
+\o probtables depend on parents value names, nr of values
+\o scripts available for creating initial tables
+\o problem is with updates!
+\o text speaks about nodes in the network, must be updated when network is changed or renamed
+\el
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{An editor for documenting Bayesian networks}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o Network graph editor. No support for analysis, just construction.
+\o import/export of network
+\o Views on main network
+\o free text editing
+\o refs to nodes
+\o chapters/sections/subsections and promoting/demoting
+\o probability table editing
+\el
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Proxima}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o Proxima
+\o what is proxima
+\el
+\bl
+\o Layered architecture and parameters
+\el
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Implementation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o Presentation
+\o Evaluation layer keeps graphs consistent
+\o AG for static checks
+\o prob tables?
+\el
+
+\subsection{Probability tables}
+
+gather 
+Scrap your boilerplate.
+
+\subsection{Network views}
+problem that not only the views are presented, but also the main network.
+Hence, gathering all 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Related work}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o no doc editor available
+\o why other systems cannot do this
+\el
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Future work}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o manipulation of chapters, etc.
+\o Extensions on generic system: menus, find/replace
+\el
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bl
+\o Future work: extensions required
+\el
+
+
+%\acks
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{plainnat}
+
+\bibliography{../proxima}
+
+\end{document}
+
