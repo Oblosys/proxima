@@ -45,6 +45,7 @@ import Data.List
 import Evaluation.DocTypes (DocumentLevel, EditDocument'_ (..))
 import Arrangement.ArrTypes
 import Presentation.PresTypes (UpdateDoc)
+import Evaluation.EnrTypes -- why doesn't this work?: (SaveFileEnr)
 import System.Environment
 import Control.Concurrent
 import System.Time
@@ -171,23 +172,47 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
   , dir "favicon.ico"
         [ methodSP GET $ fileServe ["favicon.ico"] "src/proxima/etc"]
   , dir "Document.xml"
-        [ methodSP GET $ fileServe ["Document.xml"] "."]
-
+        [ methodSP GET $ do { _<- liftIO $ genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
+                                     castEnr $ SaveFileEnr "Document.xml" 
+                              -- ignore the html rendering of the save command (is empty)
+                            ; fileServe ["Document.xml"] "."
+                            }
+        ]
+  , dir "upload"
+        [ withData $ \(Upl doc) -> 
+        [ method POST $
+           do { liftIO $ putStrLn $ "Got upload request" ++ show (doc)
+              ; liftIO $
+                 do { fh <- openFile "Document.xml" WriteMode
+                    ; hPutStrLn fh doc
+                    ; hClose fh
+                    ; genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
+                        castEnr $ OpenFileEnr "Document.xml" 
+                      -- ignore html output, the page will be reloaded after pressing the button
+                    }
+              
+              ; let responseHtml =
+                      "<html><body>Document has been uploaded.<p><button onclick=\"location.href='/'\">Return to editor</button></html>"
+              ; modifyResponseW (setHeader "Content-Type" "text/html") $ -- todo there must be a nicer way tp get an html response
+                  ok $ toResponse responseHtml
+              }
+        ]
+        ]
   , dir "handle" 
    [ withData (\cmds -> [ method GET $ 
                           do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
                       
-                             ; responseHTML <- 
+                             ; responseHtml <- 
                                  liftIO $ catchExceptions $ handleCommands params initR menuR actualViewedAreaRef
                                                             cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
                              
-                             ; seq (length responseHTML) $ return ()
+                             ; seq (length responseHtml) $ return ()
                              ; liftIO $ putStrLn $ "Sending response sent to client:\n" ++
-                                                   take 160 responseHTML ++ "..."
+                                                   take 160 responseHtml ++ "..."
                              ; modifyResponseW noCache $
-                                ok $ toResponse responseHTML
+                                ok $ toResponse responseHtml
                              }
                           
                         ])
@@ -207,9 +232,17 @@ catchExceptions io =
           ; return responseHTML
           }
 
+
+newtype Upl = Upl String deriving Show
+
+instance FromData Upl where
+  fromData = liftM Upl (look "documentFile")
+
+
+newtype Commands = Commands String deriving Show
+
 instance FromData Commands where
   fromData = liftM Commands (look "commands")
-
 
 
 {- Salvia -} {-
@@ -306,7 +339,6 @@ safeRead s = case reads s of
 -}
 
 
-data Commands = Commands String deriving Show
 
 splitCommands commandStr =
   case break (==';') commandStr of

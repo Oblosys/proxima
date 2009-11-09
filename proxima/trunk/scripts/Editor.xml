@@ -472,14 +472,6 @@ function keypress(e)
    if (answer) loadXMLDoc('Find "'+answer+'";');
     return false;
   }
-  if (keyCode==100 && e.ctrlKey) // ctrl-d
-  { downloadDocument();
-    return false;
-  }
-  if (keyCode==117 && e.ctrlKey) // ctrl-d
-  { uploadDocument();
-    return false;
-  }
   if (keyCode==98 && e.ctrlKey) // ctrl-b
   { loadXMLDoc('SetStyle Bold;');
     return false;
@@ -823,11 +815,6 @@ function downloadDocument()
 { location.href = "Document.xml";
 }
 
-function uploadDocument()
-{ alert('upload');
-}
-
-
 ]]></script>
 </head>
 <body onload="init()">
@@ -898,7 +885,13 @@ function uploadDocument()
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id='font' style='visibility:hidden;white-space: pre'></div>
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
+<form style="display: inline; margin: 0;" action="upload" enctype="multipart/form-data" method="post">
+<input type="file" name="documentFile" size="40"/>
+<input type="submit" value="Upload"/>&nbsp;&nbsp;&nbsp;
+</form>
+<button onclick="downloadDocument();">Download</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
+
 <div id="debugMessage"></div>
 </body></html>
 
