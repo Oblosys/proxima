@@ -472,6 +472,14 @@ function keypress(e)
    if (answer) loadXMLDoc('Find "'+answer+'";');
     return false;
   }
+  if (keyCode==100 && e.ctrlKey) // ctrl-d
+  { downloadDocument();
+    return false;
+  }
+  if (keyCode==117 && e.ctrlKey) // ctrl-d
+  { uploadDocument();
+    return false;
+  }
   if (keyCode==98 && e.ctrlKey) // ctrl-b
   { loadXMLDoc('SetStyle Bold;');
     return false;
@@ -811,7 +819,13 @@ function setViewedAreaClient(x,y,w,h)
   internalScrollEvent = true
 }
 
+function downloadDocument()
+{ location.href = "Document.xml";
+}
 
+function uploadDocument()
+{ alert('upload');
+}
 
 
 ]]></script>

@@ -170,6 +170,8 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
         [ fileServe [] "img" ]  
   , dir "favicon.ico"
         [ methodSP GET $ fileServe ["favicon.ico"] "src/proxima/etc"]
+  , dir "Document.xml"
+        [ methodSP GET $ fileServe ["Document.xml"] "."]
 
   , dir "handle" 
    [ withData (\cmds -> [ method GET $ 
@@ -497,7 +499,6 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
         ; genericHandler settings handler renderingLvlVar viewedAreaRef () $
             SkipRen (-2)
         }
-     
 
     ClearMetrics ->
      do { putStrLn "\n\n\n\n\n\n\nClear\n\n\n\n\n\n\n"
