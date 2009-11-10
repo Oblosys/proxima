@@ -44,8 +44,24 @@ var commandQueue = '';
 
 function init()
 {
-    
-    if (document.addEventListener)
+    addKeyboardListeners();
+
+  // context menus
+  ie5=document.all&&document.getElementById;
+  ns6=document.getElementById&&!document.all;
+  menuobj=document.getElementById("contextMenu");
+  menuobj.style.display='';
+  //
+
+
+//    setRefreshTimer(10);
+    refresh();
+   setViewedAreaServer();
+    loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
+}
+
+function addKeyboardListeners()
+{   if (document.addEventListener)
     {
        document.addEventListener("keydown",keydown,false);
        document.addEventListener("keyup",keyup,false);
@@ -63,19 +79,24 @@ function init()
        document.onkeyup= keyup;
        document.onkeypress= keypress;
     }
+}
 
-  // context menus
-  ie5=document.all&&document.getElementById;
-  ns6=document.getElementById&&!document.all;
-  menuobj=document.getElementById("contextMenu");
-  menuobj.style.display='';
-  //
-
-
-//    setRefreshTimer(10);
-    refresh();
-   setViewedAreaServer();
-    loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
+function removeKeyboardListeners()
+{ if (document.addEventListener)
+    { document.removeEventListener("keydown",keydown,false);
+      document.removeEventListener("keyup",keyup,false);
+      document.removeEventListener("keypress",keypress,false);
+    }
+    else if (document.attachEvent) // IE7
+    { document.detachEvent("onkeydown", keydown);
+      document.detachEvent("onkeyup", keyup);
+      document.detachEvent("onkeypress", keypress);
+    }
+    else // TODO: don't know if this works:
+    { document.onkeydown = "return false";
+      document.onkeyup = "return false";
+      document.onkeypress = "return false";
+    } 
 }
 
 // Font queries
@@ -685,8 +706,8 @@ Cannot use JQuery because it somehow fails for xhtml docs
 */
 
 function getDraggable(x,y)
-{ var allDraggables = $(".Draggable");
-//  alert("draggables "+showElementsDimensions(allDraggables));
+{ var allDraggables = $('.Draggable');
+//  alert('draggables '+showElementsDimensions(allDraggables));
   return getContainingElement(x,y,allDraggables);
 }
 
@@ -812,7 +833,25 @@ function setViewedAreaClient(x,y,w,h)
 }
 
 function downloadDocument()
-{ location.href = "Document.xml";
+{ location.href = 'Document.xml';
+}
+
+function uploadDocument()
+{ removeKeyboardListeners();
+  // disable keyboard, because the text field with a cursor suggests keys should go there
+  // even while this field is not editable.
+
+  // Keeping mouse events does not seem to be confusing.
+  var uploadDialog = document.getElementById('uploadDialog');
+  // setting visibility does not seem to work (text border and buttons still show),
+  // so we keep the div at -2000px and move it to 200px to show it.
+  uploadDialog.style.left = '200px';
+}
+
+function cancelUploadDocument()
+{ addKeyboardListeners();
+  var uploadDialog = document.getElementById('uploadDialog');
+  uploadDialog.style.left = '-2000px';
 }
 
 ]]></script>
@@ -832,7 +871,17 @@ function downloadDocument()
      ></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div>
      <div id="draggedElementCloneParent" style="position: relative; height: 10000px; width: 10000px;"></div>
 </div>
+<div id="uploadDialog" style='position: absolute; left:-2000px; top:200px;width:400px;height:120px; border: 2px solid black; background-color:white'>
+<form action="upload" enctype="multipart/form-data" method="post">
+<p/>
+<center> Please select the document xml file to upload.
+<p/>
+<input type="file" name="documentFile" size="40"/>
+<p/>
+<input type="submit" value="Upload"/>&nbsp;&nbsp;&nbsp;<input type="button" value="Cancel" onclick="cancelUploadDocument();"/></center>
 
+</form>
+</div>
 
 <!-- font positioning goes wrong: text is drawn at half-height ref at top of div box
 <div style='position:absolute;left:20px;top:10px;width:463px;height:29px;font-family:"Times New Roman";font-size:19pt;background-color:rgb(120,120,120);'>B</div>
@@ -885,11 +934,8 @@ function downloadDocument()
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id='font' style='visibility:hidden;white-space: pre'></div>
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
-<form style="display: inline; margin: 0;" action="upload" enctype="multipart/form-data" method="post">
-<input type="file" name="documentFile" size="40"/>
-<input type="submit" value="Upload"/>&nbsp;&nbsp;&nbsp;
-</form>
-<button onclick="downloadDocument();">Download</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<button onclick="downloadDocument();">Download</button>
+<button onclick="uploadDocument();">Upload</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
 
 <div id="debugMessage"></div>
