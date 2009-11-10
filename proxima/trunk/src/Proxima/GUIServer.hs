@@ -190,9 +190,9 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
                         castEnr $ OpenFileEnr "Document.xml" 
                       -- ignore html output, the page will be reloaded after pressing the button
                     }
--- simply serving the Editor.xml does not work, as the browser will have upload in its menu bar (also the page doesn't load
--- correctly
--- instead, we show a page that immediately goes back to the editor page
+                      -- simply serving the Editor.xml does not work, as the browser will have upload in its menu bar
+                      -- (also the page doesn't load correctly)
+                      -- Instead, we show a page that immediately goes back to the editor page
               ; let responseHtml =
                       "<html><head><script type='text/javascript'><!--\n" ++
                       "history.go(-1);" ++
