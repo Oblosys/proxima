@@ -227,6 +227,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
                              ;  return   $ toResponse responseHtml 
                              -- removed the ok, but that seems no problem
                              -- todo: figure out how to make serverpart from web etc.
+                             -- TODO: get nice epochtime using trick discovered earlier for sms manager
                              }
                           
                         ])
@@ -262,7 +263,7 @@ parseCookieSessionId serverInstanceId = withRequest $ \rq ->
                                    Nothing               -> Nothing -- * ill formed cookie on client
                                    Just (serverTime::String,key::Int) -> 
                                      if serverTime /= serverInstanceId
-                                     then Just 333 -- Nothing  -- * cookie from previous WebViews run
+                                     then Nothing  -- * cookie from previous Proxima run
                                      else Just key -- * correct cookie for this run
     ; return mCookieSessionId
     } 
