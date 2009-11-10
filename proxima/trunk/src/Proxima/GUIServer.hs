@@ -24,6 +24,7 @@ import System.Environment
 import System.Time
 import Control.Monad.Trans
 import Data.List
+
 {- End of HApps imports -}
 
 {- Salvia imports 
@@ -75,8 +76,8 @@ startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
     ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
     ; let startServer = server params initR menuR actualViewedAreaRef
 
-    ; b <- hIsEOF stdin
-    ; if b 
+ --   ; b <- hIsEOF stdin
+    ; if False -- b
       then -- no stdin, so execute server in main thread. Server stops when process is killed
        do { putStrLn "No stdin"
           ; startServer
@@ -104,7 +105,6 @@ Header modifications must therefore be applied to out rather than be fmapped to 
 -}
 
 server params@(settings,_,_,_) initR menuR actualViewedAreaRef =
-  
   simpleHTTP (Conf (serverPort settings) Nothing) (handlers params initR menuR actualViewedAreaRef)
 {-
 handle:
@@ -207,25 +207,35 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
         ]
         ]
   , dir "handle" 
-   [ withData (\cmds -> [ method GET $ 
+   [ withData (\cmds -> [ methodSP GET $ 
                           do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
-                      
-                             ; responseHtml <- 
+                             
+                             ; c <- parseCookieSessionId "serverInstanceId"
+                             ; liftIO $ putStrLn $ "cookie is " ++ show c
+                             ; responseHtml <-
                                  liftIO $ catchExceptions $ handleCommands params initR menuR actualViewedAreaRef
                                                             cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
+                             ;  makeCookieSP
                              
+
                              ; seq (length responseHtml) $ return ()
                              ; liftIO $ putStrLn $ "Sending response sent to client:\n" ++
                                                    take 160 responseHtml ++ "..."
-                             ; modifyResponseW noCache $
-                                ok $ toResponse responseHtml
+                             --; modifyResponseW noCache $
+                             ;  return   $ toResponse responseHtml 
+                             -- removed the ok, but that seems no problem
+                             -- todo: figure out how to make serverpart from web etc.
                              }
                           
                         ])
    ] 
   ]
+
+makeCookieSP :: ServerPart ()
+makeCookieSP = ServerPartT $ \_ ->
+                 addCookie 3600 (mkCookie "proxima" $ show ("serverInstanceId", 666))
 
 catchExceptions io =
   io `Control.Exception.catch` \(exc :: SomeException) ->
@@ -239,6 +249,26 @@ catchExceptions io =
                 
           ; return responseHTML
           }
+
+type ServerInstanceId = String
+type SessionId = Int
+
+parseCookieSessionId :: ServerInstanceId -> ServerPart (Maybe SessionId)
+parseCookieSessionId serverInstanceId = withRequest $ \rq ->
+ do { let cookieMap = rqCookies rq
+    ; let mCookieSessionId = case lookup "proxima" cookieMap of
+                      Nothing -> Nothing -- * no webviews cookie on the client
+                      Just c  -> case safeRead (cookieValue c) of
+                                   Nothing               -> Nothing -- * ill formed cookie on client
+                                   Just (serverTime::String,key::Int) -> 
+                                     if serverTime /= serverInstanceId
+                                     then Just 333 -- Nothing  -- * cookie from previous WebViews run
+                                     else Just key -- * correct cookie for this run
+    ; return mCookieSessionId
+    } 
+
+
+
 
 
 newtype Upl = Upl String deriving Show
