@@ -192,11 +192,10 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
                     }
 -- simply serving the Editor.xml does not work, as the browser will have upload in its menu bar (also the page doesn't load
 -- correctly
--- instead, we show a page that redirects immediately to the editor page
--- this still messes up the history. Maybe it's possible to do a back followed by a refresh?
+-- instead, we show a page that immediately goes back to the editor page
               ; let responseHtml =
                       "<html><head><script type='text/javascript'><!--\n" ++
-                      "location.href='/';" ++
+                      "history.go(-1);" ++
                       "\n--></script></head><body></body></html>"
                       -- newlines between <!-- & javascript and javascript and --> are necessary!!
                       --"<html><body>Document has been uploaded.<p><button onclick=\"location.href='/'\">Return to editor</button></html>"
