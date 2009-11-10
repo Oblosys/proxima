@@ -192,6 +192,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
                     }
 -- simply serving the Editor.xml does not work, as the browser will have upload in its menu bar (also the page doesn't load
 -- correctly
+-- instead, we show a page that redirects immediately to the editor page
               ; let responseHtml =
                       "<html><head><script type='text/javascript'><!--\n" ++
                       "function init() { location.href='/'; }" ++
