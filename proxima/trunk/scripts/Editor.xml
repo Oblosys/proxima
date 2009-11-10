@@ -33,7 +33,9 @@ padding-right:10px;
 
 
 <script type="text/javascript" src="img/jquery-1.3.2.js"></script>
-
+<!-- be careful using jquery, since it gives an error with xml pages (div.style is undefined)
+     currently we only use it for getting the draggables.
+-->
 <script type="text/javascript">
 <![CDATA[
 
@@ -882,6 +884,22 @@ function cancelUploadDocument()
 
 </form>
 </div>
+ <!-- relative to parent. Important: parent needs style = 'position: relative' -->
+<div id='font' style='visibility:hidden;white-space: pre'></div>
+<div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
+
+<button onclick="history.go(-1);">test</button>
+<button onclick="downloadDocument();">Download</button>
+<button onclick="uploadDocument();">Upload</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
+
+<div id="debugMessage"></div>
+</body></html>
+
+
+
+
+
 
 <!-- font positioning goes wrong: text is drawn at half-height ref at top of div box
 <div style='position:absolute;left:20px;top:10px;width:463px;height:29px;font-family:"Times New Roman";font-size:19pt;background-color:rgb(120,120,120);'>B</div>
@@ -931,15 +949,6 @@ function cancelUploadDocument()
   </div>
 
 -->
- <!-- relative to parent. Important: parent needs style = 'position: relative' -->
-<div id='font' style='visibility:hidden;white-space: pre'></div>
-<div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
-<button onclick="downloadDocument();">Download</button>
-<button onclick="uploadDocument();">Upload</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
-
-<div id="debugMessage"></div>
-</body></html>
 
 
 
