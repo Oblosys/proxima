@@ -71,22 +71,23 @@ startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
  do { initR <- newIORef (True)
     ; menuR <- newIORef []
     ; actualViewedAreaRef <- newIORef ((0,0),(0,0))
-                             
-    ; tId <- forkIO $ server params initR menuR actualViewedAreaRef
-    ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
-    ; putStrLn "Press <Enter> to terminate server"
-    ; getLine `Control.Exception.catch` exceptionHandler
-    ; killThread tId    
-    }
- where exceptionHandler :: SomeException -> IO String
-       exceptionHandler err =
-        do { -- if getLine fails, we assume to have stdin from /dev/null, so 
-             -- we just wait until the process is killed externally
-           ; putStrLn "No stdin, waiting for explicit termination"
-           ; threadDelay 31536000000000000 -- wait a thousand years
-           ; return "" -- not reached
-           }
 
+    ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
+    ; let startServer = server params initR menuR actualViewedAreaRef
+
+    ; b <- hIsEOF stdin
+    ; if b 
+      then -- no stdin, so execute server in main thread. Server stops when process is killed
+       do { putStrLn "No stdin"
+          ; startServer
+          }
+      else -- if we have stdin, start server in a thread and wait for return in this one
+       do { tId <- forkIO $ startServer
+          ; putStrLn "Press <Return> to terminate server"
+          ; getLine
+          ; killThread tId    
+          }
+    }
 
 {-
 HAPPS

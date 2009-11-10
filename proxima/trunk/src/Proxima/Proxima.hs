@@ -142,9 +142,9 @@ proxima settings presentationSheet parseSheet scannerSheet
    \(err :: SomeException) -> 
     do { putStrLn "\n\n\nProxima terminated abnormally:\n" 
        ; print err
-       ; putStrLn "\n<Press return to exit>"
-       ; getLine
-       ; return ()
+       --; putStrLn "\n<Press return to exit>"
+       --; getLine
+       --; return ()
        } -- This way, the dos window on Windows does not exit until the user can see the error.
     
 
