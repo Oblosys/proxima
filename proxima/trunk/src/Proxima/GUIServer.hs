@@ -190,11 +190,17 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
                         castEnr $ OpenFileEnr "Document.xml" 
                       -- ignore html output, the page will be reloaded after pressing the button
                     }
-              
+-- simply serving the Editor.xml does not work, as the browser will have upload in its menu bar (also the page doesn't load
+-- correctly
               ; let responseHtml =
-                      "<html><body>Document has been uploaded.<p><button onclick=\"location.href='/'\">Return to editor</button></html>"
-              ; modifyResponseW (setHeader "Content-Type" "text/html") $ -- todo there must be a nicer way tp get an html response
+                      "<html><head><script type='text/javascript'><!--\n" ++
+                      "function init() { location.href='/'; }" ++
+                      "\n--></script></head><body onload='init()'></body></html>"
+                      -- newlines between <!-- & javascript and javascript and --> are necessary!!
+                      --"<html><body>Document has been uploaded.<p><button onclick=\"location.href='/'\">Return to editor</button></html>"
+              ; modifyResponseW (setHeader "Content-Type" "text/html") $ -- todo there must be a nicer way to get an html response
                   ok $ toResponse responseHtml
+                         
               }
         ]
         ]
