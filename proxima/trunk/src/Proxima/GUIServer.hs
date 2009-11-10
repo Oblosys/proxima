@@ -23,7 +23,6 @@ import HAppS.State
 import System.Environment
 import System.Time
 import Control.Monad.Trans
-import Control.Monad
 import Data.List
 {- End of HApps imports -}
 
@@ -52,7 +51,7 @@ import System.Time
 import Data.Typeable hiding (cast)
 import Control.Monad.Trans
 import Control.Monad hiding (when)
-import Control.Monad.Writer
+import Control.Monad.Writer hiding (when)
 import Data.List
 
 initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize) = 
@@ -175,20 +174,21 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
         [ methodSP GET $ do { _<- liftIO $ genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
                                      castEnr $ SaveFileEnr "Document.xml" 
                               -- ignore the html rendering of the save command (is empty)
-                            ; fileServe ["Document.xml"] "."
+                            ; modifyResponseSP (setHeader "Content-Disposition" "attachment;") $
+                                fileServe ["Document.xml"] "."
                             }
         ]
   , dir "upload"
         [ withData $ \(Upl doc) -> 
         [ method POST $
-           do { liftIO $ putStrLn $ "Got upload request" ++ show (doc)
-              ; liftIO $
+           do { when (doc /= "") $ liftIO $
                  do { fh <- openFile "Document.xml" WriteMode
                     ; hPutStrLn fh doc
                     ; hClose fh
                     ; genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
                         castEnr $ OpenFileEnr "Document.xml" 
                       -- ignore html output, the page will be reloaded after pressing the button
+                    ; return ()
                     }
                       -- simply serving the Editor.xml does not work, as the browser will have upload in its menu bar
                       -- (also the page doesn't load correctly)
