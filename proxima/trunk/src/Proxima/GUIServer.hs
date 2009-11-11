@@ -110,7 +110,7 @@ Header modifications must therefore be applied to out rather than be fmapped to 
 
 server params@(settings,_,_,_) initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef =
   simpleHTTP (Conf (serverPort settings) Nothing) 
-             (handlers params initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef)
+             (sessionHandler params initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef)
 {-
 handle:
 http://<server url>/                    response: <proxima executable dir>/src/proxima/scripts/Editor.xml
@@ -122,14 +122,7 @@ http://<server url>/handle?commands=<commands separated by ;>
 TODO: The proxima server requires that the proxima directory is present for favicon and 
       Editor.xml, these files should be part of a binary distribution.
 -}
-{-
-overrideHeaders :: [(String,String)] -> ServerPart a -> ServerPart a
-overrideHeaders headers s =
- do { response <- s
-    ; modifyResponse (setHeader "Content-Type" "text/xml")
-    ; return s
-    } 
--}
+
 modifyResponseSP :: (Response -> Response) -> ServerPart a -> ServerPart a
 modifyResponseSP modResp (ServerPartT f) =
   withRequest $ \rq -> modifyResponseW modResp $ f rq
@@ -153,10 +146,24 @@ withAgentIsMIE f = withRequest $ \rq ->
                      -- XHTML is not a big problem, but for SVG we need an alternative
                      -- Maybe we also need to switch to POST for IE, since it
                      -- cannot handle large queries with GET
+
+sessionHandler params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef 
+               serverInstanceId currentSessionsRef = 
+  [ do { removeExpiredSessions currentSessionsRef
+       ; sessionId <- getCookieSessionId serverInstanceId currentSessionsRef
+       ; currentSessions <- liftIO $ readIORef currentSessionsRef
+               
+       ; isPrimary <- liftIO $ isPrimaryEditingSession currentSessionsRef sessionId
+       ; if isPrimary
+         then liftIO $ putStrLn "\n\nPrimary editing session"
+         else liftIO $ putStrLn "\n\nSecondary editing session"
+       ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show currentSessions 
+       ; multi $ handlers params initR menuR actualViewedAreaRef sessionId isPrimary
+       } ]
                      
 -- handlers :: [ServerPartT IO Response]
 handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef 
-         serverInstanceId currentSessionsRef = 
+         sessionId isPrimary = 
   debugFilter $
   [ withAgentIsMIE $ \agentIsMIE ->
       (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
@@ -215,15 +222,6 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
   , dir "handle" 
    [ withData (\cmds -> [ methodSP GET $ 
                           do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
-                             ; removeExpiredSessions currentSessionsRef
-                             ; sessionId <- getCookieSessionId serverInstanceId currentSessionsRef
-                             ; currentSessions <- liftIO $ readIORef currentSessionsRef
-               
-                             ; b <- liftIO $ isPrimaryEditingSession currentSessionsRef sessionId
-                             ; if b 
-                               then liftIO $ putStrLn "\n\nPrimary editing session"
-                               else liftIO $ putStrLn "\n\nSecondary editing session"
-                             ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show currentSessions 
 
                              ; responseHtml <-
                                  liftIO $ catchExceptions $ handleCommands params initR menuR actualViewedAreaRef
