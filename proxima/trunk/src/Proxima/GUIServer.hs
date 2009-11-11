@@ -21,7 +21,10 @@ import HAppS.Server hiding (unwrap)
 import HAppS.Server.SimpleHTTP
 import HAppS.State
 import System.Environment
-import System.Time
+import Data.Time
+import System.Locale
+import Data.IntMap (IntMap)
+import qualified Data.IntMap as IntMap
 import Control.Monad.Trans
 import Data.List
 
@@ -72,9 +75,10 @@ startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
  do { initR <- newIORef (True)
     ; menuR <- newIORef []
     ; actualViewedAreaRef <- newIORef ((0,0),(0,0))
-
+    ; currentSessionsRef <- newIORef []
+    ; serverInstanceId <- fmap (formatTime defaultTimeLocale "%s") getCurrentTime
     ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
-    ; let startServer = server params initR menuR actualViewedAreaRef
+    ; let startServer = server params initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef
 
  --   ; b <- hIsEOF stdin
     ; if False -- b
@@ -104,8 +108,9 @@ the monad, but it will only do something if the header is not set in the out par
 Header modifications must therefore be applied to out rather than be fmapped to the monad.
 -}
 
-server params@(settings,_,_,_) initR menuR actualViewedAreaRef =
-  simpleHTTP (Conf (serverPort settings) Nothing) (handlers params initR menuR actualViewedAreaRef)
+server params@(settings,_,_,_) initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef =
+  simpleHTTP (Conf (serverPort settings) Nothing) 
+             (handlers params initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef)
 {-
 handle:
 http://<server url>/                    response: <proxima executable dir>/src/proxima/scripts/Editor.xml
@@ -150,8 +155,9 @@ withAgentIsMIE f = withRequest $ \rq ->
                      -- cannot handle large queries with GET
                      
 -- handlers :: [ServerPartT IO Response]
-handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef = 
-  -- debugFilter $
+handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef 
+         serverInstanceId currentSessionsRef = 
+  debugFilter $
   [ withAgentIsMIE $ \agentIsMIE ->
       (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
                            let setTypeToHTML = if agentIsMIE 
@@ -209,34 +215,33 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
   , dir "handle" 
    [ withData (\cmds -> [ methodSP GET $ 
                           do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
-                             
-                             ; c <- parseCookieSessionId "serverInstanceId"
-                             ; liftIO $ putStrLn $ "cookie is " ++ show c
+                             ; removeExpiredSessions currentSessionsRef
+                             ; sessionId <- getCookieSessionId serverInstanceId currentSessionsRef
+                             ; currentSessions <- liftIO $ readIORef currentSessionsRef
+               
+                             ; b <- liftIO $ isPrimaryEditingSession currentSessionsRef sessionId
+                             ; if b 
+                               then liftIO $ putStrLn "\n\nPrimary editing session"
+                               else liftIO $ putStrLn "\n\nSecondary editing session"
+                             ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show currentSessions 
+
                              ; responseHtml <-
                                  liftIO $ catchExceptions $ handleCommands params initR menuR actualViewedAreaRef
                                                             cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
-                             ;  makeCookieSP
                              
 
                              ; seq (length responseHtml) $ return ()
                              ; liftIO $ putStrLn $ "Sending response sent to client:\n" ++
                                                    take 160 responseHtml ++ "..."
                              --; modifyResponseW noCache $
-                             ;  return   $ toResponse responseHtml 
-                             -- removed the ok, but that seems no problem
-                             -- todo: figure out how to make serverpart from web etc.
-                             -- TODO: get nice epochtime using trick discovered earlier for sms manager
+                             ;  anyRequest $ ok $ toResponse responseHtml 
                              }
                           
                         ])
    ] 
   ]
-
-makeCookieSP :: ServerPart ()
-makeCookieSP = ServerPartT $ \_ ->
-                 addCookie 3600 (mkCookie "proxima" $ show ("serverInstanceId", 666))
 
 catchExceptions io =
   io `Control.Exception.catch` \(exc :: SomeException) ->
@@ -253,24 +258,69 @@ catchExceptions io =
 
 type ServerInstanceId = String
 type SessionId = Int
+type Sessions = [(SessionId, UTCTime)]
 
-parseCookieSessionId :: ServerInstanceId -> ServerPart (Maybe SessionId)
-parseCookieSessionId serverInstanceId = withRequest $ \rq ->
+cookieLifeTime = sessionExpirationTime + 60 -- only needs to be as long as sessionExpirationTime
+
+sessionExpirationTime = 30
+
+removeExpiredSessions :: IORef Sessions -> ServerPart ()
+removeExpiredSessions currentSessionsRef = liftIO $
+ do { time <- getCurrentTime
+    ; currentSessions <- readIORef currentSessionsRef
+    ; writeIORef currentSessionsRef $
+        filter (\(_,lastSessionEventTime) -> diffUTCTime time lastSessionEventTime < sessionExpirationTime) currentSessions 
+    }
+getCookieSessionId :: ServerInstanceId -> IORef Sessions -> ServerPart SessionId
+getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
  do { let cookieMap = rqCookies rq
     ; let mCookieSessionId = case lookup "proxima" cookieMap of
                       Nothing -> Nothing -- * no webviews cookie on the client
                       Just c  -> case safeRead (cookieValue c) of
                                    Nothing               -> Nothing -- * ill formed cookie on client
-                                   Just (serverTime::String,key::Int) -> 
-                                     if serverTime /= serverInstanceId
+                                   Just (cookieServerInstanceId::String,key::Int) -> 
+                                     if cookieServerInstanceId /= serverInstanceId
                                      then Nothing  -- * cookie from previous Proxima run
                                      else Just key -- * correct cookie for this run
-    ; return mCookieSessionId
+
+    ; currentSessions <- liftIO $ readIORef currentSessionsRef
+
+    ; (sessionId, _) <-
+        case mCookieSessionId of
+          Just cookieSessionId | cookieSessionId `elem` map fst currentSessions ->
+            do { time <- liftIO $  getCurrentTime
+               ; liftIO $ writeIORef currentSessionsRef $ 
+                            [ (i, if i == cookieSessionId then time else t)
+                            | (i,t) <- currentSessions 
+                            ]
+               ; addCookie 60 $ mkCookie "proxima" $ show (serverInstanceId, cookieSessionId)
+               ; return (cookieSessionId, time)
+               }
+
+          -- no or wrong cookie, or sessionId is not in currentSessions (because it expired)
+          _ -> makeNewSessionCookie serverInstanceId currentSessionsRef
+    ; liftIO $ putStrLn $ "SessionId:" ++ show sessionId
+    ; return sessionId
     } 
 
-
-
-
+makeNewSessionCookie serverInstanceId currentSessionsRef =
+ do { currentSessions <- liftIO $ readIORef currentSessionsRef
+    ; time <- liftIO $  getCurrentTime
+    ; let newSessionId = maximum (0: map fst currentSessions) + 1
+          newSession = (newSessionId, time)
+    ; addCookie 60 $ mkCookie "proxima" $ show (serverInstanceId, newSessionId)
+    -- one minute
+    
+    ; liftIO $ writeIORef currentSessionsRef $ currentSessions ++ [newSession]
+    ; return newSession
+    }
+ 
+isPrimaryEditingSession currentSessionsRef sessionId =
+ do { currentSessions <- readIORef currentSessionsRef
+    ; case currentSessions of
+        ((primarySessionId,_):_) -> return $ sessionId == primarySessionId
+        _                    -> return False
+    }
 
 newtype Upl = Upl String deriving Show
 
