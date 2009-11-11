@@ -158,12 +158,11 @@ sessionHandler params@(settings,handler,renderingLvlVar,viewedAreaRef) initR men
          then liftIO $ putStrLn "\n\nPrimary editing session"
          else liftIO $ putStrLn "\n\nSecondary editing session"
        ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show currentSessions 
-       ; multi $ handlers params initR menuR actualViewedAreaRef sessionId isPrimary
+       ; multi $ handlers params initR menuR actualViewedAreaRef sessionId isPrimary (length currentSessions)
        } ]
                      
--- handlers :: [ServerPartT IO Response]
 handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef 
-         sessionId isPrimary = 
+         sessionId isPrimary nrOfSessions = 
   debugFilter $
   [ withAgentIsMIE $ \agentIsMIE ->
       (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
@@ -225,7 +224,8 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
 
                              ; responseHtml <-
                                  liftIO $ catchExceptions $ handleCommands params initR menuR actualViewedAreaRef
-                                                            cmds
+                                                                           sessionId isPrimary nrOfSessions
+                                                                           cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
                              
@@ -434,7 +434,8 @@ splitCommands commandStr =
     (command, (_:commandStr')) -> command : splitCommands commandStr'
         
 -- handle each command in commands and send the updates back
-handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef (Commands commandStr) =
+handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+               sessionId isPrimary nrOfSessions (Commands commandStr) =
  do { let commands = splitCommands commandStr
    -- ; putStrLn $ "Received commands:"++ show commands
     
@@ -465,9 +466,12 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actu
     
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
 --    ; if null pendingQueries then putStrLn "Sending rendering and focus" else return ()
-    ; return $ "<div id='updates'>"++ (if null pendingQueries 
+    ; return $ "<div id='updates' sessionId='" ++ show sessionId ++"' "++ 
+                                 "sessionType='" ++ (if isPrimary then "primary" else "secondary") ++"' "++
+                                 "nrOfSessions='"++show nrOfSessions ++ "'>" ++ 
+                                      (if null pendingQueries 
                                        then renderingHTML++focusRenderingHTML
-                                       else "")
+                                       else "") 
                                    ++queryHTML++"</div>"            
     }
         

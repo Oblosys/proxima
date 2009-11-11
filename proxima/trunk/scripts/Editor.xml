@@ -318,8 +318,14 @@ if (xmlhttp.readyState==4)
     // after this, firstChild has a value, while it is null before
                 // newRendering.firstChild;
     
-    
- //   updateTree( updates.firstChild );
+    var sessionId = updates.getAttribute('sessionId');
+    var sessionType = updates.getAttribute('sessionType');
+    var nrOfSessions = updates.getAttribute('nrOfSessions');
+    document.getElementById('sessionInfo').innerHTML =
+      'Session id: ' + sessionId + ' '  +
+      (sessionType == 'primary' ? 'Editable' : 'Non-editable') + ' ' +
+      'Nr of sessions:' + nrOfSessions;
+
     while (updates.firstChild)
     { updateTree( updates.firstChild );
     ; updates.removeChild(updates.firstChild);
@@ -889,7 +895,8 @@ function cancelUploadDocument()
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 <button onclick="downloadDocument();">Download</button>
 <button onclick="uploadDocument();">Upload</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button>
+<button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button><div id="sessionInfo"></div>
+
 
 <div id="debugMessage"></div>
 </body></html>
