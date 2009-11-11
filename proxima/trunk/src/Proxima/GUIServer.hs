@@ -153,16 +153,19 @@ sessionHandler params@(settings,handler,renderingLvlVar,viewedAreaRef) initR men
        ; sessionId <- getCookieSessionId serverInstanceId currentSessionsRef
        ; currentSessions <- liftIO $ readIORef currentSessionsRef
                
-       ; isPrimary <- liftIO $ isPrimaryEditingSession currentSessionsRef sessionId
-       ; if isPrimary
+       ; let isPrimarySession = case currentSessions of
+                                  [] -> False -- should not occur
+                                  (i,_):_ -> i == sessionId
+
+       ; if isPrimarySession
          then liftIO $ putStrLn "\n\nPrimary editing session"
          else liftIO $ putStrLn "\n\nSecondary editing session"
        ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show currentSessions 
-       ; multi $ handlers params initR menuR actualViewedAreaRef sessionId isPrimary (length currentSessions)
+       ; multi $ handlers params initR menuR actualViewedAreaRef sessionId isPrimarySession (length currentSessions)
        } ]
                      
 handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef 
-         sessionId isPrimary nrOfSessions = 
+         sessionId isPrimarySession nrOfSessions = 
   debugFilter $
   [ withAgentIsMIE $ \agentIsMIE ->
       (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
@@ -224,7 +227,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
 
                              ; responseHtml <-
                                  liftIO $ catchExceptions $ handleCommands params initR menuR actualViewedAreaRef
-                                                                           sessionId isPrimary nrOfSessions
+                                                                           sessionId isPrimarySession nrOfSessions
                                                                            cmds
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
@@ -312,14 +315,11 @@ makeNewSessionCookie serverInstanceId currentSessionsRef =
     ; liftIO $ writeIORef currentSessionsRef $ currentSessions ++ [newSession]
     ; return newSession
     }
- 
-isPrimaryEditingSession currentSessionsRef sessionId =
- do { currentSessions <- readIORef currentSessionsRef
-    ; case currentSessions of
-        ((primarySessionId,_):_) -> return $ sessionId == primarySessionId
-        _                    -> return False
-    }
 
+
+whenPrimary isPrimarySession act = if not isPrimarySession then return [] else act
+     
+ 
 newtype Upl = Upl String deriving Show
 
 instance FromData Upl where
@@ -435,12 +435,13 @@ splitCommands commandStr =
         
 -- handle each command in commands and send the updates back
 handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
-               sessionId isPrimary nrOfSessions (Commands commandStr) =
+               sessionId isPrimarySession nrOfSessions (Commands commandStr) =
  do { let commands = splitCommands commandStr
    -- ; putStrLn $ "Received commands:"++ show commands
     
     ; renderingHTMLss <-
-        mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef)
+        mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+                               sessionId isPrimarySession nrOfSessions)
              commands
  
     ; let renderingHTML = concat . concat $ renderingHTMLss
@@ -467,7 +468,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actu
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
 --    ; if null pendingQueries then putStrLn "Sending rendering and focus" else return ()
     ; return $ "<div id='updates' sessionId='" ++ show sessionId ++"' "++ 
-                                 "sessionType='" ++ (if isPrimary then "primary" else "secondary") ++"' "++
+                                 "sessionType='" ++ (if isPrimarySession then "primary" else "secondary") ++"' "++
                                  "nrOfSessions='"++show nrOfSessions ++ "'>" ++ 
                                       (if null pendingQueries 
                                        then renderingHTML++focusRenderingHTML
@@ -491,9 +492,11 @@ type Modifiers = (Bool,Bool,Bool)
 data MouseCommand = MouseDown | MouseMove | MouseUp | MouseDragStart | MouseDrop
                     deriving (Show, Read)
 
-handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef eventStr =
+handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+                 sessionId isPrimarySession nrOfSessions eventStr =
   case safeRead eventStr of
-    Just cmd -> handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef cmd
+    Just cmd -> handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+                sessionId isPrimarySession nrOfSessions cmd
     Nothing  -> error ("Syntax error in command: "++eventStr) 
 
 
@@ -502,8 +505,11 @@ handleCommand :: (Show token, Show node, Show enr, Show doc) =>
                ,((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token]))
                , IORef (RenderingLevel doc enr node clip token) 
                , IORef CommonTypes.Rectangle 
-               ) -> IORef Bool -> IORef [Wrapped doc enr node clip token] -> IORef CommonTypes.Rectangle -> Command -> IO [String]
-handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef command =
+               ) -> IORef Bool -> IORef [Wrapped doc enr node clip token] -> IORef CommonTypes.Rectangle ->
+               SessionId -> Bool -> Int ->
+               Command -> IO [String]
+handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+              sessionId isPrimarySession nrOfSessions command =
   case command of
     Metrics receivedMetrics@(font,_) ->
      do { putStrLn $ "Received metrics for: "++show font
@@ -516,6 +522,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
     -- Current structure of handlers causes focus to be repainted after context request
     -- this is not really a problem though
     ContextMenuRequest ((proxX,proxY),(screenX,screenY)) ->
+     whenPrimary isPrimarySession $ 
      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $
                     castLay ParseLay
         ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
@@ -537,6 +544,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
         }
     
     ContextMenuSelect selectedItemNr ->
+     whenPrimary isPrimarySession $
      do { menuItems <- readIORef menuR
         ; let editDoc = index "GUI.handleContextMenuSelect" menuItems selectedItemNr
         ; genericHandler settings handler renderingLvlVar viewedAreaRef () $
@@ -572,6 +580,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
              }
     
     Chr (keyChar,(shiftDown, ctrlDown, altDown)) ->
+      whenPrimary isPrimarySession $
       let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
           evt = if not ctrlDown && not altDown 
                 then KeyCharRen (chr keyChar)
@@ -587,6 +596,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
     -- (note: maybe not, focus is always from to.)    
     
     Mouse mouseCommand (x, y, (shiftDown, ctrlDown, altDown)) ->
+      whenPrimary isPrimarySession $
       let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
           evt = case mouseCommand of
                      MouseDown -> MouseDownRen x y ms 1
@@ -602,6 +612,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
              }
     
     EditStyle style ->
+      whenPrimary isPrimarySession $
       do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
                      castLay $ EditStyleLay style
          ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
@@ -609,6 +620,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
          }
 
     Find str ->
+      whenPrimary isPrimarySession $
       do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
                      castLay $ FindLay (Just str)
          ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
@@ -616,6 +628,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
          }
 
     SetViewedArea newViewedArea ->
+     whenPrimary isPrimarySession $
      do { writeIORef viewedAreaRef newViewedArea
         ; writeIORef actualViewedAreaRef newViewedArea
         ; reduceViewedArea settings viewedAreaRef
@@ -624,6 +637,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
         }
 
     ClearMetrics ->
+     whenPrimary isPrimarySession $
      do { putStrLn "\n\n\n\n\n\n\nClear\n\n\n\n\n\n\n"
         ; fh <- openFile "queriedMetrics.txt" WriteMode -- TODO: clearing this file should be done after Metrics are read in FontLib.hs
         ; hClose fh
@@ -637,7 +651,7 @@ genericHandler :: (Show token, Show node, Show enr, Show doc) => Settings ->
                () -> -- is here so the type is compatible with genericHandler from GUIGtk
                EditRendering doc enr node clip token -> IO [String]
 genericHandler settings handler renderingLvlVar viewedAreaRef () evt =   
- do { renderingLvl@(RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
+ do { renderingLvl <- readIORef renderingLvlVar
     ; putStrLn $ "Generic handler server started for edit op: " ++ show evt
     ; viewedArea <- readIORef viewedAreaRef
     ; putStrLn $ "Viewed area that is about to be rendered: " ++ show viewedArea
@@ -655,10 +669,7 @@ genericHandler settings handler renderingLvlVar viewedAreaRef () evt =
                                         ]
        -- TODO: clear any following updates to client? The alert will prevent them from being processed for a while.
        process (SetRen' renderingLvl''@(RenderingLevel scale _ renderingHTML _ (newW,newH) _ updRegions _)) =
-         do { (RenderingLevel _ _ _ _ (w,h) _ _ _) <- readIORef renderingLvlVar
-            ; writeIORef renderingLvlVar renderingLvl''
-  --          ; putStrLn $ "Drawing " ++ show (w,h) ++ show (newW,newH)
-            
+         do { writeIORef renderingLvlVar renderingLvl''
             ; viewedArea <- readIORef viewedAreaRef
             ; let htmlRendering = execWriter $ renderingHTML viewedArea
             ; return [htmlRendering]
