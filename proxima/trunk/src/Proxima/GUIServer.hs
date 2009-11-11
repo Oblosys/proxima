@@ -58,7 +58,7 @@ import Control.Monad hiding (when)
 import Control.Monad.Writer hiding (when)
 import Data.List
 
-initialize (settings,handler,renderingLvlVar,viewedAreaRef,initialWindowSize) = 
+initialize (settings,handler,renderingLvlVar,viewedAreaRef,_) = 
  do { fh <- openFile "queriedMetrics.txt" WriteMode
     ; hPutStr fh ""
     ; hClose fh
