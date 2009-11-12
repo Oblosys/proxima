@@ -74,7 +74,7 @@ withCatch io = io
 startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
  do { initR <- newIORef (True)
     ; menuR <- newIORef []
-    ; actualViewedAreaRef <- newIORef ((0,0),(0,0))
+    ; actualViewedAreaRef <- newIORef ((0,0),(0,0)) -- is used when reducing the viewed area, see mkSetViewedAreaHtml
     ; currentSessionsRef <- newIORef []
     ; serverInstanceId <- fmap (formatTime defaultTimeLocale "%s") getCurrentTime
     ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
@@ -147,21 +147,34 @@ withAgentIsMIE f = withRequest $ \rq ->
                      -- Maybe we also need to switch to POST for IE, since it
                      -- cannot handle large queries with GET
 
-sessionHandler params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef 
+-- TODO: add thread safety!!!
+sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) initR menuR actualViewedAreaRef 
                serverInstanceId currentSessionsRef = 
   [ do { removeExpiredSessions currentSessionsRef
-       ; sessionId <- getCookieSessionId serverInstanceId currentSessionsRef
+       ; (sessionId,viewedArea) <- getCookieSessionId serverInstanceId currentSessionsRef
        ; currentSessions <- liftIO $ readIORef currentSessionsRef
                
        ; let isPrimarySession = case currentSessions of
                                   [] -> False -- should not occur
-                                  (i,_):_ -> i == sessionId
+                                  (i,_,_):_ -> i == sessionId
 
        ; if isPrimarySession
          then liftIO $ putStrLn "\n\nPrimary editing session"
          else liftIO $ putStrLn "\n\nSecondary editing session"
-       ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show currentSessions 
-       ; multi $ handlers params initR menuR actualViewedAreaRef sessionId isPrimarySession (length currentSessions)
+       ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show (currentSessions) 
+       ; liftIO $ writeIORef viewedAreaRef viewedArea
+
+       ; liftIO $ putStrLn $ "Viewed area for this session: " ++ show viewedArea
+       -- todo lookup of viewed area is bad (with head) and what about actualViewedArea?
+
+       ; response <- multi $ handlers params initR menuR actualViewedAreaRef sessionId isPrimarySession (length currentSessions)
+       ; viewedArea' <- liftIO $ readIORef viewedAreaRef
+       ; liftIO $ putStrLn $ "And now viewed area is " ++ show viewedArea'
+       ; liftIO $ writeIORef currentSessionsRef $ 
+                            [ (i, t, if i == sessionId then viewedArea' else v)
+                            | (i,t,v) <- currentSessions 
+                            ]
+       ; return response
        } ]
                      
 handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef 
@@ -259,7 +272,7 @@ catchExceptions io =
 
 type ServerInstanceId = String
 type SessionId = Int
-type Sessions = [(SessionId, UTCTime)]
+type Sessions = [(SessionId, UTCTime, CommonTypes.Rectangle)]
 
 cookieLifeTime = sessionExpirationTime + 60 -- only needs to be as long as sessionExpirationTime
 
@@ -270,9 +283,9 @@ removeExpiredSessions currentSessionsRef = liftIO $
  do { time <- getCurrentTime
     ; currentSessions <- readIORef currentSessionsRef
     ; writeIORef currentSessionsRef $
-        filter (\(_,lastSessionEventTime) -> diffUTCTime time lastSessionEventTime < sessionExpirationTime) currentSessions 
+        filter (\(_,lastSessionEventTime,_) -> diffUTCTime time lastSessionEventTime < sessionExpirationTime) currentSessions 
     }
-getCookieSessionId :: ServerInstanceId -> IORef Sessions -> ServerPart SessionId
+getCookieSessionId :: ServerInstanceId -> IORef Sessions -> ServerPart (SessionId, CommonTypes.Rectangle)
 getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
  do { let cookieMap = rqCookies rq
     ; let mCookieSessionId = case lookup "proxima" cookieMap of
@@ -286,29 +299,32 @@ getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
 
     ; currentSessions <- liftIO $ readIORef currentSessionsRef
 
-    ; (sessionId, _) <-
+    ; (sessionId, _, viewedArea) <-
         case mCookieSessionId of
-          Just cookieSessionId | cookieSessionId `elem` map fst currentSessions ->
+          Just cookieSessionId | cookieSessionId `elem` map fst3 currentSessions ->
             do { time <- liftIO $  getCurrentTime
                ; liftIO $ writeIORef currentSessionsRef $ 
-                            [ (i, if i == cookieSessionId then time else t)
-                            | (i,t) <- currentSessions 
+                            [ (i, if i == cookieSessionId then time else t,v)
+                            | (i,t,v) <- currentSessions 
                             ]
                ; addCookie 60 $ mkCookie "proxima" $ show (serverInstanceId, cookieSessionId)
-               ; return (cookieSessionId, time)
+               ; let viewedArea = thd3 . head $ filter ((==cookieSessionId).fst3) currentSessions 
+               ; return (cookieSessionId, time, viewedArea)
                }
 
           -- no or wrong cookie, or sessionId is not in currentSessions (because it expired)
           _ -> makeNewSessionCookie serverInstanceId currentSessionsRef
     ; liftIO $ putStrLn $ "SessionId:" ++ show sessionId
-    ; return sessionId
+    ; return (sessionId, viewedArea)
     } 
 
 makeNewSessionCookie serverInstanceId currentSessionsRef =
  do { currentSessions <- liftIO $ readIORef currentSessionsRef
     ; time <- liftIO $  getCurrentTime
-    ; let newSessionId = maximum (0: map fst currentSessions) + 1
-          newSession = (newSessionId, time)
+    
+    ; let newViewedArea = ((0,0),(0,0))
+          newSessionId = maximum (0: map fst3 currentSessions) + 1
+          newSession = (newSessionId, time, newViewedArea)
     ; addCookie 60 $ mkCookie "proxima" $ show (serverInstanceId, newSessionId)
     -- one minute
     
@@ -628,7 +644,6 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actua
          }
 
     SetViewedArea newViewedArea ->
-     whenPrimary isPrimarySession $
      do { writeIORef viewedAreaRef newViewedArea
         ; writeIORef actualViewedAreaRef newViewedArea
         ; reduceViewedArea settings viewedAreaRef
