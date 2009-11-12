@@ -147,7 +147,13 @@ withAgentIsMIE f = withRequest $ \rq ->
                      -- Maybe we also need to switch to POST for IE, since it
                      -- cannot handle large queries with GET
 
+
+-- todo lookup of viewed area is bad (with head) and what about actualViewedArea?
 -- TODO: add thread safety!!!
+-- if we put Arrangement layer and maybe level in session (by indexing), incrementality should be back
+-- then also rendering level (may be easy) and presentation focus and maybe arrangement focus must be indexed
+-- then we have multi editing!
+-- in case of multiple sessions, editors should poll every .. seconds
 sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) initR menuR actualViewedAreaRef 
                serverInstanceId currentSessionsRef = 
   [ do { removeExpiredSessions currentSessionsRef
@@ -165,7 +171,6 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) initR me
        ; liftIO $ writeIORef viewedAreaRef viewedArea
 
        ; liftIO $ putStrLn $ "Viewed area for this session: " ++ show viewedArea
-       -- todo lookup of viewed area is bad (with head) and what about actualViewedArea?
 
        ; response <- multi $ handlers params initR menuR actualViewedAreaRef sessionId isPrimarySession (length currentSessions)
        ; viewedArea' <- liftIO $ readIORef viewedAreaRef
