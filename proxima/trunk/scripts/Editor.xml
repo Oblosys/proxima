@@ -499,7 +499,6 @@ function removeChildren(parentId)
 function keypress(e)
 {
    if (!e) e= event;
-
    var keyCode =  (e.keyCode != 0) ? e.keyCode : e.charCode
    // keyCode is 0 on Firefox
    
@@ -881,10 +880,36 @@ function insertCharPredictively(char)
   textNode.insertData(focusIndex,char);
   focusIndex++;
   var increase = focusedElt.clientWidth - w;
+
+  var proximaElt = document.getElementById('proxima');
+  var parent = focusedElt.parentNode;
+  var elt = focusedElt;
+
+  var focusRenderingElt = document.getElementById('666');
+  focusRenderingElt.style.left = parseInt(focusRenderingElt.style.left) + increase  + 'px';
+
+  while ( parent != proximaElt )
+  { n = elt.nextSibling;
+    while ( n )
+    { n.style.left = parseInt(n.style.left) + increase + 'px';
+      n = n.nextSibling;
+    }
+    elt = parent;
+    parent = parent.parentNode;
+  }
+
+// TODO!! Fix Draggable to work without jquery!!
+
+// todo: find a more elegant way to id the focus
+// todo: fix annoying bug that disables keyboard sometimes.
+// todo: need to distinguish rows and columns (no moving in columns)
+// todo: need to tag the text area, so we don't move above it (as is a problem in the decl. form)
+// todo: when intermediate rendering results arrive during typing, remaining predictive chars need to be reapplied.
 // does not take into account non-editable
 // modified strings are not reset yet. Usually this will be done by next rendering
 // except when insert does not change the string with focus (as in non-editable)
 // keep list of modified strings per rendering update?
+
 }
 
 function test(char)
