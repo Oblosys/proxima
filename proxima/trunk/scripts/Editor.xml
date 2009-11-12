@@ -44,6 +44,10 @@ var xmlhttp;
 var mouseDown = false;
 var commandQueue = '';
 
+var focusedElement; // string element that has the focus (used for predictive char rendering)
+var focusIndex;     // the index in the focused string
+
+
 function init()
 {
     addKeyboardListeners();
@@ -442,6 +446,11 @@ function updateTree(update)
   }
   else if (op == 'alert')
   { alert (update.getAttribute('text'));
+  }
+  else if (op == 'setFocusedId')
+  { var path = update.childNodes[0];
+    focusedElt = select(path, document.getElementById('proxima'));
+    focusIndex = update.getAttribute('index');
   }
   else alert ('Unknown command: '+op); 
 }
@@ -862,6 +871,18 @@ function cancelUploadDocument()
   uploadDialog.style.left = '-2000px';
 }
 
+function test()
+{
+    var w = focusedElt.clientWidth;
+    focusedElt.innerHTML = focusedElt.innerHTML + 'x';
+    var increase = focusedElt.clientWidth - w;
+//  var parent = focusedElt.parentNode;
+   //  parent.removeChild(focusedElt);
+
+    // var focusedElt = document.getElementById(focusedId);
+    alert( focusedId + ' ' + focusIndex+ ' '+ increase);
+}
+
 ]]></script>
 </head>
 <body onload="init()">
@@ -896,6 +917,7 @@ function cancelUploadDocument()
 <button onclick="downloadDocument();">Download</button>
 <button onclick="uploadDocument();">Upload</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button><div id="sessionInfo"></div>
+<button onclick="test();">Test</button>
 
 
 <div id="debugMessage"></div>

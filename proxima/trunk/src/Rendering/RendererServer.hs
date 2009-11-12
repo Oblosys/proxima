@@ -44,8 +44,22 @@ renderFocus scale arrDb focus arrangement viewedArea =
  do { -- clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
 
     ; let focusArrList = arrangeFocus focus arrangement
-
-    ; -- debug Ren ("Focus: "++show focus) $ -- ++ "\nFocus arrangement:\n"++show focusArrList) $
+    ; case focus of
+        FocusA (PathA p i) (PathA p' i') | p == p' && i == i' ->
+          case  selectTreeA p arrangement of
+            (_, _, (StringA arrId _ _ _ _ _ _ _ _ _ _ _)) -> 
+              let pathR = 0:pathRFromPathA arrangement p++[0]
+              in  debug Ren ("Focused id "++ show arrId ++ ", index " ++show i
+                             ++ "HTML path: "++ show pathR ++" pathNodes:" ++ showPathNodesA p arrangement ) $
+                   do { tell $ "<div id='setFocusedId' op='setFocusedId' "++
+                                   " focusedId='"++show arrId++"' index='"++show i++"'>" ++
+                                   htmlPath pathR ++ "</div>"
+                      }
+            _ -> return ()
+        _ -> return ()
+    ; debug Ren ("Focus: "++show focus) $
+                                          -- ++ "\nFocus arrangement:\n"++show focusArrList) $
+               
         renderArr arrDb scale origin viewedArea Nothing
                         (Just [1])
                         (DiffLeaf False)
@@ -94,12 +108,17 @@ makeReplaceUdate (Just pth) arrangement mkArrangement =
 htmlPath pth = "<div id='path'>"++stepsHTML++"</div>"
  where stepsHTML = concat [ "<div id='step' childNr='"++show p++"'></div>" | p <- pth ]
 
-
-
+pathRFromPathA _                   []       = []
+pathRFromPathA (StructuralA _ arr) (0:path) = pathRFromPathA arr path
+pathRFromPathA (ParsingA _ arr)    (0:path) = pathRFromPathA arr path
+pathRFromPathA (LocatorA _ arr)    (0:path) = pathRFromPathA arr path
+pathRFromPathA (TagA _ arr)        (0:path) = pathRFromPathA arr path
+pathRFromPathA arr                 (p:path) = p : pathRFromPathA (index "pathRFromPathA" (getChildrenA arr) p) path
 
 {- inUpdate is True when renderArr is inside a replace update -}
 
 -- first we handle the arrangements which are not rendered and hence should not cause changes to the rootPath (Maybe Path)
+-- take care that these are stripped from the arrangementPaths in pathRFromPathA
 renderArr :: Show node => Bool -> Scale -> (Int,Int) ->
                            (Point, Size) -> Maybe Tags -> Maybe Path -> DiffTree -> Arrangement node ->
                            Writer String ()    
@@ -331,7 +350,8 @@ stringHTML id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (b
                            else "") ++ "'" ++ showMClass mClass ++ ">"++
                                 
   "<div style='position:absolute;left:0px;top:"++show (h `div` 2)++"px;"++
-                "width:"++show (w*2)++"px;"++
+                --"width:"++show (w*2)++"px;"++ -- no need to set width, which also makes it easier to compute
+                                                -- new width for predictive character rendering by client
                 "font-family:"++show fFam++";"++
                 "font-size:"++show ((fSiz *1334) `div`1000)++"px;"++
                 (if fBld then "font-weight: bold;" else "")++
