@@ -32,7 +32,7 @@ padding-right:10px;
 </style>
 
 
-<script type="text/javascript" src="img/jquery-1.3.2.js"></script>
+<!-- <script type="text/javascript" src="img/jquery-1.3.2.js"></script> -->
 <!-- be careful using jquery, since it gives an error with xml pages (div.style is undefined)
      currently we only use it for getting the draggables.
 -->
@@ -539,8 +539,10 @@ function keypress(e)
     return false;
   }
 
-  if (e.which != 0 && keyCode != 8 && keyCode != 13) 
-     loadXMLDoc('Chr('+keyCode+','+showModifiers(e)+');');
+  if (e.which != 0 && keyCode != 8 && keyCode != 13)
+  { loadXMLDoc('Chr('+keyCode+','+showModifiers(e)+');');
+    insertCharPredictively( String.fromCharCode(keyCode) );
+  }
 // ? is to prevent caching by IE 
 // maybe also check alt, ctrl and  other keys, they seem to generate press events now
    
@@ -723,9 +725,10 @@ Cannot use JQuery because it somehow fails for xhtml docs
 */
 
 function getDraggable(x,y)
-{ var allDraggables = $('.Draggable');
+{ //var allDraggables = $('.Draggable');
+allDraggables = null;
 //  alert('draggables '+showElementsDimensions(allDraggables));
-  return getContainingElement(x,y,allDraggables);
+  return null; //getContainingElement(x,y,allDraggables);
 }
 
 
@@ -871,18 +874,22 @@ function cancelUploadDocument()
   uploadDialog.style.left = '-2000px';
 }
 
-function test()
-{
-    var w = focusedElt.clientWidth;
-    focusedElt.innerHTML = focusedElt.innerHTML + 'x';
-    var increase = focusedElt.clientWidth - w;
-//  var parent = focusedElt.parentNode;
-   //  parent.removeChild(focusedElt);
-
-    // var focusedElt = document.getElementById(focusedId);
-    alert( focusedId + ' ' + focusIndex+ ' '+ increase);
+function insertCharPredictively(char)
+{ var w = focusedElt.clientWidth;
+  //focusedElt.innerHTML = focusedElt.innerHTML + 'x';
+  var textNode = focusedElt.childNodes[0];
+  textNode.insertData(focusIndex,char);
+  focusIndex++;
+  var increase = focusedElt.clientWidth - w;
+// does not take into account non-editable
+// modified strings are not reset yet. Usually this will be done by next rendering
+// except when insert does not change the string with focus (as in non-editable)
+// keep list of modified strings per rendering update?
 }
 
+function test(char)
+{ insertCharPredictively(char)
+}
 ]]></script>
 </head>
 <body onload="init()">
@@ -917,7 +924,7 @@ function test()
 <button onclick="downloadDocument();">Download</button>
 <button onclick="uploadDocument();">Upload</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button><div id="sessionInfo"></div>
-<button onclick="test();">Test</button>
+<button onclick="test('X');">Test</button>
 
 
 <div id="debugMessage"></div>
