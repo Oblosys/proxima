@@ -63,7 +63,7 @@ renderFocus scale arrDb focus arrangement viewedArea =
         renderArr arrDb scale origin viewedArea Nothing
                         (Just [1])
                         (DiffLeaf False)
-                        (OverlayA NoIDA (xA arrangement) (yA arrangement)  
+                        (OverlayA (IDA 666) (xA arrangement) (yA arrangement)  
                                         (widthA arrangement) (heightA arrangement) 
                                         0 0 transparent
                                   HeadInFront
