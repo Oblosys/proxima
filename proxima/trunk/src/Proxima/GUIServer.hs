@@ -154,6 +154,8 @@ withAgentIsMIE f = withRequest $ \rq ->
 -- then also rendering level (may be easy) and presentation focus and maybe arrangement focus must be indexed
 -- then we have multi editing!
 -- in case of multiple sessions, editors should poll every .. seconds
+
+-- bug. declaration form becomes weird after single session timeout
 sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) initR menuR actualViewedAreaRef 
                serverInstanceId currentSessionsRef = 
   [ do { removeExpiredSessions currentSessionsRef
