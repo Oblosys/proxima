@@ -48,7 +48,8 @@ SEM ChoiceDoc
                    
 SEM Form
   | Form
-      loc.pres = structural $ leftTopMargins 30 40 $
+      loc.pres = structural $ -- col [ text "bla" , row [text "za", text "tralala"]] 
+                 leftTopMargins 30 40 $
                    col [ text "Travel declaration form"
                        , vSpace 5
                        , textField 400 @name.pres
@@ -72,7 +73,8 @@ SEM Form
 			     ]
                        , vSpace 15
                        , @currencies.pres `withFontSize_` (\fs -> (fs * 80) `div` 100) 
-                       ] 
+                       ]
+
 SEM List_Expense
  | List_Expense
       loc.pres = structural $ 
