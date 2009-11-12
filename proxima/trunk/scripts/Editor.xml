@@ -888,7 +888,7 @@ function insertCharPredictively(char)
   var focusRenderingElt = document.getElementById('666');
   focusRenderingElt.style.left = parseInt(focusRenderingElt.style.left) + increase  + 'px';
 
-  while ( parent != proximaElt )
+  while ( parent != proximaElt && parent.getAttribute('class') != 'Column' )
   { n = elt.nextSibling;
     while ( n )
     { n.style.left = parseInt(n.style.left) + increase + 'px';
@@ -900,6 +900,7 @@ function insertCharPredictively(char)
 
 // TODO!! Fix Draggable to work without jquery!!
 
+// todo: better way to tag column
 // todo: find a more elegant way to id the focus
 // todo: fix annoying bug that disables keyboard sometimes.
 // todo: need to distinguish rows and columns (no moving in columns)

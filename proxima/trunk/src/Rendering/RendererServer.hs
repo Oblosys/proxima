@@ -245,7 +245,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
 
-        ; divOpen id x' y' w' h' bColor (mkClass mt)
+        ; divOpen id x' y' w' h' bColor (Just "Column")--(mkClass mt)
         ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing Nothing) childDiffTrees arrs
         ; divClose
         }
