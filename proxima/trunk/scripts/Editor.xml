@@ -238,7 +238,7 @@ function showMenuXY(x,y)
   // if the horizontal distance isn't enough to accomodate the width of the context menu
   var left, top;
   
-  if (rightedge<menuobj.offsetWidth)
+  if (rightedge < menuobj.offsetWidth)
     // move the horizontal position of the menu to the left by it's width
     left= ie5 ? document.body.scrollLeft+x-menuobj.offsetWidth 
                             : window.pageXOffset+x-menuobj.offsetWidth;
@@ -248,7 +248,7 @@ function showMenuXY(x,y)
                              : window.pageXOffset+x;
 
   // same concept with the vertical position
-  if (bottomedge<menuobj.offsetHeight)
+  if (bottomedge < menuobj.offsetHeight)
     top=ie5 ? document.body.scrollTop+y-menuobj.offsetHeight 
                           : window.pageYOffset+y-menuobj.offsetHeight
   else
@@ -295,8 +295,10 @@ else if (window.ActiveXObject)
 if (xmlhttp!=null)
   { 
     { xmlhttp.onreadystatechange=state_Change;
-      xmlhttp.open("GET",'handle?commands=Commands '+ requestId++ +' "'+commandQueue+'"',true);
+      xmlhttp.open("GET",'handle?commands=Commands '+ requestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
+      requestId++;
+      debugAdd('incremented requestId: ' + requestId);
       commandQueue = '';
     }
   }
@@ -342,7 +344,8 @@ if (xmlhttp.readyState==4)
     { updateTree( updates.firstChild );
     ; updates.removeChild(updates.firstChild);
     }
-    
+
+    applyRemainingPredictiveInserts(responseId);
     //var renderArea = document.getElementById('renderArea');
     //renderArea.removeChild( document.getElementById('root') ); //old rendering
 
@@ -547,8 +550,8 @@ function keypress(e)
   }
 
   if (e.which != 0 && keyCode != 8 && keyCode != 13)
-  { loadXMLDoc('Chr('+keyCode+','+showModifiers(e)+');');
-    insertCharPredictively( String.fromCharCode(keyCode) );
+  { insertCharPredictively( String.fromCharCode(keyCode) );
+    loadXMLDoc('Chr('+keyCode+','+showModifiers(e)+');');
   }
 // ? is to prevent caching by IE 
 // maybe also check alt, ctrl and  other keys, they seem to generate press events now
@@ -882,9 +885,29 @@ function cancelUploadDocument()
   uploadDialog.style.left = '-2000px';
 }
 
-function insertCharPredictively(char)
+var predictiveInserts = new Array();
+
+function registerPredictiveInsert(char)
+{  debugAdd('register: requestId '+ requestId);
+   predictiveInserts.push({ requestId: requestId, char: char }); 
+}
+
+/* Get rid of all predictive inserts for the current response (and also previous ones, but that should not happen)
+   and reapply the predictive inserts for requests that are currently being sent to the server
+*/
+function applyRemainingPredictiveInserts(responseId)
+{ while ( predictiveInserts.length > 0 && predictiveInserts[0].requestId <= responseId )
+    predictiveInserts.shift();
+
+  for (var i=0; i < predictiveInserts.length; i++)
+  { debugAdd(responseId+' Applying: '+ predictiveInserts[i].requestId + ' ' +predictiveInserts[i].char );
+    insertChar(predictiveInserts[i].char);
+  }
+}
+
+
+function insertChar(char)
 { var w = focusedElt.clientWidth;
-  //focusedElt.innerHTML = focusedElt.innerHTML + 'x';
   var textNode = focusedElt.childNodes[0];
   textNode.insertData(focusIndex,char);
   focusIndex++;
@@ -906,12 +929,15 @@ function insertCharPredictively(char)
     elt = parent;
     parent = parent.parentNode;
   }
+}
 
-// TODO!! Fix Draggable to work without jquery!!
+function insertCharPredictively(char)
+{ insertChar(char);
+  registerPredictiveInsert(char);
 
 // todo: better way to tag column
 // todo: find a more elegant way to id the focus
-// todo: fix annoying bug that disables keyboard sometimes.
+// todo: fix annoying bug that disables keyboard sometimes. (seems to be a firefox problem)
 // todo: need to distinguish rows and columns (no moving in columns)
 // todo: need to tag the text area, so we don't move above it (as is a problem in the decl. form)
 // todo: when intermediate rendering results arrive during typing, remaining predictive chars need to be reapplied.
