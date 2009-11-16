@@ -43,6 +43,7 @@ padding-right:10px;
 var xmlhttp;
 var mouseDown = false;
 var commandQueue = '';
+var requestId = 0;
 
 var focusedElement; // string element that has the focus (used for predictive char rendering)
 var focusIndex;     // the index in the focused string
@@ -140,7 +141,7 @@ function queryFont(fontFamily, fontSize, isBold, isItalic)
   var height = font.offsetHeight;
   var baseline = baselineElt.offsetTop - font.offsetTop;
 
-  var metrics = '(("'+fontFamily+'",'+fontSize+','+
+  var metrics = '((\\"'+fontFamily+'\\",'+fontSize+','+
                 (isBold ? 'True' : 'False') +',' + 
                 (isItalic ? 'True' : 'False') + 
                 '),('+height + ',' + baseline + ',';
@@ -288,7 +289,7 @@ else if (window.ActiveXObject)
 if (xmlhttp!=null)
   { 
     { xmlhttp.onreadystatechange=state_Change;
-      xmlhttp.open("GET",'handle?commands='+commandQueue,true);
+      xmlhttp.open("GET",'handle?commands=Commands '+ requestId++ +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
       commandQueue = '';
     }
@@ -321,12 +322,13 @@ if (xmlhttp.readyState==4)
     // getElementById seems to trigger parsing the responseText
     // after this, firstChild has a value, while it is null before
                 // newRendering.firstChild;
-    
+
     var sessionId = updates.getAttribute('sessionId');
+    var responseId = updates.getAttribute('responseId');
     var sessionType = updates.getAttribute('sessionType');
     var nrOfSessions = updates.getAttribute('nrOfSessions');
     document.getElementById('sessionInfo').innerHTML =
-      'Session id: ' + sessionId + ' '  +
+      'Session id: ' + sessionId + '/' + responseId + ' '  +
       (sessionType == 'primary' ? 'Editable' : 'Non-editable') + ' ' +
       'Nr of sessions:' + nrOfSessions;
 
@@ -498,7 +500,7 @@ function removeChildren(parentId)
 
 function keypress(e)
 {
-   if (!e) e= event;
+  if (!e) e= event;
    var keyCode =  (e.keyCode != 0) ? e.keyCode : e.charCode
    // keyCode is 0 on Firefox
    
@@ -561,8 +563,7 @@ function hasNoKeyPress(keyCode)
 
 
 function keydown(e)
-{
-   if (!e) e = event;
+{  if (!e) e = event;
    if (e.keyCode==116)
      refresh();
  

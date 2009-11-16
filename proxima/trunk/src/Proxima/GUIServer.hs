@@ -349,10 +349,13 @@ instance FromData Upl where
   fromData = liftM Upl (look "documentFile")
 
 
-newtype Commands = Commands String deriving Show
+data Commands = Commands Int String deriving (Show, Read)
 
 instance FromData Commands where
-  fromData = liftM Commands (look "commands")
+  fromData = liftM parseCommands (look "commands")
+    where parseCommands str = case safeRead str of
+                                Just cmds -> cmds 
+                                Nothing  -> error ("Syntax error in commands: "++str) 
 
 
 
@@ -364,7 +367,7 @@ splitCommands commandStr =
         
 -- handle each command in commands and send the updates back
 handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
-               sessionId isPrimarySession nrOfSessions (Commands commandStr) =
+               sessionId isPrimarySession nrOfSessions (Commands requestId commandStr) =
  do { let commands = splitCommands commandStr
    -- ; putStrLn $ "Received commands:"++ show commands
     
@@ -397,6 +400,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actu
 --                  ; return $ "<div id='updates'>"++testRenderingHTML++"</div>"
 --    ; if null pendingQueries then putStrLn "Sending rendering and focus" else return ()
     ; return $ "<div id='updates' sessionId='" ++ show sessionId ++"' "++ 
+                                 "responseId='" ++ show requestId ++"' "++ 
                                  "sessionType='" ++ (if isPrimarySession then "primary" else "secondary") ++"' "++
                                  "nrOfSessions='"++show nrOfSessions ++ "'>" ++ 
                                       (if null pendingQueries 
