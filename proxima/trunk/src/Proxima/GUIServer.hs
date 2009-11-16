@@ -298,9 +298,13 @@ removeExpiredSessions currentSessionsRef = liftIO $
     ; writeIORef currentSessionsRef $
         filter (\(_,lastSessionEventTime,_) -> diffUTCTime time lastSessionEventTime < sessionExpirationTime) currentSessions 
     }
+
 getCookieSessionId :: ServerInstanceId -> IORef Sessions -> ServerPart (SessionId, CommonTypes.Rectangle)
 getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
  do { let cookieMap = rqCookies rq
+      -- TODO: happs cookie parser sometimes fails on weird cookies.
+      --       we should parse the cookie header ourselves here 
+
     ; let mCookieSessionId = case lookup "proxima" cookieMap of
                       Nothing -> Nothing -- * no webviews cookie on the client
                       Just c  -> case safeRead (cookieValue c) of
