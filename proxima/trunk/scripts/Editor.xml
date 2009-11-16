@@ -1,6 +1,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<!-- v1 -->
+<!-- v1
+
+IE problems
+-SVN support
+-use str.charAt(i) instead of str[i]
+-getElementsByClassName()      (see http://forums.devshed.com/javascript-development-115/javascript-get-all-elements-of-class-abc-24349.html)
+
+-->
 <html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
 
 <head>
@@ -33,8 +40,7 @@ padding-right:10px;
 
 
 <!-- <script type="text/javascript" src="img/jquery-1.3.2.js"></script> -->
-<!-- be careful using jquery, since it gives an error with xml pages (div.style is undefined)
-     currently we only use it for getting the draggables.
+<!-- JQuery gives an error with xml pages (div.style is undefined), which also disables Firebug.
 -->
 <script type="text/javascript">
 <![CDATA[
@@ -725,10 +731,12 @@ Cannot use JQuery because it somehow fails for xhtml docs
 */
 
 function getDraggable(x,y)
-{ //var allDraggables = $('.Draggable');
-allDraggables = null;
+{ 
+//  var allDraggables = $('.Draggable');
+
+  var allDraggables = document.getElementsByClassName('Draggable');
 //  alert('draggables '+showElementsDimensions(allDraggables));
-  return null; //getContainingElement(x,y,allDraggables);
+  return getContainingElement(x,y,allDraggables);
 }
 
 
