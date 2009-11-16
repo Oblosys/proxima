@@ -245,7 +245,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
                                  DiffLeaf c     -> repeat $ DiffLeaf c
                                  DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
 
-        ; divOpen id x' y' w' h' bColor (Just "Column")--(mkClass mt)
+        ; divOpen id x' y' w' h' bColor (mkClass mt ++ ["Column"])
         ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing Nothing) childDiffTrees arrs
         ; divClose
         }
@@ -327,27 +327,27 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
 showIDNr (IDA nr) = show nr
 showIDNr NoIDA    = {- debug Err "Renderer.showIDNr: NoIDA " $ -} show (-1)
 
-mkClass (Just DragSourceTag) = Just "Draggable"
-mkClass _                    = Nothing
+mkClass (Just DragSourceTag) = ["Draggable"]
+mkClass _                    = []
 
-showMClass Nothing      = ""
-showMClass (Just c) = " class='"++c++"'"
+showClasses [] = ""
+showClasses cs = " class='"++concat (intersperse " " cs)++"'"
 
-divOpen id x y w h (r,g,b) mClass = tell $ 
+divOpen id x y w h (r,g,b) classes = tell $ 
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show x++"px; top:"++show y++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                 (if r /= -1 then "background-color:rgb("++show (r::Int)++","++show (g::Int)++","++show (b::Int)++");"
                            else "")++"'"++
-                showMClass mClass ++ 
+                showClasses classes ++ 
                 ">" 
 divClose = tell "</div>"
 
  
-stringHTML id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) mClass = tell $ 
+stringHTML id str x y w h (Font fFam fSiz fBld fUnderln fItlc fStrkt) (r,g,b) (br,bg,bb) classes = tell $ 
   "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                  (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
-                           else "") ++ "'" ++ showMClass mClass ++ ">"++
+                           else "") ++ "'" ++ showClasses classes ++ ">"++
                                 
   "<div style='position:absolute;left:0px;top:"++show (h `div` 2)++"px;"++
                 --"width:"++show (w*2)++"px;"++ -- no need to set width, which also makes it easier to compute
@@ -368,13 +368,13 @@ toHTML str = concatMap htmlChar str
        htmlChar '>'  = "&gt;"
        htmlChar c    = [c]
 
-imageHTML id src x y w h lColor (br,bg,bb) mClass = tell $
+imageHTML id src x y w h lColor (br,bg,bb) classes = tell $
   "<div id='"++showIDNr id++"' style='position:absolute;left:"++show x++"px;top:"++show (y)++"px;"++
                 "width:"++show w++"px;height:"++show h++"px;"++
                  (if br /= -1 then "background-color:rgb("++show (br::Int)++","++show (bg::Int)++","++show (bb::Int)++");"
                            else "") ++
                  "background-image:url(\"/"++src++"\");'"++
-                 showMClass mClass ++                  
+                 showClasses classes ++                  
                  ">"++
   "</div>"                           
 
@@ -388,10 +388,10 @@ edgeHTML id (fromX,fromY) (toX, toY) lw (lr,lg,lb) = tell $
   "style='stroke:rgb("++show lr++","++show lg++","++show lb++");stroke-width:"++show lw++"'/>"
   
   
-ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) mClass = tell $
+ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) classes = tell $
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show (h+2)++"px;"++
-                "'"++ showMClass mClass ++ ">" ++
+                "'"++ showClasses classes ++ ">" ++
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
   "<ellipse cx='"++show ((w `div` 2)+1)++"' cy='"++show ((h `div` 2)+1)++"' rx='"++show (w `div` 2)++"' ry='"++show (h `div` 2)++"' "++
   "style='fill:rgb("++show fr++","++show fg++","++show fb++");"++
@@ -399,10 +399,10 @@ ellipseHTML id x y w h lw (lr,lg,lb) (fr,fg,fb) mClass = tell $
   "</svg></div>"
 -- TODO: why this max 4?
 
-polyHTML id x y w h pts lw (lr,lg,lb) (fr,fg,fb) mClass = tell $  
+polyHTML id x y w h pts lw (lr,lg,lb) (fr,fg,fb) classes = tell $  
   "<div id='"++showIDNr id++"' style='position: absolute; left:"++show (x-1)++"px; top:"++show (y-1)++"px;"++
                 "width:"++show (w+2)++"px;height:"++show ((h+2)`max` 4)++"px;"++
-                "'"++ showMClass mClass ++ ">" ++
+                "'"++ showClasses classes ++ ">" ++
   "<svg width='100%' height='100%' version='1.1' xmlns='http://www.w3.org/2000/svg'>" ++
   "<polygon points='"++pointsStr++"' "++
   "style='fill:"++(if fr == -1 then "none; "
