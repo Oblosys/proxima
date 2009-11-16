@@ -944,7 +944,6 @@ function insertCharPredictively(char)
 // does not take into account non-editable
 // modified strings are not reset yet. Usually this will be done by next rendering
 // except when insert does not change the string with focus (as in non-editable)
-// keep list of modified strings per rendering update?
 
 }
 
