@@ -80,17 +80,23 @@ startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
     ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
     ; let startServer = server params initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef
 
- --   ; b <- hIsEOF stdin
-    ; if False -- b
-      then -- no stdin, so execute server in main thread. Server stops when process is killed
-       do { putStrLn "No stdin"
-          ; startServer
-          }
-      else -- if we have stdin, start server in a thread and wait for return in this one
+    ; hSetBuffering stdin NoBuffering
+    ; stdInAvailable <- do { hReady stdin
+                           ; return True
+                           } `Control.Exception.catch` \(err :: SomeException) -> return False
+    -- this seems to be the only way to determine whether stdin is EOF!
+    -- using hIsEOF works if it is EOF, but hangs because of buffering issues when stdin is not EOF
+    
+    ; if stdInAvailable
+      then -- if we have stdin, start server in a thread and wait for return in this one
        do { tId <- forkIO $ startServer
-          ; putStrLn "Press <Return> to terminate server"
+          ; putStrLn "Press <Return> to terminate server."
           ; getLine
           ; killThread tId    
+          }
+      else -- no stdin, so execute server in main thread. Server stops when process is killed
+       do { putStrLn "No stdin: server process will continue indefinitely."
+          ; startServer
           }
     }
 
