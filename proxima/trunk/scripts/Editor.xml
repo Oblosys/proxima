@@ -889,7 +889,7 @@ var predictiveInserts = new Array();
 
 function registerPredictiveInsert(char)
 {  debugAdd('register: requestId '+ requestId);
-   predictiveInserts.push({ requestId: requestId, char: char }); 
+   predictiveInserts.push({ requestId: requestId, char: char, original: original }); 
 }
 
 /* Get rid of all predictive inserts for the current response (and also previous ones, but that should not happen)
@@ -917,7 +917,7 @@ function insertChar(char)
   var parent = focusedElt.parentNode;
   var elt = focusedElt;
 
-  var focusRenderingElt = document.getElementById('666');
+  var focusRenderingElt = document.getElementById('-2');
   focusRenderingElt.style.left = parseInt(focusRenderingElt.style.left) + increase  + 'px';
 
   while ( parent != proximaElt && parent.getAttribute('class') != 'Column' )
@@ -935,10 +935,7 @@ function insertCharPredictively(char)
 { insertChar(char);
   registerPredictiveInsert(char);
 
-// todo: better way to tag column
-// todo: find a more elegant way to id the focus
 // todo: fix annoying bug that disables keyboard sometimes. (seems to be a firefox problem)
-// todo: need to distinguish rows and columns (no moving in columns)
 // todo: need to tag the text area, so we don't move above it (as is a problem in the decl. form)
 // todo: when intermediate rendering results arrive during typing, remaining predictive chars need to be reapplied.
 // does not take into account non-editable

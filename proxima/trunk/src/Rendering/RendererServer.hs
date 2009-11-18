@@ -49,8 +49,8 @@ renderFocus scale arrDb focus arrangement viewedArea =
           case  selectTreeA p arrangement of
             (_, _, (StringA arrId _ _ _ _ _ _ _ _ _ _ _)) -> 
               let pathR = 0:pathRFromPathA arrangement p++[0]
-              in  debug Ren ("Focused id "++ show arrId ++ ", index " ++show i
-                             ++ "HTML path: "++ show pathR ++" pathNodes:" ++ showPathNodesA p arrangement ) $
+              in  --debug Ren ("Focused id "++ show arrId ++ ", index " ++show i
+                  --           ++ "HTML path: "++ show pathR ++" pathNodes:" ++ showPathNodesA p arrangement ) $
                    do { tell $ "<div id='setFocusedId' op='setFocusedId' "++
                                    " focusedId='"++show arrId++"' index='"++show i++"'>" ++
                                    htmlPath pathR ++ "</div>"
@@ -63,7 +63,7 @@ renderFocus scale arrDb focus arrangement viewedArea =
         renderArr arrDb scale origin viewedArea Nothing
                         (Just [1])
                         (DiffLeaf False)
-                        (OverlayA (IDA 666) (xA arrangement) (yA arrangement)  
+                        (OverlayA (IDA (-2)) (xA arrangement) (yA arrangement)  
                                         (widthA arrangement) (heightA arrangement) 
                                         0 0 transparent
                                   HeadInFront
@@ -174,6 +174,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
                     RowA     _ x' y' _ _ _ _ _ arrs -> renderChildren x' y' Nothing arrs
                     ColA     _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' Nothing arrs
                     OverlayA _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' Nothing arrs
+                    -- bug: overlay children do not take into account direction
+
                     GraphA   _ x' y' _ _ _ _ _ _ arrs -> renderChildren x' y' Nothing arrs
                     VertexA  _ x' y' _ _ _ _ _ _ arr  -> renderChildren x' y' Nothing [arr]
                     StructuralA _ arr           -> renderChildren 0 0 mt [arr]
@@ -326,6 +328,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
 
 showIDNr (IDA nr) = show nr
 showIDNr NoIDA    = {- debug Err "Renderer.showIDNr: NoIDA " $ -} show (-1)
+-- -2 is the rendering of the focus
+
 
 mkClass (Just DragSourceTag) = ["Draggable"]
 mkClass _                    = []
