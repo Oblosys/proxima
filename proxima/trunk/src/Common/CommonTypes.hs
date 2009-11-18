@@ -135,15 +135,15 @@ isClean Dirty = False
 isClean Clean = True
 
 data DiffTree = DiffLeaf !Bool | DiffNode !Bool !Bool ![DiffTree]
---                                       children self 
+--                               selfandChildren self
 -- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
 
--- True is Clean, False is Dirty       --selfandChildren self
+-- True is Clean, False is Dirty
 -- True True: all clean
 -- False True: children dirty self clean
 -- False False: all dirty
--- True False: not possible          (does not seem to make sense)
--- self dirty, children clean cannot be expressed possible.
+-- True False: not possible, since first bool is selfAndDescendents
+
 -- Maybe choose different representation. However, this requires pattern matching on two args in most algorithms
 -- Diff is too simple now. (inserted children?)
 instance Show DiffTree where
@@ -170,21 +170,26 @@ isSelfCleanDT (DiffLeaf c) = c
 isSelfCleanDT (DiffNode c c' _) = c'
 
 
-data DiffTreeArr = DiffLeafArr !Bool (Maybe Move) | DiffNodeArr !Bool !Bool (Maybe Move) ![DiffTreeArr]
---                                                             children self 
+data DiffTreeArr = DiffLeafArr !Bool (Maybe Move) | DiffNodeArr !Bool !Bool (Maybe Move) (Maybe InsertDelete) ![DiffTreeArr]
+--                                                 selfAndDescendents self 
 -- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
 
 -- move is not encoded in self clean: a leaf may be clean but have a move
 
+-- basically, self dirty means that the subtree will be entirely redrawn
+
 type Move = ((XCoord, YCoord), (Width, Height))
 
+data InsertDelete = InsertChildrenRen Int Int
+                  | DeleteChildrenRen Int Int deriving Show
 
--- True is Clean, False is Dirty       --selfandChildren self
+
+-- True is Clean, False is Dirty
 -- True True: all clean
 -- False True: children dirty self clean
 -- False False: all dirty
--- True False: not possible          (does not seem to make sense)
--- self dirty, children clean cannot be expressed possible.
+-- True False: not possible, since first bool is selfAndDescendents
+
 -- Maybe choose different representation. However, this requires pattern matching on two args in most algorithms
 -- Diff is too simple now. (inserted children?)
 instance Show DiffTreeArr where
@@ -192,27 +197,30 @@ instance Show DiffTreeArr where
 
 -- maybe change this so it doesn't loop for infinite difftrees?
 shallowShowDiffTreeArr (DiffLeafArr c m) = "DiffLeafArr "++show c++ " " ++ show m
-shallowShowDiffTreeArr (DiffNodeArr c c' m dts) = if c&&c' && isNothing m then "DiffNode <clean>" else
-                            "DiffNodeArr "++show c ++ " " ++ show c' ++ " " ++ show m
+shallowShowDiffTreeArr (DiffNodeArr c c' m insdel dts) = if c&&c' && isNothing m then "DiffNode <clean>" else
+                            "DiffNodeArr "++show c ++ " " ++ show c' ++ " " ++ show m ++ " " ++ show insdel
 
 
 showDiffTreeArr' indent dt = (replicate indent ' ' ++ shallowShowDiffTreeArr dt) :
   case dt of DiffLeafArr _ _ -> []
-             DiffNodeArr True True Nothing dts -> []
-             DiffNodeArr _ _ _ dts -> (concatMap (showDiffTreeArr' (indent+1)) dts)
+             DiffNodeArr True True Nothing insdel dts -> []
+             DiffNodeArr _ _ _ _ dts -> (concatMap (showDiffTreeArr' (indent+1)) dts)
 
 
 isCleanDTArr :: DiffTreeArr -> Bool
 isCleanDTArr (DiffLeafArr c Nothing) = c
-isCleanDTArr (DiffNodeArr c c' Nothing _) = c && c'
+isCleanDTArr (DiffNodeArr c c' Nothing Nothing _) = c && c'
 isCleanDTArr _                    = False
 
 isSelfCleanDTArr :: DiffTreeArr -> Bool
 isSelfCleanDTArr (DiffLeafArr c _) = c
-isSelfCleanDTArr (DiffNodeArr c c' _ _) = c'
+isSelfCleanDTArr (DiffNodeArr c c' _ _ _) = c'
 
 getMove (DiffLeafArr _ m) = m
-getMove (DiffNodeArr _ _ m _) = m
+getMove (DiffNodeArr _ _ m _ _) = m
+
+getInsertDelete (DiffLeafArr _ _) = Nothing
+getInsertDelete (DiffNodeArr _ _ _ insdel _) = insdel
 
 {-
 black = (0,0,0) :: (Int,Int,Int)

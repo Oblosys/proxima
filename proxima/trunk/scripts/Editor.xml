@@ -421,9 +421,16 @@ function updateTree(update)
     node.style.top = update.getAttribute('y')+'px';
     node.style.width = update.getAttribute('w')+'px';
     node.style.height = update.getAttribute('h')+'px';
+  } else if (op == 'delete')
+  { var path = update.childNodes[0];
+    var parentNode = select(path, document.getElementById('proxima'));
+    var pos = update.getAttribute('pos');
+    var nr = update.getAttribute('nr');
+    for(var i = 0; i < nr; i++)
+      parentNode.removeChild(parentNode.childNodes[pos+i]);
 
-  } 
-  else if (op == 'contextMenu')
+    alert( 'deleting '+nr+' children at pos '+pos);
+  } else if (op == 'contextMenu')
   { var screenX = update.getAttribute('screenX');
     var screenY = update.getAttribute('screenY');
     

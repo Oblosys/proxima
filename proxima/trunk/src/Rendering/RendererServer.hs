@@ -107,11 +107,19 @@ makeReplaceUdate (Just pth) arrangement mkArrangement =
     ; tell $ "</div>\n" 
     }
 
-makeMoveUdate Nothing    coords = debug Err ("RendererServer.makeMoveUpdate: no path.") return ()
+makeMoveUdate Nothing    coords = debug Err ("RendererServer.makeMoveUpdate: no path.") $ return ()
 makeMoveUdate (Just pth) ((x,y),(w,h)) = 
  do { tell $ "<div id='move' op='move' x='"++show x++"' y='"++show y++"' w='"++show w++"' h='"++show h++"'>"++htmlPath pth
-    --; putStrLn $ "\n\n*********REPLACE "++show pth
-    --; putStrLn $ "by:\n" ++ showTreeArr arrangement
+    ; tell $ "</div>" 
+    }
+
+makeInsertDeleteUdate Nothing    insdel = debug Err ("RendererServer.makeInsertDeleteUpdate: no path.") $ return ()
+makeInsertDeleteUdate (Just pth) (InsertChildrenRen pos nr) = 
+ do { tell $ "<div id='insert' op='insert' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
+    ; tell $ "</div>" 
+    }
+makeInsertDeleteUdate (Just pth) (DeleteChildrenRen pos nr) = 
+ do { tell $ "<div id='delete' op='delete' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
     ; tell $ "</div>" 
     }
 
@@ -132,25 +140,25 @@ pathRFromPathA arr                 (p:path) = p : pathRFromPathA (index "pathRFr
 renderArr :: Show node => Bool -> Scale -> (Int,Int) ->
                            (Point, Size) -> Maybe Tags -> Maybe Path -> DiffTreeArr -> Arrangement node ->
                            Writer String ()    
-renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ [dt]) (StructuralA _ arr) =
+renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ _ [dt]) (StructuralA _ arr) =
            renderArr o s (lux, luy) v mt m dt arr -- ignore move
 renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (StructuralA _ arr) =
            renderArr o s (lux, luy) v mt m (DiffLeafArr d mv) arr
 renderArr o s (lux, luy) v mt m _                   (StructuralA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
-renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ [dt]) (ParsingA _ arr) =
+renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ _ [dt]) (ParsingA _ arr) =
            renderArr o s (lux, luy) v mt m dt arr
 renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (ParsingA _ arr) =
            renderArr o s (lux, luy) v mt m (DiffLeafArr d mv) arr
 renderArr o s (lux, luy) v mt m _                   (ParsingA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
-renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ [dt]) (LocatorA _ arr) =
+renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ _ [dt]) (LocatorA _ arr) =
            renderArr o s (lux, luy) v mt m dt arr
 renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (LocatorA _ arr) =
            renderArr o s (lux, luy) v mt m (DiffLeafArr d mv) arr
 renderArr o s (lux, luy) v mt m _                   (LocatorA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
-renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ [dt]) (TagA tags arr) =
+renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ _ [dt]) (TagA tags arr) =
            renderArr o s (lux, luy) v (Just tags) m dt arr
 renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (TagA tags arr) =
            renderArr o s (lux, luy) v (Just tags) m (DiffLeafArr d mv) arr
@@ -165,6 +173,9 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
     ; case getMove diffTree of 
         (Just m) -> debug Ren ("We have a move: "++show m) $ makeMoveUdate mPth m
         _ -> return ()                       
+    ; case getInsertDelete diffTree of 
+        (Just insdel) -> debug Ren ("We have an insert/delete: "++show insdel) $ makeInsertDeleteUdate mPth insdel
+        _ -> return ()                       
                                        
     ; if (isSelfCleanDTArr diffTree)  -- if self is clean, only render its children (if present)
      then if (isCleanDTArr diffTree)
@@ -175,8 +186,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
                     do { -- putStrLn "renderArr: self clean, children not clean"
                        ; let (x,y)=(lux+scaleInt scale x', luy+scaleInt scale y')
                        ; let childDiffTrees = case diffTree of
-                                                DiffLeafArr c mv    -> repeat $ DiffLeafArr c Nothing
-                                                DiffNodeArr c c' mv dts -> dts ++ repeat (DiffLeafArr False Nothing)
+                                                DiffLeafArr c _   -> repeat $ DiffLeafArr c Nothing
+                                                DiffNodeArr c c' _ _ dts -> dts ++ repeat (DiffLeafArr False Nothing)
                        ; sequence_ $ zipWith3 (renderArr arrDb scale (x, y) viewedArea mtags ) 
                                        (case mPth of
                                           Nothing -> repeat Nothing
@@ -248,7 +259,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeafArr c _   -> repeat $ DiffLeafArr c Nothing
-                                 DiffNodeArr c c' _ dts -> dts ++ repeat (DiffLeafArr False Nothing) -- in case there are too few dts
+                                 DiffNodeArr c c' _ _ dts -> dts ++ repeat (DiffLeafArr False Nothing) -- in case there are too few dts
 
         ; divOpen id x' y' w' h' bColor (mkClass mt)
         ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing Nothing) childDiffTrees arrs
@@ -259,7 +270,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeafArr c _    -> repeat $ DiffLeafArr c Nothing
-                                 DiffNodeArr c c' _ dts -> dts ++ repeat (DiffLeafArr False Nothing)
+                                 DiffNodeArr c c' _ _ dts -> dts ++ repeat (DiffLeafArr False Nothing)
 
         ; divOpen id x' y' w' h' bColor (mkClass mt ++ ["Column"])
         ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing Nothing) childDiffTrees arrs
@@ -270,7 +281,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeafArr c _    -> repeat $ DiffLeafArr c Nothing
-                                 DiffNodeArr c c' _ dts -> dts ++ repeat (DiffLeafArr False Nothing)
+                                 DiffNodeArr c c' _ _ dts -> dts ++ repeat (DiffLeafArr False Nothing)
 
         ; let order = case direction of
                         HeadInFront -> reverse
@@ -287,7 +298,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeafArr c _    -> repeat $ DiffLeafArr c Nothing
-                                 DiffNodeArr c c' _ dts -> dts ++ repeat (DiffLeafArr False Nothing)
+                                 DiffNodeArr c c' _ _ dts -> dts ++ repeat (DiffLeafArr False Nothing)
 
         
         
@@ -308,7 +319,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
                                  DiffLeafArr c _    -> repeat $ DiffLeafArr c Nothing
-                                 DiffNodeArr c c' _ dts -> dts ++ repeat (DiffLeafArr False Nothing)
+                                 DiffNodeArr c c' _ _ dts -> dts ++ repeat (DiffLeafArr False Nothing)
         
         ; divOpen id x' y' w' h' bColor (mkClass mt)
         ; renderArr arrDb scale (x, y) viewedArea Nothing Nothing (head' "Renderer.renderArr" childDiffTrees) arr

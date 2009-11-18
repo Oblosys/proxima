@@ -129,23 +129,24 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 
 --       new arrangement     old arrangement
 diffArr (StructuralA _ arr) arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) [childDT]
+                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) (getInsertDelete childDT) [childDT]
 diffArr arr                  (StructuralA _ arr')  = diffArr arr arr'
 diffArr (ParsingA _ arr)    arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) [childDT]
+                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) (getInsertDelete childDT) [childDT]
 diffArr arr                  (ParsingA _ arr')     = diffArr arr arr'
 diffArr (LocatorA l arr)     arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) [childDT]
+                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) (getInsertDelete childDT) [childDT]
 diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
 diffArr (TagA t arr)     arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) [childDT]
+                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) (getInsertDelete childDT) [childDT]
 diffArr arr                  (TagA t arr')      = diffArr arr arr'
 diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
                     in  case dt of
                           -- only when child is clean we will compute a move
+                          -- todo replace by selfClean
                           DiffLeafArr True _ -> DiffLeafArr True $ computeMove arr1 arr2
-                          DiffNodeArr descendentsClean True _ dts -> 
-                                   DiffNodeArr descendentsClean True (computeMove arr1 arr2) dts
+                          DiffNodeArr descendentsClean True _ insdel dts -> 
+                                   DiffNodeArr descendentsClean True (computeMove arr1 arr2) insdel dts
                           dn -> dn 
 -- move is now copied along a chain of structurals/locators/etc. just like clean attrs.
 -- does this make sense?
@@ -194,7 +195,7 @@ diffArr' (OverlayA _ x y w h hr vr bc d arrs) (OverlayA _ x' y' w' h' hr' vr' bc
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr' (GraphA _ x y w h hr vr bc nvs arrs) (GraphA _ x' y' w' h' hr' vr' bc' nvs' arrs') =
   case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
-    DiffNodeArr childrenClean selfClean _ _ -> DiffLeafArr (selfClean && childrenClean) Nothing
+    DiffNodeArr childrenClean selfClean _ _ _ -> DiffLeafArr (selfClean && childrenClean) Nothing
     _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeafArr False  Nothing -- TODO what about this?
     -- a graph is only clean when all children and the graph itself are clean
 diffArr' arr@(RowA _ x y w h hr vr bc arrs) _                            = DiffLeafArr False Nothing
@@ -203,7 +204,7 @@ diffArr' arr@(OverlayA _ x y w h hr vr bc _ arrs) _                        = Dif
 diffArr' arr@(GraphA _ x y w h hr vr bc nvs arrs) _                      = DiffLeafArr False Nothing
 diffArr' (VertexA _ x y w h hr vr bc ol arr) (VertexA _ x' y' w' h' hr' vr' bc' ol' arr') =
  let childDT = diffArr arr arr'
- in  DiffNodeArr (isCleanDTArr childDT) (bc==bc') Nothing [childDT] -- TODO and what about this?
+ in  DiffNodeArr (isCleanDTArr childDT) (bc==bc') Nothing Nothing [childDT] -- TODO and what about this?
 diffArr' (VertexA _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
 diffArr' arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeafArr False Nothing
 -- At the moment, we ignore outline and nrOfVertices
@@ -211,17 +212,17 @@ diffArr' arr                           _                                = debug 
 -- pres is different when either self has changed or children
 
 -- first list (new) determines size of diffTree
-diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =  
-  let nrOfArrs    = length arrs
-      nrOfArrs'   = length arrs'
-      childDiffs  = zipWith diffArr arrs arrs'
-      childDiffs' = take nrOfArrs $ childDiffs ++ repeat (DiffLeafArr False Nothing)
+diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs =  
+  let newNrOfArrs    = length newArrs
+      oldNrOfArrs'   = length oldArrs
+      childDiffs  = zipWith diffArr newArrs oldArrs
+      childDiffs' = take newNrOfArrs $ childDiffs ++ repeat (DiffLeafArr False Nothing)
       selfClean   = bc==bc' 
-                    -- && nrOfArrs == nrOfArrs'
-  in  debug Arr ("diffArrs:"++show(x,x',y,y',w,w',h,h',bc,bc',nrOfArrs,nrOfArrs')) $
-      DiffNodeArr ( selfClean && all isCleanDTArr childDiffs') selfClean Nothing
+      insertDelete = if newNrOfArrs < oldNrOfArrs' then Just $ DeleteChildrenRen 0 1 else Nothing
+  in  debug Arr ("diffArrs:"++show(x,x',y,y',w,w',h,h',bc,bc',newNrOfArrs,oldNrOfArrs')) $
+      DiffNodeArr ( selfClean && all isCleanDTArr childDiffs') selfClean Nothing insertDelete
                (if not selfClean
-                then replicate (length arrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered
+                then replicate (length newArrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered
                 else childDiffs')
 
 -- | Returns a list of all areas that are dirty according to the diffTree
@@ -234,14 +235,14 @@ updatedRectArr' :: Show node => Int -> Int -> DiffTreeArr -> Arrangement node ->
 updatedRectArr' x' y' dt arr = 
   case dt of
     DiffLeafArr True _        -> []                --
-    DiffNodeArr True  _ _    _   -> []  -- moves are currently ignored
+    DiffNodeArr True  _ _  _  _   -> []  -- moves and insdel are currently ignored
     DiffLeafArr False _         -> let x = x' + xA arr
                                        y = y' + yA arr
                                    in [((x, y), (widthA arr, heightA arr))]
-    DiffNodeArr False False _ dts -> let x = x' + xA arr -- moves are currently ignored
-                                         y = y' + yA arr
+    DiffNodeArr False False _ _ dts -> let x = x' + xA arr -- moves and insdel are currently ignored
+                                           y = y' + yA arr
                                      in  [((x, y), (widthA arr, heightA arr))]
-    DiffNodeArr False True _ dts    -> -- moves are currently ignored
+    DiffNodeArr False True _ _ dts    -> -- moves and insdel are currently ignored
                                        -- self is clean, so take union of rectangles of children
       case arr of                      -- NOTE for overlay and graph, this should not occur
       (StructuralA _ arr)           -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
