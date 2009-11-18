@@ -209,8 +209,7 @@ isCleanDTArr _                    = False
 
 isSelfCleanDTArr :: DiffTreeArr -> Bool
 isSelfCleanDTArr (DiffLeafArr c _) = c
-isSelfCleanDTArr (DiffNodeArr c c' Nothing _) = c'
-isSelfCleanDTArr _                    = False
+isSelfCleanDTArr (DiffNodeArr c c' _ _) = c'
 
 getMove (DiffLeafArr _ m) = m
 getMove (DiffNodeArr _ _ m _) = m
