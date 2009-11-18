@@ -264,7 +264,7 @@ SEM List_Thing
 
 SEM Thing
   | Thing
-      loc.pres = structural $ rect ((@size+1) * 10) ((@size+1) * 10) Solid `withfColor` blue `withMouseDown`  
+      loc.pres = structural $ empty `withSize` ((@size+1) * 10,(@size+1) * 10) `withbgColor` blue `withMouseDown`  
                      (updateAt @lhs.path $ \clip -> case clip of
                                                 (Clip_Thing (Thing nr)) -> Clip_Thing $ Thing (nr + 1)
                                                 clip -> clip
@@ -272,7 +272,9 @@ SEM Thing
 
 SEM Tasks
   | Tasks
-      loc.pres = structural $ @things.pres
+      loc.pres = structural $ --row [ text "r" , col [ text "c", 
+                              row [ text "r" , @things.pres ]
+                             --]]
 {-
       loc.pres = structural $ leftTopMargins 5 5 $
                    col [ hAlignCenter $ text "Task-list editor"
