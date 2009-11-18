@@ -30,7 +30,7 @@ render scale arrDb diffTree arrangement viewedArea =
     --; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
     -- cannot use these IO regions anymore
     
-    ; --debug Ren ("DiffTree is " ++ show diffTree) $
+    ; debug Ren ("DiffTree is " ++ show diffTree) $
       --debug Ren ("Arrangement is "++show arrangement) $
       renderArr arrDb scale origin viewedArea Nothing (Just [0]) diffTree arrangement
     }
@@ -62,7 +62,7 @@ renderFocus scale arrDb focus arrangement viewedArea =
                
         renderArr arrDb scale origin viewedArea Nothing
                         (Just [1])
-                        (DiffLeaf False)
+                        (DiffLeafArr False Nothing)
                         (OverlayA (IDA (-2)) (xA arrangement) (yA arrangement)  
                                         (widthA arrangement) (heightA arrangement) 
                                         0 0 transparent
@@ -120,30 +120,30 @@ pathRFromPathA arr                 (p:path) = p : pathRFromPathA (index "pathRFr
 -- first we handle the arrangements which are not rendered and hence should not cause changes to the rootPath (Maybe Path)
 -- take care that these are stripped from the arrangementPaths in pathRFromPathA
 renderArr :: Show node => Bool -> Scale -> (Int,Int) ->
-                           (Point, Size) -> Maybe Tags -> Maybe Path -> DiffTree -> Arrangement node ->
+                           (Point, Size) -> Maybe Tags -> Maybe Path -> DiffTreeArr -> Arrangement node ->
                            Writer String ()    
-renderArr o s (lux, luy) v mt m (DiffNode _ _ [dt]) (StructuralA _ arr) =
+renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ [dt]) (StructuralA _ arr) =
            renderArr o s (lux, luy) v mt m dt arr
-renderArr o s (lux, luy) v mt m (DiffLeaf d)        (StructuralA _ arr) =
-           renderArr o s (lux, luy) v mt m (DiffLeaf d) arr
+renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (StructuralA _ arr) =
+           renderArr o s (lux, luy) v mt m (DiffLeafArr d mv) arr
 renderArr o s (lux, luy) v mt m _                   (StructuralA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
-renderArr o s (lux, luy) v mt m (DiffNode _ _ [dt]) (ParsingA _ arr) =
+renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ [dt]) (ParsingA _ arr) =
            renderArr o s (lux, luy) v mt m dt arr
-renderArr o s (lux, luy) v mt m (DiffLeaf d)        (ParsingA _ arr) =
-           renderArr o s (lux, luy) v mt m (DiffLeaf d) arr
+renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (ParsingA _ arr) =
+           renderArr o s (lux, luy) v mt m (DiffLeafArr d mv) arr
 renderArr o s (lux, luy) v mt m _                   (ParsingA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
-renderArr o s (lux, luy) v mt m (DiffNode _ _ [dt]) (LocatorA _ arr) =
+renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ [dt]) (LocatorA _ arr) =
            renderArr o s (lux, luy) v mt m dt arr
-renderArr o s (lux, luy) v mt m (DiffLeaf d)        (LocatorA _ arr) =
-           renderArr o s (lux, luy) v mt m (DiffLeaf d) arr
+renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (LocatorA _ arr) =
+           renderArr o s (lux, luy) v mt m (DiffLeafArr d mv) arr
 renderArr o s (lux, luy) v mt m _                   (LocatorA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
-renderArr o s (lux, luy) v mt m (DiffNode _ _ [dt]) (TagA tags arr) =
+renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ [dt]) (TagA tags arr) =
            renderArr o s (lux, luy) v (Just tags) m dt arr
-renderArr o s (lux, luy) v mt m (DiffLeaf d)        (TagA tags arr) =
-           renderArr o s (lux, luy) v (Just tags) m (DiffLeaf d) arr
+renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (TagA tags arr) =
+           renderArr o s (lux, luy) v (Just tags) m (DiffLeafArr d mv) arr
 renderArr o s (lux, luy) v mt m _                   (TagA _ arr) =
            debug Err "renderArr: difftree does not match arrangement" $ return ()
 
@@ -152,8 +152,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
         return ()
      --if True then return () else    -- uncomment this line to skip rendering
                                        
-    ; if (isSelfCleanDT diffTree)  -- if self is clean, only render its children (if present)
-     then if (isCleanDT diffTree)
+    ; if (isSelfCleanDTArr diffTree)  -- if self is clean, only render its children (if present)
+     then if (isCleanDTArr diffTree)
           then do { --putStrLn "renderArr: self clean, children clean";
                    return ()
                   }
@@ -161,8 +161,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
                     do { -- putStrLn "renderArr: self clean, children not clean"
                        ; let (x,y)=(lux+scaleInt scale x', luy+scaleInt scale y')
                        ; let childDiffTrees = case diffTree of
-                                                DiffLeaf c     -> repeat $ DiffLeaf c
-                                                DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+                                                DiffLeafArr c mv    -> repeat $ DiffLeafArr c Nothing
+                                                DiffNodeArr c c' dts -> dts ++ repeat (DiffLeafArr False Nothing)
                        ; sequence_ $ zipWith3 (renderArr arrDb scale (x, y) viewedArea mtags ) 
                                        (case mPth of
                                           Nothing -> repeat Nothing
@@ -233,8 +233,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
     (RowA id x' y' w' h' _ _ bColor arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
-                                 DiffLeaf c     -> repeat $ DiffLeaf c
-                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False) -- in case there are too few dts
+                                 DiffLeafArr c _   -> repeat $ DiffLeafArr c Nothing
+                                 DiffNodeArr c c' dts -> dts ++ repeat (DiffLeafArr False Nothing) -- in case there are too few dts
 
         ; divOpen id x' y' w' h' bColor (mkClass mt)
         ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing Nothing) childDiffTrees arrs
@@ -244,8 +244,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
     (ColA id x' y' w' h' _ _ bColor _ arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
-                                 DiffLeaf c     -> repeat $ DiffLeaf c
-                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+                                 DiffLeafArr c _    -> repeat $ DiffLeafArr c Nothing
+                                 DiffNodeArr c c' dts -> dts ++ repeat (DiffLeafArr False Nothing)
 
         ; divOpen id x' y' w' h' bColor (mkClass mt ++ ["Column"])
         ; sequence_ $ zipWith (renderArr arrDb scale (x, y) viewedArea Nothing Nothing) childDiffTrees arrs
@@ -255,8 +255,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
     (OverlayA id x' y' w' h' _ _ bColor direction arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
-                                 DiffLeaf c     -> repeat $ DiffLeaf c
-                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+                                 DiffLeafArr c _    -> repeat $ DiffLeafArr c Nothing
+                                 DiffNodeArr c c' dts -> dts ++ repeat (DiffLeafArr False Nothing)
 
         ; let order = case direction of
                         HeadInFront -> reverse
@@ -272,8 +272,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
     (GraphA id x' y' w' h' _ _ bColor nrOfVertices arrs) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
-                                 DiffLeaf c     -> repeat $ DiffLeaf c
-                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+                                 DiffLeafArr c _    -> repeat $ DiffLeafArr c Nothing
+                                 DiffNodeArr c c' dts -> dts ++ repeat (DiffLeafArr False Nothing)
 
         
         
@@ -293,8 +293,8 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
     (VertexA id x' y' w' h' _ _ bColor _ arr) ->
      do { let (x,y,w,h)=(lux+scaleInt scale x', luy+scaleInt scale y', scaleInt scale w', scaleInt scale h')
         ; let childDiffTrees = case diffTree of
-                                 DiffLeaf c     -> repeat $ DiffLeaf c
-                                 DiffNode c c' dts -> dts ++ repeat (DiffLeaf False)
+                                 DiffLeafArr c _    -> repeat $ DiffLeafArr c Nothing
+                                 DiffNodeArr c c' dts -> dts ++ repeat (DiffLeafArr False Nothing)
         
         ; divOpen id x' y' w' h' bColor (mkClass mt)
         ; renderArr arrDb scale (x, y) viewedArea Nothing Nothing (head' "Renderer.renderArr" childDiffTrees) arr

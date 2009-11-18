@@ -121,7 +121,7 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 -- diffArr skips Structural, Parsing and Locator arrangements, since these do not
 -- influence the rendering. For the same reason, Formatter parameters to rows and
 -- h/vRefs are ignored
--- we do mark them as self dirty if their child (or descendent in case of a chaing) is dirty.
+-- we do mark them as self dirty if their child (or descendent in case of a chain) is dirty.
 -- this is necessary to be able to see at parent level that a direct child may have changed size
 -- (used for example in updatedRectArr)
 
@@ -129,40 +129,40 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 
 --       new arrangement     old arrangement
 diffArr (StructuralA _ arr) arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
+                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) [childDT]
 diffArr arr                  (StructuralA _ arr')  = diffArr arr arr'
 diffArr (ParsingA _ arr)    arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
+                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) [childDT]
 diffArr arr                  (ParsingA _ arr')     = diffArr arr arr'
 diffArr (LocatorA l arr)     arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
+                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) [childDT]
 diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
 diffArr (TagA t arr)     arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNode (isCleanDT childDT) (isSelfCleanDT childDT) [childDT]
+                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) [childDT]
 diffArr arr                  (TagA t arr')      = diffArr arr arr'
 
 
 
-diffArr (EmptyA _ x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeaf $ x==x' && y==y' && w==w' && h==h' && bc == bc'                                                         
-diffArr (EmptyA _ x y w h hr vr bc)     _                       = DiffLeaf False
+diffArr (EmptyA _ x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeafArr (x==x' && y==y' && w==w' && h==h' && bc == bc') Nothing
+diffArr (EmptyA _ x y w h hr vr bc)     _                       = DiffLeafArr False Nothing
 diffArr (StringA _ x y w h hr vr str lc bc f _) (StringA _ x' y' w' h' hr' vr' str' lc' bc' f' _) = 
-  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && str==str' && lc==lc' && bc==bc' && f==f'
-diffArr (StringA _ x y w h hr vr str lc bc f _)  _                                    = DiffLeaf False
+  DiffLeafArr (x==x' && y==y' && w==w' && h==h' && str==str' && lc==lc' && bc==bc' && f==f') Nothing
+diffArr (StringA _ x y w h hr vr str lc bc f _)  _                                    = DiffLeafArr False Nothing
 diffArr (ImageA _ x y w h hr vr src style fc bc) (ImageA _ x' y' w' h' hr' vr' src' style' fc' bc') =
-  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && src == src' && style == style' && fc == fc' && bc == bc'
-diffArr (ImageA _  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+  DiffLeafArr (x==x' && y==y' && w==w' && h==h' && src == src' && style == style' && fc == fc' && bc == bc') Nothing
+diffArr (ImageA _  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
 diffArr (PolyA _ x y w h hr vr pts lw style lc fc bc) (PolyA _ x' y' w' h' hr' vr' pts' lw' style' lc' fc' bc') =
-  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && pts == pts' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc'
-diffArr (PolyA _  _ _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+  DiffLeafArr (x==x' && y==y' && w==w' && h==h' && pts == pts' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc') Nothing
+diffArr (PolyA _  _ _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
 diffArr (RectangleA _ x y w h hr vr lw style lc fc bc) (RectangleA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
-  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc'
-diffArr (RectangleA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+  DiffLeafArr (x==x' && y==y' && w==w' && h==h' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc') Nothing
+diffArr (RectangleA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
 diffArr (EllipseA _ x y w h hr vr lw style lc fc bc) (EllipseA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
-  DiffLeaf $ x==x' && y==y' && w==w' && h==h' && lw == lw'  && style == style' && lc == lc' && fc == fc' && bc == bc'
-diffArr (EllipseA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+  DiffLeafArr (x==x' && y==y' && w==w' && h==h' && lw == lw'  && style == style' && lc == lc' && fc == fc' && bc == bc') Nothing
+diffArr (EllipseA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
 diffArr (EdgeA _ x1 y1 x2 y2 hr vr lw lc) (EdgeA _ x1' y1' x2' y2' hr' vr' lw' lc') =
-  DiffLeaf $ x1==x1' && y1==y1' && x2==x2' && y2==y2' && lw == lw'  && lc == lc'
-diffArr (EdgeA _  _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
+  DiffLeafArr (x1==x1' && y1==y1' && x2==x2' && y2==y2' && lw == lw'  && lc == lc') Nothing
+diffArr (EdgeA _  _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
 
 diffArr (RowA _ x y w h hr vr bc arrs) (RowA _ x' y' w' h' hr' vr' bc' arrs') =  
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
@@ -172,18 +172,18 @@ diffArr (OverlayA _ x y w h hr vr bc d arrs) (OverlayA _ x' y' w' h' hr' vr' bc'
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
 diffArr (GraphA _ x y w h hr vr bc nvs arrs) (GraphA _ x' y' w' h' hr' vr' bc' nvs' arrs') =
   case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
-    DiffNode childrenClean selfClean _ -> DiffLeaf (selfClean && childrenClean)
-    _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeaf False  
+    DiffNodeArr childrenClean selfClean _ -> DiffLeafArr (selfClean && childrenClean) Nothing
+    _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeafArr False  Nothing
     -- a graph is only clean when all children and the graph itself are clean
-diffArr arr@(RowA _ x y w h hr vr bc arrs) _                            = DiffLeaf False 
-diffArr arr@(ColA _ x y w h hr vr bc _ arrs) _                          = DiffLeaf False 
-diffArr arr@(OverlayA _ x y w h hr vr bc _ arrs) _                        = DiffLeaf False 
-diffArr arr@(GraphA _ x y w h hr vr bc nvs arrs) _                      = DiffLeaf False 
+diffArr arr@(RowA _ x y w h hr vr bc arrs) _                            = DiffLeafArr False Nothing
+diffArr arr@(ColA _ x y w h hr vr bc _ arrs) _                          = DiffLeafArr False  Nothing
+diffArr arr@(OverlayA _ x y w h hr vr bc _ arrs) _                        = DiffLeafArr False Nothing
+diffArr arr@(GraphA _ x y w h hr vr bc nvs arrs) _                      = DiffLeafArr False Nothing
 diffArr (VertexA _ x y w h hr vr bc ol arr) (VertexA _ x' y' w' h' hr' vr' bc' ol' arr') =
  let childDT = diffArr arr arr'
- in  DiffNode (isCleanDT childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
-diffArr (VertexA _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeaf False
-diffArr arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeaf False
+ in  DiffNodeArr (isCleanDTArr childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
+diffArr (VertexA _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeafArr False Nothing
 -- At the moment, we ignore outline and nrOfVertices
 
 -- pres is different when either self has changed or children
@@ -193,30 +193,31 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
   let nrOfArrs    = length arrs
       nrOfArrs'   = length arrs'
       childDiffs  = zipWith diffArr arrs arrs'
-      childDiffs' = take nrOfArrs $ childDiffs ++ repeat (DiffLeaf False)
+      childDiffs' = take nrOfArrs $ childDiffs ++ repeat (DiffLeafArr False Nothing)
       selfClean   =    x==x' && y==y' && w==w' && h==h' && bc==bc' 
                     && nrOfArrs == nrOfArrs'
-  in  DiffNode ( selfClean && all isCleanDT childDiffs') selfClean
+  in  debug Arr ("diffArrs:"++show(x,x',y,y',w,w',h,h',bc,bc',nrOfArrs,nrOfArrs')) $
+      DiffNodeArr ( selfClean && all isCleanDTArr childDiffs') selfClean
                (if not selfClean
-                then replicate (length arrs) (DiffLeaf False)  -- is self is dirty, all below need to be rerendered
+                then replicate (length arrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered
                 else childDiffs')
 
 -- | Returns a list of all areas that are dirty according to the diffTree
-updatedRectArr :: Show node => DiffTree -> Arrangement node -> [((Int, Int), (Int, Int))]
+updatedRectArr :: Show node => DiffTreeArr -> Arrangement node -> [((Int, Int), (Int, Int))]
 updatedRectArr dt arr = updatedRectArr' 0 0 dt arr 
 
-updatedRectArr' :: Show node => Int -> Int -> DiffTree -> Arrangement node -> [((Int, Int), (Int, Int))]
+updatedRectArr' :: Show node => Int -> Int -> DiffTreeArr -> Arrangement node -> [((Int, Int), (Int, Int))]
 updatedRectArr' x' y' dt arr = 
   case dt of
-    DiffLeaf True            -> []                --
-    DiffNode True  _     _   -> []
-    DiffLeaf False           -> let x = x' + xA arr
-                                    y = y' + yA arr
-                                in [((x, y), (widthA arr, heightA arr))]
-    DiffNode False False dts -> let x = x' + xA arr
-                                    y = y' + yA arr
-                                in [((x, y), (widthA arr, heightA arr))]
-    DiffNode False True  dts    ->     -- self is clean, so take union of rectangles of children
+    DiffLeafArr True _        -> []                --
+    DiffNodeArr True  _     _   -> []
+    DiffLeafArr False _         -> let x = x' + xA arr
+                                       y = y' + yA arr
+                                   in [((x, y), (widthA arr, heightA arr))]
+    DiffNodeArr False False dts -> let x = x' + xA arr
+                                       y = y' + yA arr
+                                   in  [((x, y), (widthA arr, heightA arr))]
+    DiffNodeArr False True  dts    ->     -- self is clean, so take union of rectangles of children
       case arr of                      -- NOTE for overlay and graph, this should not occur
       (StructuralA _ arr)           -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
       (ParsingA _ arr)              -> if not (null dts) then updatedRectArr' x' y' (head' "ArrUtils.updatedRectArr'" dts) arr else problem
@@ -237,13 +238,13 @@ updatedRectArr' x' y' dt arr =
 --   is positioned, in order to redraw the background if the child shrunk
 
 updatedRectRow x' y' h dts arrs = 
-  concat [ if isSelfCleanDT dt 
+  concat [ if isSelfCleanDTArr dt 
            then updatedRectArr' x' y' dt arr 
            else [((x'+xA arr, y'),(widthA arr, h))] 
          | (dt, arr) <- zip dts arrs ]
 
 updatedRectCol x' y' w dts arrs = 
-  concat [ if isSelfCleanDT dt 
+  concat [ if isSelfCleanDTArr dt 
            then updatedRectArr' x' y' dt arr 
            else [((x', y'+yA arr),(w, heightA arr))] 
          | (dt, arr) <- zip dts arrs ]
@@ -417,7 +418,7 @@ tryFocus computeFocus dir viewedAreaRef focus arr editop =
 
 
 setFocus x y arr     = showDebug' GI "focus set to " $
-                       let f = navigateFocus x y arr in {- showDebug GI -} (FocusA f f)
+                       let f = navigateFocus x y arr in {- showDebug Arr -} (FocusA f f)
 
 enlargeFocusXY focus x y arr = enlargeFocus focus (navigateFocus x y arr)
 
@@ -429,7 +430,7 @@ enlargeFocusDown focus arr = case downPath (toA focus) arr of
                                Nothing  -> Nothing
                                Just pth -> Just $ enlargeFocus focus pth 
 
-enlargeFocus (FocusA f@(PathA _ _) t) pth = {- showDebug Ren $ -} (FocusA f pth)
+enlargeFocus (FocusA f@(PathA _ _) t) pth = {- showDebug Arr $ -} (FocusA f pth)
 enlargeFocus f                        pth = debug Err "ArrUtils.enlargeFocus: selection without focus set" $ (FocusA pth pth)
 
 
@@ -439,7 +440,7 @@ upFocus (FocusA f  t) arr = case upPath f arr of
                               Nothing   -> Nothing
 upFocus _             _   = Nothing
 
-upPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Ren $ -} sizeA (pth++[i]) arr
+upPath (PathA pth i) arr = let (x,y,w,h) = {- showDebug Arr $ -} sizeA (pth++[i]) arr
                            in  navigateFocusUp (x+w `div` 2) pth arr -- use the horizontal center of currently focused item
 upPath _             _   = Nothing
 

@@ -159,6 +159,35 @@ isSelfCleanDT :: DiffTree -> Bool
 isSelfCleanDT (DiffLeaf c) = c
 isSelfCleanDT (DiffNode c c' _) = c'
 
+
+data DiffTreeArr = DiffLeafArr !Bool (Maybe Move) | DiffNodeArr !Bool !Bool ![DiffTreeArr]
+
+type Move = (XCoord, YCoord, Width, Height)
+--                                       children self 
+-- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
+
+-- True is Clean, False is Dirty       --selfandChildren self
+-- True True: all clean
+-- False True: children dirty self clean
+-- False False: all dirty
+-- True False: not possible          (does not seem to make sense)
+-- self dirty, children clean cannot be expressed possible.
+-- Maybe choose different representation. However, this requires pattern matching on two args in most algorithms
+-- Diff is too simple now. (inserted children?)
+instance Show DiffTreeArr where
+   show (DiffLeafArr c m) = "DiffLeafArr "++show c++ " " ++ show m
+   show (DiffNodeArr c c' dts) = if c&&c' 
+                              then "<Clean>"
+                              else "DiffNodeArr "++show c ++ " " ++ show c' ++ " " ++ show dts
+
+isCleanDTArr :: DiffTreeArr -> Bool
+isCleanDTArr (DiffLeafArr c _) = c
+isCleanDTArr (DiffNodeArr c c' _) = c && c'
+
+isSelfCleanDTArr :: DiffTreeArr -> Bool
+isSelfCleanDTArr (DiffLeafArr c _) = c
+isSelfCleanDTArr (DiffNodeArr c c' _) = c'
+
 {-
 black = (0,0,0) :: (Int,Int,Int)
 blue = (0,0,255) :: (Int,Int,Int)

@@ -261,7 +261,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
 
                              ; seq (length responseHtml) $ return ()
                              ; liftIO $ putStrLn $ "Sending response sent to client:\n" ++
-                                                   take 160 responseHtml ++ "..."
+                                                   {-take 160-}responseHtml ++ "..."
                              --; modifyResponseW noCache $
                              ;  anyRequest $ ok $ toResponse responseHtml 
                              }

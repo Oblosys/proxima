@@ -24,7 +24,7 @@ render :: (HasPath node, Show node) => Settings ->
 -}
 render settings state (ArrangementLevel arr focus prs) ren@(RenderingLevel scale _ _ _ _ debugging updRegions lmd) (SkipArr' 0) = 
    let arr'        = if debugging then debugArrangement arr else arr
-       diffTree    = DiffLeaf False
+       diffTree    = DiffLeafArr False Nothing
        rendering   = Rendering.Renderer.render scale debugging diffTree arr' 
        focusRendering = renderFocus scale debugging focus arr'
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arr arr'
@@ -38,7 +38,7 @@ render settings state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel s
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arrOld arr'
        rendering   = if rendererIncrementality settings 
                      then Rendering.Renderer.render scale debugging diffTree arr'
-                     else Rendering.Renderer.render scale debugging (DiffLeaf False) arr'
+                     else Rendering.Renderer.render scale debugging (DiffLeafArr False Nothing) arr'
        focusRendering = renderFocus scale debugging focus arr'
        size        = (widthA arr', heightA arr')
    in  {-debug Arr ("\n\n\nRender: old/new size "++ show (widthA arrOld, heightA arrOld)++ show (widthA arr', heightA arr')
