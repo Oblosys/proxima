@@ -140,50 +140,66 @@ diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
 diffArr (TagA t arr)     arr'                   = let childDT = diffArr arr arr'
                                                       in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) [childDT]
 diffArr arr                  (TagA t arr')      = diffArr arr arr'
+diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
+                    in  case dt of
+                          -- only when child is clean we will compute a move
+                          DiffLeafArr True _ -> DiffLeafArr True $ computeMove arr1 arr2
+                          dn -> dn 
+-- move for composites
+-- move for leafs not possible for svg's (the contain absolute coords)
+-- what about graph and edge?
+-- problem with poly's! x - 1 (maybe put a div around everything for easy move
+
+computeMove newArr oldArr =
+  let a1@((x1,y1),(w1,h1)) = getAreaA newArr
+      a2@((x2,y2),(w2,h2)) = getAreaA oldArr
+  in  if a1 == a2 then Nothing else Just a1 
 
 
-
-diffArr (EmptyA _ x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeafArr (x==x' && y==y' && w==w' && h==h' && bc == bc') Nothing
-diffArr (EmptyA _ x y w h hr vr bc)     _                       = DiffLeafArr False Nothing
-diffArr (StringA _ x y w h hr vr str lc bc f _) (StringA _ x' y' w' h' hr' vr' str' lc' bc' f' _) = 
-  DiffLeafArr (x==x' && y==y' && w==w' && h==h' && str==str' && lc==lc' && bc==bc' && f==f') Nothing
-diffArr (StringA _ x y w h hr vr str lc bc f _)  _                                    = DiffLeafArr False Nothing
-diffArr (ImageA _ x y w h hr vr src style fc bc) (ImageA _ x' y' w' h' hr' vr' src' style' fc' bc') =
-  DiffLeafArr (x==x' && y==y' && w==w' && h==h' && src == src' && style == style' && fc == fc' && bc == bc') Nothing
-diffArr (ImageA _  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
-diffArr (PolyA _ x y w h hr vr pts lw style lc fc bc) (PolyA _ x' y' w' h' hr' vr' pts' lw' style' lc' fc' bc') =
+-- Poly, Rectangle, Ellipse and Edge cannot be moved because width and height is encoded in the svg code
+-- (actually, they could be moved, but not resized). Anyhow, because these are just leafs, a move is not much more efficient
+-- than a redraw. Hence, we let them return False on a position or dimension change by including the x1 == x2 ... in the DiffLeafArr
+diffArr' (EmptyA _ x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeafArr (bc == bc') Nothing
+diffArr' (EmptyA _ x y w h hr vr bc)     _                       = DiffLeafArr False Nothing
+diffArr' (StringA _ x y w h hr vr str lc bc f _) (StringA _ x' y' w' h' hr' vr' str' lc' bc' f' _) = 
+  DiffLeafArr (str==str' && lc==lc' && bc==bc' && f==f') Nothing
+diffArr' (StringA _ x y w h hr vr str lc bc f _)  _                                    = DiffLeafArr False Nothing
+diffArr' (ImageA _ x y w h hr vr src style fc bc) (ImageA _ x' y' w' h' hr' vr' src' style' fc' bc') =
+  DiffLeafArr (src == src' && style == style' && fc == fc' && bc == bc') Nothing
+diffArr' (ImageA _  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr' (PolyA _ x y w h hr vr pts lw style lc fc bc) (PolyA _ x' y' w' h' hr' vr' pts' lw' style' lc' fc' bc') =
   DiffLeafArr (x==x' && y==y' && w==w' && h==h' && pts == pts' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc') Nothing
-diffArr (PolyA _  _ _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
-diffArr (RectangleA _ x y w h hr vr lw style lc fc bc) (RectangleA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
+diffArr' (PolyA _  _ _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr' (RectangleA _ x y w h hr vr lw style lc fc bc) (RectangleA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
   DiffLeafArr (x==x' && y==y' && w==w' && h==h' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc') Nothing
-diffArr (RectangleA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
-diffArr (EllipseA _ x y w h hr vr lw style lc fc bc) (EllipseA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
+diffArr' (RectangleA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr' (EllipseA _ x y w h hr vr lw style lc fc bc) (EllipseA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
   DiffLeafArr (x==x' && y==y' && w==w' && h==h' && lw == lw'  && style == style' && lc == lc' && fc == fc' && bc == bc') Nothing
-diffArr (EllipseA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
-diffArr (EdgeA _ x1 y1 x2 y2 hr vr lw lc) (EdgeA _ x1' y1' x2' y2' hr' vr' lw' lc') =
+diffArr' (EllipseA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr' (EdgeA _ x1 y1 x2 y2 hr vr lw lc) (EdgeA _ x1' y1' x2' y2' hr' vr' lw' lc') =
   DiffLeafArr (x1==x1' && y1==y1' && x2==x2' && y2==y2' && lw == lw'  && lc == lc') Nothing
-diffArr (EdgeA _  _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr' (EdgeA _  _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
 
-diffArr (RowA _ x y w h hr vr bc arrs) (RowA _ x' y' w' h' hr' vr' bc' arrs') =  
+diffArr' (RowA _ x y w h hr vr bc arrs) (RowA _ x' y' w' h' hr' vr' bc' arrs') =  
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
-diffArr (ColA _ x y w h hr vr bc _ arrs) (ColA _ x' y' w' h' hr' vr' bc' _ arrs') = 
+diffArr' (ColA _ x y w h hr vr bc _ arrs) (ColA _ x' y' w' h' hr' vr' bc' _ arrs') = 
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
-diffArr (OverlayA _ x y w h hr vr bc d arrs) (OverlayA _ x' y' w' h' hr' vr' bc' d' arrs') =
+diffArr' (OverlayA _ x y w h hr vr bc d arrs) (OverlayA _ x' y' w' h' hr' vr' bc' d' arrs') =
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
-diffArr (GraphA _ x y w h hr vr bc nvs arrs) (GraphA _ x' y' w' h' hr' vr' bc' nvs' arrs') =
+diffArr' (GraphA _ x y w h hr vr bc nvs arrs) (GraphA _ x' y' w' h' hr' vr' bc' nvs' arrs') =
   case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
     DiffNodeArr childrenClean selfClean _ -> DiffLeafArr (selfClean && childrenClean) Nothing
     _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeafArr False  Nothing
     -- a graph is only clean when all children and the graph itself are clean
-diffArr arr@(RowA _ x y w h hr vr bc arrs) _                            = DiffLeafArr False Nothing
-diffArr arr@(ColA _ x y w h hr vr bc _ arrs) _                          = DiffLeafArr False  Nothing
-diffArr arr@(OverlayA _ x y w h hr vr bc _ arrs) _                        = DiffLeafArr False Nothing
-diffArr arr@(GraphA _ x y w h hr vr bc nvs arrs) _                      = DiffLeafArr False Nothing
-diffArr (VertexA _ x y w h hr vr bc ol arr) (VertexA _ x' y' w' h' hr' vr' bc' ol' arr') =
+diffArr' arr@(RowA _ x y w h hr vr bc arrs) _                            = DiffLeafArr False Nothing
+diffArr' arr@(ColA _ x y w h hr vr bc _ arrs) _                          = DiffLeafArr False  Nothing
+diffArr' arr@(OverlayA _ x y w h hr vr bc _ arrs) _                        = DiffLeafArr False Nothing
+diffArr' arr@(GraphA _ x y w h hr vr bc nvs arrs) _                      = DiffLeafArr False Nothing
+diffArr' (VertexA _ x y w h hr vr bc ol arr) (VertexA _ x' y' w' h' hr' vr' bc' ol' arr') =
  let childDT = diffArr arr arr'
- in  DiffNodeArr (isCleanDTArr childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') [childDT]
-diffArr (VertexA _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
-diffArr arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeafArr False Nothing
+ in  DiffNodeArr (isCleanDTArr childDT) (bc==bc') [childDT]
+diffArr' (VertexA _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr' arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeafArr False Nothing
 -- At the moment, we ignore outline and nrOfVertices
 
 -- pres is different when either self has changed or children
@@ -194,7 +210,7 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
       nrOfArrs'   = length arrs'
       childDiffs  = zipWith diffArr arrs arrs'
       childDiffs' = take nrOfArrs $ childDiffs ++ repeat (DiffLeafArr False Nothing)
-      selfClean   =    x==x' && y==y' && w==w' && h==h' && bc==bc' 
+      selfClean   = bc==bc' 
                     && nrOfArrs == nrOfArrs'
   in  debug Arr ("diffArrs:"++show(x,x',y,y',w,w',h,h',bc,bc',nrOfArrs,nrOfArrs')) $
       DiffNodeArr ( selfClean && all isCleanDTArr childDiffs') selfClean
@@ -203,9 +219,11 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
                 else childDiffs')
 
 -- | Returns a list of all areas that are dirty according to the diffTree
+-- not used in Proxima 2.0, browser takes care of this
 updatedRectArr :: Show node => DiffTreeArr -> Arrangement node -> [((Int, Int), (Int, Int))]
 updatedRectArr dt arr = updatedRectArr' 0 0 dt arr 
 
+-- check this for new difftree with moves and insert/delete
 updatedRectArr' :: Show node => Int -> Int -> DiffTreeArr -> Arrangement node -> [((Int, Int), (Int, Int))]
 updatedRectArr' x' y' dt arr = 
   case dt of
@@ -237,6 +255,7 @@ updatedRectArr' x' y' dt arr =
 --   for self-dirty children, return the entire segment of the col/row where the child
 --   is positioned, in order to redraw the background if the child shrunk
 
+-- check this for new difftree with moves and insert/delete
 updatedRectRow x' y' h dts arrs = 
   concat [ if isSelfCleanDTArr dt 
            then updatedRectArr' x' y' dt arr 

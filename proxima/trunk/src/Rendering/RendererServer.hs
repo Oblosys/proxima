@@ -96,12 +96,22 @@ cleanParentId contains Just the parent if it was self clean. On rendering, Nothi
 Hence, we can emit a replace command if the parent is clean but the child is self dirty
 -}
 
+-- This is not very nice, makeReplaceUpdate is called also on descendents, in which case it doesn't really make an update
+-- arrangement is passed only for debugging
 makeReplaceUdate Nothing    arrangement mkArrangement = mkArrangement
 makeReplaceUdate (Just pth) arrangement mkArrangement = 
  do { tell $ "<div id='replace' op='replace'>"++htmlPath pth
     --; putStrLn $ "\n\n*********REPLACE "++show pth
     --; putStrLn $ "by:\n" ++ showTreeArr arrangement
     ; mkArrangement
+    ; tell $ "</div>\n" 
+    }
+
+makeMoveUdate Nothing    coords = debug Err ("RendererServer.makeMoveUpdate: no path.") return ()
+makeMoveUdate (Just pth) ((x,y),(w,h)) = 
+ do { tell $ "<div id='move' op='move' x='"++show x++"' y='"++show y++"' w='"++show w++"' h='"++show h++"'>"++htmlPath pth
+    --; putStrLn $ "\n\n*********REPLACE "++show pth
+    --; putStrLn $ "by:\n" ++ showTreeArr arrangement
     ; tell $ "</div>" 
     }
 
@@ -151,6 +161,10 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
  do { --debug Ren (shallowShowArr arrangement ++"renderArr on: "++ show (isSelfCleanDT diffTree)++":"++ show (isCleanDT diffTree)) $
         return ()
      --if True then return () else    -- uncomment this line to skip rendering
+
+    ; case diffTree of 
+        DiffLeafArr _ (Just m) -> debug Ren ("We have a move: "++show m) $ makeMoveUdate mPth m
+        _ -> return ()                       
                                        
     ; if (isSelfCleanDTArr diffTree)  -- if self is clean, only render its children (if present)
      then if (isCleanDTArr diffTree)

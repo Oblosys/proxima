@@ -161,8 +161,9 @@ isSelfCleanDT (DiffNode c c' _) = c'
 
 
 data DiffTreeArr = DiffLeafArr !Bool (Maybe Move) | DiffNodeArr !Bool !Bool ![DiffTreeArr]
+-- move is not encoded in bool: a leaf may be clean but have a move
 
-type Move = (XCoord, YCoord, Width, Height)
+type Move = ((XCoord, YCoord), (Width, Height))
 --                                       children self 
 -- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
 
@@ -181,8 +182,9 @@ instance Show DiffTreeArr where
                               else "DiffNodeArr "++show c ++ " " ++ show c' ++ " " ++ show dts
 
 isCleanDTArr :: DiffTreeArr -> Bool
-isCleanDTArr (DiffLeafArr c _) = c
+isCleanDTArr (DiffLeafArr c Nothing) = c
 isCleanDTArr (DiffNodeArr c c' _) = c && c'
+isCleanDTArr _                    = False
 
 isSelfCleanDTArr :: DiffTreeArr -> Bool
 isSelfCleanDTArr (DiffLeafArr c _) = c

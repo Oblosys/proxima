@@ -380,14 +380,14 @@ if (xmlhttp.readyState==4)
 function updateTree(update)
 { var op = update.getAttribute('op');
  /*
-  if (op === 'add')
+  if (op == 'add')
   { var parentId = update.getAttribute('parentId');
     var newChild = update.firstChild;
     var parent = document.getElementById(parentId);
     parent.appendChild( newChild );
 //    debug('add to '+parentId+' '+newChild.getAttribute('Id'));
   }    
-  else if (op === 'remove')
+  else if (op == 'remove')
   { var parentId = update.getAttribute('parentId');
     var targetId = update.getAttribute('targetId');
     var parent = document.getElementById(parentId);
@@ -402,7 +402,7 @@ function updateTree(update)
   } 
   else 
   */
-  if (op === 'replace')
+  if (op == 'replace')
   { var path = update.childNodes[0];
     var newChild = update.childNodes[1];
     
@@ -413,6 +413,15 @@ function updateTree(update)
     parent.replaceChild(newChild,oldChild);
       
 //    debug('replace '+targetId+' at '+parentId+' by '+newChild.getAttribute('Id'));
+  } else if (op == 'move')
+  { var path = update.childNodes[0];
+    var node = select(path, document.getElementById('proxima'));
+      
+    node.style.left = update.getAttribute('x')+'px';
+    node.style.top = update.getAttribute('y')+'px';
+    node.style.width = update.getAttribute('w')+'px';
+    node.style.height = update.getAttribute('h')+'px';
+
   } 
   else if (op == 'contextMenu')
   { var screenX = update.getAttribute('screenX');
