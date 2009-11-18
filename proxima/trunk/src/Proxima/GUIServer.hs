@@ -610,7 +610,7 @@ genericHandler settings handler renderingLvlVar viewedAreaRef () evt =
                                           filter (/='\'') str ++"'></div>" 
                                         ]
        -- TODO: clear any following updates to client? The alert will prevent them from being processed for a while.
-       process (SetRen' renderingLvl''@(RenderingLevel scale _ renderingHTML _ (newW,newH) _ updRegions _)) =
+       process (SetRen' renderingLvl''@(RenderingLevel scale _ renderingHTML _ (newW,newH) _ _ _)) =
          do { writeIORef renderingLvlVar renderingLvl''
             ; viewedArea <- readIORef viewedAreaRef
             ; let htmlRendering = execWriter $ renderingHTML viewedArea
@@ -619,7 +619,7 @@ genericHandler settings handler renderingLvlVar viewedAreaRef () evt =
     
 
 drawFocusHTML settings renderingLvlVar viewedAreaRef = 
- do { RenderingLevel scale _ _ focusRenderingHTML (w,h) debug updRegions _ <- readIORef renderingLvlVar
+ do { RenderingLevel scale _ _ focusRenderingHTML (w,h) debug _ _ <- readIORef renderingLvlVar
     ; viewedArea <- readIORef viewedAreaRef
     ; let htmlFocusRendering = execWriter $ focusRenderingHTML viewedArea
     ; return htmlFocusRendering
