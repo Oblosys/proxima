@@ -214,12 +214,20 @@ diffArr' arr                           _                                = debug 
 -- first list (new) determines size of diffTree
 diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs =  
   let newNrOfArrs    = length newArrs
-      oldNrOfArrs'   = length oldArrs
+      oldNrOfArrs   = length oldArrs
       childDiffs  = zipWith diffArr newArrs oldArrs
-      childDiffs' = take newNrOfArrs $ childDiffs ++ repeat (DiffLeafArr False Nothing)
+      reverseChildDiffs = zipWith diffArr (reverse newArrs) (reverse oldArrs)
+      firstSelfDirtyChildIx = length $ takeWhile isSelfCleanDTArr childDiffs
+      leftChildDiffs = take firstSelfDirtyChildIx childDiffs
+      rightChildDiffs = reverse $ take (newNrOfArrs - firstSelfDirtyChildIx) reverseChildDiffs
+      childDiffs' = leftChildDiffs ++ rightChildDiffs
       selfClean   = bc==bc' 
-      insertDelete = if newNrOfArrs < oldNrOfArrs' then Just $ DeleteChildrenRen 0 1 else Nothing
-  in  debug Arr ("diffArrs:"++show(x,x',y,y',w,w',h,h',bc,bc',newNrOfArrs,oldNrOfArrs')) $
+      insertDelete = if newNrOfArrs < oldNrOfArrs then Just 
+                       $ DeleteChildrenRen firstSelfDirtyChildIx 
+                                           (oldNrOfArrs - newNrOfArrs) 
+                     else Nothing
+  in  if length childDiffs' /= newNrOfArrs then error "problem!!!!!!!!!!!!" else
+      debug Arr ("diffArrs:"++show(x,x',y,y',w,w',h,h',bc,bc',newNrOfArrs,oldNrOfArrs)) $
       DiffNodeArr ( selfClean && all isCleanDTArr childDiffs') selfClean Nothing insertDelete
                (if not selfClean
                 then replicate (length newArrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered
