@@ -104,7 +104,7 @@ makeReplaceUdate (Just pth) arrangement mkArrangement =
     --; putStrLn $ "\n\n*********REPLACE "++show pth
     --; putStrLn $ "by:\n" ++ showTreeArr arrangement
     ; mkArrangement
-    ; tell $ "</div>\n" 
+    ; tell $ "</div>" 
     }
 
 makeMoveUdate Nothing    coords = debug Err ("RendererServer.makeMoveUpdate: no path.") $ return ()
