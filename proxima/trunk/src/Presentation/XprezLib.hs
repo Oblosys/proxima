@@ -46,11 +46,11 @@ overlayReverse= OverlayP NoIDP HeadAtBack
 
 
 --matrix = Matrix 
-rect w h = RectangleP NoIDP w h 1
-ellipse w h = EllipseP NoIDP w h 1
+rect w h fillstyle = RectangleP NoIDP w h 1 fillstyle
+ellipse w h fillstyle = EllipseP NoIDP w h 1 fillstyle
 img src = ImageP NoIDP src Tile
-poly pts = PolyP NoIDP pts 1
-polyW w pts = PolyP NoIDP pts w
+poly pts fillstyle = PolyP NoIDP pts 1 fillstyle
+polyW w pts fillstyle = PolyP NoIDP pts w fillstyle
 formatter xps = FormatterP NoIDP xps
 --alt xps = Alternative xps
 with_ xp f = WithP f xp
