@@ -12,6 +12,7 @@ import Common.DebugLevels
 
 import Char
 import List
+import Data.Maybe
 import Data.IORef
 import System.IO.Unsafe
 
@@ -146,10 +147,19 @@ data DiffTree = DiffLeaf !Bool | DiffNode !Bool !Bool ![DiffTree]
 -- Maybe choose different representation. However, this requires pattern matching on two args in most algorithms
 -- Diff is too simple now. (inserted children?)
 instance Show DiffTree where
-   show (DiffLeaf c) = "DiffLeaf "++show c
-   show (DiffNode c c' dts) = if c&&c' 
-                              then "<Clean>"
-                              else "DiffNode "++show c ++ " " ++ show c' ++ " " ++ show dts
+   show dt = unlines $ showDiffTree' 0 dt
+
+-- maybe change this so it doesn't loop for infinite difftrees?
+shallowShowDiffTree (DiffLeaf c) = "DiffLeafArr "++show c
+shallowShowDiffTree (DiffNode c c' dts) = if c&&c' then "DiffNode <clean>" else
+                            "DiffNodeArr "++show c ++ " " ++ show c'
+
+
+showDiffTree' indent dt = (replicate indent ' ' ++ shallowShowDiffTree dt) :
+  case dt of DiffLeaf _ -> []
+             DiffNode True True dts -> []
+             DiffNode _ _ dts -> (concatMap (showDiffTree' (indent+1)) dts)
+
 
 isCleanDT :: DiffTree -> Bool
 isCleanDT (DiffLeaf c) = c
@@ -160,12 +170,14 @@ isSelfCleanDT (DiffLeaf c) = c
 isSelfCleanDT (DiffNode c c' _) = c'
 
 
-data DiffTreeArr = DiffLeafArr !Bool (Maybe Move) | DiffNodeArr !Bool !Bool ![DiffTreeArr]
--- move is not encoded in bool: a leaf may be clean but have a move
+data DiffTreeArr = DiffLeafArr !Bool (Maybe Move) | DiffNodeArr !Bool !Bool (Maybe Move) ![DiffTreeArr]
+--                                                             children self 
+-- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
+
+-- move is not encoded in self clean: a leaf may be clean but have a move
 
 type Move = ((XCoord, YCoord), (Width, Height))
---                                       children self 
--- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
+
 
 -- True is Clean, False is Dirty       --selfandChildren self
 -- True True: all clean
@@ -176,19 +188,32 @@ type Move = ((XCoord, YCoord), (Width, Height))
 -- Maybe choose different representation. However, this requires pattern matching on two args in most algorithms
 -- Diff is too simple now. (inserted children?)
 instance Show DiffTreeArr where
-   show (DiffLeafArr c m) = "DiffLeafArr "++show c++ " " ++ show m
-   show (DiffNodeArr c c' dts) = if c&&c' 
-                              then "<Clean>"
-                              else "DiffNodeArr "++show c ++ " " ++ show c' ++ " " ++ show dts
+   show dt = unlines $ showDiffTreeArr' 0 dt
+
+-- maybe change this so it doesn't loop for infinite difftrees?
+shallowShowDiffTreeArr (DiffLeafArr c m) = "DiffLeafArr "++show c++ " " ++ show m
+shallowShowDiffTreeArr (DiffNodeArr c c' m dts) = if c&&c' && isNothing m then "DiffNode <clean>" else
+                            "DiffNodeArr "++show c ++ " " ++ show c' ++ " " ++ show m
+
+
+showDiffTreeArr' indent dt = (replicate indent ' ' ++ shallowShowDiffTreeArr dt) :
+  case dt of DiffLeafArr _ _ -> []
+             DiffNodeArr True True Nothing dts -> []
+             DiffNodeArr _ _ _ dts -> (concatMap (showDiffTreeArr' (indent+1)) dts)
+
 
 isCleanDTArr :: DiffTreeArr -> Bool
 isCleanDTArr (DiffLeafArr c Nothing) = c
-isCleanDTArr (DiffNodeArr c c' _) = c && c'
+isCleanDTArr (DiffNodeArr c c' Nothing _) = c && c'
 isCleanDTArr _                    = False
 
 isSelfCleanDTArr :: DiffTreeArr -> Bool
 isSelfCleanDTArr (DiffLeafArr c _) = c
-isSelfCleanDTArr (DiffNodeArr c c' _) = c'
+isSelfCleanDTArr (DiffNodeArr c c' Nothing _) = c'
+isSelfCleanDTArr _                    = False
+
+getMove (DiffLeafArr _ m) = m
+getMove (DiffNodeArr _ _ m _) = m
 
 {-
 black = (0,0,0) :: (Int,Int,Int)
