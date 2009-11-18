@@ -922,7 +922,7 @@ var predictiveInserts = new Array();
 
 function registerPredictiveInsert(char)
 {  debugAdd('register: requestId '+ requestId);
-   predictiveInserts.push({ requestId: requestId, char: char, original: original }); 
+   predictiveInserts.push({ requestId: requestId, char: char }); 
 }
 
 /* Get rid of all predictive inserts for the current response (and also previous ones, but that should not happen)
