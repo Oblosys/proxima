@@ -49,9 +49,14 @@ data Currency = Currency Description Float_
               | ParseErrCurrency (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                   deriving (Show, Data, Typeable)
 
-data Tasks = Tasks Bool List_Task
+data Tasks = Tasks List_Thing Bool List_Task
            | HoleTasks
            | ParseErrTasks (ParseError Document EnrichedDoc Node ClipDoc UserToken)
+               deriving (Show, Data, Typeable)
+
+data Thing = Thing Int
+           | HoleThing
+           | ParseErrThing (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                deriving (Show, Data, Typeable)
 
 data Task = BasicTask Description Bool
@@ -130,6 +135,11 @@ data List_Currency = List_Currency ConsList_Currency
                    | ParseErrList_Currency (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                        deriving (Show, Data, Typeable)
 
+data List_Thing = List_Thing ConsList_Thing
+                | HoleList_Thing
+                | ParseErrList_Thing (ParseError Document EnrichedDoc Node ClipDoc UserToken)
+                    deriving (Show, Data, Typeable)
+
 data List_Task = List_Task ConsList_Task
                | HoleList_Task
                | ParseErrList_Task (ParseError Document EnrichedDoc Node ClipDoc UserToken)
@@ -152,6 +162,10 @@ data ConsList_Expense = Cons_Expense Expense ConsList_Expense
 data ConsList_Currency = Cons_Currency Currency ConsList_Currency
                        | Nil_Currency
                            deriving (Show, Data, Typeable)
+
+data ConsList_Thing = Cons_Thing Thing ConsList_Thing
+                    | Nil_Thing
+                        deriving (Show, Data, Typeable)
 
 data ConsList_Task = Cons_Task Task ConsList_Task
                    | Nil_Task
@@ -179,6 +193,7 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Expense Expense
              | Clip_Currency Currency
              | Clip_Tasks Tasks
+             | Clip_Thing Thing
              | Clip_Task Task
              | Clip_Description Description
              | Clip_Sudoku Sudoku
@@ -193,6 +208,7 @@ data ClipDoc = Clip_EnrichedDoc EnrichedDoc
              | Clip_Float_ Float_
              | Clip_List_Expense List_Expense
              | Clip_List_Currency List_Currency
+             | Clip_List_Thing List_Thing
              | Clip_List_Task List_Task
              | Clip_List_Word List_Word
              | Clip_List_WordPart List_WordPart
@@ -233,6 +249,9 @@ data Node = NoNode
           | Node_Tasks Tasks Path
           | Node_HoleTasks Tasks Path
           | Node_ParseErrTasks Tasks Path
+          | Node_Thing Thing Path
+          | Node_HoleThing Thing Path
+          | Node_ParseErrThing Thing Path
           | Node_BasicTask Task Path
           | Node_CompositeTask Task Path
           | Node_HoleTask Task Path
@@ -281,6 +300,9 @@ data Node = NoNode
           | Node_List_Currency List_Currency Path
           | Node_HoleList_Currency List_Currency Path
           | Node_ParseErrList_Currency List_Currency Path
+          | Node_List_Thing List_Thing Path
+          | Node_HoleList_Thing List_Thing Path
+          | Node_ParseErrList_Thing List_Thing Path
           | Node_List_Task List_Task Path
           | Node_HoleList_Task List_Task Path
           | Node_ParseErrList_Task List_Task Path
@@ -324,6 +346,9 @@ instance Show Node where
   show (Node_Tasks _ _) = "Node_Tasks" 
   show (Node_HoleTasks _ _) = "Node_HoleTasks" 
   show (Node_ParseErrTasks _ _) = "Node_ParseErrTasks" 
+  show (Node_Thing _ _) = "Node_Thing" 
+  show (Node_HoleThing _ _) = "Node_HoleThing" 
+  show (Node_ParseErrThing _ _) = "Node_ParseErrThing" 
   show (Node_BasicTask _ _) = "Node_BasicTask" 
   show (Node_CompositeTask _ _) = "Node_CompositeTask" 
   show (Node_HoleTask _ _) = "Node_HoleTask" 
@@ -372,6 +397,9 @@ instance Show Node where
   show (Node_List_Currency _ _) = "Node_List_Currency" 
   show (Node_HoleList_Currency _ _) = "Node_HoleList_Currency" 
   show (Node_ParseErrList_Currency _ _) = "Node_ParseErrList_Currency" 
+  show (Node_List_Thing _ _) = "Node_List_Thing" 
+  show (Node_HoleList_Thing _ _) = "Node_HoleList_Thing" 
+  show (Node_ParseErrList_Thing _ _) = "Node_ParseErrList_Thing" 
   show (Node_List_Task _ _) = "Node_List_Task" 
   show (Node_HoleList_Task _ _) = "Node_HoleList_Task" 
   show (Node_ParseErrList_Task _ _) = "Node_ParseErrList_Task" 
