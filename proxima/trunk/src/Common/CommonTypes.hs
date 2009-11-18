@@ -170,18 +170,19 @@ isSelfCleanDT (DiffLeaf c) = c
 isSelfCleanDT (DiffNode c c' _) = c'
 
 
-data DiffTreeArr = DiffLeafArr !Bool (Maybe Move) | DiffNodeArr !Bool !Bool (Maybe Move) (Maybe InsertDelete) ![DiffTreeArr]
---                                                 selfAndDescendents self 
+data DiffTreeArr = DiffLeafArr !Bool (Maybe MoveRen) 
+                 | DiffNodeArr !Bool !Bool (Maybe MoveRen) (Maybe InsertDeleteRen) ![DiffTreeArr]
+--                selfAndDescendents self 
 -- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
 
 -- move is not encoded in self clean: a leaf may be clean but have a move
 
 -- basically, self dirty means that the subtree will be entirely redrawn
 
-type Move = ((XCoord, YCoord), (Width, Height))
+type MoveRen = ((XCoord, YCoord), (Width, Height))
 
-data InsertDelete = InsertChildrenRen Int Int
-                  | DeleteChildrenRen Int Int deriving Show
+data InsertDeleteRen = InsertChildrenRen Int Int
+                     | DeleteChildrenRen Int Int deriving Show
 
 
 -- True is Clean, False is Dirty
