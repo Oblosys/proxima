@@ -153,7 +153,7 @@ diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
 -- maybe don't put moves everywhere, and also don't put selfclean everywhere, just copy descendentclean
 
 -- TODO what if difference between old and new is large eg [xx] -> [xyyyyyyyx] ? or vice versa. does the take algorithm yield lists of correct length?
-
+-- todo change error to debug Err
 
 -- why are edit ops duplicated on mouse up?
 
