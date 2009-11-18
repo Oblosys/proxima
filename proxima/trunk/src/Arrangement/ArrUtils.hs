@@ -152,6 +152,9 @@ diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
 -- does this make sense?
 -- maybe don't put moves everywhere, and also don't put selfclean everywhere, just copy descendentclean
 
+-- TODO what if difference between old and new is large eg [xx] -> [xyyyyyyyx] ? or vice versa. does the take algorithm yield lists of correct length?
+
+
 -- why are edit ops duplicated on mouse up?
 
 -- we can alleviate clean restrictions on graphs because browser paints everything
@@ -219,12 +222,19 @@ diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs =
       reverseChildDiffs = zipWith diffArr (reverse newArrs) (reverse oldArrs)
       firstSelfDirtyChildIx = length $ takeWhile isSelfCleanDTArr childDiffs
       leftChildDiffs = take firstSelfDirtyChildIx childDiffs
-      rightChildDiffs = reverse $ take (newNrOfArrs - firstSelfDirtyChildIx) reverseChildDiffs
+
+      rightChildDiffs = reverse $ if newNrOfArrs < oldNrOfArrs 
+                                  then take (newNrOfArrs - firstSelfDirtyChildIx) reverseChildDiffs
+                                  else take (oldNrOfArrs - firstSelfDirtyChildIx) reverseChildDiffs ++
+                                       replicate (newNrOfArrs - oldNrOfArrs) (DiffLeafArr False Nothing)
       childDiffs' = leftChildDiffs ++ rightChildDiffs
       selfClean   = bc==bc' 
       insertDelete = if newNrOfArrs < oldNrOfArrs then Just 
                        $ DeleteChildrenRen firstSelfDirtyChildIx 
                                            (oldNrOfArrs - newNrOfArrs) 
+                     else if newNrOfArrs > oldNrOfArrs then Just 
+                       $ InsertChildrenRen firstSelfDirtyChildIx 
+                                           (newNrOfArrs - oldNrOfArrs) 
                      else Nothing
   in  if length childDiffs' /= newNrOfArrs then error "problem!!!!!!!!!!!!" else
       debug Arr ("diffArrs:"++show(x,x',y,y',w,w',h,h',bc,bc',newNrOfArrs,oldNrOfArrs)) $

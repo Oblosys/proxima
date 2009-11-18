@@ -421,6 +421,24 @@ function updateTree(update)
     node.style.top = update.getAttribute('y')+'px';
     node.style.width = update.getAttribute('w')+'px';
     node.style.height = update.getAttribute('h')+'px';
+  } else if (op == 'insert')
+  { var path = update.childNodes[0];
+    var parentNode = select(path, document.getElementById('proxima'));
+    var pos = parseInt(update.getAttribute('pos'));
+    var nr = parseInt(update.getAttribute('nr'));
+  
+    var nextChild = parentNode.childNodes[pos];
+
+    // insert nr dummy divs at position pos (in case parent has no elements, and no nextChild, we append the elements)
+    // when parent is non-empty dummies are inserted in reverse order, but since they are identical, this is no problem.
+    // when parent is empty, dummies are inserted in normal order because nextChild is not updated and we keep on appending.
+    for(var i = 0; i < nr; i++)
+    { var dummy = document.createElement('div');
+      if (nextChild)
+        parentNode.insertBefore(dummy, nextChild);
+      else
+        parentNode.appendChild(dummy);
+    }
   } else if (op == 'delete')
   { var path = update.childNodes[0];
     var parentNode = select(path, document.getElementById('proxima'));
