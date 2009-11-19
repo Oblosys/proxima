@@ -421,6 +421,7 @@ function updateTree(update)
     node.style.top = update.getAttribute('y')+'px';
     node.style.width = update.getAttribute('w')+'px';
     node.style.height = update.getAttribute('h')+'px';
+    debugAdd('move');
   } else if (op == 'insert')
   { var path = update.childNodes[0];
     var parentNode = select(path, document.getElementById('proxima'));
@@ -439,6 +440,7 @@ function updateTree(update)
       else
         parentNode.appendChild(dummy);
     }
+    debugAdd('insert '+pos+ ' '+nr);
   } else if (op == 'delete')
   { var path = update.childNodes[0];
     var parentNode = select(path, document.getElementById('proxima'));
@@ -446,7 +448,8 @@ function updateTree(update)
     var nr = parseInt(update.getAttribute('nr'));
 
     for(var i = 0; i < nr; i++)
-      parentNode.removeChild(parentNode.childNodes[pos+i]);
+      parentNode.removeChild(parentNode.childNodes[pos]); // after remove, the next child to remove will also be at pos
+    debugAdd('delete '+pos+ ' '+nr);
   } else if (op == 'contextMenu')
   { var screenX = update.getAttribute('screenX');
     var screenY = update.getAttribute('screenY');
@@ -980,7 +983,10 @@ function insertCharPredictively(char)
 }
 
 function test(char)
-{ insertCharPredictively(char)
+{
+    loadXMLDoc('Key(13,(False,False,False));'); // put this one in refresh?
+
+ // insertCharPredictively(char)
 }
 ]]></script>
 </head>
