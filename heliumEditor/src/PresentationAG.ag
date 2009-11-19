@@ -113,7 +113,7 @@ SEM EnrichedDoc
                  
 SEM RootE
   | RootE
-      loc.pres = structural $
+      loc.pres = structural $  -- col [@idListDecls.idsPres,@decls.pres ] -- simplest presentation that still works
                    col [ row [ hSpace 3
                               -- , text $ "Document focus: " ++show @lhs.focusD
                               , case lookup @lhs.focusD @lhs.typeEnv of
