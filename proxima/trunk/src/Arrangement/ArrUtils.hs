@@ -128,18 +128,14 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 -- Does not take into account direction of Overlay
 
 --       new arrangement     old arrangement
-diffArr (StructuralA _ arr) arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) (getInsertDelete childDT) [childDT]
+diffArr (StructuralA _ arr) arr'                   = diffArr arr arr'
 diffArr arr                  (StructuralA _ arr')  = diffArr arr arr'
-diffArr (ParsingA _ arr)    arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) (getInsertDelete childDT) [childDT]
+diffArr (ParsingA _ arr)    arr'                   = diffArr arr arr'
 diffArr arr                  (ParsingA _ arr')     = diffArr arr arr'
-diffArr (LocatorA l arr)     arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) (getInsertDelete childDT) [childDT]
-diffArr arr                  (LocatorA l arr')      = diffArr arr arr'
-diffArr (TagA t arr)     arr'                   = let childDT = diffArr arr arr'
-                                                      in  DiffNodeArr (isCleanDTArr childDT) (isSelfCleanDTArr childDT) (getMove childDT) (getInsertDelete childDT) [childDT]
-diffArr arr                  (TagA t arr')      = diffArr arr arr'
+diffArr (LocatorA l arr)     arr'                  = diffArr arr arr'
+diffArr arr                  (LocatorA l arr')     = diffArr arr arr'
+diffArr (TagA t arr)     arr'                      = diffArr arr arr'
+diffArr arr                  (TagA t arr')         = diffArr arr arr'
 diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
                     in  case dt of
                           -- only when child is clean we will compute a move
@@ -242,8 +238,7 @@ diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs =
                        $ InsertChildrenRen firstSelfDirtyChildIx 
                                            (newNrOfArrs - oldNrOfArrs) 
                      else Nothing
-  in  if length childDiffs' /= newNrOfArrs then error "problem!!!!!!!!!!!!" else
-      debug Arr ("diffArrs:"++show(x,x',y,y',w,w',h,h',bc,bc',newNrOfArrs,oldNrOfArrs)) $
+  in  (if length childDiffs' /= newNrOfArrs then debug Err "ArrUtils.diffArrs: internal error, wrong nr of difftrees" else id)
       DiffNodeArr ( selfClean && all isCleanDTArr childDiffs') selfClean Nothing insertDelete
                (if not selfClean
                 then replicate (length newArrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered

@@ -98,28 +98,32 @@ Hence, we can emit a replace command if the parent is clean but the child is sel
 
 -- This is not very nice, makeReplaceUpdate is called also on descendents, in which case it doesn't really make an update
 -- arrangement is passed only for debugging
-makeReplaceUdate Nothing    arrangement mkArrangement = mkArrangement
-makeReplaceUdate (Just pth) arrangement mkArrangement = 
- do { tell $ "<div id='replace' op='replace'>"++htmlPath pth
+makeReplaceUpdate Nothing    arrangement mkArrangement = mkArrangement
+makeReplaceUpdate (Just pth) arrangement mkArrangement = 
+ do { debug Ren ("mkReplace " ++ shallowShowArr arrangement ++ " on "++ show pth) $ return ()
+    ; tell $ "<div id='replace' op='replace'>"++htmlPath pth
     --; putStrLn $ "\n\n*********REPLACE "++show pth
     --; putStrLn $ "by:\n" ++ showTreeArr arrangement
     ; mkArrangement
     ; tell $ "</div>" 
     }
 
-makeMoveUdate Nothing    coords = debug Err ("RendererServer.makeMoveUpdate: no path.") $ return ()
-makeMoveUdate (Just pth) ((x,y),(w,h)) = 
- do { tell $ "<div id='move' op='move' x='"++show x++"' y='"++show y++"' w='"++show w++"' h='"++show h++"'>"++htmlPath pth
+makeMoveUpdate Nothing    coords = debug Err ("RendererServer.makeMoveUpdate: no path.") $ return ()
+makeMoveUpdate (Just pth) dim@((x,y),(w,h)) = 
+ do { debug Ren ("mkMove "++show dim++" on "++ show pth) $ return ()
+    ; tell $ "<div id='move' op='move' x='"++show x++"' y='"++show y++"' w='"++show w++"' h='"++show h++"'>"++htmlPath pth
     ; tell $ "</div>" 
     }
 
-makeInsertDeleteUdate Nothing    insdel = debug Err ("RendererServer.makeInsertDeleteUpdate: no path.") $ return ()
-makeInsertDeleteUdate (Just pth) (InsertChildrenRen pos nr) = 
- do { tell $ "<div id='insert' op='insert' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
+makeInsertDeleteUpdate Nothing    insdel = debug Err ("RendererServer.makeInsertDeleteUpdate: no path.") $ return ()
+makeInsertDeleteUpdate (Just pth) (InsertChildrenRen pos nr) = 
+ do { debug Ren ("mkDelete "++show pos++" "++show nr++" on "++ show pth) $ return ()
+    ; tell $ "<div id='insert' op='insert' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
     ; tell $ "</div>" 
     }
-makeInsertDeleteUdate (Just pth) (DeleteChildrenRen pos nr) = 
- do { tell $ "<div id='delete' op='delete' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
+makeInsertDeleteUpdate (Just pth) (DeleteChildrenRen pos nr) = 
+ do { debug Ren ("mkInsert "++show pos++" "++show nr++" on "++ show pth) $ return ()
+    ; tell $ "<div id='delete' op='delete' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
     ; tell $ "</div>" 
     }
 
@@ -140,30 +144,14 @@ pathRFromPathA arr                 (p:path) = p : pathRFromPathA (index "pathRFr
 renderArr :: Show node => Bool -> Scale -> (Int,Int) ->
                            (Point, Size) -> Maybe Tags -> Maybe Path -> DiffTreeArr -> Arrangement node ->
                            Writer String ()    
-renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ _ [dt]) (StructuralA _ arr) =
-           renderArr o s (lux, luy) v mt m dt arr -- ignore move
-renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (StructuralA _ arr) =
-           renderArr o s (lux, luy) v mt m (DiffLeafArr d mv) arr
-renderArr o s (lux, luy) v mt m _                   (StructuralA _ arr) =
-           debug Err "renderArr: difftree does not match arrangement" $ return ()
-renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ _ [dt]) (ParsingA _ arr) =
+renderArr o s (lux, luy) v mt m dt (StructuralA _ arr) =
            renderArr o s (lux, luy) v mt m dt arr
-renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (ParsingA _ arr) =
-           renderArr o s (lux, luy) v mt m (DiffLeafArr d mv) arr
-renderArr o s (lux, luy) v mt m _                   (ParsingA _ arr) =
-           debug Err "renderArr: difftree does not match arrangement" $ return ()
-renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ _ [dt]) (LocatorA _ arr) =
+renderArr o s (lux, luy) v mt m dt (ParsingA _ arr) =
            renderArr o s (lux, luy) v mt m dt arr
-renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (LocatorA _ arr) =
-           renderArr o s (lux, luy) v mt m (DiffLeafArr d mv) arr
-renderArr o s (lux, luy) v mt m _                   (LocatorA _ arr) =
-           debug Err "renderArr: difftree does not match arrangement" $ return ()
-renderArr o s (lux, luy) v mt m (DiffNodeArr _ _ _ _ [dt]) (TagA tags arr) =
+renderArr o s (lux, luy) v mt m dt (LocatorA _ arr) =
+           renderArr o s (lux, luy) v mt m dt arr
+renderArr o s (lux, luy) v mt m dt (TagA tags arr) =
            renderArr o s (lux, luy) v (Just tags) m dt arr
-renderArr o s (lux, luy) v mt m (DiffLeafArr d mv)        (TagA tags arr) =
-           renderArr o s (lux, luy) v (Just tags) m (DiffLeafArr d mv) arr
-renderArr o s (lux, luy) v mt m _                   (TagA _ arr) =
-           debug Err "renderArr: difftree does not match arrangement" $ return ()
 
 renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
  do { --debug Ren (shallowShowArr arrangement ++"renderArr on: "++ show (isSelfCleanDT diffTree)++":"++ show (isCleanDT diffTree)) $
@@ -171,10 +159,10 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
      --if True then return () else    -- uncomment this line to skip rendering
 
     ; case getMove diffTree of 
-        (Just m) -> debug Ren ("We have a move: "++show m) $ makeMoveUdate mPth m
+        (Just m) -> makeMoveUpdate mPth m
         _ -> return ()                       
     ; case getInsertDelete diffTree of 
-        (Just insdel) -> debug Ren ("We have an insert/delete: "++show insdel) $ makeInsertDeleteUdate mPth insdel
+        (Just insdel) -> makeInsertDeleteUpdate mPth insdel
         _ -> return ()                       
                                        
     ; if (isSelfCleanDTArr diffTree)  -- if self is clean, only render its children (if present)
@@ -212,7 +200,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
           --when (overlap ((lux+xA arrangement, luy+yA arrangement),
           --               (widthA arrangement, heightA arrangement)) viewedArea) $
           -- only render when the arrangement is in the viewed area   
-          makeReplaceUdate mPth arrangement $
+          makeReplaceUpdate mPth arrangement $
 --          (\mkArr -> do {putStrLn "self dirty"; mkArr}) $
           
   case arrangement of 
