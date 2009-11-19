@@ -152,6 +152,12 @@ diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
 -- does this make sense?
 -- maybe don't put moves everywhere, and also don't put selfclean everywhere, just copy descendentclean
 
+-- do a clean .. thing with right, to prevent complicated moves. (is that necessary)
+
+-- maybe these are related
+-- what about undrendered x polygons, there was one visible in the helium editor
+-- focus disappears
+
 -- TODO what if difference between old and new is large eg [xx] -> [xyyyyyyyx] ? or vice versa. does the take algorithm yield lists of correct length?
 -- todo change error to debug Err
 
@@ -220,7 +226,7 @@ diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs =
       oldNrOfArrs   = length oldArrs
       childDiffs  = zipWith diffArr newArrs oldArrs
       reverseChildDiffs = zipWith diffArr (reverse newArrs) (reverse oldArrs)
-      firstSelfDirtyChildIx = length $ takeWhile isSelfCleanDTArr childDiffs
+      firstSelfDirtyChildIx = length $ takeWhile isCleanX childDiffs
       leftChildDiffs = take firstSelfDirtyChildIx childDiffs
 
       rightChildDiffs = reverse $ if newNrOfArrs < oldNrOfArrs 
@@ -242,6 +248,12 @@ diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs =
                (if not selfClean
                 then replicate (length newArrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered
                 else childDiffs')
+
+isCleanX (DiffLeafArr False _) = False
+isCleanX (DiffNodeArr False _ _ _ _) = False
+isCleanX (DiffNodeArr _ False _ _ _) = False
+isCleanX (DiffNodeArr _ _ _ (Just _) _) = False
+isCleanX _ = True
 
 -- | Returns a list of all areas that are dirty according to the diffTree
 -- not used in Proxima 2.0, browser takes care of this
