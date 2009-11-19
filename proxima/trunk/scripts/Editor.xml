@@ -986,6 +986,9 @@ function insertCharPredictively(char)
 
 // one time there was a textNode undefined problem, while all calls to insertChar were commented out..
 // and also insert did not work on new lines. maybe this can occur again, what happens if there is no element at the focus?
+
+// big X on startup, and on waiting to long. Probably related to sessions
+// thread safety in sessions!!
 }
 
 function test(char)
