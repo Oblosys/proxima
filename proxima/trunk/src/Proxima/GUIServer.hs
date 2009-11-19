@@ -259,9 +259,10 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
                              
 
-                             ; seq (length responseHtml) $ return ()
-                             ; liftIO $ putStrLn $ "Sending response sent to client:\n" ++
-                                                   {-take 160-}responseHtml ++ "..."
+                             ; let responseLength = length responseHtml 
+                             ; seq responseLength $ return ()
+                             ; liftIO $ putStrLn $ "Sending response sent to client ("++show responseLength++")" 
+--                                                   {-take 160-}(show $ length responseHtml)
                              --; modifyResponseW noCache $
                              ;  anyRequest $ ok $ toResponse responseHtml 
                              }
