@@ -30,7 +30,7 @@ render scale arrDb diffTree arrangement viewedArea =
     --; clipRegion <- regionRectangle $ Rectangle (xA arrangement) (yA arrangement) (widthA arrangement) (heightA arrangement)
     -- cannot use these IO regions anymore
     
-    ; debug Ren ("DiffTree is " ++ show diffTree) $
+    ; --debug Ren ("DiffTree is " ++ show diffTree) $
       --debug Ren ("Arrangement is "++show arrangement) $
       renderArr arrDb scale origin viewedArea Nothing (Just [0]) diffTree arrangement
     }
