@@ -137,7 +137,8 @@ diffArr arr                  (LocatorA l arr')     = diffArr arr arr'
 diffArr (TagA t arr)     arr'                      = diffArr arr arr'
 diffArr arr                  (TagA t arr')         = diffArr arr arr'
 diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
-                    in  case dt of
+                    in  -- removeMove $
+                        case dt of
                           -- only when child is clean we will compute a move
                           -- todo replace by selfClean
                           DiffLeafArr True _ -> DiffLeafArr True $ computeMove arr1 arr2
@@ -145,6 +146,9 @@ diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
                                    DiffNodeArr descendentsClean True (computeMove arr1 arr2) insdel dts
                           dn -> dn 
 
+removeMove dt = case getMove dt of
+                  Nothing -> dt
+                  Just _ -> DiffLeafArr False Nothing
 -- do a clean .. thing with right, to prevent complicated moves. (is that necessary)
 
 -- maybe these are related
