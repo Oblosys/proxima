@@ -253,7 +253,8 @@ isCleanX _ = True
 
 
 
-
+-- Cumulative moves will save a lot of move operation, since in rows and columns, the position of an element depends on
+-- it predecessors
 makeMovesCumulativeRow o [] = []
 makeMovesCumulativeRow o (DiffLeafArr b Nothing : dts) = DiffLeafArr b Nothing : makeMovesCumulativeRow o dts
 makeMovesCumulativeRow o (DiffLeafArr b (Just ((x,y),d)): dts ) = DiffLeafArr b (filterEmpty $ Just ((x-o,y),d)) : 
