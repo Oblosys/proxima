@@ -190,13 +190,13 @@ diffArr' (EdgeA _ x1 y1 x2 y2 hr vr lw lc) (EdgeA _ x1' y1' x2' y2' hr' vr' lw' 
 diffArr' (EdgeA _  _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
 
 diffArr' (RowA _ x y w h hr vr bc arrs) (RowA _ x' y' w' h' hr' vr' bc' arrs') =  
-  diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
+  diffArrs x y w h bc arrs x' y' w' h' bc' arrs' (Just Horizontal)
 diffArr' (ColA _ x y w h hr vr bc _ arrs) (ColA _ x' y' w' h' hr' vr' bc' _ arrs') = 
-  diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
+  diffArrs x y w h bc arrs x' y' w' h' bc' arrs' (Just Vertical)
 diffArr' (OverlayA _ x y w h hr vr bc d arrs) (OverlayA _ x' y' w' h' hr' vr' bc' d' arrs') =
-  diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
+  diffArrs x y w h bc arrs x' y' w' h' bc' arrs' Nothing
 diffArr' (GraphA _ x y w h hr vr bc nvs arrs) (GraphA _ x' y' w' h' hr' vr' bc' nvs' arrs') =
-  case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
+  case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' Nothing of
     DiffNodeArr childrenClean selfClean _ _ _ -> DiffLeafArr (selfClean && childrenClean) Nothing
     _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeafArr False  Nothing -- TODO what about this?
     -- a graph is only clean when all children and the graph itself are clean
@@ -214,7 +214,7 @@ diffArr' arr                           _                                = debug 
 -- pres is different when either self has changed or children
 
 -- first list (new) determines size of diffTree
-diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs =  
+diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs mOrientation =  
   let newNrOfArrs    = length newArrs
       oldNrOfArrs   = length oldArrs
       childDiffs  = zipWith diffArr newArrs oldArrs
@@ -226,7 +226,11 @@ diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs =
                                   then take (newNrOfArrs - firstSelfDirtyChildIx) reverseChildDiffs
                                   else take (oldNrOfArrs - firstSelfDirtyChildIx) reverseChildDiffs ++
                                        replicate (newNrOfArrs - oldNrOfArrs) (DiffLeafArr False Nothing)
-      childDiffs' = leftChildDiffs ++ rightChildDiffs
+      makeCumulative = case mOrientation of
+                         Just Horizontal -> makeMovesCumulativeRow 0
+                         Just Vertical -> makeMovesCumulativeCol 0
+                         _               -> id
+      childDiffs' = makeCumulative $ leftChildDiffs ++ rightChildDiffs
       selfClean   = bc==bc' 
       insertDelete = if newNrOfArrs < oldNrOfArrs then Just 
                        $ DeleteChildrenRen firstSelfDirtyChildIx 
@@ -247,9 +251,27 @@ isCleanX (DiffNodeArr _ False _ _ _) = False
 isCleanX (DiffNodeArr _ _ _ (Just _) _) = False
 isCleanX _ = True
 
+
+
+
 makeMovesCumulativeRow o [] = []
 makeMovesCumulativeRow o (DiffLeafArr b Nothing : dts) = DiffLeafArr b Nothing : makeMovesCumulativeRow o dts
-makeMovesCumulativeRow o (DiffLeafArr b (Just ((x,y),d)) : dts ) = DiffLeafArr b (Just ((x,y),d)) : makeMovesCumulativeRow o dts
+makeMovesCumulativeRow o (DiffLeafArr b (Just ((x,y),d)): dts ) = DiffLeafArr b (filterEmpty $ Just ((x-o,y),d)) : 
+                                                                  makeMovesCumulativeRow x dts {- o + (x-o) == x -}
+makeMovesCumulativeRow o (DiffNodeArr b1 b2 Nothing id cs : dts) = DiffNodeArr b1 b2 Nothing id cs : makeMovesCumulativeRow o dts
+makeMovesCumulativeRow o (DiffNodeArr b1 b2 (Just ((x,y),d)) id cs: dts ) = DiffNodeArr b1 b2 (filterEmpty $ Just ((x-o,y),d)) id cs :
+                                                                            makeMovesCumulativeRow x dts
+
+makeMovesCumulativeCol o [] = []
+makeMovesCumulativeCol o (DiffLeafArr b Nothing : dts) = DiffLeafArr b Nothing : makeMovesCumulativeCol o dts
+makeMovesCumulativeCol o (DiffLeafArr b (Just ((x,y),d)): dts ) = DiffLeafArr b (filterEmpty $ Just ((x,y-o),d)) : 
+                                                                  makeMovesCumulativeCol y dts
+makeMovesCumulativeCol o (DiffNodeArr b1 b2 Nothing id cs : dts) = DiffNodeArr b1 b2 Nothing id cs : makeMovesCumulativeCol o dts
+makeMovesCumulativeCol o (DiffNodeArr b1 b2 (Just ((x,y),d)) id cs: dts ) = DiffNodeArr b1 b2 (filterEmpty $ Just ((x,y-o),d)) id cs :
+                                                                            makeMovesCumulativeCol y dts
+
+filterEmpty (Just ((0,0),(0,0))) = Nothing
+filterEmpty mdim = mdim
 
 -- | Returns a list of all areas that are dirty according to the diffTree
 -- not used in Proxima 2.0, browser takes care of this

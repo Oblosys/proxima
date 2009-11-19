@@ -417,11 +417,14 @@ function updateTree(update)
   } else if (op == 'move')
   { var path = update.childNodes[0];
     var node = select(path, document.getElementById('proxima'));
-      
-    node.style.left = node.offsetLeft +  parseInt( update.getAttribute('x') )+'px';
-    node.style.top = node.offsetTop + parseInt( update.getAttribute('y') )+'px';
-    node.style.width = node.offsetWidth + parseInt( update.getAttribute('w') )+'px';
-    node.style.height = node.offsetHeight + parseInt( update.getAttribute('h') )+'px';
+    do // move the node and all it's siblings in the row/column
+    { node.style.left = node.offsetLeft +  parseInt( update.getAttribute('x') )+'px';
+      node.style.top = node.offsetTop + parseInt( update.getAttribute('y') )+'px';
+      node.style.width = node.offsetWidth + parseInt( update.getAttribute('w') )+'px';
+      node.style.height = node.offsetHeight + parseInt( update.getAttribute('h') )+'px';
+      node = node.nextSibling;
+    } while (node);
+
 //    debugAdd('move');
   } else if (op == 'insert')
   { var path = update.childNodes[0];
