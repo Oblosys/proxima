@@ -251,18 +251,25 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
    [ withData (\cmds -> [ methodSP GET $ 
                           do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
 
-                             ; responseHtml <-
-                                 liftIO $ catchExceptions $ handleCommands params initR menuR actualViewedAreaRef
-                                                                           sessionId isPrimarySession nrOfSessions
-                                                                           cmds
+                             ; (responseHtml,responseLength) <-
+                                 liftIO $ catchExceptions $
+                                   do { html <- handleCommands params initR menuR actualViewedAreaRef
+                                                               sessionId isPrimarySession nrOfSessions
+                                                               cmds
+                                      ; let responseLength = length html 
+                                      ; seq responseLength $ return ()
+                                      ; return (html, responseLength)
+                                      } -- kind of tricky, we need to make sure that the html string is evaluated here, so
+                                        -- any possible exceptions are thrown and caught. If not, HApps silently sends the
+                                        -- exception text as the html response :-(
+
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
-                             
+                             ; liftIO $ putStrLn "\n\n\n\n\n\nBefore length"
 
-                             ; let responseLength = length responseHtml 
-                             ; seq responseLength $ return ()
-                             ; liftIO $ putStrLn $ "Sending response sent to client ("++show responseLength++")" 
---                                                   {-take 160-}(show $ length responseHtml)
+                             ; liftIO $ putStrLn "After length\n\n\n\n"
+                             ; liftIO $ putStrLn $ "Sending response sent to client (" -- ++show responseLength++ ")" 
+                                                   ++ {-take 160-} show responseLength
                              --; modifyResponseW noCache $
                              ;  anyRequest $ ok $ toResponse responseHtml 
                              }
@@ -281,7 +288,7 @@ catchExceptions io =
           ; putStrLn exceptionText
           ; let responseHTML = "<div id='updates'><div id='alert' op='alert' text='"++filter (/='\'') exceptionText++"'></div></div>"
                 
-          ; return responseHTML
+          ; return (responseHTML, length responseHTML)
           }
 
 type ServerInstanceId = String
