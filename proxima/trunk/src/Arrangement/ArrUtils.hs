@@ -144,9 +144,6 @@ diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
                           DiffNodeArr descendentsClean True _ insdel dts -> 
                                    DiffNodeArr descendentsClean True (computeMove arr1 arr2) insdel dts
                           dn -> dn 
--- move is now copied along a chain of structurals/locators/etc. just like clean attrs.
--- does this make sense?
--- maybe don't put moves everywhere, and also don't put selfclean everywhere, just copy descendentclean
 
 -- do a clean .. thing with right, to prevent complicated moves. (is that necessary)
 
@@ -165,7 +162,7 @@ diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
 computeMove newArr oldArr =
   let a1@((x1,y1),(w1,h1)) = getAreaA newArr
       a2@((x2,y2),(w2,h2)) = getAreaA oldArr
-  in  if a1 == a2 then Nothing else Just a1 
+  in  if a1 == a2 then Nothing else Just ((x1-x2,y1-y2),(w1-w2,h1-h2)) 
 
 
 -- Poly, Rectangle, Ellipse and Edge cannot be moved because width and height is encoded in the svg code
@@ -249,6 +246,10 @@ isCleanX (DiffNodeArr False _ _ _ _) = False
 isCleanX (DiffNodeArr _ False _ _ _) = False
 isCleanX (DiffNodeArr _ _ _ (Just _) _) = False
 isCleanX _ = True
+
+makeMovesCumulativeRow o [] = []
+makeMovesCumulativeRow o (DiffLeafArr b Nothing : dts) = DiffLeafArr b Nothing : makeMovesCumulativeRow o dts
+makeMovesCumulativeRow o (DiffLeafArr b (Just ((x,y),d)) : dts ) = DiffLeafArr b (Just ((x,y),d)) : makeMovesCumulativeRow o dts
 
 -- | Returns a list of all areas that are dirty according to the diffTree
 -- not used in Proxima 2.0, browser takes care of this

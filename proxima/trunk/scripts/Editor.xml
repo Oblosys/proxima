@@ -3,8 +3,9 @@
 <!-- v1
 
 IE problems
--SVN support
+-SVG support
 -use str.charAt(i) instead of str[i]
+-offsetLeft, etc.?
 -getElementsByClassName()      (see http://forums.devshed.com/javascript-development-115/javascript-get-all-elements-of-class-abc-24349.html)
 
 -->
@@ -298,7 +299,7 @@ if (xmlhttp!=null)
       xmlhttp.open("GET",'handle?commands=Commands '+ requestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
       requestId++;
-      debugAdd('incremented requestId: ' + requestId);
+//      debugAdd('incremented requestId: ' + requestId);
       commandQueue = '';
     }
   }
@@ -417,11 +418,11 @@ function updateTree(update)
   { var path = update.childNodes[0];
     var node = select(path, document.getElementById('proxima'));
       
-    node.style.left = update.getAttribute('x')+'px';
-    node.style.top = update.getAttribute('y')+'px';
-    node.style.width = update.getAttribute('w')+'px';
-    node.style.height = update.getAttribute('h')+'px';
-    debugAdd('move');
+    node.style.left = node.offsetLeft +  parseInt( update.getAttribute('x') )+'px';
+    node.style.top = node.offsetTop + parseInt( update.getAttribute('y') )+'px';
+    node.style.width = node.offsetWidth + parseInt( update.getAttribute('w') )+'px';
+    node.style.height = node.offsetHeight + parseInt( update.getAttribute('h') )+'px';
+//    debugAdd('move');
   } else if (op == 'insert')
   { var path = update.childNodes[0];
     var parentNode = select(path, document.getElementById('proxima'));
@@ -440,7 +441,7 @@ function updateTree(update)
       else
         parentNode.appendChild(dummy);
     }
-    debugAdd('insert '+pos+ ' '+nr);
+//    debugAdd('insert '+pos+ ' '+nr);
   } else if (op == 'delete')
   { var path = update.childNodes[0];
     var parentNode = select(path, document.getElementById('proxima'));
@@ -449,7 +450,7 @@ function updateTree(update)
 
     for(var i = 0; i < nr; i++)
       parentNode.removeChild(parentNode.childNodes[pos]); // after remove, the next child to remove will also be at pos
-    debugAdd('delete '+pos+ ' '+nr);
+//    debugAdd('delete '+pos+ ' '+nr);
   } else if (op == 'contextMenu')
   { var screenX = update.getAttribute('screenX');
     var screenY = update.getAttribute('screenY');
