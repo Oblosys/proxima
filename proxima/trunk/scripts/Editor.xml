@@ -936,15 +936,13 @@ function registerPredictiveInsert(char)
    and reapply the predictive inserts for requests that are currently being sent to the server
 */
 function applyRemainingPredictiveInserts(responseId)
-{ /*
-   while ( predictiveInserts.length > 0 && predictiveInserts[0].requestId <= responseId )
+{ while ( predictiveInserts.length > 0 && predictiveInserts[0].requestId <= responseId )
     predictiveInserts.shift();
 
   for (var i=0; i < predictiveInserts.length; i++)
   { debugAdd(responseId+' Applying: '+ predictiveInserts[i].requestId + ' ' +predictiveInserts[i].char );
     insertChar(predictiveInserts[i].char);
   }
-*/
 }
 
 
@@ -974,8 +972,8 @@ function insertChar(char)
 }
 
 function insertCharPredictively(char)
-{ //insertChar(char);
-  //registerPredictiveInsert(char);
+{ insertChar(char);
+  registerPredictiveInsert(char);
 
 // todo: fix annoying bug that disables keyboard sometimes. (seems to be a firefox problem)
 // todo: need to tag the text area, so we don't move above it (as is a problem in the decl. form)
@@ -990,9 +988,9 @@ function insertCharPredictively(char)
 
 function test(char)
 {
-    loadXMLDoc('Key(13,(False,False,False));'); // put this one in refresh?
+  loadXMLDoc('Key(13,(False,False,False));'); // put this one in refresh?
 
- // insertCharPredictively(char)
+  insertCharPredictively(char)
 }
 ]]></script>
 </head>
