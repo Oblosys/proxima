@@ -167,7 +167,6 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
                serverInstanceId currentSessionsRef = 
   [ do { liftIO $ takeMVar mutex -- obtain mutex
        -- Proxima is not thread safe yet, so only one thread at a time is allowed to execute.
-       ; liftIO $ threadDelay 4000000
 
        ; removeExpiredSessions currentSessionsRef
        ; (sessionId,viewedArea) <- getCookieSessionId serverInstanceId currentSessionsRef
