@@ -44,6 +44,7 @@ import Network.Salvia.Handlers
 
 
 import Control.Concurrent
+import Control.Concurrent.MVar
 import Data.List
 import Evaluation.DocTypes (DocumentLevel, EditDocument'_ (..))
 import Arrangement.ArrTypes
@@ -72,13 +73,13 @@ initialize (settings,handler,renderingLvlVar,viewedAreaRef,_) =
 withCatch io = io
 
 startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
- do { initR <- newIORef (True)
+ do { mutex <- newMVar ()
     ; menuR <- newIORef []
     ; actualViewedAreaRef <- newIORef ((0,0),(0,0)) -- is used when reducing the viewed area, see mkSetViewedAreaHtml
     ; currentSessionsRef <- newIORef []
     ; serverInstanceId <- fmap (formatTime defaultTimeLocale "%s") getCurrentTime
     ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
-    ; let startServer = server params initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef
+    ; let startServer = server params mutex menuR actualViewedAreaRef serverInstanceId currentSessionsRef
 
     ; hSetBuffering stdin NoBuffering
     ; stdInAvailable <- do { hReady stdin
@@ -114,9 +115,9 @@ the monad, but it will only do something if the header is not set in the out par
 Header modifications must therefore be applied to out rather than be fmapped to the monad.
 -}
 
-server params@(settings,_,_,_) initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef =
+server params@(settings,_,_,_) mutex menuR actualViewedAreaRef serverInstanceId currentSessionsRef =
   simpleHTTP (Conf (serverPort settings) Nothing) 
-             (sessionHandler params initR menuR actualViewedAreaRef serverInstanceId currentSessionsRef)
+             (sessionHandler params mutex menuR actualViewedAreaRef serverInstanceId currentSessionsRef)
 {-
 handle:
 http://<server url>/                    response: <proxima executable dir>/src/proxima/scripts/Editor.xml
@@ -162,9 +163,13 @@ withAgentIsMIE f = withRequest $ \rq ->
 -- in case of multiple sessions, editors should poll every .. seconds
 
 -- bug. declaration form becomes weird after single session timeout
-sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) initR menuR actualViewedAreaRef 
+sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex menuR actualViewedAreaRef 
                serverInstanceId currentSessionsRef = 
-  [ do { removeExpiredSessions currentSessionsRef
+  [ do { liftIO $ takeMVar mutex -- obtain mutex
+       -- Proxima is not thread safe yet, so only one thread at a time is allowed to execute.
+       ; liftIO $ threadDelay 4000000
+
+       ; removeExpiredSessions currentSessionsRef
        ; (sessionId,viewedArea) <- getCookieSessionId serverInstanceId currentSessionsRef
        ; currentSessions <- liftIO $ readIORef currentSessionsRef
                
@@ -180,17 +185,19 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) initR me
 
        ; liftIO $ putStrLn $ "Viewed area for this session: " ++ show viewedArea
 
-       ; response <- multi $ handlers params initR menuR actualViewedAreaRef sessionId isPrimarySession (length currentSessions)
+       ; response <- multi $ handlers params menuR actualViewedAreaRef sessionId isPrimarySession (length currentSessions)
        ; viewedArea' <- liftIO $ readIORef viewedAreaRef
        ; liftIO $ putStrLn $ "And now viewed area is " ++ show viewedArea'
        ; liftIO $ writeIORef currentSessionsRef $ 
                             [ (i, t, if i == sessionId then viewedArea' else v)
                             | (i,t,v) <- currentSessions 
                             ]
+
+       ; liftIO $ putMVar mutex () -- release the mutex
        ; return response
        } ]
                      
-handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef 
+handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef 
          sessionId isPrimarySession nrOfSessions = 
   debugFilter $
   [ withAgentIsMIE $ \agentIsMIE ->
@@ -253,7 +260,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) initR menuR act
 
                              ; (responseHtml,responseLength) <-
                                  liftIO $ catchExceptions $
-                                   do { html <- handleCommands params initR menuR actualViewedAreaRef
+                                   do { html <- handleCommands params menuR actualViewedAreaRef
                                                                sessionId isPrimarySession nrOfSessions
                                                                cmds
                                       ; let responseLength = length html 
@@ -384,13 +391,13 @@ splitCommands commandStr =
     (command, (_:commandStr')) -> command : splitCommands commandStr'
         
 -- handle each command in commands and send the updates back
-handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
                sessionId isPrimarySession nrOfSessions (Commands requestId commandStr) =
  do { let commands = splitCommands commandStr
    -- ; putStrLn $ "Received commands:"++ show commands
     
     ; renderingHTMLss <-
-        mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+        mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
                                sessionId isPrimarySession nrOfSessions)
              commands
  
@@ -443,10 +450,10 @@ type Modifiers = (Bool,Bool,Bool)
 data MouseCommand = MouseDown | MouseMove | MouseUp | MouseDragStart | MouseDrop
                     deriving (Show, Read)
 
-handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
                  sessionId isPrimarySession nrOfSessions eventStr =
   case safeRead eventStr of
-    Just cmd -> handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+    Just cmd -> handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
                 sessionId isPrimarySession nrOfSessions cmd
     Nothing  -> error ("Syntax error in command: "++eventStr) 
 
@@ -456,10 +463,10 @@ handleCommand :: (Show token, Show node, Show enr, Show doc) =>
                ,((RenderingLevel doc enr node clip token, EditRendering doc enr node clip token) -> IO (RenderingLevel doc enr node clip token, [EditRendering' doc enr node clip token]))
                , IORef (RenderingLevel doc enr node clip token) 
                , IORef CommonTypes.Rectangle 
-               ) -> IORef Bool -> IORef [Wrapped doc enr node clip token] -> IORef CommonTypes.Rectangle ->
+               ) -> IORef [Wrapped doc enr node clip token] -> IORef CommonTypes.Rectangle ->
                SessionId -> Bool -> Int ->
                Command -> IO [String]
-handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) initR menuR actualViewedAreaRef
+handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
               sessionId isPrimarySession nrOfSessions command =
   case command of
     Metrics receivedMetrics@(font,_) ->
