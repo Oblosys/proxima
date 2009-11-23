@@ -27,7 +27,7 @@ import Data.IntMap (IntMap)
 import qualified Data.IntMap as IntMap
 import Control.Monad.Trans
 import Data.List
-
+import qualified Data.ByteString.Char8 as BS
 {- End of HApps imports -}
 
 {- Salvia imports 
@@ -271,9 +271,6 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualVie
 
 --                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
 --                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
-                             ; liftIO $ putStrLn "\n\n\n\n\n\nBefore length"
-
-                             ; liftIO $ putStrLn "After length\n\n\n\n"
                              ; liftIO $ putStrLn $ "Sending response sent to client (" -- ++show responseLength++ ")" 
                                                    ++ {-take 160-} show responseLength
                              --; modifyResponseW noCache $
@@ -315,21 +312,9 @@ removeExpiredSessions currentSessionsRef = liftIO $
 
 getCookieSessionId :: ServerInstanceId -> IORef Sessions -> ServerPart (SessionId, CommonTypes.Rectangle)
 getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
- do { let cookieMap = rqCookies rq
-      -- TODO: happs cookie parser sometimes fails on weird cookies.
-      --       we should parse the cookie header ourselves here 
-
-    ; let mCookieSessionId = case lookup "proxima" cookieMap of
-                      Nothing -> Nothing -- * no webviews cookie on the client
-                      Just c  -> case safeRead (cookieValue c) of
-                                   Nothing               -> Nothing -- * ill formed cookie on client
-                                   Just (cookieServerInstanceId::String,key::Int) -> 
-                                     if cookieServerInstanceId /= serverInstanceId
-                                     then Nothing  -- * cookie from previous Proxima run
-                                     else Just key -- * correct cookie for this run
-
+ do { let mCookieSessionId = parseCookie serverInstanceId rq
     ; currentSessions <- liftIO $ readIORef currentSessionsRef
-
+    ; liftIO $ putStrLn $ "parsed cookie id is " ++ show mCookieSessionId
     ; (sessionId, _, viewedArea) <-
         case mCookieSessionId of
           Just cookieSessionId | cookieSessionId `elem` map fst3 currentSessions ->
@@ -338,8 +323,9 @@ getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
                             [ (i, if i == cookieSessionId then time else t,v)
                             | (i,t,v) <- currentSessions 
                             ]
+
                ; addCookie 60 $ mkCookie "proxima" $ show (serverInstanceId, cookieSessionId)
-               ; let viewedArea = thd3 . head $ filter ((==cookieSessionId).fst3) currentSessions 
+               ; let viewedArea = thd3 . head' "GUIServer.getCookieSessionId" $ filter ((==cookieSessionId).fst3) currentSessions 
                ; return (cookieSessionId, time, viewedArea)
                }
 
@@ -348,6 +334,31 @@ getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
     ; liftIO $ putStrLn $ "SessionId:" ++ show sessionId
     ; return (sessionId, viewedArea)
     } 
+
+-- Added a (primitive) cookie parser because Happs cookie parser is buggy when other cookies exist with _ in the cookie name 
+parseCookie serverInstanceId rq = 
+ do { case getHeader "cookie" rq of
+        Nothing -> Nothing
+        Just cookieHeader ->
+          case getCookieFromHeader (BS.unpack cookieHeader) of
+                 Just (cookieServerInstanceId, key) |  cookieServerInstanceId == serverInstanceId -> 
+                                      Just key -- * correct cookie for this run
+                 _ -> Nothing -- * no webviews cookie on the client
+    }
+ where getCookieFromHeader [] = Nothing
+       getCookieFromHeader xs@(_:xs') = 
+         if not $ cookiePrefix `isPrefixOf` xs 
+         then getCookieFromHeader xs'
+         else case safeRead $ takeWhile (/= ';') $ drop (length cookiePrefix) xs of
+                Nothing -> -- the pathological case that proxima=" appears in the value of another cookie
+                           getCookieFromHeader $ drop (length cookiePrefix) xs
+                Just (valueStr :: String) ->
+                  case safeRead valueStr of
+                    Just (cookieServerInstanceId::String,key::Int) -> return (cookieServerInstanceId, key)
+                    Nothing -> -- cannot occur, since proxima=".." cannot appear in the value of another cookie (the " will be escaped)
+                               -- hence, when we have proxima=".." the .. will be a valid id/key pair
+                               getCookieFromHeader $ drop (length cookiePrefix) xs  
+       cookiePrefix = "proxima="
 
 makeNewSessionCookie serverInstanceId currentSessionsRef =
  do { currentSessions <- liftIO $ readIORef currentSessionsRef
