@@ -314,7 +314,7 @@ getCookieSessionId :: ServerInstanceId -> IORef Sessions -> ServerPart (SessionI
 getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
  do { let mCookieSessionId = parseCookie serverInstanceId rq
     ; currentSessions <- liftIO $ readIORef currentSessionsRef
-    ; liftIO $ putStrLn $ "parsed cookie id is " ++ show mCookieSessionId
+--    ; liftIO $ putStrLn $ "parsed cookie id is " ++ show mCookieSessionId
     ; (sessionId, _, viewedArea) <-
         case mCookieSessionId of
           Just cookieSessionId | cookieSessionId `elem` map fst3 currentSessions ->
