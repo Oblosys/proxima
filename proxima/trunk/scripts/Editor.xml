@@ -979,7 +979,6 @@ function insertCharPredictively(char)
 
 // todo: fix annoying bug that disables keyboard sometimes. (seems to be a firefox problem)
 // todo: need to tag the text area, so we don't move above it (as is a problem in the decl. form)
-// todo: when intermediate rendering results arrive during typing, remaining predictive chars need to be reapplied.
 // does not take into account non-editable
 // modified strings are not reset yet. Usually this will be done by next rendering
 // except when insert does not change the string with focus (as in non-editable)
@@ -987,8 +986,6 @@ function insertCharPredictively(char)
 // one time there was a textNode undefined problem, while all calls to insertChar were commented out..
 // and also insert did not work on new lines. maybe this can occur again, what happens if there is no element at the focus?
 
-// big X on startup, and on waiting to long. Probably related to sessions
-// thread safety in sessions!!
 }
 
 function test(char)
