@@ -10,8 +10,10 @@ import Rendering.Renderer
 
 import Evaluation.DocTypes (DocumentLevel)
 
+import Data.Time.Clock
+
 presentIO settings state high low =  castRemainingEditOps $ \editHigh ->
- do { let (editLow, state', high') = Rendering.RenPresent.render settings state high low editHigh
+ do { (editLow, state', high') <- Rendering.RenPresent.render settings state high low editHigh
     ; return ([editLow], state', high')
     }
     
@@ -29,9 +31,9 @@ render settings state (ArrangementLevel arr focus prs) ren@(RenderingLevel scale
        focusRendering = renderFocus scale debugging focus arr'
        updRegions' = computeUpdatedRegions updRegions scale focus diffTree arr arr'
        size        = (widthA arr', heightA arr')
-   in  ( SetRen' (RenderingLevel scale (mkPopupMenuXY settings prs scale arr') rendering focusRendering size debugging updRegions' lmd)
+   in  return ( SetRen' (RenderingLevel scale (mkPopupMenuXY settings prs scale arr') rendering focusRendering size debugging updRegions' lmd)
        , state, ArrangementLevel arr focus prs)
-render settings state arrLvl ren (SkipArr' i) = (SkipRen' (i-1), state, arrLvl)
+render settings state arrLvl ren (SkipArr' i) = return (SkipRen' (i-1), state, arrLvl)
 render settings state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel scale _ _ _ _ debugging updRegions lmd) (SetArr' (ArrangementLevel arr focus prs)) =  -- arr is recomputed, so no debug
    let arr'        = if debugging then debugArrangement arr else arr
        diffTree    = diffArr arr' arrOld
@@ -47,6 +49,13 @@ render settings state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel s
                   ) 
        
        $ -}
+   do { t <- getCurrentTime
+      ; putStrLn "\n\n\nBefore diff"
+      ; seq (length $ show diffTree) $ return ()
+      ; diff <- fmap (flip diffUTCTime $ t) getCurrentTime
+      ; putStrLn $ "After diff: " ++ show diff
+      ; return
        ( SetRen' (RenderingLevel scale (mkPopupMenuXY settings prs scale arr') rendering focusRendering size debugging updRegions' lmd)
        , state, ArrangementLevel arr focus prs)
-render settings state arrLvl ren (WrapArr' wrapped) = (unwrap wrapped, state, arrLvl)
+      }
+render settings state arrLvl ren (WrapArr' wrapped) = return (unwrap wrapped, state, arrLvl)

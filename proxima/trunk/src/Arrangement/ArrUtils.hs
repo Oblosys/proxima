@@ -9,6 +9,8 @@ import Control.Exception
 import Data.Maybe 
 import Data.IORef
 
+import Debug.Trace
+import System.IO.Unsafe
 -- utils
 
 ifFocusA NoFocusA           _   = NoFocusA
@@ -110,8 +112,15 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
                                         | otherwise = lookupVertex vid vs
 
 
+counter :: IORef Int
+counter = unsafePerformIO $ newIORef (0::Int)
 
-
+count arr x = unsafePerformIO $
+ do { i <- readIORef counter
+    ; writeIORef counter $ i+1
+    ; putStrLn $ show i ++ "  "++shallowShowArr arr
+    ; return x
+    }
 -- add correct case for graph
 -- what about diff for overlays? Should diff always return False False when a child is different?
 -- or should the render have special behavior? (this is is tricky since focus is added with an
@@ -136,8 +145,9 @@ diffArr (LocatorA l arr)     arr'                  = diffArr arr arr'
 diffArr arr                  (LocatorA l arr')     = diffArr arr arr'
 diffArr (TagA t arr)     arr'                      = diffArr arr arr'
 diffArr arr                  (TagA t arr')         = diffArr arr arr'
-diffArr arr1 arr2 = let dt = diffArr' arr1 arr2
-                    in  removeMove (computeMove arr1 arr2) $
+diffArr arr1 arr2 = count arr1 $
+                    let dt = diffArr' arr1 arr2
+                    in  -- removeMove (computeMove arr1 arr2) $
                         case dt of
                           -- only when child is clean we will compute a move
                           -- todo replace by selfClean
@@ -254,6 +264,93 @@ isCleanX (DiffNodeArr False _ _ _ _) = False
 isCleanX (DiffNodeArr _ False _ _ _) = False
 isCleanX (DiffNodeArr _ _ _ (Just _) _) = False
 isCleanX _ = True
+
+
+{-
+
+
+diffArr :: Show node => Arrangement node -> Arrangement node -> DiffTreeArr
+diffArr (StructuralA _ arr) arr'                   = diffArr arr arr'
+diffArr arr                  (StructuralA _ arr')  = diffArr arr arr'
+diffArr (ParsingA _ arr)    arr'                   = diffArr arr arr'
+diffArr arr                  (ParsingA _ arr')     = diffArr arr arr'
+diffArr (LocatorA l arr)     arr'                  = diffArr arr arr'
+diffArr arr                  (LocatorA l arr')     = diffArr arr arr'
+diffArr (TagA t arr)     arr'                      = diffArr arr arr'
+diffArr arr                  (TagA t arr')         = diffArr arr arr'
+diffArr a1 a2 = count $  {- debug Arr (shallowShowArr a1) $ -} diffArr'' a1 a2
+
+
+
+diffArr'' (EmptyA _ x y w h hr vr bc)     (EmptyA _  x' y' w' h' hr' vr' bc') = DiffLeafArr (x==x' && y==y' && w==w' && h==h' && bc == bc') Nothing                                                      
+diffArr'' (EmptyA _ x y w h hr vr bc)     _                       = DiffLeafArr False Nothing
+diffArr'' (StringA _ x y w h hr vr str lc bc f _) (StringA _ x' y' w' h' hr' vr' str' lc' bc' f' _) = 
+  DiffLeafArr ( x==x' && y==y' && w==w' && h==h' && str==str' && lc==lc' && bc==bc' && f==f') Nothing
+diffArr'' (StringA _ x y w h hr vr str lc bc f _)  _                                    = DiffLeafArr False Nothing
+diffArr'' (ImageA _ x y w h hr vr src style fc bc) (ImageA _ x' y' w' h' hr' vr' src' style' fc' bc') =
+  DiffLeafArr ( x==x' && y==y' && w==w' && h==h' && src == src' && style == style' && fc == fc' && bc == bc') Nothing
+diffArr'' (ImageA _  _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr'' (PolyA _ x y w h hr vr pts lw style lc fc bc) (PolyA _ x' y' w' h' hr' vr' pts' lw' style' lc' fc' bc') =
+  DiffLeafArr ( x==x' && y==y' && w==w' && h==h' && pts == pts' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc') Nothing
+diffArr'' (PolyA _  _ _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr'' (RectangleA _ x y w h hr vr lw style lc fc bc) (RectangleA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
+  DiffLeafArr ( x==x' && y==y' && w==w' && h==h' && lw == lw' && style == style' && lc == lc' && fc == fc' && bc == bc') Nothing
+diffArr'' (RectangleA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr'' (EllipseA _ x y w h hr vr lw style lc fc bc) (EllipseA _ x' y' w' h' hr' vr' lw' style' lc' fc' bc') =
+  DiffLeafArr ( x==x' && y==y' && w==w' && h==h' && lw == lw'  && style == style' && lc == lc' && fc == fc' && bc == bc') Nothing
+diffArr'' (EllipseA _  _ _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr'' (EdgeA _ x1 y1 x2 y2 hr vr lw lc) (EdgeA _ x1' y1' x2' y2' hr' vr' lw' lc') =
+  DiffLeafArr ( x1==x1' && y1==y1' && x2==x2' && y2==y2' && lw == lw'  && lc == lc') Nothing
+diffArr'' (EdgeA _  _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+
+diffArr'' (RowA _ x y w h hr vr bc arrs) (RowA _ x' y' w' h' hr' vr' bc' arrs') =  
+  diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
+diffArr'' (ColA _ x y w h hr vr bc _ arrs) (ColA _ x' y' w' h' hr' vr' bc' _ arrs') = 
+  diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
+diffArr'' (OverlayA _ x y w h hr vr bc d arrs) (OverlayA _ x' y' w' h' hr' vr' bc' d' arrs') =
+  diffArrs x y w h bc arrs x' y' w' h' bc' arrs'
+diffArr'' (GraphA _ x y w h hr vr bc nvs arrs) (GraphA _ x' y' w' h' hr' vr' bc' nvs' arrs') =
+  case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' of
+    DiffNodeArr childrenClean selfClean _ _ _ -> DiffLeafArr (selfClean && childrenClean)  Nothing
+    _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeafArr False Nothing
+    -- a graph is only clean when all children and the graph itself are clean
+diffArr'' arr@(RowA _ x y w h hr vr bc arrs) _                            = DiffLeafArr False  Nothing
+diffArr'' arr@(ColA _ x y w h hr vr bc _ arrs) _                          = DiffLeafArr False  Nothing
+diffArr'' arr@(OverlayA _ x y w h hr vr bc _ arrs) _                        = DiffLeafArr False  Nothing
+diffArr'' arr@(GraphA _ x y w h hr vr bc nvs arrs) _                      = DiffLeafArr False  Nothing
+diffArr'' (VertexA _ x y w h hr vr bc ol arr) (VertexA _ x' y' w' h' hr' vr' bc' ol' arr') =
+ let childDT = diffArr arr arr'
+ in  DiffNodeArr (isCleanDTArr childDT) (x==x' && y==y' && w==w' && h==h' && bc==bc') Nothing Nothing [childDT]
+diffArr'' (VertexA _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
+diffArr'' arr                           arr2                                = 
+  debug Err ("ArrUtils.diffArr: can't handle "++ shallowShowArr arr++"\n"++shallowShowArr arr2) $ DiffLeafArr False Nothing
+-- At the moment, we ignore outline and nrOfVertices
+
+-- pres is different when either self has changed or children
+
+-- first list (new) determines size of diffTree
+diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =  
+  let nrOfArrs    = length arrs
+      nrOfArrs'   = length arrs'
+      childDiffs  = zipWith diffArr arrs arrs'
+      childDiffs' = take nrOfArrs $ childDiffs ++ repeat (DiffLeafArr False Nothing)
+      selfClean   =    x==x' && y==y' && w==w' && h==h' && bc==bc' 
+                    && nrOfArrs == nrOfArrs'
+  in  DiffNodeArr ( selfClean && all isCleanDTArr childDiffs') selfClean Nothing Nothing
+               (if not selfClean
+                then replicate (length arrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered
+                else childDiffs')
+
+-}
+
+
+
+
+
+
+
+
+
 
 
 
