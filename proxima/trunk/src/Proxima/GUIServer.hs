@@ -324,7 +324,7 @@ getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
                             | (i,t,v) <- currentSessions 
                             ]
 
-               ; addCookie 60 $ mkCookie "proxima" $ show (serverInstanceId, cookieSessionId)
+               ; addCookie cookieLifeTime $ mkCookie "proxima" $ show (serverInstanceId, cookieSessionId)
                ; let viewedArea = thd3 . head' "GUIServer.getCookieSessionId" $ filter ((==cookieSessionId).fst3) currentSessions 
                ; return (cookieSessionId, time, viewedArea)
                }
@@ -337,10 +337,13 @@ getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
 
 -- Added a (primitive) cookie parser because Happs cookie parser is buggy when other cookies exist with _ in the cookie name 
 parseCookie serverInstanceId rq = 
- do { case getHeader "cookie" rq of
-        Nothing -> Nothing
-        Just cookieHeader ->
-          case getCookieFromHeader (BS.unpack cookieHeader) of
+ do { case fmap (safeRead . show) $ getHeader "cookie" rq of
+        Nothing -> Nothing  -- TODO: weird: this is not a ByteString but a Lazy.Internal.ByteString
+                            -- Therefore we must do this stupid show safeRead thing instead of unpack
+                            -- Even weirder is that it does work in GHC when importing ByteString.Char8, but not in scion
+        Just Nothing -> Nothing -- should not occur, since show safeRead should always yield a string
+        Just (Just (cookieHeader :: String)) ->
+          case getCookieFromHeader cookieHeader of
                  Just (cookieServerInstanceId, key) |  cookieServerInstanceId == serverInstanceId -> 
                                       Just key -- * correct cookie for this run
                  _ -> Nothing -- * no webviews cookie on the client
@@ -367,7 +370,7 @@ makeNewSessionCookie serverInstanceId currentSessionsRef =
     ; let newViewedArea = ((0,0),(0,0))
           newSessionId = maximum (0: map fst3 currentSessions) + 1
           newSession = (newSessionId, time, newViewedArea)
-    ; addCookie 60 $ mkCookie "proxima" $ show (serverInstanceId, newSessionId)
+    ; addCookie cookieLifeTime $ mkCookie "proxima" $ show (serverInstanceId, newSessionId)
     -- one minute
     
     ; liftIO $ writeIORef currentSessionsRef $ currentSessions ++ [newSession]
