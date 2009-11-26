@@ -421,21 +421,19 @@ function updateTree(update)
     var renderingElt = document.getElementById('proxima').childNodes[0];
     // this is the rendering div (which has a variable id)
 
-    if (node == renderingElt) // for the rendering root, don't move siblings
-    { node.style.left = node.offsetLeft +  parseInt( update.getAttribute('x') )+'px';
-      node.style.top = node.offsetTop + parseInt( update.getAttribute('y') )+'px';
-      node.style.width = node.offsetWidth + parseInt( update.getAttribute('w') )+'px';
-      node.style.height = node.offsetHeight + parseInt( update.getAttribute('h') )+'px';
-      node = node.nextSibling;
-    } else
-    do // move the node and all it's siblings in the row/column
-    { node.style.left = node.offsetLeft +  parseInt( update.getAttribute('x') )+'px';
-      node.style.top = node.offsetTop + parseInt( update.getAttribute('y') )+'px';
-      node.style.width = node.offsetWidth + parseInt( update.getAttribute('w') )+'px';
-      node.style.height = node.offsetHeight + parseInt( update.getAttribute('h') )+'px';
-      node = node.nextSibling;
-    } while (node);
-
+    node.style.left = node.offsetLeft +  parseInt( update.getAttribute('x') )+'px';
+    node.style.top = node.offsetTop + parseInt( update.getAttribute('y') )+'px';
+    node.style.width = node.offsetWidth + parseInt( update.getAttribute('w') )+'px';
+    node.style.height = node.offsetHeight + parseInt( update.getAttribute('h') )+'px';
+      
+    if (node != renderingElt) // for the rendering root, don't move siblings
+    { node = node.nextSibling;
+      while (node) // move the node and all it's siblings in the row/column
+      { node.style.left = node.offsetLeft +  parseInt( update.getAttribute('x') )+'px';
+        node.style.top = node.offsetTop + parseInt( update.getAttribute('y') )+'px';
+        node = node.nextSibling;
+      }
+    }
 //    debugAdd('move');
   } else if (op == 'insert')
   { var path = update.childNodes[0];
