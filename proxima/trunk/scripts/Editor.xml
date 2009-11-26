@@ -925,20 +925,30 @@ function cancelUploadDocument()
   uploadDialog.style.left = '-2000px';
 }
 
+
+
 var predictiveInserts = new Array();
 
 function registerPredictiveInsert(char)
-{  debugAdd('register: requestId '+ requestId);
-   predictiveInserts.push({ requestId: requestId, char: char }); 
+{  debugAdd('registerr: requestId '+ requestId);;
+   predictiveInserts.push({ requestId: requestId, char: char, element: focusedElt }); 
 }
 
 /* Get rid of all predictive inserts for the current response (and also previous ones, but that should not happen)
    and reapply the predictive inserts for requests that are currently being sent to the server
 */
 function applyRemainingPredictiveInserts(responseId)
-{ while ( predictiveInserts.length > 0 && predictiveInserts[0].requestId <= responseId )
-    predictiveInserts.shift();
+{ var previouslyShiftedElt = null;
+  while ( predictiveInserts.length > 0 && predictiveInserts[0].requestId <= responseId )
+  { var shifted = predictiveInserts.shift();
+    //debugAdd('element '+shifted.element.id+'prev element '+previouslyShifted.element.id);
 
+    if (shifted.element != previouslyShiftedElt )
+    { // should reset the string here for: shifted.element
+      // also should reset all moved siblings and parent siblings
+    }
+    previouslyShiftedElt = shifted;
+  }
   for (var i=0; i < predictiveInserts.length; i++)
   { debugAdd(responseId+' Applying: '+ predictiveInserts[i].requestId + ' ' +predictiveInserts[i].char );
     insertChar(predictiveInserts[i].char);
@@ -972,8 +982,8 @@ function insertChar(char)
 }
 
 function insertCharPredictively(char)
-{ insertChar(char);
-  registerPredictiveInsert(char);
+{ //insertChar(char);
+  //registerPredictiveInsert(char);
 
 // todo: fix annoying bug that disables keyboard sometimes. (seems to be a firefox problem)
 // todo: need to tag the text area, so we don't move above it (as is a problem in the decl. form)
