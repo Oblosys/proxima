@@ -417,6 +417,17 @@ function updateTree(update)
   } else if (op == 'move')
   { var path = update.childNodes[0];
     var node = select(path, document.getElementById('proxima'));
+
+    var renderingElt = document.getElementById('proxima').childNodes[0];
+    // this is the rendering div (which has a variable id)
+
+    if (node == renderingElt) // for the rendering root, don't move siblings
+    { node.style.left = node.offsetLeft +  parseInt( update.getAttribute('x') )+'px';
+      node.style.top = node.offsetTop + parseInt( update.getAttribute('y') )+'px';
+      node.style.width = node.offsetWidth + parseInt( update.getAttribute('w') )+'px';
+      node.style.height = node.offsetHeight + parseInt( update.getAttribute('h') )+'px';
+      node = node.nextSibling;
+    } else
     do // move the node and all it's siblings in the row/column
     { node.style.left = node.offsetLeft +  parseInt( update.getAttribute('x') )+'px';
       node.style.top = node.offsetTop + parseInt( update.getAttribute('y') )+'px';
@@ -963,14 +974,14 @@ function insertChar(char)
   focusIndex++;
   var increase = focusedElt.clientWidth - w;
 
-  var proximaElt = document.getElementById('proxima');
+  var renderingElt = document.getElementById('proxima').childNodes[0]; // this is the rendering div (which has a variable id)
   var parent = focusedElt.parentNode;
   var elt = focusedElt;
 
   var focusRenderingElt = document.getElementById('-2');
   focusRenderingElt.style.left = parseInt(focusRenderingElt.style.left) + increase  + 'px';
 
-  while ( parent != proximaElt && parent.getAttribute('class') != 'Column' )
+  while ( parent != renderingElt && parent.getAttribute('class') != 'Column' )
   { n = elt.nextSibling;
     while ( n )
     { n.style.left = parseInt(n.style.left) + increase + 'px';
