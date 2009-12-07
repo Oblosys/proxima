@@ -31,9 +31,9 @@ render scale arrDb diffTree arrangement viewedArea =
     -- cannot use these IO regions anymore
     
     ; --debug Ren ("DiffTree is " ++ show diffTree) $
-      --debug Ren ("Arrangement is "++show arrangement) $
+     -- debug Ren ("Arrangement is "++showTreeArr arrangement) $
       renderArr arrDb scale origin viewedArea Nothing (Just [0]) diffTree arrangement
-    }
+    }                 -- 0 is for the rendering (1 is focus)
 
 
 -- old comment: debugged rendering also displays overlay for focus adding, but this has not been processed by debugArrangement
@@ -61,7 +61,7 @@ renderFocus scale arrDb focus arrangement viewedArea =
                                           -- ++ "\nFocus arrangement:\n"++show focusArrList) $
                
         renderArr arrDb scale origin viewedArea Nothing
-                        (Just [1])
+                        (Just [1])  -- 1 is for the focus (0 is rendering)
                         (DiffLeafArr False Nothing)
                         (OverlayA (IDA (-2)) (xA arrangement) (yA arrangement)  
                                         (widthA arrangement) (heightA arrangement) 
@@ -115,14 +115,14 @@ makeMoveUpdate (Just pth) dim@((x,y),(w,h)) =
     ; tell $ "</div>" 
     }
 
-makeInsertDeleteUpdate Nothing    insdel = debug Err ("RendererServer.makeInsertDeleteUpdate: no path.") $ return ()
-makeInsertDeleteUpdate (Just pth) (InsertChildrenRen pos nr) = 
- do { debug Ren ("mkDelete "++show pos++" "++show nr++" on "++ show pth) $ return ()
+makeInsertDeleteUpdate _ Nothing    insdel = debug Err ("RendererServer.makeInsertDeleteUpdate: no path.") $ return ()
+makeInsertDeleteUpdate arr (Just pth) (InsertChildrenRen pos nr) = 
+ do { debug Ren ("mkInsert "++show pos++" "++show nr++" on "++ show pth ++ " " ++ shallowShowArr arr) $ return ()
     ; tell $ "<div id='insert' op='insert' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
     ; tell $ "</div>" 
     }
-makeInsertDeleteUpdate (Just pth) (DeleteChildrenRen pos nr) = 
- do { debug Ren ("mkInsert "++show pos++" "++show nr++" on "++ show pth) $ return ()
+makeInsertDeleteUpdate arr (Just pth) (DeleteChildrenRen pos nr) = 
+ do { debug Ren ("mkDelete "++show pos++" "++show nr++" on "++ show pth ++ " " ++ shallowShowArr arr) $ return ()
     ; tell $ "<div id='delete' op='delete' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
     ; tell $ "</div>" 
     }
@@ -162,7 +162,7 @@ renderArr arrDb scale (lux, luy) viewedArea mt mPth diffTree arrangement =
         (Just m) -> makeMoveUpdate mPth m
         _ -> return ()                       
     ; case getInsertDelete diffTree of 
-        (Just insdel) -> makeInsertDeleteUpdate mPth insdel
+        (Just insdel) -> makeInsertDeleteUpdate arrangement mPth insdel
         _ -> return ()                       
                                        
     ; if (isSelfCleanDTArr diffTree)  -- if self is clean, only render its children (if present)
