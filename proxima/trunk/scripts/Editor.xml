@@ -1049,7 +1049,7 @@ function test(char)
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 </td></tr>
 <tr><td>
-<table cellspacing="0">
+<table cellspacing="0" width="100%">
 <tr>
 <td><button onclick="downloadDocument();">Download</button></td>
 <td><button onclick="uploadDocument();">Upload</button></td>
