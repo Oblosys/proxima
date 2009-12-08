@@ -216,6 +216,8 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualVie
 
   , dir "img"
         [ fileServe [] "img" ]  
+  , dir "etc"
+        [ fileServe [] "src/proxima/etc" ]  
   , dir "favicon.ico"
         [ methodSP GET $ fileServe ["favicon.ico"] "src/proxima/etc"]
   , dir "Document.xml"
