@@ -298,7 +298,7 @@ if (xmlhttp!=null)
     { xmlhttp.onreadystatechange=state_Change;
       xmlhttp.open("GET",'handle?commands=Commands '+ requestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
-      document.getElementById('state').innerHTML = '<img src="etc/statusRed.jpg"/>';
+      document.getElementById('state').innerHTML = '<img src="etc/statusBlue.jpg"/>';
       requestId++;
 //      debugAdd('incremented requestId: ' + requestId);
       commandQueue = '';
