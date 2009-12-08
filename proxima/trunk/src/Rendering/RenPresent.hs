@@ -50,10 +50,10 @@ render settings state (ArrangementLevel arrOld focusOld _) ren@(RenderingLevel s
        
        $ -}
    do { t <- getCurrentTime
-      ; putStrLn "\n\n\nBefore diff"
+      --; putStrLn "\n\n\nBefore diff"
       ; seq (length $ show diffTree) $ return ()
-      ; diff <- fmap (flip diffUTCTime $ t) getCurrentTime
-      ; putStrLn $ "After diff: " ++ show diff
+     -- ; diff <- fmap (flip diffUTCTime $ t) getCurrentTime
+     -- ; putStrLn $ "After diff: " ++ show diff
       ; return
        ( SetRen' (RenderingLevel scale (mkPopupMenuXY settings prs scale arr') rendering focusRendering size debugging updRegions' lmd)
        , state, ArrangementLevel arr focus prs)
