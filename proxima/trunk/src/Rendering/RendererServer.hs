@@ -100,7 +100,7 @@ Hence, we can emit a replace command if the parent is clean but the child is sel
 -- arrangement is passed only for debugging
 makeReplaceUpdate Nothing    arrangement mkArrangement = mkArrangement
 makeReplaceUpdate (Just pth) arrangement mkArrangement = 
- do { debug Ren ("mkReplace " ++ shallowShowArr arrangement ++ " on "++ show pth) $ return ()
+ do { --debug Ren ("mkReplace " ++ shallowShowArr arrangement ++ " on "++ show pth) $ return ()
     ; tell $ "<div id='replace' op='replace'>"++htmlPath pth
     --; putStrLn $ "\n\n*********REPLACE "++show pth
     --; putStrLn $ "by:\n" ++ showTreeArr arrangement
@@ -110,19 +110,19 @@ makeReplaceUpdate (Just pth) arrangement mkArrangement =
 
 makeMoveUpdate Nothing    coords = debug Err ("RendererServer.makeMoveUpdate: no path.") $ return ()
 makeMoveUpdate (Just pth) dim@((x,y),(w,h)) = 
- do { debug Ren ("mkMove "++show dim++" on "++ show pth) $ return ()
+ do { --debug Ren ("mkMove "++show dim++" on "++ show pth) $ return ()
     ; tell $ "<div id='move' op='move' x='"++show x++"' y='"++show y++"' w='"++show w++"' h='"++show h++"'>"++htmlPath pth
     ; tell $ "</div>" 
     }
 
 makeInsertDeleteUpdate _ Nothing    insdel = debug Err ("RendererServer.makeInsertDeleteUpdate: no path.") $ return ()
 makeInsertDeleteUpdate arr (Just pth) (InsertChildrenRen pos nr) = 
- do { debug Ren ("mkInsert "++show pos++" "++show nr++" on "++ show pth ++ " " ++ shallowShowArr arr) $ return ()
+ do { --debug Ren ("mkInsert "++show pos++" "++show nr++" on "++ show pth ++ " " ++ shallowShowArr arr) $ return ()
     ; tell $ "<div id='insert' op='insert' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
     ; tell $ "</div>" 
     }
 makeInsertDeleteUpdate arr (Just pth) (DeleteChildrenRen pos nr) = 
- do { debug Ren ("mkDelete "++show pos++" "++show nr++" on "++ show pth ++ " " ++ shallowShowArr arr) $ return ()
+ do { --debug Ren ("mkDelete "++show pos++" "++show nr++" on "++ show pth ++ " " ++ shallowShowArr arr) $ return ()
     ; tell $ "<div id='delete' op='delete' pos='"++show pos++"' nr='"++show nr++"'>"++htmlPath pth
     ; tell $ "</div>" 
     }
