@@ -340,7 +340,7 @@ if (xmlhttp.readyState==4)
     var sessionType = updates.getAttribute('sessionType');
     var nrOfSessions = updates.getAttribute('nrOfSessions');
     document.getElementById('sessionInfo').innerHTML =
-      'Session id: ' + sessionId + '/' + responseId + ' '  +
+      'Session id: ' + sessionId + ':' + responseId + ' '  +
       (sessionType == 'primary' ? 'Editable' : 'Non-editable') + ' ' +
       'Nr of sessions:' + nrOfSessions;
 
