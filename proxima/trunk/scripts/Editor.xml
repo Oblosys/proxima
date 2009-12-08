@@ -298,6 +298,7 @@ if (xmlhttp!=null)
     { xmlhttp.onreadystatechange=state_Change;
       xmlhttp.open("GET",'handle?commands=Commands '+ requestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
+      document.getElementById('state').innerHTML = '<img src="etc/statusRed.jpg"/>';
       requestId++;
 //      debugAdd('incremented requestId: ' + requestId);
       commandQueue = '';
@@ -323,7 +324,9 @@ if (xmlhttp.readyState==4)
     { //debugAdd('sending queue');
       loadXMLDoc('');
     }
-    
+    else
+        document.getElementById('state').innerHTML = '<img src="etc/statusGreen.jpg"/>';
+
     var focus = document.getElementById('focus');
     
     
@@ -1018,6 +1021,8 @@ function test(char)
 
 <!-- <div style="position: absolute; border: 1px solid red; left:254px; top: 154px; width: 492px; height: 292px;"></div> -->
 <!-- to show reduced viewed area 1000x600 with scrolling leaves a viewed area of ((246,146),(492,292)) to this we add 8 is added to left and top to account for margin above and left of proxima elt -->
+<table cellpadding="0">
+<tr><td>
 <div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 600px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
@@ -1042,12 +1047,21 @@ function test(char)
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id='font' style='visibility:hidden;white-space: pre'></div>
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
-<button onclick="downloadDocument();">Download</button>
-<button onclick="uploadDocument();">Upload</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload font metrics</button><div id="sessionInfo"></div>
-<button onclick="test('X');">Test</button>
-
-
+</td></tr>
+<tr><td>
+<table cellspacing="0">
+<tr>
+<td><button onclick="downloadDocument();">Download</button></td>
+<td><button onclick="uploadDocument();">Upload</button></td>
+<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<td><button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload&nbsp;Font&nbsp;Metrics</button></td> <!-- with normal space button text gets line breaks -->
+<td><button onclick="test('X');">Test</button></td>
+<td width="100%"></td>
+<td><div id="state"></div></td>
+</tr>
+</table>
+</td></tr></table>
+<div id="sessionInfo"></div>
 <div id="debugMessage"></div>
 </body></html>
 
