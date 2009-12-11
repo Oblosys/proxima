@@ -411,7 +411,7 @@ splitCommands commandStr =
 handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
                sessionId isPrimarySession nrOfSessions (Commands requestId commandStr) =
  do { let commands = splitCommands commandStr
-   -- ; putStrLn $ "Received commands:"++ show commands
+    --; putStrLn $ "Received commands:"++ show commands
     
     ; renderingHTMLss <-
         mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
@@ -420,8 +420,12 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualView
  
     ; let renderingHTML = concat . concat $ renderingHTMLss
 
-    ; focusRenderingHTML <- drawFocusHTML settings renderingLvlVar viewedAreaRef 
-
+    ; focusRenderingHTML <- case map safeRead commands of
+                              [Just (SetViewedArea _)] -> return ""
+                              _                        -> drawFocusHTML settings renderingLvlVar viewedAreaRef 
+    -- focus only needs to be rendered if there is a possibility that it changed, but in case of SetViewedArea, it
+    -- even creates a problem if the focus is rendered, because on init, this command is given, but there is no rendering yet.
+    -- Therefore, we don't render the focus if the command is a single SetViewedArea
 
 
     ; pendingQueriesTxt <-  readFile "metricsQueries.txt"
