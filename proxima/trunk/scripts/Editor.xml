@@ -50,10 +50,7 @@ padding-right:10px;
 var xmlhttp;
 var mouseDown = false;
 var commandQueue = '';
-var requestId = 0;
-
-var focusedElement; // string element that has the focus (used for predictive char rendering)
-var focusIndex;     // the index in the focused string
+var currentRequestId = 0;
 
 
 function init()
@@ -296,11 +293,12 @@ else if (window.ActiveXObject)
 if (xmlhttp!=null)
   { 
     { xmlhttp.onreadystatechange=state_Change;
-      xmlhttp.open("GET",'handle?commands=Commands '+ requestId +' "'+commandQueue+'"',true);
+      xmlhttp.open("GET",'handle?commands=Commands '+ currentRequestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
       document.getElementById('state').innerHTML = '<img src="etc/statusBlue.jpg"/>';
-      requestId++;
-//      debugAdd('incremented requestId: ' + requestId);
+      currentRequestId++;
+//      debugAdd('incremented currentRequestId: ' + currentRequestId);
+      moveCurrentPredictiveInsertsToSent();
       commandQueue = '';
     }
   }
@@ -319,14 +317,16 @@ if (xmlhttp.readyState==4)
     var newRendering = document.getElementById('newRendering');
     newRendering.innerHTML=xmlhttp.responseText;
     
-    
+    removeAllPredictiveInserts();
+    clearSentPredictiveUpdates();
+      
     if (commandQueue != '')
     { //debugAdd('sending queue');
       loadXMLDoc('');
     }
     else
-        document.getElementById('state').innerHTML = '<img src="etc/statusGreen.jpg"/>';
-
+      document.getElementById('state').innerHTML = '<img src="etc/statusGreen.jpg"/>';
+    
     var focus = document.getElementById('focus');
     
     
@@ -344,12 +344,13 @@ if (xmlhttp.readyState==4)
       (sessionType == 'primary' ? 'Editable' : 'Non-editable') + ' ' +
       'Nr of sessions:' + nrOfSessions;
 
+   
     while (updates.firstChild)
     { updateTree( updates.firstChild );
-    ; updates.removeChild(updates.firstChild);
+      updates.removeChild(updates.firstChild);
     }
+    reApplySentPredictiveInserts();
 
-    applyRemainingPredictiveInserts(responseId);
     //var renderArea = document.getElementById('renderArea');
     //renderArea.removeChild( document.getElementById('root') ); //old rendering
 
@@ -380,9 +381,10 @@ if (xmlhttp.readyState==4)
     }
   }
 }
-
+var theOp ;
 function updateTree(update)
 { var op = update.getAttribute('op');
+  theOp = op;
  /*
   if (op == 'add')
   { var parentId = update.getAttribute('parentId');
@@ -525,8 +527,11 @@ function select(path, node)
   else
     { path.removeChild(step);
       var childNr = parseInt( step.getAttribute('childNr') ); 
-      var child = node.childNodes[childNr];
-      return (select (path, child));
+      if (node)
+      { var child = node.childNodes[childNr];
+        return (select (path, child));
+      }
+      else alert ('incorrect path at op: '+theOp);
     }
 }
 
@@ -938,38 +943,94 @@ function cancelUploadDocument()
 }
 
 
+var focusedElt; // string element that has the focus (used for predictive char rendering)
+var focusIndex; // the index in the focused string
 
-var predictiveInserts = new Array();
+var currentPredictiveInserts = null; // inserts corresponding to the set of commands that will be sent to the server next
 
-function registerPredictiveInsert(char)
-{  debugAdd('registerr: requestId '+ requestId);;
-   predictiveInserts.push({ requestId: requestId, char: char, element: focusedElt }); 
+var sentPredictiveInserts = null;  // inserts corresponding to set of commands that were already sent to the server
+
+var focusedEltOriginalText = null;
+
+
+
+function removeAllPredictiveInserts()
+{ if (focusedElt && focusedEltOriginalText)
+    focusedElt.childNodes[0].textContent=focusedEltOriginalText;
+    
+  removePredictiveInserts( currentPredictiveInserts );
+  removePredictiveInserts( sentPredictiveInserts );
 }
 
-/* Get rid of all predictive inserts for the current response (and also previous ones, but that should not happen)
-   and reapply the predictive inserts for requests that are currently being sent to the server
+function removePredictiveInserts(predictiveInserts)
+{ if (predictiveInserts)
+  { 
+//alert( 'done: ' + sentPredictiveInserts.element.childNodes[0].textContent);
+    for (var j=0; j < predictiveInserts.affectedElts.length; j++)
+      predictiveInserts.affectedElts[j].element.style.left = predictiveInserts.affectedElts[j].originalLeft;
+  }
+}
+
+function moveCurrentPredictiveInsertsToSent()
+{ sentPredictiveInserts = currentPredictiveInserts;
+  currentPredictiveInserts = null;
+}
+
+function clearSentPredictiveUpdates()
+{ sentPredictiveInserts = null;
+}
+
+/* Re-apply the predictive inserts for requests that are currently being sent to the server
 */
-function applyRemainingPredictiveInserts(responseId)
-{ var previouslyShiftedElt = null;
-  while ( predictiveInserts.length > 0 && predictiveInserts[0].requestId <= responseId )
-  { var shifted = predictiveInserts.shift();
-    //debugAdd('element '+shifted.element.id+'prev element '+previouslyShifted.element.id);
+function reApplySentPredictiveInserts()
+{ if (focusedElt)
+  { focusedEltOriginalText = focusedElt.childNodes[0].textContent;
+// messy: create an insert that does only this without registering stuff
 
-    if (shifted.element != previouslyShiftedElt )
-    { // should reset the string here for: shifted.element
-      // also should reset all moved siblings and parent siblings
+  var w = focusedElt.clientWidth;
+
+
+  if (sentPredictiveInserts)
+  { //insertCharPredictively('X');
+    for (var i=0; i < sentPredictiveInserts.chars.length; i++)
+    {  var textNode = focusedElt.childNodes[0];
+       textNode.insertData(focusIndex,sentPredictiveInserts.chars.charAt(i));
+       focusIndex++;
+    //insertCharPredictively(sentPredictiveInserts.chars.charAt(i));
     }
-    previouslyShiftedElt = shifted;
+    //insertCharPredictively('X');
   }
-  for (var i=0; i < predictiveInserts.length; i++)
-  { debugAdd(responseId+' Applying: '+ predictiveInserts[i].requestId + ' ' +predictiveInserts[i].char );
-    insertChar(predictiveInserts[i].char);
+  var increase = focusedElt.clientWidth - w;
+  var focusRenderingElt = document.getElementById('-2');
+  focusRenderingElt.style.left = parseInt(focusRenderingElt.style.left) + increase  + 'px';
   }
 }
 
+// todo: fix annoying bug that disables keyboard sometimes. (seems to be a firefox problem)
+// todo: need to tag the text area, so we don't move above it (as is a problem in the decl. form)
+//       this is now solved by stopping at columns
+// does not take into account non-editable
+// modified strings are not reset yet. Usually this will be done by next rendering
+// except when insert does not change the string with focus (as in non-editable)
 
-function insertChar(char)
-{ var w = focusedElt.clientWidth;
+// one time there was a textNode undefined problem, while all calls to insertChar were commented out..
+// and also insert did not work on new lines. maybe this can occur again, what happens if there is no element at the focus?
+// todo affectedElts maybe original elts?
+
+function insertCharPredictively(char)
+{ var isNewPredictiveSession;
+
+if ( currentPredictiveInserts )
+    isNewPredictiveSession = false;
+  else
+  { isNewPredictiveSession = true
+    currentPredictiveInserts = { requestId: currentRequestId, chars : '', element: focusedElt,
+                                 affectedElts: new Array() };
+  }
+
+  currentPredictiveInserts.chars += char; // record the inserted char
+
+  var w = focusedElt.clientWidth;
   var textNode = focusedElt.childNodes[0];
   textNode.insertData(focusIndex,char);
   focusIndex++;
@@ -985,7 +1046,9 @@ function insertChar(char)
   while ( parent != renderingElt && parent.getAttribute('class') != 'Column' )
   { n = elt.nextSibling;
     while ( n )
-    { n.style.left = parseInt(n.style.left) + increase + 'px';
+    { if (isNewPredictiveSession) // only at the first char insert, store the original positions of moved siblings
+        currentPredictiveInserts.affectedElts.push({element: n, originalLeft: n.style.left});
+      n.style.left = parseInt(n.style.left) + increase + 'px';
       n = n.nextSibling;
     }
     elt = parent;
@@ -993,26 +1056,11 @@ function insertChar(char)
   }
 }
 
-function insertCharPredictively(char)
-{ //insertChar(char);
-  //registerPredictiveInsert(char);
-
-// todo: fix annoying bug that disables keyboard sometimes. (seems to be a firefox problem)
-// todo: need to tag the text area, so we don't move above it (as is a problem in the decl. form)
-// does not take into account non-editable
-// modified strings are not reset yet. Usually this will be done by next rendering
-// except when insert does not change the string with focus (as in non-editable)
-
-// one time there was a textNode undefined problem, while all calls to insertChar were commented out..
-// and also insert did not work on new lines. maybe this can occur again, what happens if there is no element at the focus?
-
-}
 
 function test(char)
 {
-  loadXMLDoc('Key(13,(False,False,False));'); // put this one in refresh?
-
-  insertCharPredictively(char)
+  insertCharPredictively('A');
+  loadXMLDoc('Chr(65,(False,False,False));');
 }
 ]]></script>
 </head>
