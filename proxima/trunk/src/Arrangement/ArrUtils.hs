@@ -115,10 +115,10 @@ mkEdges edges vertices lineColor = concatMap mkEdge edges
 counter :: IORef Int
 counter = unsafePerformIO $ newIORef (0::Int)
 
-count arr x = unsafePerformIO $
+count arr1 arr2 x = unsafePerformIO $
  do { i <- readIORef counter
     ; writeIORef counter $ i+1
-    ; putStrLn $ show i ++ "  "++shallowShowArr arr
+    ; putStrLn $ show i ++ "  "++shallowShowArr arr1 ++"  "++shallowShowArr arr2
     ; return x
     }
 -- add correct case for graph
@@ -145,11 +145,11 @@ diffArr (LocatorA l arr)     arr'                  = diffArr arr arr'
 diffArr arr                  (LocatorA l arr')     = diffArr arr arr'
 diffArr (TagA t arr)     arr'                      = diffArr arr arr'
 diffArr arr                  (TagA t arr')         = diffArr arr arr'
-diffArr arr1 arr2 = count arr1 $
+diffArr arr1 arr2 = --count arr1 arr2 $
                     let dt = diffArr' arr1 arr2
                     in  -- removeMove (computeMove arr1 arr2) $
                         case dt of
-                          -- only when child is clean we will compute a move
+                          -- only when child is clean we will compute a move (otherwise it is redrawn anyway)
                           -- todo replace by selfClean
                           DiffLeafArr True _ -> DiffLeafArr True $ computeMove arr1 arr2
                           DiffNodeArr descendentsClean True _ insdel dts -> 
@@ -173,6 +173,12 @@ removeMove move dt = case move {- getMove dt -} of
 -- we can alleviate clean restrictions on graphs because browser paints everything
 -- what about graph and edge?
 
+-- is cumulative the right word?
+
+-- improvement: when nr of arrs is less, we don't need to do a complicated diff, but just search for the first non matching
+-- but probably this is not worth the extra implementation complexity.
+
+-- strictness in difftree?
 computeMove newArr oldArr =
   let a1@((x1,y1),(w1,h1)) = getAreaA newArr
       a2@((x2,y2),(w2,h2)) = getAreaA oldArr
@@ -236,7 +242,10 @@ diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs mOrientation =
       firstSelfDirtyChildIx = length $ takeWhile isCleanX childDiffs
       leftChildDiffs = take firstSelfDirtyChildIx childDiffs
 
-      rightChildDiffs = reverse $ if newNrOfArrs < oldNrOfArrs 
+      rightChildDiffs = reverse $ if newNrOfArrs == oldNrOfArrs then
+                                       take (newNrOfArrs - firstSelfDirtyChildIx - 1) reverseChildDiffs ++
+                                       (if firstSelfDirtyChildIx == newNrOfArrs then [] else [childDiffs !! firstSelfDirtyChildIx])
+                                  else if newNrOfArrs < oldNrOfArrs 
                                   then take (newNrOfArrs - firstSelfDirtyChildIx) reverseChildDiffs
                                   else take (oldNrOfArrs - firstSelfDirtyChildIx) reverseChildDiffs ++
                                        replicate (newNrOfArrs - oldNrOfArrs) (DiffLeafArr False Nothing)
@@ -246,19 +255,35 @@ diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs mOrientation =
                          _               -> id
       childDiffs' = makeCumulative $ leftChildDiffs ++ rightChildDiffs
       selfClean   = bc==bc' 
-      insertDelete = if newNrOfArrs < oldNrOfArrs then Just 
+      insertDelete = if newNrOfArrs < oldNrOfArrs then Just $ debug Err ("there is a delete on old:\n" ++ unlines (map shallowShowArr oldArrs)++"new:\n" ++ unlines (map shallowShowArr newArrs)) 
                        $ DeleteChildrenRen firstSelfDirtyChildIx 
                                            (oldNrOfArrs - newNrOfArrs) 
-                     else if newNrOfArrs > oldNrOfArrs then Just 
+                     else if newNrOfArrs > oldNrOfArrs then Just $ debug Err ("there is an insert on\n" ++ unlines (map shallowShowArr newArrs)) 
                        $ InsertChildrenRen firstSelfDirtyChildIx 
                                            (newNrOfArrs - oldNrOfArrs) 
                      else Nothing
-  in  (if length childDiffs' /= newNrOfArrs then debug Err "ArrUtils.diffArrs: internal error, wrong nr of difftrees" else id)
-      DiffNodeArr ( selfClean && all isCleanDTArr childDiffs') selfClean Nothing insertDelete
+  in  (if length childDiffs' /= newNrOfArrs then debug Err ("ArrUtils.diffArrs: internal error, wrong nr of difftrees"
+                                                           ++show newNrOfArrs++" "++show oldNrOfArrs++" "++show (length childDiffs')++" ")else id) $
+      if ({- showDebug' Arr "nr of dirties: " $ -} length (filter (not . isCleanDTArr) childDiffs')) > 2 
+      then DiffLeafArr False Nothing
+      else DiffNodeArr ( selfClean && all isCleanDTArr childDiffs') selfClean Nothing insertDelete
                (if not selfClean
                 then replicate (length newArrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered
                 else childDiffs')
 
+{-
+new >= old
+
+aaaxaaa
+aaayaaa
+
+firstselfd 3
+new 7
+new - first -1 = 3 
+
+
+-}
+-- isCleanX allows moves, (but not inserts, or deep moves)
 isCleanX (DiffLeafArr False _) = False
 isCleanX (DiffNodeArr False _ _ _ _) = False
 isCleanX (DiffNodeArr _ False _ _ _) = False
@@ -266,8 +291,8 @@ isCleanX (DiffNodeArr _ _ _ (Just _) _) = False
 isCleanX _ = True
 
 
-{-
 
+{-
 
 diffArr :: Show node => Arrangement node -> Arrangement node -> DiffTreeArr
 diffArr (StructuralA _ arr) arr'                   = diffArr arr arr'
@@ -278,7 +303,7 @@ diffArr (LocatorA l arr)     arr'                  = diffArr arr arr'
 diffArr arr                  (LocatorA l arr')     = diffArr arr arr'
 diffArr (TagA t arr)     arr'                      = diffArr arr arr'
 diffArr arr                  (TagA t arr')         = diffArr arr arr'
-diffArr a1 a2 = count $  {- debug Arr (shallowShowArr a1) $ -} diffArr'' a1 a2
+diffArr a1 a2 = count a1 a2 $  {- debug Arr (shallowShowArr a1) $ -} diffArr'' a1 a2
 
 
 
@@ -341,10 +366,10 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
                 then replicate (length arrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered
                 else childDiffs')
 
+
+
+
 -}
-
-
-
 
 
 
@@ -357,18 +382,26 @@ diffArrs x y w h bc arrs x' y' w' h' bc' arrs' =
 -- Cumulative moves will save a lot of move operation, since in rows and columns, the position of an element depends on
 -- it predecessors
 makeMovesCumulativeRow o [] = []
-makeMovesCumulativeRow o (DiffLeafArr b Nothing : dts) = DiffLeafArr b Nothing : makeMovesCumulativeRow o dts
+makeMovesCumulativeRow o (DiffLeafArr b Nothing : dts) = --DiffLeafArr b Nothing : makeMovesCumulativeRow o dts
+                                                         DiffLeafArr b (filterEmpty $ Just ((-o,0),(0,0))) : 
+                                                         makeMovesCumulativeRow 0 dts {- o + (x-o) == x -}
 makeMovesCumulativeRow o (DiffLeafArr b (Just ((x,y),d)): dts ) = DiffLeafArr b (filterEmpty $ Just ((x-o,y),d)) : 
                                                                   makeMovesCumulativeRow x dts {- o + (x-o) == x -}
-makeMovesCumulativeRow o (DiffNodeArr b1 b2 Nothing id cs : dts) = DiffNodeArr b1 b2 Nothing id cs : makeMovesCumulativeRow o dts
+makeMovesCumulativeRow o (DiffNodeArr b1 b2 Nothing id cs : dts) = -- DiffNodeArr b1 b2 Nothing id cs : makeMovesCumulativeRow o dts
+                                                                   DiffNodeArr b1 b2 (filterEmpty $ Just ((-o,0),(0,0))) id cs :
+                                                                   makeMovesCumulativeRow 0 dts
 makeMovesCumulativeRow o (DiffNodeArr b1 b2 (Just ((x,y),d)) id cs: dts ) = DiffNodeArr b1 b2 (filterEmpty $ Just ((x-o,y),d)) id cs :
                                                                             makeMovesCumulativeRow x dts
 
 makeMovesCumulativeCol o [] = []
-makeMovesCumulativeCol o (DiffLeafArr b Nothing : dts) = DiffLeafArr b Nothing : makeMovesCumulativeCol o dts
+makeMovesCumulativeCol o (DiffLeafArr b Nothing : dts) = --DiffLeafArr b Nothing : makeMovesCumulativeCol o dts
+                                                         DiffLeafArr b (filterEmpty $ Just ((0,-o),(0,0))) : 
+                                                         makeMovesCumulativeCol 0 dts
 makeMovesCumulativeCol o (DiffLeafArr b (Just ((x,y),d)): dts ) = DiffLeafArr b (filterEmpty $ Just ((x,y-o),d)) : 
                                                                   makeMovesCumulativeCol y dts
-makeMovesCumulativeCol o (DiffNodeArr b1 b2 Nothing id cs : dts) = DiffNodeArr b1 b2 Nothing id cs : makeMovesCumulativeCol o dts
+makeMovesCumulativeCol o (DiffNodeArr b1 b2 Nothing id cs : dts) = --DiffNodeArr b1 b2 Nothing id cs : makeMovesCumulativeCol o dts
+                                                                   DiffNodeArr b1 b2 (filterEmpty $ Just ((0,-o),(0,0))) id cs :
+                                                                   makeMovesCumulativeCol 0 dts
 makeMovesCumulativeCol o (DiffNodeArr b1 b2 (Just ((x,y),d)) id cs: dts ) = DiffNodeArr b1 b2 (filterEmpty $ Just ((x,y-o),d)) id cs :
                                                                             makeMovesCumulativeCol y dts
 
