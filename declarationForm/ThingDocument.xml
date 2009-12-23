@@ -1,0 +1,46 @@
+<RootDoc>
+  <TaskDoc>
+    <Tasks>
+      <Thing><Integer val="2"/></Thing>
+      <Thing><Integer val="5"/></Thing>
+      <Thing><Integer val="3"/></Thing>
+      <Bool val="True"/>
+      <BasicTask>
+        <Description>
+          <String>Pinpas bestellen</String>
+        </Description>
+        <Bool val="True"/>
+      </BasicTask>
+      <CompositeTask>
+        <Bool val="True"/>
+        <Description>
+          <String>Declaratie editor bouwen</String>
+        </Description>
+        <CompositeTask>
+          <Bool val="True"/>
+          <Description>
+            <String>Upgrade Proxima</String>
+          </Description>
+          <BasicTask>
+            <Description>
+              <String>Drag & Drop</String>
+            </Description>
+            <Bool val="True"/>
+          </BasicTask>
+          <BasicTask>
+            <Description>
+              <String>Xprez</String>
+            </Description>
+            <Bool val="True"/>
+          </BasicTask>
+        </CompositeTask>
+        <BasicTask>
+          <Description>
+            <String>Instantie maken</String>
+          </Description>
+          <Bool val="False"/>
+        </BasicTask>
+      </CompositeTask>
+    </Tasks>
+  </TaskDoc>
+</RootDoc>
