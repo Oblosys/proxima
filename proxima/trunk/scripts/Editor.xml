@@ -1071,7 +1071,7 @@ function test(char)
 <!-- to show reduced viewed area 1000x600 with scrolling leaves a viewed area of ((246,146),(492,292)) to this we add 8 is added to left and top to account for margin above and left of proxima elt -->
 <table cellpadding="0">
 <tr><td>
-<div id="proxima" style="position: relative; border: 1px solid black; width: 1000px; height: 600px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
+<div id="proxima" style="position: relative; border: 1px solid black; width: 770px; height: 435px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
      onclick="return mouseHandler('C',event)"
@@ -1109,7 +1109,7 @@ function test(char)
 </tr>
 </table>
 </td></tr></table>
-<div id="sessionInfo"></div>
+<div style="visibility:hidden" id="sessionInfo"></div>
 <div id="debugMessage"></div>
 </body></html>
 
