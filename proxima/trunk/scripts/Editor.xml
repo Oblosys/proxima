@@ -955,7 +955,7 @@ var focusedEltOriginalText = null;
 
 
 function removeAllPredictiveInserts()
-{ if (focusedElt && focusedEltOriginalText)
+{ if (focusedElt && focusedElt.childNodes[0] && focusedEltOriginalText)
     focusedElt.childNodes[0].textContent=focusedEltOriginalText;
     
   removePredictiveInserts( currentPredictiveInserts );
@@ -988,7 +988,7 @@ function clearSentPredictiveUpdates()
 /* Re-apply the predictive inserts for requests that are currently being sent to the server
 */
 function reApplySentPredictiveInserts()
-{ if (focusedElt)
+{ if (focusedElt && focusedElt.childNodes[0])
   { focusedEltOriginalText = focusedElt.childNodes[0].textContent;
 // messy: create an insert that does only this without registering stuff
 
@@ -1028,7 +1028,8 @@ function reApplySentPredictiveInserts()
     }
   }
 }
-
+// todo: instead of not doing predictive inserts when focusedElt.childNodes[0] == null, we could
+//       simply insert a textnode in this case. The parent seems to be there.
 // todo: fix annoying bug that disables keyboard sometimes. (seems to be a firefox problem)
 // todo: need to tag the text area, so we don't move above it (as is a problem in the decl. form)
 //       this is now solved by stopping at columns
@@ -1041,7 +1042,9 @@ function reApplySentPredictiveInserts()
 // todo affectedElts maybe original elts?
 
 function insertCharPredictively(char)
-{ var isNewPredictiveSession;
+{ if (focusedElt == null || focusedElt.childNodes[0] == null) return;
+
+  var isNewPredictiveSession;
 
 if ( currentPredictiveInserts )
     isNewPredictiveSession = false;
