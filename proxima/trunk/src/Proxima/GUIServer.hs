@@ -258,8 +258,8 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualVie
   , dir "handle" 
    [ withData (\cmds -> [ methodSP GET $ 
                           do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
-                             ; liftIO $ putStrLn "Pausing.."
-                             ; liftIO $ threadDelay 1000000
+                             --; liftIO $ putStrLn "Pausing.."
+                             --; liftIO $ threadDelay 1000000
                              ; liftIO $ putStrLn "Done"
                              ; (responseHtml,responseLength) <-
                                  liftIO $ catchExceptions $
