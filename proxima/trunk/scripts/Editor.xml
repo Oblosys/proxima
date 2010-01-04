@@ -962,6 +962,11 @@ function removeAllPredictiveInserts()
   removePredictiveInserts( sentPredictiveInserts );
 }
 
+function pause(milliseconds) {
+	var dt = new Date();
+	while ((new Date()) - dt <= milliseconds) { /* Do nothing */ }
+}
+
 function removePredictiveInserts(predictiveInserts)
 { if (predictiveInserts)
   { 
@@ -987,22 +992,40 @@ function reApplySentPredictiveInserts()
   { focusedEltOriginalText = focusedElt.childNodes[0].textContent;
 // messy: create an insert that does only this without registering stuff
 
-  var w = focusedElt.clientWidth;
+    var w = focusedElt.clientWidth;
 
 
-  if (sentPredictiveInserts)
-  { //insertCharPredictively('X');
-    for (var i=0; i < sentPredictiveInserts.chars.length; i++)
-    {  var textNode = focusedElt.childNodes[0];
-       textNode.insertData(focusIndex,sentPredictiveInserts.chars.charAt(i));
-       focusIndex++;
-    //insertCharPredictively(sentPredictiveInserts.chars.charAt(i));
+    if (sentPredictiveInserts)
+    { //insertCharPredictively('X');
+      for (var i=0; i < sentPredictiveInserts.chars.length; i++)
+      {  var textNode = focusedElt.childNodes[0];
+         textNode.insertData(focusIndex,sentPredictiveInserts.chars.charAt(i));
+         focusIndex++;
+      //insertCharPredictively(sentPredictiveInserts.chars.charAt(i));
+      }
+      //insertCharPredictively('X');
+    
+      var increase = focusedElt.clientWidth - w;
+
+      var focusRenderingElt = document.getElementById('-2');
+      focusRenderingElt.style.left = parseInt(focusRenderingElt.style.left) + increase  + 'px';
+
+      var renderingElt = document.getElementById('proxima').childNodes[0]; // this is the rendering div (which has a variable id)
+      var parent = focusedElt.parentNode;
+      var elt = focusedElt;
+
+      while ( parent != renderingElt && parent.getAttribute('class') != 'Column' )
+      { var n = elt.nextSibling;
+        while ( n )
+        { // NOTE: why do we need to do this again (otherwise during long insert, sometimes too much right shift)    
+          sentPredictiveInserts.affectedElts.push({element: n, originalLeft: n.style.left});
+          n.style.left = parseInt(n.style.left) + increase + 'px';
+          n = n.nextSibling;
+        }
+        elt = parent;
+        parent = parent.parentNode;
+      }
     }
-    //insertCharPredictively('X');
-  }
-  var increase = focusedElt.clientWidth - w;
-  var focusRenderingElt = document.getElementById('-2');
-  focusRenderingElt.style.left = parseInt(focusRenderingElt.style.left) + increase  + 'px';
   }
 }
 
@@ -1036,15 +1059,16 @@ if ( currentPredictiveInserts )
   focusIndex++;
   var increase = focusedElt.clientWidth - w;
 
-  var renderingElt = document.getElementById('proxima').childNodes[0]; // this is the rendering div (which has a variable id)
-  var parent = focusedElt.parentNode;
-  var elt = focusedElt;
 
   var focusRenderingElt = document.getElementById('-2');
   focusRenderingElt.style.left = parseInt(focusRenderingElt.style.left) + increase  + 'px';
 
+  var renderingElt = document.getElementById('proxima').childNodes[0]; // this is the rendering div (which has a variable id)
+  var parent = focusedElt.parentNode;
+  var elt = focusedElt;
+
   while ( parent != renderingElt && parent.getAttribute('class') != 'Column' )
-  { n = elt.nextSibling;
+  { var n = elt.nextSibling;
     while ( n )
     { if (isNewPredictiveSession) // only at the first char insert, store the original positions of moved siblings
         currentPredictiveInserts.affectedElts.push({element: n, originalLeft: n.style.left});
