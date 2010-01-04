@@ -106,7 +106,7 @@ unArrange state arrLvl@(ArrangementLevel arr focus p) layLvl@(LayoutLevel pres _
     NormalizeArr          -> ([NormalizeLay],          state, arrLvl)
     RedrawArr             -> ([SkipLay 0],             state, (ArrangementLevel emptyA focus p))
     Test2Arr              -> ([Test2Lay],              state, arrLvl)
-    KeyCharArr c          -> ([InsertLay c, guaranteeFocusInView],           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
+    KeyCharArr c          -> ([InsertLay c{-, guaranteeFocusInView]-}],           state, arrLvl)--debug UnA (show$KeyCharArr c) (let (a,b) = editArr c state in (SkipLay 0, a,b) )
     KeySpecialArr c ms    -> ([SkipLay 0],             state, arrLvl) 
     MouseDownArr x y (Modifiers False False False) i ->
       (case navigateFocus x y arr of
