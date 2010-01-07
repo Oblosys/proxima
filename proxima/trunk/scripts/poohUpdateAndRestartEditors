@@ -5,29 +5,30 @@ killall HeliumEditor
 killall DeclarationForm
 # the last four editors share the same executable name
 
+echo updating and building all editors with -O
 cd /home/martijn/proxima/dazzleEditor
 svn update
 cabal configure --ghc-option=-O
 cabal build
 cd /home/martijn/proxima/heliumEditor
 svn update
-cabal configure --ghc-option=-O2
+cabal configure --ghc-option=-O
 cabal build
 cd /home/martijn/proxima/declarationForm
 svn update
-cabal configure --ghc-option=-O2
+cabal configure --ghc-option=-O
 cabal build
 cd /home/martijn/proxima/taskEditor
 svn update
-cabal configure --ghc-option=-O2
+cabal configure --ghc-option=-O
 cabal build
 cd /home/martijn/proxima/sudoku
 svn update
-cabal configure --ghc-option=-O2
+cabal configure --ghc-option=-O
 cabal build
 cd /home/martijn/proxima/styledText
 svn update
-cabal configure --ghc-option=-O2
+cabal configure --ghc-option=-O
 cabal build
 
 /home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima dazzleEditor DazzleEditor
