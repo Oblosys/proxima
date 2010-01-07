@@ -619,7 +619,8 @@ function keypress(e)
   }
 
   if (e.which != 0 && keyCode != 8 && keyCode != 13)
-  { insertCharPredictively( String.fromCharCode(keyCode) );
+  { if (!(e.ctrlKey || e.altKey || e.metaKey))
+      insertCharPredictively( String.fromCharCode(keyCode) );
     loadXMLDoc('Chr('+keyCode+','+showModifiers(e)+');');
   }
 // ? is to prevent caching by IE 
