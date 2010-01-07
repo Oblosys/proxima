@@ -52,6 +52,11 @@ var mouseDown = false;
 var commandQueue = '';
 var currentRequestId = 0;
 
+var sessionId;
+var responseId;
+var sessionType; // 'primary' or 'secondary'
+var nrOfSessions;
+
 
 function init()
 {
@@ -295,7 +300,11 @@ if (xmlhttp!=null)
     { xmlhttp.onreadystatechange=state_Change;
       xmlhttp.open("GET",'handle?commands=Commands '+ currentRequestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
-      document.getElementById('state').innerHTML = '<img src="etc/statusBlue.jpg"/>';
+      if (sessionType == 'primary')
+        document.getElementById('state').innerHTML = '<img src="etc/statusBlue.jpg"/>';
+      else
+        document.getElementById('state').innerHTML = '<img src="etc/statusRed.jpg"/>';
+
       currentRequestId++;
 //      debugAdd('incremented currentRequestId: ' + currentRequestId);
       moveCurrentPredictiveInsertsToSent();
@@ -325,7 +334,10 @@ if (xmlhttp.readyState==4)
       loadXMLDoc('');
     }
     else
-      document.getElementById('state').innerHTML = '<img src="etc/statusGreen.jpg"/>';
+      if (sessionType == 'primary')
+        document.getElementById('state').innerHTML = '<img src="etc/statusGreen.jpg"/>';
+      else
+        document.getElementById('state').innerHTML = '<img src="etc/statusRed.jpg"/>';
     
     var focus = document.getElementById('focus');
     
@@ -335,10 +347,10 @@ if (xmlhttp.readyState==4)
     // after this, firstChild has a value, while it is null before
                 // newRendering.firstChild;
 
-    var sessionId = updates.getAttribute('sessionId');
-    var responseId = updates.getAttribute('responseId');
-    var sessionType = updates.getAttribute('sessionType');
-    var nrOfSessions = updates.getAttribute('nrOfSessions');
+    sessionId = updates.getAttribute('sessionId');
+    responseId = updates.getAttribute('responseId');
+    sessionType = updates.getAttribute('sessionType');
+    nrOfSessions = updates.getAttribute('nrOfSessions');
     document.getElementById('sessionInfo').innerHTML =
       'Session id: ' + sessionId + ':' + responseId + ' '  +
       (sessionType == 'primary' ? 'Editable' : 'Non-editable') + ' ' +
