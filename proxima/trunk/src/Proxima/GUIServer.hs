@@ -305,7 +305,7 @@ type Sessions = [(SessionId, UTCTime, CommonTypes.Rectangle)]
 
 cookieLifeTime = sessionExpirationTime + 60 -- only needs to be as long as sessionExpirationTime
 
-sessionExpirationTime = 300
+sessionExpirationTime = 24 * 60 * 60 -- 24 hours for the demo, (expiration sometimes seems to cause problems)
 
 removeExpiredSessions :: IORef Sessions -> ServerPart ()
 removeExpiredSessions currentSessionsRef = liftIO $
