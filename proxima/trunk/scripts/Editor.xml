@@ -1142,7 +1142,7 @@ function test(char)
 <td><button onclick="uploadDocument();">Upload</button></td>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <td><button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload&nbsp;Font&nbsp;Metrics</button></td> <!-- with normal space button text gets line breaks -->
-<td><button onclick="test('X');">Test</button></td>
+<!-- <td><button onclick="test('X');">Test</button></td> -->
 <td width="100%"></td>
 <td><div id="state"></div></td>
 </tr>
