@@ -590,31 +590,31 @@ function keypress(e)
     return false;
   }
   if (keyCode==98 && e.ctrlKey) // ctrl-b
-  { loadXMLDoc('SetStyle Bold;');
+  { loadXMLDoc('EditStyle SetBold;');
     return false;
   }
-  if (keyCode==66 && e.ctrlKey) // ctrl-B
-  { loadXMLDoc('ClearStyle Bold;');
+ if (keyCode==66 && e.ctrlKey) // ctrl-B
+  { loadXMLDoc('EditStyle ClearBold;');
     return false;
   }
   if (keyCode==105 && e.ctrlKey) // ctrl-i
-  { loadXMLDoc('SetStyle Italic;');
+  { loadXMLDoc('EditStyle SetItalic;');
     return false;
   }
   if (keyCode==73 && e.ctrlKey) // ctrl-I
-  { loadXMLDoc('ClearStyle Italic;');
+  { loadXMLDoc('EditStyle ClearItalic;');
     return false;
   }
   if (keyCode==48 && e.ctrlKey) // ctrl-0
-  { loadXMLDoc('SetStyle (Colored (0,0,0));');
+  { loadXMLDoc('EditStyle (SetColor (0,0,0));');
     return false;
   }
   if (keyCode==49 && e.ctrlKey) // ctrl-1
-  { loadXMLDoc('SetStyle (Colored (255,0,0));');
+  { loadXMLDoc('EditStyle (SetColor (255,0,0));');
     return false;
   }
   if (keyCode==50 && e.ctrlKey) // ctrl-2
-  { loadXMLDoc('SetStyle (Colored (0,0,255));');
+  { loadXMLDoc('EditStyle (SetColor (0,0,255));');
     return false;
   }
 
