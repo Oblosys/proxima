@@ -170,7 +170,7 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
        -- Proxima is not thread safe yet, so only one thread at a time is allowed to execute.
 
        ; removeExpiredSessions currentSessionsRef
-       ; (sessionId,viewedArea) <- getCookieSessionId serverInstanceId currentSessionsRef
+       ; (sessionId,viewedArea) <- getCookieSessionId settings serverInstanceId currentSessionsRef
        ; currentSessions <- liftIO $ readIORef currentSessionsRef
                
        ; let isPrimarySession = case currentSessions of
@@ -303,6 +303,8 @@ type ServerInstanceId = String
 type SessionId = Int
 type Sessions = [(SessionId, UTCTime, CommonTypes.Rectangle)]
 
+mkCookieName settings = "Proxima"++filter isAlpha (applicationName settings)
+
 cookieLifeTime = sessionExpirationTime + 60 -- only needs to be as long as sessionExpirationTime
 
 sessionExpirationTime = 24 * 60 * 60 -- 24 hours for the demo, (expiration sometimes seems to cause problems)
@@ -315,9 +317,9 @@ removeExpiredSessions currentSessionsRef = liftIO $
         filter (\(_,lastSessionEventTime,_) -> diffUTCTime time lastSessionEventTime < sessionExpirationTime) currentSessions 
     }
 
-getCookieSessionId :: ServerInstanceId -> IORef Sessions -> ServerPart (SessionId, CommonTypes.Rectangle)
-getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
- do { let mCookieSessionId = parseCookie serverInstanceId rq
+getCookieSessionId :: Settings -> ServerInstanceId -> IORef Sessions -> ServerPart (SessionId, CommonTypes.Rectangle)
+getCookieSessionId settings serverInstanceId currentSessionsRef = withRequest $ \rq ->
+ do { let mCookieSessionId = parseCookie settings serverInstanceId rq
     ; currentSessions <- liftIO $ readIORef currentSessionsRef
 --    ; liftIO $ putStrLn $ "parsed cookie id is " ++ show mCookieSessionId
     ; (sessionId, _, viewedArea) <-
@@ -329,19 +331,19 @@ getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
                             | (i,t,v) <- currentSessions 
                             ]
 
-               ; addCookie cookieLifeTime $ mkCookie "proxima" $ show (serverInstanceId, cookieSessionId)
+               ; addCookie cookieLifeTime $ mkCookie (mkCookieName settings) $ show (serverInstanceId, cookieSessionId)
                ; let viewedArea = thd3 . head' "GUIServer.getCookieSessionId" $ filter ((==cookieSessionId).fst3) currentSessions 
                ; return (cookieSessionId, time, viewedArea)
                }
 
           -- no or wrong cookie, or sessionId is not in currentSessions (because it expired)
-          _ -> makeNewSessionCookie serverInstanceId currentSessionsRef
+          _ -> makeNewSessionCookie settings serverInstanceId currentSessionsRef
     ; liftIO $ putStrLn $ "SessionId:" ++ show sessionId
     ; return (sessionId, viewedArea)
     } 
 
 -- Added a (primitive) cookie parser because Happs cookie parser is buggy when other cookies exist with _ in the cookie name 
-parseCookie serverInstanceId rq = 
+parseCookie settings serverInstanceId rq = 
  do { case fmap (safeRead . show) $ getHeader "cookie" rq of
         Nothing -> Nothing  -- TODO: weird: this is not a ByteString but a Lazy.Internal.ByteString
                             -- Therefore we must do this stupid show safeRead thing instead of unpack
@@ -358,24 +360,24 @@ parseCookie serverInstanceId rq =
          if not $ cookiePrefix `isPrefixOf` xs 
          then getCookieFromHeader xs'
          else case safeRead $ takeWhile (/= ';') $ drop (length cookiePrefix) xs of
-                Nothing -> -- the pathological case that proxima=" appears in the value of another cookie
+                Nothing -> -- the pathological case that cookieName++"=" appears in the value of another cookie
                            getCookieFromHeader $ drop (length cookiePrefix) xs
                 Just (valueStr :: String) ->
                   case safeRead valueStr of
                     Just (cookieServerInstanceId::String,key::Int) -> return (cookieServerInstanceId, key)
-                    Nothing -> -- cannot occur, since proxima=".." cannot appear in the value of another cookie (the " will be escaped)
+                    Nothing -> -- cannot occur, since "cookieName++"=".." cannot appear in the value of another cookie (the " will be escaped)
                                -- hence, when we have proxima=".." the .. will be a valid id/key pair
                                getCookieFromHeader $ drop (length cookiePrefix) xs  
-       cookiePrefix = "proxima="
+       cookiePrefix = (mkCookieName settings)++"="
 
-makeNewSessionCookie serverInstanceId currentSessionsRef =
+makeNewSessionCookie settings serverInstanceId currentSessionsRef =
  do { currentSessions <- liftIO $ readIORef currentSessionsRef
     ; time <- liftIO $  getCurrentTime
     
     ; let newViewedArea = ((0,0),(0,0))
           newSessionId = maximum (0: map fst3 currentSessions) + 1
           newSession = (newSessionId, time, newViewedArea)
-    ; addCookie cookieLifeTime $ mkCookie "proxima" $ show (serverInstanceId, newSessionId)
+    ; addCookie cookieLifeTime $ mkCookie (mkCookieName settings) $ show (serverInstanceId, newSessionId)
     -- one minute
     
     ; liftIO $ writeIORef currentSessionsRef $ currentSessions ++ [newSession]
