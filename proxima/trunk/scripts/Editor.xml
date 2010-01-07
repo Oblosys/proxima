@@ -301,9 +301,9 @@ if (xmlhttp!=null)
       xmlhttp.open("GET",'handle?commands=Commands '+ currentRequestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
       if (sessionType == 'primary')
-        document.getElementById('state').innerHTML = '<img src="etc/statusBlue.jpg"/>';
+        document.getElementById('status').innerHTML = '<img src="etc/statusBlue.jpg"/>';
       else
-        document.getElementById('state').innerHTML = '<img src="etc/statusRed.jpg"/>';
+        document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
 
       currentRequestId++;
 //      debugAdd('incremented currentRequestId: ' + currentRequestId);
@@ -335,9 +335,9 @@ if (xmlhttp.readyState==4)
     }
     else
       if (sessionType == 'primary')
-        document.getElementById('state').innerHTML = '<img src="etc/statusGreen.jpg"/>';
+        document.getElementById('status').innerHTML = '<img src="etc/statusGreen.jpg"/>';
       else
-        document.getElementById('state').innerHTML = '<img src="etc/statusRed.jpg"/>';
+        document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
     
     var focus = document.getElementById('focus');
     
@@ -1144,7 +1144,7 @@ function test(char)
 <td><button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload&nbsp;Font&nbsp;Metrics</button></td> <!-- with normal space button text gets line breaks -->
 <!-- <td><button onclick="test('X');">Test</button></td> -->
 <td width="100%"></td>
-<td><div id="state"></div></td>
+<td><div id="status"></div></td>
 </tr>
 </table>
 </td></tr></table>
