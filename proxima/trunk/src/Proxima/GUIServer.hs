@@ -157,6 +157,7 @@ withAgentIsMIE f = withRequest $ \rq ->
 
 -- todo lookup of viewed area is bad (with head) and what about actualViewedArea?
 -- TODO: add thread safety!!!
+-- currently, having secondary edit sessions destroys incrementality
 -- if we put Arrangement layer and maybe level in session (by indexing), incrementality should be back
 -- then also rendering level (may be easy) and presentation focus and maybe arrangement focus must be indexed
 -- then we have multi editing!
@@ -530,7 +531,17 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewe
             unwrap editDoc
         }
 
+    -- Allow this F5 key also for secondary sessions to refresh (and initialize) the screen.
+    -- This is a hack. TODO: make a special command for this.
+    Key (116,(False, False, False)) ->
+      let evt = KeySpecialRen CommonTypes.F5Key  (CommonTypes.Modifiers False False False)
+      in  do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt
+             ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+             ; return $ html ++ [setViewedAreaHtml]
+             }
+
     Key (keyCode,(shiftDown, ctrlDown, altDown)) ->
+      whenPrimary isPrimarySession $
       let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
           evt = case keyCode of
                   46 -> KeySpecialRen CommonTypes.DeleteKey ms
