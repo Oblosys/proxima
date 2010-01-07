@@ -543,7 +543,7 @@ function select(path, node)
       { var child = node.childNodes[childNr];
         return (select (path, child));
       }
-      else alert ('incorrect path at op: '+theOp);
+      //else alert ('incorrect path at op: '+theOp);
     }
 }
 
