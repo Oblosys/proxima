@@ -623,7 +623,6 @@ function keypress(e)
       insertCharPredictively( String.fromCharCode(keyCode) );
     loadXMLDoc('Chr('+keyCode+','+showModifiers(e)+');');
   }
-// ? is to prevent caching by IE 
 // maybe also check alt, ctrl and  other keys, they seem to generate press events now
    
    if (e.preventDefault) e.preventDefault();
