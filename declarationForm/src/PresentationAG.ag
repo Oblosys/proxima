@@ -285,7 +285,7 @@ SEM Tasks
 		      	       -- , @things2.pres
 		       , text "Tasks:"
       	       	           `addPopupItems` 
-                             ([ ("Insert task", docUpd $ insertElementAtEnd (toClip newTask) (@lhs.path++[1]))
+                             ([ ("Insert task", docUpd $ insertElementAtEnd (toClip newTask) (@lhs.path++[2]))
                               ] ++ showHideCompletedItem @lhs.path @self)
 		       , @tasks.pres `withFontSize` 12
 		       ]
