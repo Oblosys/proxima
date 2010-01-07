@@ -13,8 +13,10 @@ data Currency = Currency name : Description euroRate : Float_
 
 
 
+--data Tasks = Tasks showCompleted : Bool tasks : [Task]
+
 data Tasks = Tasks things : [Thing] showCompleted : Bool tasks : [Task]
--- data Tasks = Tasks showCompleted : Bool tasks : [Task]
+-- NOTE: when using this declaration, fix popup for "Insert Task"
 
 data Thing = Thing size : Int
 
