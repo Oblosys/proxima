@@ -154,7 +154,7 @@ SEM RootE
                        
                        , row [ hSpace 3, text "module " `withColor` keyCol, bold $ text "Main" , text " where" `withColor` keyCol]
                        , row [ hSpace 3, @decls.pres ]
-                       , empty `withStretch` True
+                       , empty `withHStretch` True
                        , vSpace 10
                        , hLine
                        , vSpace 4                       -- empty col's are buggy in Xprez
