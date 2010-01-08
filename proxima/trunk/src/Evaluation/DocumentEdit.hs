@@ -92,7 +92,7 @@ menuD path@(PathD p) d =
       , ("Copy", \(DocumentLevel d _ clip) -> DocumentLevel d path (selectD p d) ) 
       , ("Paste", \(DocumentLevel d _ clip) -> DocumentLevel (pasteD p clip d) path clip )
       , ("Select", \(DocumentLevel d _ clip) -> DocumentLevel d path clip ) ]
-      ++ map mkItem alts   -- use this one or the one in the argument? They should be the same
+{-      ++ map mkItem alts   -- use this one or the one in the argument? They should be the same
       ++ if null p then [] else
            let parent = (selectD (init p) d)
            in if not (isListClip parent) then [] else
@@ -103,7 +103,7 @@ menuD path@(PathD p) d =
                     pasteAfter = ("Paste after", \(DocumentLevel _ pth clip) -> 
                                                      DocumentLevel (pasteD (init p) (insertListClip (last p+1) clip parent) d) pth clip )
                 in  map mkItem2 alts2 ++ [pasteBefore,pasteAfter]
-
+-}
 
 selectD :: Editable doc doc enr node clip token => Path -> doc -> clip
 selectD p doc = select p doc
