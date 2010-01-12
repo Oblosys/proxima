@@ -70,10 +70,8 @@ function init()
   //
 
 
-//    setRefreshTimer(10);
-    refresh();
-   setViewedAreaServer();
-    loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
+  setViewedAreaServer();
+  refresh();
 }
 
 function addKeyboardListeners()
@@ -300,11 +298,14 @@ if (xmlhttp!=null)
     { xmlhttp.onreadystatechange=state_Change;
       xmlhttp.open("GET",'handle?commands=Commands '+ currentRequestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
-      if (sessionType == 'primary')
+      if (sessionType == 'primary' || sessionType == '')
         document.getElementById('status').innerHTML = '<img src="etc/statusBlue.jpg"/>';
+    
       else
         document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
 
+      stopAutoRefreshTimer();
+      
       currentRequestId++;
 //      debugAdd('incremented currentRequestId: ' + currentRequestId);
       moveCurrentPredictiveInsertsToSent();
@@ -335,12 +336,13 @@ if (xmlhttp.readyState==4)
     }
     else
       if (sessionType == 'primary')
-        document.getElementById('status').innerHTML = '<img src="etc/statusGreen.jpg"/>';
+      { document.getElementById('status').innerHTML = '<img src="etc/statusGreen.jpg"/>';
+        stopAutoRefreshTimer(); // in case it was started
+      }
       else
-        document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
-    
-    var focus = document.getElementById('focus');
-    
+      { document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
+        startAutoRefreshTimer();
+      }   
     
     var updates = document.getElementById('updates');
     // getElementById seems to trigger parsing the responseText
@@ -519,7 +521,6 @@ function updateTree(update)
   
   else if (op == 'refresh')
   { refresh();
-    loadXMLDoc('Key(116,(False,False,False));'); // put this one in refresh?
   }
   else if (op == 'alert')
   { alert (update.getAttribute('text'));
@@ -562,18 +563,37 @@ function setStatus(message)
     document.getElementById('status').innerHTML=message;
 }
 
+var autoRefreshTimer;
 
-function refresh()
-{ removeChildren('rendering');
-  removeChildren('focus');
-  removeChildren('newRendering');
-  removeChildren('contextMenu');
+function startAutoRefreshTimer()
+{  autoRefreshTimer = setTimeout('autoRefresh()',10 * 1000);
 }
 
-function removeChildren(parentId)
-{ var parent = document.getElementById(parentId);
-    while (parent.firstChild)
-      parent.removeChild(parent.firstChild);
+function stopAutoRefreshTimer()
+{  clearTimeout(autoRefreshTimer);
+}
+
+function autoRefresh()
+{ refresh();
+}
+
+function refresh()
+{ var renderingElt = document.getElementById('proxima').childNodes[0];
+    // this is the rendering div (which has a variable id)
+  removeChildren(renderingElt);
+  removeChildrenById('-2');  // -2 is the focus
+  removeChildrenById('newRendering');
+  removeChildrenById('contextMenu');
+  loadXMLDoc('Key(116,(False,False,False));');
+}
+
+function removeChildrenById(parentId)
+{ removeChildren(document.getElementById(parentId));
+}
+
+function removeChildren(parent)
+{ while (parent.firstChild)
+    parent.removeChild(parent.firstChild);
 }
 
 function keypress(e)
@@ -642,9 +662,11 @@ function hasNoKeyPress(keyCode)
 
 function keydown(e)
 {  if (!e) e = event;
-   if (e.keyCode==116)
+   if (e.keyCode==115)
+   { alert('Refresh');
      refresh();
- 
+     return false;
+   }
    if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
      loadXMLDoc('Key('+e.keyCode+','+showModifiers(e)+');');
@@ -1115,10 +1137,11 @@ function test(char)
      onmouseup="return mouseHandler('U',event)"
      onclick="return mouseHandler('C',event)"
      onmousemove="return mouseHandler('M',event)"
-     oncontextmenu="return contextHandler(event)"
-><div id="rendering" 
-     ></div><div id="focus"></div><div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div>
-     <div id="draggedElementCloneParent" style="position: relative; height: 10000px; width: 10000px;"></div>
+     oncontextmenu="return contextHandler(event)">
+<div id="rendering"></div>
+<div id="-2"></div>  <!-- -2 is the focus -->
+<div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div>
+<div id="draggedElementCloneParent" style="position: relative; height: 10000px; width: 10000px;"></div>
 </div>
 <div id="uploadDialog" style='position: absolute; left:-2000px; top:200px;width:400px;height:120px; border: 2px solid black; background-color:white'>
 <form action="upload" enctype="multipart/form-data" method="post">
