@@ -168,16 +168,11 @@ withAgentIsMIE f = withRequest $ \rq ->
                      -- Maybe we also need to switch to POST for IE, since it
                      -- cannot handle large queries with GET
 
-
--- todo lookup of viewed area is bad (with head) and what about actualViewedArea?
--- TODO: add thread safety!!!
 -- currently, having secondary edit sessions destroys incrementality
 -- if we put Arrangement layer and maybe level in session (by indexing), incrementality should be back
 -- then also rendering level (may be easy) and presentation focus and maybe arrangement focus must be indexed
 -- then we have multi editing!
--- in case of multiple sessions, editors should poll every .. seconds
 
--- bug. declaration form becomes weird after single session timeout
 sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex menuR actualViewedAreaRef 
                serverInstanceId currentSessionsRef = 
   [ do { liftIO $ takeMVar mutex -- obtain mutex
