@@ -78,7 +78,7 @@ startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
     ; actualViewedAreaRef <- newIORef ((0,0),(0,0)) -- is used when reducing the viewed area, see mkSetViewedAreaHtml
     ; currentSessionsRef <- newIORef ([],0) -- list of active session and session id counter
                                            
-    ; serverInstanceId <- fmap (formatTime defaultTimeLocale "%s") getCurrentTime
+    ; serverInstanceId <- mkServerInstanceId settings
     ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
     ; let startServer = server params mutex menuR actualViewedAreaRef serverInstanceId currentSessionsRef
 
@@ -101,6 +101,19 @@ startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
           ; startServer
           }
     }
+
+-- Return string with epoch seconds, current picoseconds, and name of editor. Unique in most cases.
+-- (unless the same editor is started twice within one picosecond)
+mkServerInstanceId settings =
+ do { currentTime <- getCurrentTime
+    
+    ; return $ formatTime defaultTimeLocale "%s" currentTime ++ "_" ++
+               formatTime defaultTimeLocale "%q" currentTime ++ "_" ++
+               safeStr (applicationName settings)
+    }
+ where safeStr [] = []
+       safeStr (c:cs) | isAlpha c = c : safeStr cs
+                      | otherwise = '_' : safeStr cs
 
 {-
 HAPPS
