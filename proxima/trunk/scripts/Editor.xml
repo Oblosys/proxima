@@ -611,7 +611,7 @@ function keypress(e)
   if (keyCode==102 && e.ctrlKey) // ctrl-f
   { var answer=prompt("Enter search term.");
 // todo: escape answer string
-   if (answer) loadXMLDoc('Find "'+answer+'";');
+   if (answer) loadXMLDoc('Find \\"'+answer+'\\";');
     return false;
   }
   if (keyCode==98 && e.ctrlKey) // ctrl-b
@@ -670,7 +670,7 @@ function keydown(e)
   if (e.keyCode==116)
   { return true; // don't handle F5, so browser can do a keypress event and a refresh
   }
-
+// todo prevent ctrl f and other keys bound in keyPress from sending Key events here.
   if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
      loadXMLDoc('Key('+e.keyCode+','+showModifiers(e)+');');
