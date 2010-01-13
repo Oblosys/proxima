@@ -70,7 +70,6 @@ function init()
   //
 
 
-  setViewedAreaServer();
   refresh();
 }
 
@@ -278,7 +277,10 @@ function hidemenuie5(e)
 
 
 function loadXMLDoc(url)
-{ commandQueue = commandQueue + url;
+{ if (commandQueue == "")
+    prependSetViewedAreaCommand(); // every set of commands is prepended with the viewed area
+
+  commandQueue = commandQueue + url;
 
   if ( xmlhttp && xmlhttp.readyState != 0 && xmlhttp.readyState != 4)
     return; // if xmlhttp exists and was initialized and not ready, we return
@@ -705,12 +707,17 @@ function mouseHandler(str,e)
   if (scrollInProgress)
   { if (str == 'U')
     { scrollInProgress = false;
-      setViewedAreaServer();
+
+      prependSetViewedAreaCommand();
+      // there already is one at the start of the command queue (added by loadXMLDoc), but put the most recent one just in case
+      loadXMLDoc('Redraw;');
+
       return true;
     }
     else if (str == 'M')
     { if (commandQueue == "")
-        setViewedAreaServer(); // during scroll, only update if no other commands in queue, to prevent flooding
+      // there commandQueue is empty, so viewed area command will be prepended by loadXMLDoc
+      loadXMLDoc('Redraw;'); // during scroll, only update if no other commands in queue, to prevent flooding
       return true;
     }
     // mouse down cannot occur
@@ -934,11 +941,10 @@ function showModifiers(e )
 
 // set the viewed area at server side according to size and scroll position of proxima
 // element
-function setViewedAreaServer()
+function prependSetViewedAreaCommand()
 { var proxima = document.getElementById('proxima');
-//    debug('scroll '+ proxima.scrollLeft + ',' +proxima.scrollTop); 
-  loadXMLDoc('SetViewedArea((' + proxima.scrollLeft + ',' + proxima.scrollTop +
-              '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));');
+  commandQueue = commandQueue + 'SetViewedArea((' + proxima.scrollLeft + ',' + proxima.scrollTop +
+                 '),(' + proxima.clientWidth + ',' + proxima.clientHeight + '));';
 }
 
 // scroll proxima element to show the viewed area

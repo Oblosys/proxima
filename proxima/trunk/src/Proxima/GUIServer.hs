@@ -499,6 +499,7 @@ data Command = Metrics ((String,Int,Bool,Bool),(Int,Int,[Int]))
              | EditStyle StyleEdit 
              | Find String
              | SetViewedArea CommonTypes.Rectangle
+             | Redraw
              | ClearMetrics 
                deriving (Show, Read)
                         
@@ -656,7 +657,11 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewe
      do { writeIORef viewedAreaRef newViewedArea
         ; writeIORef actualViewedAreaRef newViewedArea
         ; reduceViewedArea settings viewedAreaRef
-        ; genericHandler settings handler renderingLvlVar viewedAreaRef () $
+        ; return []
+        }
+
+    Redraw ->
+     do { genericHandler settings handler renderingLvlVar viewedAreaRef () $
             SkipRen (-2)
         }
 
