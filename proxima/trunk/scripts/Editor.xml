@@ -602,7 +602,12 @@ function keypress(e)
    var keyCode =  (e.keyCode != 0) ? e.keyCode : e.charCode
    // keyCode is 0 on Firefox
    
-//  debugAdd('Key is '+keyCode +',' + e.charCode);
+  //alert('Key is '+keyCode +',' + e.charCode);
+
+  if (keyCode==116)
+  { return true; // don't handle F5, so browser can do a refresh
+  }
+
   if (keyCode==102 && e.ctrlKey) // ctrl-f
   { var answer=prompt("Enter search term.");
 // todo: escape answer string
@@ -661,13 +666,12 @@ function hasNoKeyPress(keyCode)
 
 
 function keydown(e)
-{  if (!e) e = event;
-   if (e.keyCode==115)
-   { alert('Refresh');
-     refresh();
-     return false;
-   }
-   if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
+{ if (!e) e = event;
+  if (e.keyCode==116)
+  { return true; // don't handle F5, so browser can do a keypress event and a refresh
+  }
+
+  if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
      loadXMLDoc('Key('+e.keyCode+','+showModifiers(e)+');');
      if (e.preventDefault) e.preventDefault();
@@ -683,14 +687,6 @@ function keydown(e)
 
 function keyup(e)
 {
-}
-
-function ignore(e)
-{
-   if (e.preventDefault) e.preventDefault();
-   if (e.stopPropagation) e.stopPropagation();
-
-   return false;
 }
 
 var scrollInProgress = false;
