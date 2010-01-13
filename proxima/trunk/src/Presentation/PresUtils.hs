@@ -625,6 +625,7 @@ selectTree (0:path) (TagP _ pres)         = selectTree path pres
 selectTree (p:path) (FormatterP _ press)      = selectTree path (index "PresUtils.selectTree" press p)
 selectTree pth      pres                      = debug Err ("PresUtils.selectTree: can't handle "++show pth++" "++show pres) (StringP NoIDP "unselectable")
 
+-- for graphs, we do the same thing as for rows/columns
 pathsToAncestorRightSiblings :: (Show node, Show token) => Path -> Path -> Layout doc enr node clip token -> [Path]
 pathsToAncestorRightSiblings _    []       _                     = []
 pathsToAncestorRightSiblings _    (p:path) (StringP _ _)         = [] 
@@ -632,6 +633,9 @@ pathsToAncestorRightSiblings root (p:path) (RowP _ _ press)      = pathsToAncest
                                                               ++ (if p < length press - 1 then [root++[p+1]] else [])
 pathsToAncestorRightSiblings root (p:path) (ColP _ _ _ press)      = pathsToAncestorRightSiblings (root++[p]) path (index "PresUtils.pathsToAncestorRightSiblings" press p)
                                                               ++ (if p < length press - 1 then [root++[p+1]] else [])
+pathsToAncestorRightSiblings root (p:path) (GraphP _ _ _ _ _ press)      = pathsToAncestorRightSiblings (root++[p]) path (index "PresUtils.pathsToAncestorRightSiblings" press p)
+                                                              ++ (if p < length press - 1 then [root++[p+1]] else [])
+pathsToAncestorRightSiblings root (p:path) (VertexP _ _ _ _ _ pres) = pathsToAncestorRightSiblings (root++[p]) path pres
 pathsToAncestorRightSiblings root (0:path) (OverlayP _ _ (pres:_)) = pathsToAncestorRightSiblings (root++[0]) path pres
 pathsToAncestorRightSiblings root (p:path) (StructuralP _ pres)  = pathsToAncestorRightSiblings (root++[p]) path pres
 pathsToAncestorRightSiblings root (p:path) (ParsingP _ _ _ pres)   = pathsToAncestorRightSiblings (root++[p]) path pres
@@ -649,6 +653,9 @@ pathsToAncestorLeftSiblings root (p:path) (RowP _ _ press)      = pathsToAncesto
                                                              ++ (if p > 0 then [root++[p-1]] else [])
 pathsToAncestorLeftSiblings root (p:path) (ColP _ _ _ press)      = pathsToAncestorLeftSiblings (root++[p]) path (index "PresUtils.pathsToAncestorLeftSiblings" press p)
                                                              ++ (if p > 0 then [root++[p-1]] else [])
+pathsToAncestorLeftSiblings root (p:path) (GraphP _ _ _ _ _ press)      = pathsToAncestorLeftSiblings (root++[p]) path (index "PresUtils.pathsToAncestorLeftSiblings" press p)
+                                                             ++ (if p > 0 then [root++[p-1]] else [])
+pathsToAncestorLeftSiblings root (p:path) (VertexP _ _ _ _ _ pres) = pathsToAncestorLeftSiblings (root++[p]) path pres 
 pathsToAncestorLeftSiblings root (0:path) (OverlayP _ _ (pres:_)) = pathsToAncestorLeftSiblings (root++[0]) path pres
 pathsToAncestorLeftSiblings root (p:path) (StructuralP _ pres)  = pathsToAncestorLeftSiblings (root++[p]) path pres 
 pathsToAncestorLeftSiblings root (p:path) (ParsingP _ _ _ pres)     = pathsToAncestorLeftSiblings (root++[p]) path pres 
@@ -710,6 +717,8 @@ rightNavigatePath (PathP path offset) pres =
    eg row [ col [ ...,"..|"], col ["..",..]] gives [ col [ ...,".."], col ["|..",..]]
    for rows with singleton colums this may give an unexpected result, but in order to change
    that a more sophisticated navigation is required.
+
+  TODO: maybe we should also check passing through vertex, although this is a rather exotic case
 -}
                               if passedColumn path leafPath pres
                               then pathP
