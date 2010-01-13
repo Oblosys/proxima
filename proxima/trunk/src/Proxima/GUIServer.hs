@@ -175,9 +175,11 @@ withAgentIsMIE f = withRequest $ \rq ->
 
 sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex menuR actualViewedAreaRef 
                serverInstanceId currentSessionsRef = 
-  [ do { liftIO $ takeMVar mutex -- obtain mutex
+  [ do { liftIO $ putStrLn "Trying to obtain mutex"
+       ; liftIO $ takeMVar mutex -- obtain mutex
        -- Proxima is not thread safe yet, so only one thread at a time is allowed to execute.
-
+       ; liftIO $ putStrLn "Obtained mutex"
+        
        ; removeExpiredSessions currentSessionsRef
        ; (sessionId,viewedArea) <- getCookieSessionId serverInstanceId currentSessionsRef
        ; (currentSessions, idCounter) <- liftIO $ readIORef currentSessionsRef
@@ -204,7 +206,9 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
                           , idCounter
                           )
 
+       ; liftIO $ putStrLn "About to release mutex"
        ; liftIO $ putMVar mutex () -- release the mutex
+       ; liftIO $ putStrLn "Mutex released"
        ; return response
        } ]
                      
@@ -297,6 +301,9 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualVie
    ] 
   ]
 
+-- NOTE: this does not catch syntax errors in the fromData on Commands, as these are handled before we get in the IO monad.
+-- This only occurs when there is a problem with string quotes in the command string. If parsing fails, we get a happs server error:... 
+-- The separate commands on the other hand are parsed safely.
 catchExceptions io =
   io `Control.Exception.catch` \(exc :: SomeException) ->
        do { let exceptionText = 
@@ -305,10 +312,12 @@ catchExceptions io =
                   "###########################################" 
           
           ; putStrLn exceptionText
-          ; let responseHTML = "<div id='updates'><div id='alert' op='alert' text='"++filter (/='\'') exceptionText++"'></div></div>"
+          ; let responseHTML = mkAlertResponseHTML exceptionText
                 
           ; return (responseHTML, length responseHTML)
           }
+
+mkAlertResponseHTML alertMsg =  "<div id='updates'><div id='alert' op='alert' text='"++filter (/='\'') alertMsg ++"'></div></div>"
 
 type ServerInstanceId = String
 type SessionId = Int
@@ -639,6 +648,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewe
       do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
                      castLay $ FindLay (Just str)
          ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+         ; seq (read "x" :: Int) $ return ()
          ; return $ html ++ [setViewedAreaHtml]
          }
 
