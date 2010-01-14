@@ -300,11 +300,22 @@ if (xmlhttp!=null)
     { xmlhttp.onreadystatechange=state_Change;
       xmlhttp.open("GET",'handle?commands=Commands '+ currentRequestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
-      if (sessionType == 'primary' || sessionType == '')
-        document.getElementById('status').innerHTML = '<img src="etc/statusBlue.jpg"/>';
-    
-      else
-        document.getElementById('status').innerHTML = '<img src="etc/statusOrange.jpg"/>';
+
+      switch(sessionType)
+      { case 'primary':
+          document.getElementById('status').innerHTML = '<img src="etc/statusBlue.jpg"/>';
+          break;
+
+        case 'secondary':
+          document.getElementById('status').innerHTML = '<img src="etc/statusOrange.jpg"/>';
+          break;
+
+        default:
+          document.getElementById('status').innerHTML = '<img src="etc/statusWhite.jpg"/>';
+
+      }
+
+
 
       stopAutoRefreshTimer();
       
@@ -342,7 +353,7 @@ if (xmlhttp.readyState==4)
         stopAutoRefreshTimer(); // in case it was started
         startExpirationTimer()
       }
-      else
+      else  
       { document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
         startAutoRefreshTimer();
       }   
@@ -568,24 +579,29 @@ function setStatus(message)
 
 
 var expirationTimer;
-var sessionExpirationTime = 30; // make sure this is equal to sessionExpirationTime in GUIServer.hs
+var sessionExpirationTime = 10; // make sure this is equal to sessionExpirationTime in GUIServer.hs
 
 function startExpirationTimer()
-{ expirationTimer = setTimeout('turnOffStatusLight()',sessionExpirationTime * 1000 - 5000);
+{ if (expirationTimer)
+    clearTimeout(expirationTimer);
 
+  expirationTimer = setTimeout('turnOffStatusLight()',sessionExpirationTime * 1000 - 5000);
 // The -5000 is because response from server is not immediate, so the timer is always started a bit
 // too late. The session will show to expire up to 5 seconds before it does on the server. (which is not a problem)
 }
 
 function turnOffStatusLight()
 { document.getElementById('status').innerHTML = '<img src="etc/statusGrey.jpg"/>';
+  sessionType = '';
   clearTimeout(expirationTimer);
 }
 
 var autoRefreshTimer;
 
 function startAutoRefreshTimer()
-{  autoRefreshTimer = setTimeout('autoRefresh()',5 * 1000);
+{ if (autoRefreshTimer)
+    clearTimeout(autoRefreshTimer);
+  autoRefreshTimer = setTimeout('autoRefresh()',5 * 1000);
 }
 
 function stopAutoRefreshTimer()
@@ -593,8 +609,7 @@ function stopAutoRefreshTimer()
 }
 
 function autoRefresh()
-{ //refresh();
-  loadXMLDoc('Rearrange;');
+{ loadXMLDoc('Rearrange;');
 }
 
 function refresh()
@@ -625,7 +640,8 @@ function keypress(e)
   //alert('Key is '+keyCode +',' + e.charCode);
 
   if (keyCode==116)
-  { return true; // don't handle F5, so browser can do a refresh
+  { loadXMLDoc('Rearrange;');
+    return false;
   }
 
   if (keyCode==102 && e.ctrlKey) // ctrl-f
@@ -688,8 +704,8 @@ function hasNoKeyPress(keyCode)
 function keydown(e)
 { if (!e) e = event;
   if (e.keyCode==116)
-  { return true; // don't handle F5, so browser can do a keypress event and a refresh
-  }
+    return true; // don't handle F5 here, it is handled in keypress()
+  
 // todo prevent ctrl f and other keys bound in keyPress from sending Key events here.
   if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {

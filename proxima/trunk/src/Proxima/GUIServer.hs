@@ -366,7 +366,7 @@ mkCookieName (serverInstanceId::ServerInstanceId) = "Proxima_"++serverInstanceId
 
 cookieLifeTime = sessionExpirationTime + 60 -- only needs to be as long as sessionExpirationTime
 
-sessionExpirationTime = 30 -- make sure this value is equal to sessionExpirationTime in Editor.xml
+sessionExpirationTime = 10 -- make sure this value is equal to sessionExpirationTime in Editor.xml
 
 -- Added a (primitive) cookie parser because Happs cookie parser is buggy when other cookies exist with _ in the cookie name 
 parseCookie serverInstanceId rq = 
