@@ -181,28 +181,22 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
        ; liftIO $ putStrLn "Obtained mutex"
         
        ; removeExpiredSessions currentSessionsRef
-       ; (sessionId,viewedArea) <- getCookieSessionId serverInstanceId currentSessionsRef
+       ; sessionId <- getCookieSessionId serverInstanceId currentSessionsRef
        ; (currentSessions, idCounter) <- liftIO $ readIORef currentSessionsRef
                
        ; let isPrimarySession = case currentSessions of
                                   [] -> False -- should not occur
-                                  (i,_,_):_ -> i == sessionId
+                                  (i,_):_ -> i == sessionId
 
        ; if isPrimarySession
          then liftIO $ putStrLn "\n\nPrimary editing session"
          else liftIO $ putStrLn "\n\nSecondary editing session"
        ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show (currentSessions) 
-       ; liftIO $ writeIORef viewedAreaRef viewedArea
-
-       ; liftIO $ putStrLn $ "Viewed area for this session: " ++ show viewedArea
 
        ; response <- multi $ handlers params menuR actualViewedAreaRef sessionId isPrimarySession (length currentSessions)
-       ; viewedArea' <- liftIO $ readIORef viewedAreaRef
-       ; liftIO $ putStrLn $ "And now viewed area is " ++ show viewedArea'
+
        ; liftIO $ writeIORef currentSessionsRef $ 
-                          ( [ (i, t, if i == sessionId then viewedArea' else v)
-                            | (i,t,v) <- currentSessions 
-                            ]
+                          ( currentSessions 
                           , idCounter
                           )
 
@@ -321,7 +315,7 @@ mkAlertResponseHTML alertMsg =  "<div id='updates'><div id='alert' op='alert' te
 
 type ServerInstanceId = String
 type SessionId = Int
-type Sessions = [(SessionId, UTCTime, CommonTypes.Rectangle)]
+type Sessions = [(SessionId, UTCTime)]
 type CurrentSessionsRef = IORef (Sessions, SessionId)
 
 
@@ -330,41 +324,38 @@ removeExpiredSessions currentSessionsRef = liftIO $
  do { time <- getCurrentTime
     ; (currentSessions, idCounter) <- readIORef currentSessionsRef
     ; writeIORef currentSessionsRef $
-        ( filter (\(_,lastSessionEventTime,_) -> diffUTCTime time lastSessionEventTime < sessionExpirationTime) currentSessions 
+        ( filter (\(_,lastSessionEventTime) -> diffUTCTime time lastSessionEventTime < sessionExpirationTime) currentSessions 
         , idCounter
         )
     }
 
-getCookieSessionId :: ServerInstanceId -> CurrentSessionsRef -> ServerPart (SessionId, CommonTypes.Rectangle)
+getCookieSessionId :: ServerInstanceId -> CurrentSessionsRef -> ServerPart SessionId
 getCookieSessionId serverInstanceId currentSessionsRef = withRequest $ \rq ->
  do { let mCookieSessionId = parseCookie serverInstanceId rq
     ; (currentSessions,idCounter) <- liftIO $ readIORef currentSessionsRef
 --    ; liftIO $ putStrLn $ "parsed cookie id is " ++ show mCookieSessionId
-    ; (sessionId, _, viewedArea) <-
+    ; sessionId <-
         case mCookieSessionId of
-          Just cookieSessionId | cookieSessionId `elem` map fst3 currentSessions ->
+          Just cookieSessionId | cookieSessionId `elem` map fst currentSessions ->
               -- if there is a cookie for this server instance and it's session id is in the current sessions
               -- then update it in the current sessions
             do { time <- liftIO $  getCurrentTime
                ; liftIO $ writeIORef currentSessionsRef $ 
-                   ( [ (i, if i == cookieSessionId then time else t,v)
-                     | (i,t,v) <- currentSessions 
+                   ( [ (i, if i == cookieSessionId then time else t)
+                     | (i,t) <- currentSessions 
                      ]
                    , idCounter
                    )
                  
                -- renew the cookie
                ; addCookie cookieLifeTime $ mkCookie (mkCookieName serverInstanceId) $ show cookieSessionId
-
-               -- and set viewed area to the value for this session
-               ; let viewedArea = thd3 . head' "GUIServer.getCookieSessionId" $ filter ((==cookieSessionId).fst3) currentSessions 
-               ; return (cookieSessionId, time, viewedArea)
+               ; return cookieSessionId
                }
 
           -- no or wrong cookie, or sessionId is not in currentSessions (because it expired)
           _ -> makeNewSessionCookie serverInstanceId currentSessionsRef
     ; liftIO $ putStrLn $ "SessionId:" ++ show sessionId
-    ; return (sessionId, viewedArea)
+    ; return sessionId
     } 
 
 
@@ -407,13 +398,12 @@ makeNewSessionCookie serverInstanceId currentSessionsRef =
  do { (currentSessions,idCounter) <- liftIO $ readIORef currentSessionsRef
     ; time <- liftIO $  getCurrentTime
     
-    ; let newViewedArea = ((0,0),(0,0))
-          newSessionId = idCounter -- need a fresh unique id, otherwise an old cookie may contain the same id
-          newSession = (newSessionId, time, newViewedArea)
+    ; let newSessionId = idCounter -- need a fresh unique id, otherwise an old cookie may contain the same id
+          newSession = (newSessionId, time)
     ; addCookie cookieLifeTime $ mkCookie (mkCookieName serverInstanceId) $ show newSessionId
     
     ; liftIO $ writeIORef currentSessionsRef $ (currentSessions ++ [newSession], idCounter + 1)
-    ; return newSession
+    ; return newSessionId
     }
 
 
