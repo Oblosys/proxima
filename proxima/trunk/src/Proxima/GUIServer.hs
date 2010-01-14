@@ -490,6 +490,7 @@ data Command = Metrics ((String,Int,Bool,Bool),(Int,Int,[Int]))
              | Find String
              | SetViewedArea CommonTypes.Rectangle
              | Redraw
+             | Rearrange
              | ClearMetrics 
                deriving (Show, Read)
                         
@@ -653,6 +654,11 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewe
     Redraw ->
      do { genericHandler settings handler renderingLvlVar viewedAreaRef () $
             SkipRen (-2)
+        }
+
+    Rearrange ->
+     do { genericHandler settings handler renderingLvlVar viewedAreaRef () $
+            SkipRen (-1)
         }
 
     ClearMetrics ->
