@@ -340,6 +340,7 @@ if (xmlhttp.readyState==4)
       if (sessionType == 'primary')
       { document.getElementById('status').innerHTML = '<img src="etc/statusGreen.jpg"/>';
         stopAutoRefreshTimer(); // in case it was started
+        startExpirationTimer()
       }
       else
       { document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
@@ -563,6 +564,22 @@ function debugAdd(message)
 function setStatus(message)
 {
     document.getElementById('status').innerHTML=message;
+}
+
+
+var expirationTimer;
+var sessionExpirationTime = 30; // make sure this is equal to sessionExpirationTime in GUIServer.hs
+
+function startExpirationTimer()
+{ expirationTimer = setTimeout('turnOffStatusLight()',sessionExpirationTime * 1000 - 5000);
+
+// The -5000 is because response from server is not immediate, so the timer is always started a bit
+// too late. The session will show to expire up to 5 seconds before it does on the server. (which is not a problem)
+}
+
+function turnOffStatusLight()
+{ document.getElementById('status').innerHTML = '<img src="etc/statusGrey.jpg"/>';
+  clearTimeout(expirationTimer);
 }
 
 var autoRefreshTimer;
