@@ -342,22 +342,7 @@ if (xmlhttp.readyState==4)
     
     removeAllPredictiveInserts();
     clearSentPredictiveUpdates();
-      
-    if (commandQueue != '')
-    { //debugAdd('sending queue');
-      loadXMLDoc('');
-    }
-    else
-      if (sessionType == 'primary')
-      { document.getElementById('status').innerHTML = '<img src="etc/statusGreen.jpg"/>';
-        stopAutoRefreshTimer(); // in case it was started
-        startExpirationTimer()
-      }
-      else  
-      { document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
-        startAutoRefreshTimer();
-      }   
-    
+
     var updates = document.getElementById('updates');
     // getElementById seems to trigger parsing the responseText
     // after this, firstChild has a value, while it is null before
@@ -371,6 +356,24 @@ if (xmlhttp.readyState==4)
       'Session id: ' + sessionId + ':' + responseId + ' '  +
       (sessionType == 'primary' ? 'Editable' : 'Non-editable') + ' ' +
       'Nr of sessions:' + nrOfSessions;
+
+
+    if (commandQueue != '')
+    { //debugAdd('sending queue');
+      loadXMLDoc('');
+    }
+    else
+      if (sessionType == 'primary')
+      { document.getElementById('status').innerHTML = '<img src="etc/statusGreen.jpg"/>';
+        stopAutoRefreshTimer(); // in case it was started
+        startExpirationTimer()
+      }
+      else  
+      { alert ('session type '+sessionType);
+        document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
+        startAutoRefreshTimer();
+      }   
+    
 
    
     while (updates.firstChild)
