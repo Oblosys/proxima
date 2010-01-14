@@ -56,11 +56,14 @@ var sessionId;
 var responseId;
 var sessionType; // 'primary' or 'secondary'
 var nrOfSessions;
-
+var browserIsSafari;
 
 function init()
 {
-    addKeyboardListeners();
+  var ua = navigator.userAgent.toLowerCase();
+  browserIsSafari = ua.indexOf('safari/') != -1;
+
+  addKeyboardListeners();
 
   // context menus
   ie5=document.all&&document.getElementById;
@@ -731,7 +734,7 @@ var scrollInProgress = false;
 
 function mouseHandler(str,e) 
 { if (e.button != 0) return true;  // only handle left button here
-
+  debugAdd("Mouse "+str);
   var proxima = document.getElementById('proxima');
 
   var coords = getMouseCoordsWithinTarget(e,proxima);
@@ -741,9 +744,13 @@ function mouseHandler(str,e)
   /* We don't use scroll events, because setting scrollLeft and scrollTop also fires these events, and
      it does not seem possible to disable the handler temporarily */
   if (scrollInProgress)
-  { if (str == 'U')
-    { scrollInProgress = false;
+  { if (str == 'U' || (str == 'M' && browserIsSafari) )
 
+    // Safari does not trigger the up event when dragging in the scroll bar. Instead, it fires a move event.
+    // But since it only fires one move, at the release of the mouse, we can use it instead of an up event.
+
+    { scrollInProgress = false;
+     alert('ScrollInProgress' + scrollInProgress);
       prependSetViewedAreaCommand();
       // there already is one at the start of the command queue (added by loadXMLDoc), but put the most recent one just in case
       loadXMLDoc('Redraw;');
