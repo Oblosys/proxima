@@ -734,7 +734,6 @@ var scrollInProgress = false;
 
 function mouseHandler(str,e) 
 { if (e.button != 0) return true;  // only handle left button here
-  debugAdd("Mouse "+str);
   var proxima = document.getElementById('proxima');
 
   var coords = getMouseCoordsWithinTarget(e,proxima);
@@ -750,7 +749,6 @@ function mouseHandler(str,e)
     // But since it only fires one move, at the release of the mouse, we can use it instead of an up event.
 
     { scrollInProgress = false;
-     alert('ScrollInProgress' + scrollInProgress);
       prependSetViewedAreaCommand();
       // there already is one at the start of the command queue (added by loadXMLDoc), but put the most recent one just in case
       loadXMLDoc('Redraw;');
