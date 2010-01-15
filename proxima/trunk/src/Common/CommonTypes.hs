@@ -170,8 +170,8 @@ isSelfCleanDT (DiffLeaf c) = c
 isSelfCleanDT (DiffNode c c' _) = c'
 
 
-data DiffTreeArr = DiffLeafArr Bool (Maybe MoveRen) 
-                 | DiffNodeArr Bool Bool (Maybe MoveRen) (Maybe InsertDeleteRen) [DiffTreeArr]
+data DiffTreeArr = DiffLeafArr !Bool (Maybe MoveRen) 
+                 | DiffNodeArr !Bool !Bool (Maybe MoveRen) (Maybe InsertDeleteRen) [DiffTreeArr]
 --                selfAndDescendents self 
 -- DiffTree may contain infinite lists, so don't use it to recurse on (use a path arrangement instead)
 
