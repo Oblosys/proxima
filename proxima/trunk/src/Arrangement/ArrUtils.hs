@@ -159,16 +159,7 @@ diffArr arr1 arr2 = --count arr1 arr2 $
 removeMove move dt = case move {- getMove dt -} of
                   Nothing -> dt
                   Just _ -> DiffLeafArr False Nothing
--- do a clean .. thing with right, to prevent complicated moves. (is that necessary)
 
--- maybe these are related
--- what about undrendered x polygons, there was one visible in the helium editor
--- focus disappears
-
--- TODO what if difference between old and new is large eg [xx] -> [xyyyyyyyx] ? or vice versa. does the take algorithm yield lists of correct length?
--- todo change error to debug Err
-
--- why are edit ops duplicated on mouse up?
 
 -- we can alleviate clean restrictions on graphs because browser paints everything
 -- what about graph and edge?
