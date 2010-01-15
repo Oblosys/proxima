@@ -539,7 +539,7 @@ function updateTree(update)
   }
   
   else if (op == 'refresh')
-  { refresh();
+  { refresh(); // this is triggered at the end of a set of font queries
   }
   else if (op == 'clear')
   { debugAdd('Clearing');
@@ -631,8 +631,7 @@ function clearRendering()
 }
 
 function refresh()
-{ clearRendering();
-  loadXMLDoc('Key(116,(False,False,False));');
+{ loadXMLDoc('Rearrange;');
 }
 
 function removeChildrenById(parentId)
