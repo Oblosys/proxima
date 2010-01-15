@@ -488,9 +488,8 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualView
                                  "responseId='" ++ show requestId ++"' "++ 
                                  "sessionType='" ++ (if isPrimarySession then "primary" else "secondary") ++"' "++
                                  "nrOfSessions='"++show nrOfSessions ++ "'>" ++ 
-                                      disableIncrementalityHTML ++
                                       (if null pendingQueries 
-                                       then renderingHTML++focusRenderingHTML
+                                       then disableIncrementalityHTML ++ renderingHTML++focusRenderingHTML
                                        else "") 
                                    ++queryHTML++"</div>"            
     }
