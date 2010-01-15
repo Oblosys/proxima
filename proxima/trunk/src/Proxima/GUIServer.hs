@@ -557,15 +557,6 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewe
             unwrap editDoc
         }
 
-    -- Allow this F5 key also for secondary sessions to refresh (and initialize) the screen.
-    -- This is a hack. TODO: make a special command for this.
-    Key (116,(False, False, False)) ->
-      let evt = KeySpecialRen CommonTypes.F5Key  (CommonTypes.Modifiers False False False)
-      in  do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () evt
-             ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
-             ; return $ html ++ [setViewedAreaHtml]
-             }
-
     Key (keyCode,(shiftDown, ctrlDown, altDown)) ->
       whenPrimary isPrimarySession $
       let ms = CommonTypes.Modifiers shiftDown ctrlDown altDown
@@ -651,13 +642,12 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewe
         ; return []
         }
 
-    Redraw ->
+    Redraw -> -- re-render the arrangement, this assumes that the incremental client rendering state corresponds to the server's
      do { genericHandler settings handler renderingLvlVar viewedAreaRef () $
             SkipRen (-2)
         }
 
-
-    Rearrange ->
+    Rearrange -> -- rearrange the entire presentation, for when old rendering on the client does not correspond to the server state
      do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $
                     castArr $ RedrawArr
         ; return $ ["<div op='clear'></div>"]++html 
