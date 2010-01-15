@@ -202,10 +202,6 @@ withAgentIsMIE f = withRequest $ \rq ->
                      -- Maybe we also need to switch to POST for IE, since it
                      -- cannot handle large queries with GET
 
--- currently, having secondary edit sessions destroys incrementality
--- if we put Arrangement layer and maybe level in session (by indexing), incrementality should be back
--- then also rendering level (may be easy) and presentation focus and maybe arrangement focus must be indexed
--- then we have multi editing!
 
 sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex menuR actualViewedAreaRef mPreviousSessionRef
                serverInstanceId currentSessionsRef = 
@@ -446,11 +442,18 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualView
     ; putStrLn $ "Previous session: " ++ (maybe "none" show mPreviousSessionId) ++ " " ++ show disableIncrementality
     ; writeIORef  mPreviousSessionRef $ Just sessionId
 
+    
     ; disableIncrementalityHTML <- if mPreviousSessionId == Just sessionId then return "" else  
        do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $
                       castArr $ RedrawArr
           ; return $ "<div op='clear'></div>"++ concat html 
           }
+{-    This redraw disables the incrementality if the previous session was for a different browser. This is because there is only
+      one arrangement for all editing sessions, so incrementality can only be maintained if the previous request came from the same session
+
+      Incrementality can be restored if we keep track of multiple arrangements, indexed by session ID. Similarly, the focus can be indexed
+      in order to provide a simple form of multi-user editing.
+-}
 
     ; renderingHTMLss <-
         mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
