@@ -63,6 +63,10 @@ function init()
   var ua = navigator.userAgent.toLowerCase();
   browserIsSafari = ua.indexOf('safari/') != -1;
 
+  if (ua.indexOf('iphone') != -1)
+  {
+  }
+  
   addKeyboardListeners();
 
   // context menus
