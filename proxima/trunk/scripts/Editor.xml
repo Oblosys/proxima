@@ -64,13 +64,13 @@ function init()
   var ua = navigator.userAgent.toLowerCase();
   browserIsSafari = ua.indexOf('safari/') != -1;
 
-    buttonBarElt = document.getElementById('buttonBar');
-    buttonBarElt.parentNode.removeChild( buttonBarElt );
 
   if (ua.indexOf('iphone') != -1)
   { rootTableElt = document.getElementById('rootTable');
     rootTableElt.style.margin = '0px';
 
+    buttonBarElt = document.getElementById('buttonBar');
+    buttonBarElt.parentNode.removeChild( buttonBarElt );
 
     proximaElt = document.getElementById('proxima');
     proximaElt.style.border = '0px';
