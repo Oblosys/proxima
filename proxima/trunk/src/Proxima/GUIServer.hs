@@ -177,10 +177,10 @@ withAgentIsMIE f = withRequest $ \rq ->
 
 sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex menuR actualViewedAreaRef mPreviousSessionRef
                serverInstanceId currentSessionsRef = 
-  [ do { liftIO $ putStrLn "Trying to obtain mutex"
+  [ do { -- liftIO $ putStrLn "Trying to obtain mutex"
        ; liftIO $ takeMVar mutex -- obtain mutex
+       --; liftIO $ putStrLn "Obtained mutex"
        -- Proxima is not thread safe yet, so only one thread at a time is allowed to execute.
-       ; liftIO $ putStrLn "Obtained mutex"
         
        ; removeExpiredSessions currentSessionsRef
        ; sessionId <- getCookieSessionId serverInstanceId currentSessionsRef
@@ -202,9 +202,9 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
                           , idCounter
                           )
 
-       ; liftIO $ putStrLn "About to release mutex"
+       --; liftIO $ putStrLn "About to release mutex"
        ; liftIO $ putMVar mutex () -- release the mutex
-       ; liftIO $ putStrLn "Mutex released"
+       --; liftIO $ putStrLn "Mutex released"
        ; return response
        } ]
                      
@@ -272,7 +272,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualVie
                           do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
                              --; liftIO $ putStrLn "Pausing.."
                              --; liftIO $ threadDelay 1000000
-                             ; liftIO $ putStrLn "Done"
+                             --; liftIO $ putStrLn "Done"
                              ; (responseHtml,responseLength) <-
                                  liftIO $ catchExceptions $
                                    do { html <- handleCommands params menuR actualViewedAreaRef mPreviousSessionRef
