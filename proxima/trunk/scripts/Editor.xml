@@ -10,6 +10,7 @@ IE problems
 
 -->
 <html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 <head>
 <title>Proxima 2.0</title>
@@ -69,6 +70,7 @@ function init()
 
     proximaElt = document.getElementById('proxima');
     proximaElt.style.border = '0px';
+    proximaElt.style.width = '320px';
   }
   
   addKeyboardListeners();
@@ -1183,7 +1185,7 @@ function test(char)
 <!-- to show reduced viewed area 1000x600 with scrolling leaves a viewed area of ((246,146),(492,292)) to this we add 8 is added to left and top to account for margin above and left of proxima elt -->
 <table id="rootTable" cellpadding="0" style="border-collapse: collapse; margin: 4px; padding: 0px; marginwidth: 0px">
 <tr><td>
-<div id="proxima" style="position: relative; border: 0px solid black; width: 975px; height: 620px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
+<div id="proxima" style="position: relative; border: 1px solid black; width: 975px; height: 620px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
      onclick="return mouseHandler('C',event)"
