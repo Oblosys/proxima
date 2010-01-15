@@ -10,7 +10,7 @@ IE problems
 
 -->
 <html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<meta name="viewport" content="width=320; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+<meta name="viewport" content="width=320; height=396; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 <head>
 <title>Proxima 2.0</title>
@@ -64,13 +64,19 @@ function init()
   var ua = navigator.userAgent.toLowerCase();
   browserIsSafari = ua.indexOf('safari/') != -1;
 
- if (ua.indexOf('iphone') != -1)
+    buttonBarElt = document.getElementById('buttonBar');
+    buttonBarElt.style.visibility="hidden";
+
+  if (ua.indexOf('iphone') != -1)
   { rootTableElt = document.getElementById('rootTable');
     rootTableElt.style.margin = '0px';
+
 
     proximaElt = document.getElementById('proxima');
     proximaElt.style.border = '0px';
     proximaElt.style.width = '320px';
+    proximaElt.style.height = '396px';
+
   }
   
   addKeyboardListeners();
@@ -365,11 +371,12 @@ if (xmlhttp.readyState==4)
     responseId = updates.getAttribute('responseId');
     sessionType = updates.getAttribute('sessionType');
     nrOfSessions = updates.getAttribute('nrOfSessions');
-    document.getElementById('sessionInfo').innerHTML =
-      'Session id: ' + sessionId + ':' + responseId + ' '  +
-      (sessionType == 'primary' ? 'Editable' : 'Non-editable') + ' ' +
-      'Nr of sessions:' + nrOfSessions;
-
+    if (document.getElementById('sessionInfo'))
+    { document.getElementById('sessionInfo').innerHTML =
+           'Session id: ' + sessionId + ':' + responseId + ' '  +
+           (sessionType == 'primary' ? 'Editable' : 'Non-editable') + ' ' +
+           'Nr of sessions:' + nrOfSessions;
+    }
 
     if (commandQueue != '')
     { //debugAdd('sending queue');
@@ -1211,7 +1218,7 @@ function test(char)
 <div id='font' style='visibility:hidden;white-space: pre'></div>
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 </td></tr>
-<tr><td>
+<tr id="buttonBar"><td>
 <table cellspacing="0" width="100%">
 <tr>
 <td><button onclick="downloadDocument();">Download</button></td>
@@ -1226,8 +1233,8 @@ function test(char)
 </tr>
 </table>
 </td></tr></table>
-<div style="visibility:hidden" id="sessionInfo"></div>
-<div id="debugMessage"></div>
+<!-- <div style="visibility:hidden" id="sessionInfo"></div>
+<div id="debugMessage"></div> -->
 </body></html>
 
 
