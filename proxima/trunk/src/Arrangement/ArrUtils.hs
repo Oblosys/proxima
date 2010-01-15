@@ -164,7 +164,6 @@ removeMove move dt = case move {- getMove dt -} of
 -- we can alleviate clean restrictions on graphs because browser paints everything
 -- what about graph and edge?
 
--- is cumulative the right word?
 
 -- improvement: when nr of arrs is less, we don't need to do a complicated diff, but just search for the first non matching
 -- but probably this is not worth the extra implementation complexity.
@@ -207,17 +206,14 @@ diffArr' (ColA _ x y w h hr vr bc _ arrs) (ColA _ x' y' w' h' hr' vr' bc' _ arrs
 diffArr' (OverlayA _ x y w h hr vr bc d arrs) (OverlayA _ x' y' w' h' hr' vr' bc' d' arrs') =
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs' Nothing
 diffArr' (GraphA _ x y w h hr vr bc nvs arrs) (GraphA _ x' y' w' h' hr' vr' bc' nvs' arrs') =
-  case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' Nothing of
-    DiffNodeArr childrenClean selfClean _ _ _ -> DiffLeafArr (selfClean && childrenClean) Nothing
-    _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeafArr False  Nothing -- TODO what about this?
-    -- a graph is only clean when all children and the graph itself are clean
+  diffArrs x y w h bc arrs x' y' w' h' bc' arrs' Nothing
 diffArr' arr@(RowA _ x y w h hr vr bc arrs) _                            = DiffLeafArr False Nothing
 diffArr' arr@(ColA _ x y w h hr vr bc _ arrs) _                          = DiffLeafArr False  Nothing
 diffArr' arr@(OverlayA _ x y w h hr vr bc _ arrs) _                        = DiffLeafArr False Nothing
 diffArr' arr@(GraphA _ x y w h hr vr bc nvs arrs) _                      = DiffLeafArr False Nothing
 diffArr' (VertexA _ x y w h hr vr bc ol arr) (VertexA _ x' y' w' h' hr' vr' bc' ol' arr') =
  let childDT = diffArr arr arr'
- in  DiffNodeArr (isCleanDTArr childDT) (bc==bc') Nothing Nothing [childDT] -- TODO and what about this?
+ in  DiffNodeArr (isCleanDTArr childDT) (bc==bc') Nothing Nothing [childDT]
 diffArr' (VertexA _ _ _ _ _ _ _ _ _ _)      _                 = DiffLeafArr False Nothing
 diffArr' arr                           _                                = debug Err ("ArrUtils.diffArr: can't handle "++ show arr) $ DiffLeafArr False Nothing
 -- At the moment, we ignore outline and nrOfVertices
@@ -283,7 +279,7 @@ isCleanX _ = True
 
 
 
-{-
+{- old diffArr algorithm (different because gtk renderer is much more basic than html renderer)
 
 diffArr :: Show node => Arrangement node -> Arrangement node -> DiffTreeArr
 diffArr (StructuralA _ arr) arr'                   = diffArr arr arr'
