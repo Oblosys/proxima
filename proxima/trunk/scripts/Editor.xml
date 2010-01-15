@@ -542,8 +542,7 @@ function updateTree(update)
   { refresh(); // this is triggered at the end of a set of font queries
   }
   else if (op == 'clear')
-  { debugAdd('Clearing');
-    clearRendering();
+  { clearRendering();
   }
   else if (op == 'alert')
   { alert (update.getAttribute('text'));
