@@ -131,9 +131,41 @@ the monad, but it will only do something if the header is not set in the out par
 Header modifications must therefore be applied to out rather than be fmapped to the monad.
 -}
 
-server params@(settings,_,_,_) mutex menuR actualViewedAreaRef mPreviousSessionRef serverInstanceId currentSessionsRef =
+server params@(settings,handler,renderingLvlVar,viewedAreaRef) mutex menuR actualViewedAreaRef mPreviousSessionRef serverInstanceId currentSessionsRef =
   simpleHTTP (Conf (serverPort settings) Nothing) 
-             (sessionHandler params mutex menuR actualViewedAreaRef  mPreviousSessionRef serverInstanceId currentSessionsRef)
+    -- these first handlers do not need to be in the session, since they don't affect the document
+    [ dir "img"
+        [ fileServe [] "img" ]  
+    , dir "etc"
+          [ fileServe [] "src/proxima/etc" ]  
+    , dir "favicon.ico"
+          [ methodSP GET $ fileServe ["favicon.ico"] "src/proxima/etc"]
+    , withAgentIsMIE $ \agentIsMIE ->
+        (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
+                             let setTypeToHTML = if agentIsMIE 
+                                                 then setHeader "Content-Type" "text/html"
+                                                 else id
+                                           
+                           ; let filePath = "src/proxima/scripts/Editor.xml"
+                           ; exist <- liftIO $ doesFileExist filePath
+                           ; if exist then return () else error $ "File not found: " ++ filePath  
+                                    
+                           ; modifyResponseSP (noCache. setTypeToHTML) $
+                                fileServe [] filePath
+                           })
+                 
+
+    , dir "Document.xml"
+        [ methodSP GET $ do { _<- liftIO $ genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
+                                     castEnr $ SaveFileEnr "Document.xml" 
+                              -- ignore the html rendering of the save command (is empty)
+                            ; modifyResponseSP (setHeader "Content-Disposition" "attachment;") $
+                                fileServe ["Document.xml"] "."
+                            }
+        ]
+    , sessionHandler params mutex menuR actualViewedAreaRef  mPreviousSessionRef serverInstanceId currentSessionsRef
+    ]
+
 {-
 handle:
 http://<server url>/                    response: <proxima executable dir>/src/proxima/scripts/Editor.xml
@@ -177,7 +209,7 @@ withAgentIsMIE f = withRequest $ \rq ->
 
 sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex menuR actualViewedAreaRef mPreviousSessionRef
                serverInstanceId currentSessionsRef = 
-  [ do { -- liftIO $ putStrLn "Trying to obtain mutex"
+    do { -- liftIO $ putStrLn "Trying to obtain mutex"
        ; liftIO $ takeMVar mutex -- obtain mutex
        --; liftIO $ putStrLn "Obtained mutex"
        -- Proxima is not thread safe yet, so only one thread at a time is allowed to execute.
@@ -206,96 +238,66 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
        ; liftIO $ putMVar mutex () -- release the mutex
        --; liftIO $ putStrLn "Mutex released"
        ; return response
-       } ]
+       }
                      
 handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef mPreviousSessionRef
-         sessionId isPrimarySession nrOfSessions = 
-  debugFilter $
-  [ withAgentIsMIE $ \agentIsMIE ->
-      (methodSP GET $ do { -- liftIO $ putStrLn $ "############# page request"
-                           let setTypeToHTML = if agentIsMIE 
-                                               then setHeader "Content-Type" "text/html"
-                                               else id
-                                           
-                         ; let filePath = "src/proxima/scripts/Editor.xml"
-                         ; exist <- liftIO $ doesFileExist filePath
-                         ; if exist then return () else error $ "File not found: " ++ filePath  
-                                    
-                         ; modifyResponseSP (noCache. setTypeToHTML) $
-                              fileServe [] filePath
-                         })
-                 
-
-  , dir "img"
-        [ fileServe [] "img" ]  
-  , dir "etc"
-        [ fileServe [] "src/proxima/etc" ]  
-  , dir "favicon.ico"
-        [ methodSP GET $ fileServe ["favicon.ico"] "src/proxima/etc"]
-  , dir "Document.xml"
-        [ methodSP GET $ do { _<- liftIO $ genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
-                                     castEnr $ SaveFileEnr "Document.xml" 
-                              -- ignore the html rendering of the save command (is empty)
-                            ; modifyResponseSP (setHeader "Content-Disposition" "attachment;") $
-                                fileServe ["Document.xml"] "."
-                            }
-        ]
-  , dir "upload"
-        [ withData $ \(Upl doc) -> 
-        [ method POST $
-           do { when (doc /= "") $ liftIO $
-                 do { fh <- openFile "Document.xml" WriteMode
-                    ; hPutStrLn fh doc
-                    ; hClose fh
-                    ; genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
-                        castEnr $ OpenFileEnr "Document.xml" 
-                      -- ignore html output, the page will be reloaded after pressing the button
-                    ; return ()
-                    }
-                      -- simply serving the Editor.xml does not work, as the browser will have upload in its menu bar
-                      -- (also the page doesn't load correctly)
-                      -- Instead, we show a page that immediately goes back to the editor page
-              ; let responseHtml =
-                      "<html><head><script type='text/javascript'><!--\n" ++
-                      "history.go(-1);" ++
-                      "\n--></script></head><body></body></html>"
-                      -- newlines between <!-- & javascript and javascript and --> are necessary!!
-                      --"<html><body>Document has been uploaded.<p><button onclick=\"location.href='/'\">Return to editor</button></html>"
-              ; modifyResponseW (setHeader "Content-Type" "text/html") $ -- todo there must be a nicer way to get an html response
-                  ok $ toResponse responseHtml
+         sessionId isPrimarySession nrOfSessions = debugFilter $ -- does debugFilter even work? 
+  [ dir "upload"
+      [ withData $ \(Upl doc) -> 
+          [ method POST $
+             do { when (doc /= "") $ liftIO $
+                   do { fh <- openFile "Document.xml" WriteMode
+                      ; hPutStrLn fh doc
+                      ; hClose fh
+                      ; genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
+                          castEnr $ OpenFileEnr "Document.xml" 
+                        -- ignore html output, the page will be reloaded after pressing the button
+                      ; return ()
+                      }
+                        -- simply serving the Editor.xml does not work, as the browser will have upload in its menu bar
+                        -- (also the page doesn't load correctly)
+                        -- Instead, we show a page that immediately goes back to the editor page
+                ; let responseHtml =
+                        "<html><head><script type='text/javascript'><!--\n" ++
+                        "history.go(-1);" ++
+                        "\n--></script></head><body></body></html>"
+                        -- newlines between <!-- & javascript and javascript and --> are necessary!!
+                        --"<html><body>Document has been uploaded.<p><button onclick=\"location.href='/'\">Return to editor</button></html>"
+                ; modifyResponseW (setHeader "Content-Type" "text/html") $ -- todo there must be a nicer way to get an html response
+                    ok $ toResponse responseHtml
                          
-              }
-        ]
-        ]
+                }
+          ]
+      ]
   , dir "handle" 
-   [ withData (\cmds -> [ methodSP GET $ 
-                          do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
-                             --; liftIO $ putStrLn "Pausing.."
-                             --; liftIO $ threadDelay 1000000
-                             --; liftIO $ putStrLn "Done"
-                             ; (responseHtml,responseLength) <-
-                                 liftIO $ catchExceptions $
-                                   do { html <- handleCommands params menuR actualViewedAreaRef mPreviousSessionRef
-                                                               sessionId isPrimarySession nrOfSessions
-                                                               cmds
-                                      ; let responseLength = length html 
-                                      ; seq responseLength $ return ()
-                                      ; return (html, responseLength)
-                                      } -- kind of tricky, we need to make sure that the html string is evaluated here, so
-                                        -- any possible exceptions are thrown and caught. If not, HApps silently sends the
-                                        -- exception text as the html response :-(
+      [ withData (\cmds -> [ methodSP GET $ 
+                             do { liftIO $ putStrLn $ "Command received " ++ take 60 (show cmds)
+                                --; liftIO $ putStrLn "Pausing.."
+                                --; liftIO $ threadDelay 1000000
+                                --; liftIO $ putStrLn "Done"
+                                ; (responseHtml,responseLength) <-
+                                    liftIO $ catchExceptions $
+                                      do { html <- handleCommands params menuR actualViewedAreaRef mPreviousSessionRef
+                                                                  sessionId isPrimarySession nrOfSessions
+                                                                  cmds
+                                         ; let responseLength = length html 
+                                         ; seq responseLength $ return ()
+                                         ; return (html, responseLength)
+                                         } -- kind of tricky, we need to make sure that the html string is evaluated here, so
+                                           -- any possible exceptions are thrown and caught. If not, HApps silently sends the
+                                           -- exception text as the html response :-(
 
---                             ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
---                             ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
-                             ; liftIO $ putStrLn $ "Sending response sent to client (" -- ++show responseLength++ ")" 
-                                                   ++ {-take 160-} show responseLength
-                             --; modifyResponseW noCache $
-                             ;  anyRequest $ ok $ toResponse responseHtml 
-                             }
-                          
-                        ])
-   ] 
-  ]
+--                                ; liftIO $ putStrLn $ "\n\n\n\ncmds = "++show cmds
+--                                ; liftIO $ putStrLn $ "\n\n\nresponse = \n" ++ show responseHTML
+                                ; liftIO $ putStrLn $ "Sending response sent to client (length: "++show responseLength++ ")" 
+
+                                --; modifyResponseW noCache $
+                                ;  anyRequest $ ok $ toResponse responseHtml 
+                                }
+                             
+                           ])
+      ] 
+  ]  
 
 -- NOTE: this does not catch syntax errors in the fromData on Commands, as these are handled before we get in the IO monad.
 -- This only occurs when there is a problem with string quotes in the command string. If parsing fails, we get a happs server error:... 
