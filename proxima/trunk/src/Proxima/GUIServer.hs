@@ -76,11 +76,13 @@ startEventLoop params@(settings,h,rv,vr) = withProgName "proxima" $
  do { mutex <- newMVar ()
     ; menuR <- newIORef []
     ; actualViewedAreaRef <- newIORef ((0,0),(0,0)) -- is used when reducing the viewed area, see mkSetViewedAreaHtml
+    ; mPreviousSessionRef <- newIORef Nothing
+
     ; currentSessionsRef <- newIORef ([],0) -- list of active session and session id counter
                                            
     ; serverInstanceId <- mkServerInstanceId settings
     ; putStrLn $ "Starting Proxima server on port " ++ show (serverPort settings) ++ "."
-    ; let startServer = server params mutex menuR actualViewedAreaRef serverInstanceId currentSessionsRef
+    ; let startServer = server params mutex menuR actualViewedAreaRef mPreviousSessionRef serverInstanceId currentSessionsRef
 
     ; hSetBuffering stdin NoBuffering
     ; stdInAvailable <- do { hReady stdin
@@ -129,9 +131,9 @@ the monad, but it will only do something if the header is not set in the out par
 Header modifications must therefore be applied to out rather than be fmapped to the monad.
 -}
 
-server params@(settings,_,_,_) mutex menuR actualViewedAreaRef serverInstanceId currentSessionsRef =
+server params@(settings,_,_,_) mutex menuR actualViewedAreaRef mPreviousSessionRef serverInstanceId currentSessionsRef =
   simpleHTTP (Conf (serverPort settings) Nothing) 
-             (sessionHandler params mutex menuR actualViewedAreaRef serverInstanceId currentSessionsRef)
+             (sessionHandler params mutex menuR actualViewedAreaRef  mPreviousSessionRef serverInstanceId currentSessionsRef)
 {-
 handle:
 http://<server url>/                    response: <proxima executable dir>/src/proxima/scripts/Editor.xml
@@ -173,7 +175,7 @@ withAgentIsMIE f = withRequest $ \rq ->
 -- then also rendering level (may be easy) and presentation focus and maybe arrangement focus must be indexed
 -- then we have multi editing!
 
-sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex menuR actualViewedAreaRef 
+sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex menuR actualViewedAreaRef mPreviousSessionRef
                serverInstanceId currentSessionsRef = 
   [ do { liftIO $ putStrLn "Trying to obtain mutex"
        ; liftIO $ takeMVar mutex -- obtain mutex
@@ -193,7 +195,7 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
          else liftIO $ putStrLn "\n\nSecondary editing session"
        ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show (currentSessions) 
 
-       ; response <- multi $ handlers params menuR actualViewedAreaRef sessionId isPrimarySession (length currentSessions)
+       ; response <- multi $ handlers params menuR actualViewedAreaRef mPreviousSessionRef sessionId isPrimarySession (length currentSessions)
 
        ; liftIO $ writeIORef currentSessionsRef $ 
                           ( currentSessions 
@@ -206,7 +208,7 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
        ; return response
        } ]
                      
-handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef 
+handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef mPreviousSessionRef
          sessionId isPrimarySession nrOfSessions = 
   debugFilter $
   [ withAgentIsMIE $ \agentIsMIE ->
@@ -273,7 +275,7 @@ handlers params@(settings,handler,renderingLvlVar,viewedAreaRef) menuR actualVie
                              ; liftIO $ putStrLn "Done"
                              ; (responseHtml,responseLength) <-
                                  liftIO $ catchExceptions $
-                                   do { html <- handleCommands params menuR actualViewedAreaRef
+                                   do { html <- handleCommands params menuR actualViewedAreaRef mPreviousSessionRef
                                                                sessionId isPrimarySession nrOfSessions
                                                                cmds
                                       ; let responseLength = length html 
@@ -433,11 +435,14 @@ splitCommands commandStr =
     (command, (_:commandStr')) -> command : splitCommands commandStr'
         
 -- handle each command in commands and send the updates back
-handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
+handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef mPreviousSessionRef
                sessionId isPrimarySession nrOfSessions (Commands requestId commandStr) =
  do { let commands = splitCommands commandStr
     --; putStrLn $ "Received commands:"++ show commands
-    
+    ; mPreviousSessionId <- readIORef mPreviousSessionRef
+    ; putStrLn $ "Previous session: " ++ (maybe "none" show mPreviousSessionId)
+    ; writeIORef  mPreviousSessionRef $ Just sessionId
+
     ; renderingHTMLss <-
         mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
                                sessionId isPrimarySession nrOfSessions)
