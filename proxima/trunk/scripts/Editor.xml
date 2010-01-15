@@ -63,8 +63,12 @@ function init()
   var ua = navigator.userAgent.toLowerCase();
   browserIsSafari = ua.indexOf('safari/') != -1;
 
-  if (ua.indexOf('iphone') != -1)
-  {
+ if (ua.indexOf('iphone') != -1)
+  { rootTableElt = document.getElementById('rootTable');
+    rootTableElt.style.margin = '0px';
+
+    proximaElt = document.getElementById('proxima');
+    proximaElt.style.border = '0px';
   }
   
   addKeyboardListeners();
@@ -1177,9 +1181,9 @@ function test(char)
 
 <!-- <div style="position: absolute; border: 1px solid red; left:254px; top: 154px; width: 492px; height: 292px;"></div> -->
 <!-- to show reduced viewed area 1000x600 with scrolling leaves a viewed area of ((246,146),(492,292)) to this we add 8 is added to left and top to account for margin above and left of proxima elt -->
-<table cellpadding="0" style="border-collapse: collapse; margin: 4px; padding: 0px; marginwidth: 0px">
+<table id="rootTable" cellpadding="0" style="border-collapse: collapse; margin: 4px; padding: 0px; marginwidth: 0px">
 <tr><td>
-<div id="proxima" style="position: relative; border: 1px solid black; width: 975px; height: 620px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
+<div id="proxima" style="position: relative; border: 0px solid black; width: 975px; height: 620px; overflow:auto; font-size : 18px; font-family: monospace; line-height: 0px;white-space:pre"
      onmousedown="hidemenuie5(event);return mouseHandler('D',event)"
      onmouseup="return mouseHandler('U',event)"
      onclick="return mouseHandler('C',event)"
