@@ -175,6 +175,10 @@ computeMove newArr oldArr =
   in  if a1 == a2 then Nothing else Just ((x1-x2,y1-y2),(w1-w2,h1-h2)) 
 
 
+-- Graphs are not incremental at the time. When doing this, take into account the cumulative moves (which must be disabled)
+-- and the current threshold in number of allowed changes until a composite is considered as completely dirty (since multiple edges
+-- may be affected)
+
 -- Poly, Rectangle, Ellipse and Edge cannot be moved because width and height is encoded in the svg code
 -- (actually, they could be moved, but not resized). Anyhow, because these are just leafs, a move is not much more efficient
 -- than a redraw. Hence, we let them return False on a position or dimension change by including the x1 == x2 ... in the DiffLeafArr
@@ -206,7 +210,10 @@ diffArr' (ColA _ x y w h hr vr bc _ arrs) (ColA _ x' y' w' h' hr' vr' bc' _ arrs
 diffArr' (OverlayA _ x y w h hr vr bc d arrs) (OverlayA _ x' y' w' h' hr' vr' bc' d' arrs') =
   diffArrs x y w h bc arrs x' y' w' h' bc' arrs' Nothing
 diffArr' (GraphA _ x y w h hr vr bc nvs arrs) (GraphA _ x' y' w' h' hr' vr' bc' nvs' arrs') =
-  diffArrs x y w h bc arrs x' y' w' h' bc' arrs' Nothing
+  case diffArrs x y w h bc arrs x' y' w' h' bc' arrs' Nothing of
+    DiffNodeArr childrenClean selfClean _ _ _ -> DiffLeafArr (selfClean && childrenClean) Nothing
+    _ -> debug Err ("ArrUtils.diffArr: problem in difArrs") $ DiffLeafArr False  Nothing 
+    -- a graph is only clean when all children and the graph itself are clean
 diffArr' arr@(RowA _ x y w h hr vr bc arrs) _                            = DiffLeafArr False Nothing
 diffArr' arr@(ColA _ x y w h hr vr bc _ arrs) _                          = DiffLeafArr False  Nothing
 diffArr' arr@(OverlayA _ x y w h hr vr bc _ arrs) _                        = DiffLeafArr False Nothing
@@ -258,18 +265,6 @@ diffArrs x y w h bc newArrs x' y' w' h' bc' oldArrs mOrientation =
                 then replicate (length newArrs) (DiffLeafArr False Nothing)  -- is self is dirty, all below need to be rerendered
                 else childDiffs')
 
-{-
-new >= old
-
-aaaxaaa
-aaayaaa
-
-firstselfd 3
-new 7
-new - first -1 = 3 
-
-
--}
 -- isCleanX allows moves, (but not inserts, or deep moves)
 isCleanX (DiffLeafArr False _) = False
 isCleanX (DiffNodeArr False _ _ _ _) = False
