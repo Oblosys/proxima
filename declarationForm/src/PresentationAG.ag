@@ -278,7 +278,6 @@ SEM Tasks
 -}
       loc.pres = structural $ (leftTopMargins 5 5 $
                    col [ hAlignCenter $ text "Task-list editor"
-                       , row [ vLine `withHeight` 10, empty `withHStretch` True, text "X",vLine `withHeight` 10, vLine `withHeight` 10 ]
                        , vSpace 20
            
                                --   @things1.pres
