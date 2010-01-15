@@ -541,6 +541,10 @@ function updateTree(update)
   else if (op == 'refresh')
   { refresh();
   }
+  else if (op == 'clear')
+  { debugAdd('Clearing');
+    clearRendering();
+  }
   else if (op == 'alert')
   { alert (update.getAttribute('text'));
   }
@@ -617,13 +621,17 @@ function autoRefresh()
 { loadXMLDoc('Rearrange;');
 }
 
-function refresh()
+function clearRendering()
 { var renderingElt = document.getElementById('proxima').childNodes[0];
     // this is the rendering div (which has a variable id)
   removeChildren(renderingElt);
   removeChildrenById('-2');  // -2 is the focus
   removeChildrenById('newRendering');
   removeChildrenById('contextMenu');
+}
+
+function refresh()
+{ clearRendering();
   loadXMLDoc('Key(116,(False,False,False));');
 }
 
@@ -1201,7 +1209,7 @@ function test(char)
 <td><button onclick="downloadDocument();">Download</button></td>
 <td><button onclick="uploadDocument();">Upload</button></td>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td><button onclick="loadXMLDoc('ClearMetrics;Key(116,(False,False,False));');window.location.reload( true)">Reload&nbsp;Font&nbsp;Metrics</button></td> <!-- with normal space button text gets line breaks -->
+<td><button onclick="loadXMLDoc('ClearMetrics;')">Reload&nbsp;Font&nbsp;Metrics</button></td> <!-- with normal space button text gets line breaks -->
 
 <!-- <td><button onclick="test('X');">Test</button></td> -->
 

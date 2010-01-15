@@ -656,9 +656,13 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewe
             SkipRen (-2)
         }
 
+
     Rearrange ->
-     do { genericHandler settings handler renderingLvlVar viewedAreaRef () $
-            SkipRen (-1)
+     do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $
+                    castArr $ RedrawArr
+        ; return $ ["<div op='clear'></div>"]++html 
+        -- causes rearrange with an empty previous arrangement. Hence, the client must delete the old rendering before
+        -- rendering the new one.  
         }
 
     ClearMetrics ->
@@ -666,8 +670,14 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewe
      do { putStrLn "\n\n\n\n\n\n\nClear\n\n\n\n\n\n\n"
         ; fh <- openFile "queriedMetrics.txt" WriteMode -- TODO: clearing this file should be done after Metrics are read in FontLib.hs
         ; hClose fh
-        ; genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
+        ; html1 <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
             castArr $ ClearMetricsArr
+        ; html2 <- genericHandler settings handler renderingLvlVar viewedAreaRef () $ 
+            castArr $ RedrawArr
+
+        ; setViewedAreaHtml <- mkSetViewedAreaHtml settings viewedAreaRef actualViewedAreaRef
+
+        ; return $ html1++["<div op='clear'></div>"]++html2
         }
      
 genericHandler :: (Show token, Show node, Show enr, Show doc) => Settings ->
