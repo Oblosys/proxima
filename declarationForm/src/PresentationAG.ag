@@ -289,7 +289,7 @@ SEM Tasks
                              ([ ("Insert task", docUpd $ insertElementAtEnd (toClip newTask) (@lhs.path++[2]))
                               ] ++ showHideCompletedItem @lhs.path @self)
 		       , @tasks.pres `withFontSize` 12
-		       ] `withHStretch` True) `withHStretch` True 
+		       ] `withHStretch` True) `withWidth` 300 
 
 SEM List_Task
   | List_Task
