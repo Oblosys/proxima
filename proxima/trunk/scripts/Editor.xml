@@ -65,7 +65,7 @@ function init()
   browserIsSafari = ua.indexOf('safari/') != -1;
 
     buttonBarElt = document.getElementById('buttonBar');
-  //  buttonBarElt.style.visibility="hidden";
+    buttonBarElt.parentNode.removeChild( buttonBarElt );
 
   if (ua.indexOf('iphone') != -1)
   { rootTableElt = document.getElementById('rootTable');
@@ -75,7 +75,7 @@ function init()
     proximaElt = document.getElementById('proxima');
     proximaElt.style.border = '0px';
     proximaElt.style.width = '320px';
-    proximaElt.style.height = '330px';
+    proximaElt.style.height = '352px'; // 352 is without button bar 330 is with
 
   }
   
@@ -320,17 +320,18 @@ if (xmlhttp!=null)
       xmlhttp.open("GET",'handle?commands=Commands '+ currentRequestId +' "'+commandQueue+'"',true);
       xmlhttp.send(null);     // commands are terminated by semicolons
 
-      switch(sessionType)
-      { case 'primary':
-          document.getElementById('status').innerHTML = '<img src="etc/statusBlue.jpg"/>';
-          break;
+      if (document.getElementById('status'))
+        switch(sessionType)
+        { case 'primary':
+            document.getElementById('status').innerHTML = '<img src="etc/statusBlue.jpg"/>';
+            break;
 
-        case 'secondary':
-          document.getElementById('status').innerHTML = '<img src="etc/statusOrange.jpg"/>';
-          break;
+          case 'secondary':
+            document.getElementById('status').innerHTML = '<img src="etc/statusOrange.jpg"/>';
+            break;
 
-        default:
-          document.getElementById('status').innerHTML = '<img src="etc/statusWhite.jpg"/>';
+          default:
+            document.getElementById('status').innerHTML = '<img src="etc/statusWhite.jpg"/>';
 
       }
 
@@ -384,12 +385,14 @@ if (xmlhttp.readyState==4)
     }
     else
       if (sessionType == 'primary')
-      { document.getElementById('status').innerHTML = '<img src="etc/statusGreen.jpg"/>';
+      { if (document.getElementById('status'))
+          document.getElementById('status').innerHTML = '<img src="etc/statusGreen.jpg"/>';
         stopAutoRefreshTimer(); // in case it was started
         startExpirationTimer()
       }
       else  
-      { document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
+      { if (document.getElementById('status'))
+          document.getElementById('status').innerHTML = '<img src="etc/statusRed.jpg"/>';
         startAutoRefreshTimer();
       }   
     
@@ -420,14 +423,12 @@ if (xmlhttp.readyState==4)
     
 
     
-    //var status = xmlRoot.getAttribute("status");
-    //if (status !='')
-    //  document.getElementById('status').innerHTML = status;
-    }
+   }
   else
     {
     debug("Problem retrieving data:" + xmlhttp.statusText);
-//    document.getElementById('status').innerHTML='Server not available.';
+//    if (document.getElementById('status'))
+//        document.getElementById('status').innerHTML='Server not available.';
     }
   }
 }
@@ -599,6 +600,7 @@ function debugAdd(message)
 
 function setStatus(message)
 {
+  if (document.getElementById('status'))
     document.getElementById('status').innerHTML=message;
 }
 
@@ -616,7 +618,8 @@ function startExpirationTimer()
 }
 
 function turnOffStatusLight()
-{ document.getElementById('status').innerHTML = '<img src="etc/statusGrey.jpg"/>';
+{ if (document.getElementById('status'))
+    document.getElementById('status').innerHTML = '<img src="etc/statusGrey.jpg"/>';
   sessionType = '';
   clearTimeout(expirationTimer);
 }
