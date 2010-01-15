@@ -440,8 +440,15 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualView
  do { let commands = splitCommands commandStr
     --; putStrLn $ "Received commands:"++ show commands
     ; mPreviousSessionId <- readIORef mPreviousSessionRef
-    ; putStrLn $ "Previous session: " ++ (maybe "none" show mPreviousSessionId)
+    ; let disableIncrementality = mPreviousSessionId /= Just sessionId 
+    ; putStrLn $ "Previous session: " ++ (maybe "none" show mPreviousSessionId) ++ " " ++ show disableIncrementality
     ; writeIORef  mPreviousSessionRef $ Just sessionId
+
+    ; disableIncrementalityHTML <- if mPreviousSessionId == Nothing then return "" else  
+       do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $
+                      castArr $ RedrawArr
+          ; return $ "<div op='clear'></div>"++ concat html 
+          }
 
     ; renderingHTMLss <-
         mapM (handleCommandStr (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewedAreaRef
@@ -479,6 +486,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualView
                                  "responseId='" ++ show requestId ++"' "++ 
                                  "sessionType='" ++ (if isPrimarySession then "primary" else "secondary") ++"' "++
                                  "nrOfSessions='"++show nrOfSessions ++ "'>" ++ 
+                                      disableIncrementalityHTML ++
                                       (if null pendingQueries 
                                        then renderingHTML++focusRenderingHTML
                                        else "") 
