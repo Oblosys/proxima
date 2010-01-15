@@ -509,7 +509,7 @@ SEM Root
   | Root
       layout.assignedWidth  = showDebug' Arr "\n\n\nScreenWidth   " $ 
                                     let (_,(extendedScreenWidth,_)) = @lhs.viewedArea
-                                        screenWidth = extendedScreenWidth * 2 * 2 `div` 3 -- why times 2? and also correct height?
+                                        screenWidth = extendedScreenWidth * 2 `div` 3 -- correction for extended viewed area
                                     in  if @layout.hStretch && screenWidth >= @layout.minWidth 
                                         then screenWidth else @layout.minWidth
       layout.assignedHeight = let (_,(_,screenHeight)) = @lhs.viewedArea
