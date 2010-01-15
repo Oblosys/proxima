@@ -446,7 +446,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualView
     ; putStrLn $ "Previous session: " ++ (maybe "none" show mPreviousSessionId) ++ " " ++ show disableIncrementality
     ; writeIORef  mPreviousSessionRef $ Just sessionId
 
-    ; disableIncrementalityHTML <- if mPreviousSessionId == Nothing then return "" else  
+    ; disableIncrementalityHTML <- if mPreviousSessionId == Just sessionId then return "" else  
        do { html <- genericHandler settings handler renderingLvlVar viewedAreaRef () $
                       castArr $ RedrawArr
           ; return $ "<div op='clear'></div>"++ concat html 
