@@ -80,7 +80,7 @@ function init()
     proximaElt = document.getElementById('proxima');
     proximaElt.style.border = '0px';
     proximaElt.style.width = '320px';
-    proximaElt.style.height = '416px'; // 356 is without button bar 334 is with
+    proximaElt.style.height = '356px'; // 416 is without button and menu bar 356 is without button bar 334 is with
 
 
     setTimeout(scrollTo, 0, 0, 1);
@@ -748,8 +748,15 @@ function keydown(e)
 { if (!e) e = event;
   if (e.keyCode==116)
     return true; // don't handle F5 here, it is handled in keypress()
-  
 // todo prevent ctrl f and other keys bound in keyPress from sending Key events here.
+
+  if (e.keyCode==127) // backspace on iPhone is 127
+  {  loadXMLDoc('Key(8,'+showModifiers(e)+');');
+     if (e.preventDefault) e.preventDefault();
+     if (e.stopPropagation) e.stopPropagation();
+     return false; // false, so no keyPress event is generated
+  }
+
   if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
      loadXMLDoc('Key('+e.keyCode+','+showModifiers(e)+');');
@@ -1192,12 +1199,16 @@ if ( currentPredictiveInserts )
 }
 
 
-function test(char)
-{
-//  insertCharPredictively('A');
-//  loadXMLDoc('Chr(65,(False,False,False));');
-  loadXMLDoc('Rearrange;');
+function activateIPhoneKeyboard(char)
+{ keyboardElt = document.getElementById('keyboardInput');
+  keyboardElt.value = 'zaa';
+  keyboardElt.focus();
 }
+
+function test()
+{ 
+}
+
 ]]></script>
 </head>
 <body onload="init()" leftmargin="0px" topmargin="0px" marginwidth="0px" marginheight="0px"> 
@@ -1219,6 +1230,7 @@ function test(char)
 <div id="draggedElementCloneParent" style="position: relative; height: 10px; width: 10px;"></div>
 <div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 <div id="iPhoneStatus" style='visibility: hidden; position: absolute; right: 0px; bottom: 0px;'><img src="etc/statusGrey.jpg"/></div>
+<div id="iPhoneKeyboardButton" style=' position: absolute; left: 0px; bottom: 0px;'><button onclick="activateIPhoneKeyboard ();">Keyboard</button></div>
 </div>
 <div id="uploadDialog" style='position: absolute; left:-2000px; top:200px;width:400px;height:120px; border: 2px solid black; background-color:white'>
 <form action="upload" enctype="multipart/form-data" method="post">
@@ -1235,13 +1247,15 @@ function test(char)
 <div id='font' style='visibility:hidden;white-space: pre'></div>
 </td></tr>
 
+<div id="iPhoneKeyboard" style=' position: absolute; left: -500px; bottom: 0px;'><input onkeydown="iPhoneKeyHandler();" type="text" id="keyboardInput" autocapitalize="off"/></div>
+
 <tr id="buttonBar"><td>
 <table cellspacing="0" width="100%">
 <tr>
 <td><button onclick="downloadDocument();">Download</button></td>
 <td><button onclick="uploadDocument();">Upload</button></td>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<td><button onclick="loadXMLDoc('ClearMetrics;')">Reload&nbsp;Font&nbsp;Metrics</button></td> <!-- with normal space button text gets line breaks -->
+<!-- <td><button onclick="loadXMLDoc('ClearMetrics;')">Reload&nbsp;Font&nbsp;Metrics</button></td> --><!-- with normal space button text gets line breaks -->
 
 <!-- <td><button onclick="test('X');">Test</button></td> -->
 
