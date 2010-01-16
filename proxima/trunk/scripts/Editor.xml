@@ -10,10 +10,14 @@ IE problems
 
 -->
 <html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<meta name="viewport" content="width=device-width; height=device-height; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+
 
 <head>
-<title>Proxima 2.0</title>
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<link rel="apple-touch-startup-image" href="etc/Uncle-Oblomov-startup.png"/>
+<title>Proxima 2.00</title>
 
 
 <style>
@@ -83,10 +87,11 @@ function init()
     proximaElt = document.getElementById('proxima');
     proximaElt.style.border = '0px';
     proximaElt.style.width = '320px';
-    proximaElt.style.height = '356px'; // 416 is without button and menu bar 356 is without button bar 334 is with
+    proximaElt.style.height = '460px'; // 416 is without button and menu bar 356 is without button bar 334 is with
 
 
-    setTimeout(scrollTo, 0, 0, 1);
+//    window.scrollTo(0, 1);
+
 
   //  setTimeout(proximaElt.addEventListener('touchmove', function(event) {  
   //  event.preventDefault(); // the default behaviour is scrolling  
