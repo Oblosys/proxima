@@ -10,7 +10,7 @@ IE problems
 
 -->
 <html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
-<meta name="viewport" content="width=320; height=330; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
+<meta name="viewport" content="width=320; height=356; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;"/>
 
 <head>
 <title>Proxima 2.0</title>
@@ -75,7 +75,7 @@ function init()
     proximaElt = document.getElementById('proxima');
     proximaElt.style.border = '0px';
     proximaElt.style.width = '320px';
-    proximaElt.style.height = '352px'; // 352 is without button bar 330 is with
+    proximaElt.style.height = '356px'; // 356 is without button bar 334 is with
 
   }
   
