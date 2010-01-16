@@ -85,9 +85,9 @@ function init()
 
     setTimeout(scrollTo, 0, 0, 1);
 
-    setTimeout(proximaElt.addEventListener('touchmove', function(event) {  
-    event.preventDefault(); // the default behaviour is scrolling  
-    }),1000);
+  //  setTimeout(proximaElt.addEventListener('touchmove', function(event) {  
+  //  event.preventDefault(); // the default behaviour is scrolling  
+  //  }),1000);
 
 }
   
