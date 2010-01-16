@@ -1189,6 +1189,7 @@ function test(char)
 ]]></script>
 </head>
 <body onload="init()" leftmargin="0px" topmargin="0px" marginwidth="0px" marginheight="0px"> 
+<!-- resize can be caught on body with onresize=... but it generates many events -->
 
 <!-- <div style="position: absolute; border: 1px solid red; left:254px; top: 154px; width: 492px; height: 292px;"></div> -->
 <!-- to show reduced viewed area 1000x600 with scrolling leaves a viewed area of ((246,146),(492,292)) to this we add 8 is added to left and top to account for margin above and left of proxima elt -->
