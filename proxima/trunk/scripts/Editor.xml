@@ -1227,13 +1227,49 @@ function orientationHandler()
   refresh();
 }
 
+var touchAndHoldTimer;
+var touchStartX;
+var touchStartY;
+
+function touchStartHandler(event)
+{ clearTimeout(touchAndHoldTimer);
+  touchStartX = event.touches[0].pageX;
+  touchStartY = event.touches[0].pageY;
+  touchAndHoldTimer = setTimeout('touchBasedContextMenu()',500);
+  return true;
+}
+
+function touchMoveHandler(event)
+{ if (event.touches[0].pageX-touchStartX  > 5 || event.touches[0].pageY-touchStartY > 5)
+    clearTimeout(touchAndHoldTimer);
+  else
+  { touchStartX = event.touches[0].pageX;
+    touchStartY = event.touches[0].pageY;
+  }
+}
+
+function touchEndHandler(event)
+{ clearTimeout(touchAndHoldTimer);
+}
+
+function touchBasedContextMenu()
+{   loadXMLDoc('ContextMenuRequest(('+touchStartX+','+touchStartY+'),('+touchStartX+','+touchStartY+'));');
+
+}
+/*
+                      ontouchstart="touchStartHandler(event)"
+                      ontouchmove="touchMoveHandler(event)"
+                      ontouchend="touchEndHandler(event)" 
+*/
+
 function test(char)
 { 
 }
 
 ]]></script>
 </head>
-<body onload="init()" onorientationchange="orientationHandler()" leftmargin="0px" topmargin="0px" marginwidth="0px" marginheight="0px"> 
+<body onload="init()" onorientationchange="orientationHandler()"
+                      leftmargin="0px" topmargin="0px" marginwidth="0px" marginheight="0px"> 
 <!-- resize can be caught on body with onresize=... but it generates many events -->
 
 <!-- <div style="position: absolute; border: 1px solid red; left:254px; top: 154px; width: 492px; height: 292px;"></div> -->
