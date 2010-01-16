@@ -35,18 +35,19 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
                        -- actually used in the pruning algorithm (since the presentation has no 
                        -- position & size information)
                             
+
     ; let ((x,y),(w,h)) = viewedArea
-          extendedViewedArea = ( (clip 0 10000 (x- w `div` 4), clip 0 10000 (y- h `div` 4))
-                               , (w+ w `div` 2, h + h `div` 2)
-                               )
           screenWidth = w
           screenHeight = h
 
-    ; let ((x,y),(w,h)) = oldViewedArea
-          extendedOldViewedArea = ( (clip 0 10000 (x- w `div` 4), clip 0 10000 (y- h `div` 4))
-                               , (w+ w `div` 2, h + h `div` 2)
-                               )          
-    -- extension is to arrange a bit more for scrolling
+          extendViewedArea ((x,y),(w,h)) = ( (clip 0 10000 (x- w `div` 4), clip 0 10000 (y- h `div` 4))
+                                           , (w+ w `div` 2, h + h `div` 2)
+                                           )
+
+                   
+          -- extension is to arrange a bit more for quick scrolling
+          extendedViewedArea = extendViewedArea viewedArea
+          extendedOldViewedArea = extendViewedArea oldViewedArea
  
     ; debugLnIO Arr $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show oldViewedArea
     ; debugLnIO Arr $ "Extended viewed area: "++show extendedViewedArea
