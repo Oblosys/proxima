@@ -507,14 +507,10 @@ SEM LayoutList
 
 SEM Root
   | Root
-      layout.assignedWidth  = let (_,(extendedScreenWidth,_)) = @lhs.viewedArea
-                                  screenWidth = extendedScreenWidth * 2 `div` 3 -- correction for extended viewed area
-                              in  if @layout.hStretch && screenWidth >= @layout.minWidth 
-                                  then screenWidth else @layout.minWidth
-      layout.assignedHeight = let (_,(_,extendedScreenHeight)) = @lhs.viewedArea
-                                  screenHeight = extendedScreenHeight * 2 `div` 3 -- correction for extended viewed area
-                              in  if @layout.vStretch && screenHeight >= @layout.minHeight
-                                  then screenHeight else @layout.minHeight
+      layout.assignedWidth  = if @layout.hStretch && @lhs.screenWidth >= @layout.minWidth 
+                              then @lhs.screenWidth else @layout.minWidth
+      layout.assignedHeight = if @layout.vStretch && @lhs.screenHeight >= @layout.minHeight
+                              then @lhs.screenHeight else @layout.minHeight
       layout.assignedVRef = @layout.vRef -- is ignored anyway 
       layout.assignedHRef = @layout.hRef 
 
@@ -803,6 +799,8 @@ SEM LayoutList
 
 
 -- Viewed Area
+
+ATTR Root [ screenWidth, screenHeight : Int | | ]
 
 -- propagated with copy rules
 ATTR Root Layout LayoutList [ viewedArea, oldViewedArea : Rectangle | | ]

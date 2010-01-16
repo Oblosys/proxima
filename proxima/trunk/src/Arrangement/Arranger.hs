@@ -38,14 +38,15 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
     ; let ((x,y),(w,h)) = viewedArea
           extendedViewedArea = ( (clip 0 10000 (x- w `div` 4), clip 0 10000 (y- h `div` 4))
                                , (w+ w `div` 2, h + h `div` 2)
-                               )           
+                               )
+          screenWidth = w
+          screenHeight = h
 
     ; let ((x,y),(w,h)) = oldViewedArea
           extendedOldViewedArea = ( (clip 0 10000 (x- w `div` 4), clip 0 10000 (y- h `div` 4))
                                , (w+ w `div` 2, h + h `div` 2)
                                )          
     -- extension is to arrange a bit more for scrolling
-    -- NOTE: in arrangerAG, the old width and height are computed, so changes here also require updating screenWidth/Height in arrangerAG
  
     ; debugLnIO Arr $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show oldViewedArea
     ; debugLnIO Arr $ "Extended viewed area: "++show extendedViewedArea
@@ -54,7 +55,7 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
 --    ; debugLnIO Arr ("Pruned Presentation"++show prunedPres)
 --    ; debugLnIO Arr ("Old arrangement "++ show oldArrangement)
 
-    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef (getIDACounter state') focus prunedPres pres extendedViewedArea extendedOldViewedArea oldArrangement
+    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef (getIDACounter state') focus prunedPres pres extendedViewedArea extendedOldViewedArea  screenWidth screenHeight oldArrangement
 
     ; let state'' = state' { getIDACounter = idCounter' }
     ; when (maxFDepth > 1) $
@@ -63,9 +64,9 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
     }
 
 
-fixed :: (Show node, Show token) => Settings -> FontMetricsRef -> Int -> FocusPres -> Layout doc enr node clip token -> Layout doc enr node clip token -> Rectangle -> Rectangle -> 
+fixed :: (Show node, Show token) => Settings -> FontMetricsRef -> Int -> FocusPres -> Layout doc enr node clip token -> Layout doc enr node clip token -> Rectangle -> Rectangle -> Int -> Int ->  
          Arrangement node -> IO (Arrangement node, Int, Int)
-fixed settings fontMetricsRef idACounter focus (pres :: Layout doc enr node clip token) (unprunedPres :: Layout doc enr node clip token) viewedArea oldViewedArea oldArrangement = 
+fixed settings fontMetricsRef idACounter focus (pres :: Layout doc enr node clip token) (unprunedPres :: Layout doc enr node clip token) viewedArea oldViewedArea screenWidth screenHeight oldArrangement = 
  mdo { (fontMetrics,arrangement, idACounter', maxFDepth) <- f (fontMetrics,arrangement, idACounter, maxFDepth)
      ; return (arrangement, idACounter', maxFDepth)
      }
@@ -90,6 +91,8 @@ fixed settings fontMetricsRef idACounter focus (pres :: Layout doc enr node clip
                                                Nothing  -- mouseDown : Maybe (UpdateDoc doc clip)
                                                (Just oldArrangement)
                                                oldViewedArea
+                                               screenHeight
+                                               screenWidth
                                                defaultTextColor
                                                unprunedPres
                                                viewedArea
