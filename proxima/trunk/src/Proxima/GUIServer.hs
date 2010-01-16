@@ -138,6 +138,11 @@ server params@(settings,handler,renderingLvlVar,viewedAreaRef) mutex menuR actua
         [ fileServe [] "img" ]  
     , dir "etc"
           [ fileServe [] "src/proxima/etc" ]  
+    , dir "apple-touch-icon-precomposed.png"
+          [ methodSP GET $ fileServe ["Uncle-Oblomov.png"] "src/proxima/etc"]
+    , dir "startup.png"
+          [ methodSP GET $ fileServe ["Uncle-Oblomov.png"] "src/proxima/etc"]
+ -- todo handle defaults!! todo make it possible to always print request
     , dir "favicon.ico"
           [ methodSP GET $ fileServe ["favicon.ico"] "src/proxima/etc"]
     , withAgentIsMIE $ \agentIsMIE ->
@@ -222,7 +227,8 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
          then liftIO $ putStrLn "\n\nPrimary editing session"
          else liftIO $ putStrLn "\n\nSecondary editing session"
        ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show (currentSessions) 
-
+       ; url <- withRequest  $ \r -> return $ rqURL r
+       ; liftIO $ putStrLn $ "URL: "++ url
        ; response <- multi $ handlers params menuR actualViewedAreaRef mPreviousSessionRef sessionId isPrimarySession (length currentSessions)
 
        ; liftIO $ writeIORef currentSessionsRef $ 
