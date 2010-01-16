@@ -35,11 +35,18 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
                        -- actually used in the pruning algorithm (since the presentation has no 
                        -- position & size information)
                             
-         -- TODO: also extend old viewedArea?                   
     ; let ((x,y),(w,h)) = viewedArea
           extendedViewedArea = ( (clip 0 10000 (x- w `div` 4), clip 0 10000 (y- h `div` 4))
                                , (w+ w `div` 2, h + h `div` 2)
                                )           
+
+    ; let ((x,y),(w,h)) = oldViewedArea
+          extendedOldViewedArea = ( (clip 0 10000 (x- w `div` 4), clip 0 10000 (y- h `div` 4))
+                               , (w+ w `div` 2, h + h `div` 2)
+                               )          
+    -- extension is to arrange a bit more for scrolling
+    -- NOTE: in arrangerAG, the old width and height are computed, so changes here also require updating screenWidth/Height in arrangerAG
+ 
     ; debugLnIO Arr $ "Viewed area: "++show viewedArea ++ " last viewed area: "++show oldViewedArea
     ; debugLnIO Arr $ "Extended viewed area: "++show extendedViewedArea
 --    ; debugLnIO Arr ("Diff tree"++show dt)
@@ -47,7 +54,7 @@ arrangePresentation settings state fontMetricsRef focus oldArrangement dt pres =
 --    ; debugLnIO Arr ("Pruned Presentation"++show prunedPres)
 --    ; debugLnIO Arr ("Old arrangement "++ show oldArrangement)
 
-    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef (getIDACounter state') focus prunedPres pres extendedViewedArea oldViewedArea oldArrangement
+    ; (attrTree, idCounter', maxFDepth) <- fixed settings fontMetricsRef (getIDACounter state') focus prunedPres pres extendedViewedArea extendedOldViewedArea oldArrangement
 
     ; let state'' = state' { getIDACounter = idCounter' }
     ; when (maxFDepth > 1) $
