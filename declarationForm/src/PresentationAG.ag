@@ -276,10 +276,13 @@ SEM Tasks
                            @things.pres 
                              --]]]
 -}
-      loc.pres = structural $ (leftTopMargins 5 5 $
+      loc.pres = structural $ (
+                  row [ vLine, col [ hLine,
+                   leftTopMargins 5 5 $
                    col [ hAlignCenter $ text "Task-list editor"
                        , vSpace 20
-           
+                       
+                       , empty `withVStretch` True
                                --   @things1.pres
 		               -- , vSpace 20
 		      	       -- , @things2.pres
@@ -288,7 +291,8 @@ SEM Tasks
                              ([ ("Insert task", docUpd $ insertElementAtEnd (toClip newTask) (@lhs.path++[2]))
                               ] ++ showHideCompletedItem @lhs.path @self)
 		       , @tasks.pres `withFontSize` 12
-		       ]`withHStretch` True) `withHStretch` True 
+		       ]`withStretch` True
+                       , hLine], vLine]) `withStretch` True 
 
 SEM List_Task
   | List_Task
