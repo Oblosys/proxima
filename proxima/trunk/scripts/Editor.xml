@@ -1207,19 +1207,33 @@ if ( currentPredictiveInserts )
 }
 
 
-function activateIPhoneKeyboard(char)
+function activateIPhoneKeyboard()
 { keyboardElt = document.getElementById('keyboardInput');
   keyboardElt.value = 'zaa';
   keyboardElt.focus();
+  window.scrollTo(0, -480);
 }
 
-function test()
+function orientationHandler()
+{ if (window.orientation == 0 || window.orientation == 180)
+  { proximaElt.style.width = '320px';
+    proximaElt.style.height = '460px'; // 416 is without button and menu bar 356 is without button bar 334 is with
+  }
+  else
+  { proximaElt.style.width = '480px';
+    proximaElt.style.height = '300px'; // 416 is without button and menu bar 356 is without button bar 334 is with
+  }
+
+  refresh();
+}
+
+function test(char)
 { 
 }
 
 ]]></script>
 </head>
-<body onload="init()" leftmargin="0px" topmargin="0px" marginwidth="0px" marginheight="0px"> 
+<body onload="init()" onorientationchange="orientationHandler()" leftmargin="0px" topmargin="0px" marginwidth="0px" marginheight="0px"> 
 <!-- resize can be caught on body with onresize=... but it generates many events -->
 
 <!-- <div style="position: absolute; border: 1px solid red; left:254px; top: 154px; width: 492px; height: 292px;"></div> -->
