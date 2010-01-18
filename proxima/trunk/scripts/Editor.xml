@@ -543,7 +543,7 @@ function updateTree(update)
   { var screenX = update.getAttribute('screenX');
     var screenY = update.getAttribute('screenY');
     
-    removeChildrenByID('contextMenu');
+    removeChildrenById('contextMenu');
     
     while (update.firstChild)
     { var item = update.firstChild;
