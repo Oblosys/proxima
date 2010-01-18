@@ -690,7 +690,7 @@ function keypress(e)
    
   //alert('Key is '+keyCode +',' + e.charCode);
 
-  if (keyCode==116)
+  if (keyCode==116 && e.charCode==0) // F5
   { loadXMLDoc('Rearrange;');
     return false;
   }
