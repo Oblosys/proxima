@@ -543,7 +543,7 @@ function updateTree(update)
   { var screenX = update.getAttribute('screenX');
     var screenY = update.getAttribute('screenY');
     
-    removeChildren('contextMenu');
+    removeChildrenByID('contextMenu');
     
     while (update.firstChild)
     { var item = update.firstChild;
@@ -1286,7 +1286,6 @@ function test(char)
 <div id="-2"></div>  <!-- -2 is the focus -->
 <div id="newRendering" style='position: absolute; left: 1000px; top: 0px;' ></div>
 <div id="draggedElementCloneParent" style="position: relative; height: 10px; width: 10px;"></div>
-<div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 <div id="iPhoneStatus" style='visibility: hidden; position: absolute; right: 0px; bottom: 0px;'><img src="etc/statusGrey.jpg"/></div>
 <div id="iPhoneKeyboardButton" style='visibility: hidden; position: absolute; left: 0px; bottom: 0px;'><img  onclick="activateIPhoneKeyboard ();" src="etc/keyboard.jpg"/></div>
 </div>
@@ -1303,6 +1302,7 @@ function test(char)
 </div>
  <!-- relative to parent. Important: parent needs style = 'position: relative' -->
 <div id='font' style='visibility:hidden;white-space: pre'></div>
+<div id="contextMenu" class="skin0" onmouseover="return highlightie5(event)" onmouseout="lowlightie5(event)" onclick="jumptoie5(event)"></div>
 </td></tr>
 
 <div id="iPhoneKeyboard" style=' position: absolute; left: -500px; bottom: 0px;'><input onkeydown="iPhoneKeyHandler();" type="text" id="keyboardInput" autocapitalize="off"/></div>
