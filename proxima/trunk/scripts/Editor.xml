@@ -1257,9 +1257,6 @@ function touchBasedContextMenu()
 
 }
 /*
-                      ontouchstart="touchStartHandler(event)"
-                      ontouchmove="touchMoveHandler(event)"
-                      ontouchend="touchEndHandler(event)" 
 */
 
 function test(char)
@@ -1269,6 +1266,9 @@ function test(char)
 ]]></script>
 </head>
 <body onload="init()" onorientationchange="orientationHandler()"
+                      ontouchstart="touchStartHandler(event)"
+                      ontouchmove="touchMoveHandler(event)"
+                      ontouchend="touchEndHandler(event)" 
                       leftmargin="0px" topmargin="0px" marginwidth="0px" marginheight="0px"> 
 <!-- resize can be caught on body with onresize=... but it generates many events -->
 
