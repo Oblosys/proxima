@@ -30,10 +30,4 @@ cd /home/martijn/proxima/styledText
 svn update
 cabal configure --ghc-option=-O
 cabal build
-
-/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima dazzleEditor DazzleEditor
-/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima heliumEditor HeliumEditor
-/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima declarationForm DeclarationForm
-/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima taskEditor DeclarationForm
-/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima sudoku DeclarationForm
-/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohStartProxima styledText DeclarationForm
+/home/martijn/proxima/dazzleEditor/src/proxima/scripts/poohRestartAllEditors
