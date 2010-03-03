@@ -1315,10 +1315,11 @@ function test()
 <td><button onclick="uploadDocument();">Upload</button></td>
 <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <!-- <td><button onclick="loadXMLDoc('ClearMetrics;')">Reload&nbsp;Font&nbsp;Metrics</button></td> --><!-- with normal space button text gets line breaks -->
-
 <!-- <td><button onclick="test();">Test</button></td> -->
 
 <td width="100%"></td>
+<td><button onclick="window.open('http://www.cs.uu.nl/wiki/bin/view/Proxima/ProximaUserManual');">User&nbsp;Manual</button>
+</td>
 <td><div id="status"><img src="etc/statusGrey.jpg"/></div></td>
 </tr>
 </table>
