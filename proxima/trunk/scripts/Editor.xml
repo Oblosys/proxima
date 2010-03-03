@@ -1259,8 +1259,9 @@ function touchBasedContextMenu()
 /*
 */
 
-function test(char)
-{ 
+function test()
+{ alert(document.cookie);
+
 }
 
 ]]></script>
@@ -1315,7 +1316,7 @@ function test(char)
 <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <!-- <td><button onclick="loadXMLDoc('ClearMetrics;')">Reload&nbsp;Font&nbsp;Metrics</button></td> --><!-- with normal space button text gets line breaks -->
 
-<!-- <td><button onclick="test('X');">Test</button></td> -->
+<!-- <td><button onclick="test();">Test</button></td> -->
 
 <td width="100%"></td>
 <td><div id="status"><img src="etc/statusGrey.jpg"/></div></td>
