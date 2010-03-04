@@ -228,7 +228,7 @@ sessionHandler params@(settings,handler,renderingLvlVar, viewedAreaRef) mutex me
          else liftIO $ putStrLn "\n\nSecondary editing session"
        ; liftIO $ putStrLn $ "Session "++show sessionId ++", all sessions: "++ show (currentSessions) 
        ; url <- withRequest  $ \r -> return $ rqURL r
-       ; liftIO $ putStrLn $ "URL: "++ url
+--       ; liftIO $ putStrLn $ "URL: "++ url
        ; response <- multi $ handlers params menuR actualViewedAreaRef mPreviousSessionRef sessionId isPrimarySession (length currentSessions)
 
        ; liftIO $ writeIORef currentSessionsRef $ 
