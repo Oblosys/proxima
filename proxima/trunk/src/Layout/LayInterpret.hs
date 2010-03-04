@@ -1,4 +1,4 @@
-module Layout.LayTranslate where
+module Layout.LayInterpret where
 
 import Common.CommonTypes
 import Common.CommonUtils
@@ -118,7 +118,7 @@ parse _ state layLvl prsLvl Test2Lay           = ([Test2Pres], state, layLvl)
 -- to allow presenter mouse handle: change GestureInterpreter, so the event is handled there
 -}
 parse _ state layLvl prsLvl (WrapLay wrapped) = ([unwrap wrapped],        state, layLvl)
-parse _ state layLvl prsLvl cmd            = debug Err ("LayTranslate.parse: unhandled command "++show cmd) $ ([SkipPres 0], state, layLvl)
+parse _ state layLvl prsLvl cmd            = debug Err ("LayInterpret.parse: unhandled command "++show cmd) $ ([SkipPres 0], state, layLvl)
 
 
 -- edit ops need to be consistent, when navigating with non-empty focus, collapse focus
@@ -293,7 +293,7 @@ addVertex :: (DocNode node, Show token) => [Int] -> (Int, Int) ->  LayerStateLay
              (LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
 addVertex pth (x,y) state (LayoutLevel pres focus dt)  =
   let vertexIDs = getVertexIDs pth pres
-      freshID = head' "LayTranslate.addVertex" $ dropWhile (`elem` vertexIDs) [0..]
+      freshID = head' "LayInterpret.addVertex" $ dropWhile (`elem` vertexIDs) [0..]
       pres' = addVertexPres (PathP pth 0) (loc noNode $ structural $ VertexP NoIDP freshID x y outline vertex) pres
   in  (state, LayoutLevel pres' focus dt)     -- 0 in path is ignored
  where vertex = empty

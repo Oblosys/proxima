@@ -1,4 +1,4 @@
-module Arrangement.ArrTranslate where
+module Arrangement.ArrInterpret where
 
 import Common.CommonTypes
 import Common.CommonUtils

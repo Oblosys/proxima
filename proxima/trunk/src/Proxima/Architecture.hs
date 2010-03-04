@@ -3,15 +3,15 @@ module Proxima.Architecture where
 import Proxima.ArchitectureLibM
 
 import qualified Evaluation.EvalPresent     as EvalPresent
-import qualified Evaluation.EvalTranslate   as EvalTranslate
+import qualified Evaluation.EvalInterpret   as EvalInterpret
 import qualified Presentation.PresPresent   as PresPresent
-import qualified Presentation.PresTranslate as PresTranslate
+import qualified Presentation.PresInterpret as PresInterpret
 import qualified Layout.LayPresent          as LayPresent
-import qualified Layout.LayTranslate        as LayTranslate
+import qualified Layout.LayInterpret        as LayInterpret
 import qualified Arrangement.ArrPresent     as ArrPresent
-import qualified Arrangement.ArrTranslate   as ArrTranslate
+import qualified Arrangement.ArrInterpret   as ArrInterpret
 import qualified Rendering.RenPresent       as RenPresent
-import qualified Rendering.RenTranslate     as RenTranslate
+import qualified Rendering.RenInterpret     as RenInterpret
 
 type Step m nextstep a b c d = (a -> m (b, nextstep m c d a b))
 
@@ -77,16 +77,16 @@ wrap (ProximaLayer translate' present') =
         }
 
 
-evaluationLayer   = ProximaLayer EvalTranslate.translateIO EvalPresent.presentIO
+evaluationLayer   = ProximaLayer EvalInterpret.translateIO EvalPresent.presentIO
 presentationLayer presentationSheet parseSheet = ProximaLayer 
-                                                   (PresTranslate.translateIO parseSheet)
+                                                   (PresInterpret.translateIO parseSheet)
                                                    (PresPresent.presentIO presentationSheet)
 layoutLayer       scannerSheet = ProximaLayer 
-                                   (LayTranslate.translateIO scannerSheet) LayPresent.presentIO
+                                   (LayInterpret.translateIO scannerSheet) LayPresent.presentIO
 arrangementLayer  settings     = ProximaLayer 
-                                   ArrTranslate.translateIO (ArrPresent.presentIO settings)
+                                   ArrInterpret.translateIO (ArrPresent.presentIO settings)
 renderingLayer    settings     = ProximaLayer
-                                   RenTranslate.translateIO (RenPresent.presentIO settings)
+                                   RenInterpret.translateIO (RenPresent.presentIO settings)
 
 
 proximaLayers settings presentationSheet parseSheet scannerSheet

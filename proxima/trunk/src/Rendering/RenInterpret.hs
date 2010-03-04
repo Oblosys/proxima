@@ -1,4 +1,4 @@
-module Rendering.RenTranslate where
+module Rendering.RenInterpret where
 
 import Common.CommonTypes
 import Rendering.RenLayerTypes

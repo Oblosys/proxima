@@ -1,4 +1,4 @@
-module Evaluation.EvalTranslate where
+module Evaluation.EvalInterpret where
 
 import Common.CommonTypes
 import Common.CommonUtils
