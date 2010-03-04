@@ -11,12 +11,12 @@ import Evaluation.DocumentEdit
 import UU.Parsing.CharParser
 import UU.Parsing
 
-translateIO :: (Doc doc, ReductionSheet doc enr clip) =>
+interpretIO :: (Doc doc, ReductionSheet doc enr clip) =>
                LayerStateEval doc clip -> EnrichedDocLevel enr doc -> DocumentLevel doc clip ->
                [EditEnrichedDoc doc enr node clip token] -> 
                IO ([EditDocument doc enr node clip token], LayerStateEval doc clip, EnrichedDocLevel enr doc)
 
-translateIO state low high = castRemainingEditOps $ \editLow ->
+interpretIO state low high = castRemainingEditOps $ \editLow ->
   do { (editHigh, state', low') <- reduceIO state low high editLow
 --     ; debugLnIO Prs $ "Edit Enriched:"++show editHigh
      ; return ([editHigh], state', low')

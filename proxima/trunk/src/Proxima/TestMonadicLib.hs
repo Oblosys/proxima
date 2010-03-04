@@ -10,24 +10,24 @@ import Main.ArchitectureLibM
 type Step nStep a b c d = (a -> IO (nStep c d a b, b))
 
 newtype PresStep doc pres gest upd = 
-            PresStep {presStep :: Step TransStep doc pres gest upd}
-newtype TransStep gest upd doc pres = 
-            TransStep {transStep :: Step PresStep gest upd doc pres}
+            PresStep {presStep :: Step IntrpStep doc pres gest upd}
+newtype IntrpStep gest upd doc pres = 
+            IntrpStep {intrpStep :: Step PresStep gest upd doc pres}
 
-instance Pack IO (PresStep a b c d) a b (TransStep c d a b) where
+instance Pack IO (PresStep a b c d) a b (IntrpStep c d a b) where
   pack = PresStep
   unpack = presStep
 
-instance Pack IO (TransStep a b c d) a b (PresStep c d a b) where
-  pack = TransStep
-  unpack = transStep
+instance Pack IO (IntrpStep a b c d) a b (PresStep c d a b) where
+  pack = IntrpStep
+  unpack = intrpStep
 
 
 
 lift :: Simple a b c d e f  -> a -> (PresStep c d e f)
 lift simple =
   fix $ liftStep (present simple) 
-      . liftStep (translate simple) 
+      . liftStep (interpret simple) 
 
 combine :: PresStep a b e f -> PresStep b c d e -> PresStep a c d f
 combine hghr lwr =  
@@ -36,27 +36,27 @@ combine hghr lwr =
 
 data Simple state mapping doc pres gest upd =
        Simple { present ::   LayerFunction IO state doc (mapping, state) pres
-              , translate :: LayerFunction IO (mapping, state) gest state upd
+              , interpret :: LayerFunction IO (mapping, state) gest state upd
               }
 
 
 --------------------
 
 
-mylayerIO0 = lift (Simple presIO0 transIO0) 0
+mylayerIO0 = lift (Simple presIO0 intrpIO0) 0
 presIO0 state doc = 
  do { putStr "presIO0"
     ; return (("map for state "++ show state, state), "<0 "++show state++","++doc++" 0>")
     }
 
-transIO0 (map ,state) gest =
- do { putStr "transIO0"
+intrpIO0 (map ,state) gest =
+ do { putStr "intrpIO0"
     ; return . seq2 $ (state+1, map++","++gest)                   
     }
 
-mylayerIO1 = lift (Simple presIO1 transIO1) 0.0
+mylayerIO1 = lift (Simple presIO1 intrpIO1) 0.0
 presIO1 state doc = return (("map for state "++ show state, state), "<1 "++show state++","++doc++" 1>")
-transIO1 (map,state) gest = return (seq2 (state+1.0, map++","++gest))                   
+intrpIO1 (map,state) gest = return (seq2 (state+1.0, map++","++gest))                   
 
 
 seq2 (a,b) = seq a (seq b (a,b))
@@ -67,7 +67,7 @@ testIO =
     }
  where loop layer n =
         do { let PresStep f = layer
-           ; (TransStep f', rend) <- f "doc"
+           ; (IntrpStep f', rend) <- f "doc"
            ; putStr rend
            ; (layer', upd) <- f' "gest"
            ; putStr upd

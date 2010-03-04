@@ -90,8 +90,8 @@ proxima settings presentationSheet parseSheet scannerSheet
                         
                           -- initial Rendering is given to startGUI.
                                
-                               -- maybe better to do init stuff at handling of Init.. edit command in translate modules
-    ; let TransStep translate = layers
+                               -- maybe better to do init stuff at handling of Init.. edit command in interpret modules
+    ; let IntrpStep interpret = layers
     ; let initEvent = InitRen
 {-                                    
     ; args <- getArgs
@@ -101,7 +101,7 @@ proxima settings presentationSheet parseSheet scannerSheet
                         _       -> InitRen -- putStrLn $ "Usage: Proxima [filename]"
 -}     
     
-    ; stepRf <- newIORef translate
+    ; stepRf <- newIORef interpret
     
     ; let --handler :: ((RenderingLevel documentLevel, EditRendering documentLevel) -> IO (RenderingLevel documentLevel, EditRendering' documentLevel))
           handler (renderingLvl, SkipRen 0) = return $ (renderingLvl, [SkipRen' 0]) -- just so unimportant events don't flood debugging traces
@@ -109,21 +109,21 @@ proxima settings presentationSheet parseSheet scannerSheet
            do {
 --                debugLnIO Main $ "Rendering edit is "++show event
 
-              ; translate <- readIORef stepRf
+              ; interpret <- readIORef stepRf
               
-              ; (renderingLvl', renderingEdits, translate') <- 
-                   performEditCycles translate renderingLvl [event]             
+              ; (renderingLvl', renderingEdits, interpret') <- 
+                   performEditCycles interpret renderingLvl [event]             
               
-              ; writeIORef stepRf translate'
+              ; writeIORef stepRf interpret'
               ; return $ (renderingLvl', renderingEdits)
               }
-           where performEditCycles translate renderingLvl [] = return (renderingLvl, [], translate)
-                 performEditCycles translate renderingLvl (event:events) =
-                  do {  ((doc, docEdits), PresStep present) <- translate (renderingLvl, [event])             
-                     ; ((renderingLvl', renderingEdit':newEvents), TransStep translate') <- present (doc, (redirect docEdits))
-                     ; (renderingLvl'', renderingEdits, translate'') <-
-                         performEditCycles translate' renderingLvl' (map cast newEvents ++ events)
-                     ; return (renderingLvl'', renderingEdit':renderingEdits, translate'')
+           where performEditCycles interpret renderingLvl [] = return (renderingLvl, [], interpret)
+                 performEditCycles interpret renderingLvl (event:events) =
+                  do {  ((doc, docEdits), PresStep present) <- interpret (renderingLvl, [event])             
+                     ; ((renderingLvl', renderingEdit':newEvents), IntrpStep interpret') <- present (doc, (redirect docEdits))
+                     ; (renderingLvl'', renderingEdits, interpret'') <-
+                         performEditCycles interpret' renderingLvl' (map cast newEvents ++ events)
+                     ; return (renderingLvl'', renderingEdit':renderingEdits, interpret'')
                      }
                       -- initial RenderingLevel 
     ; startGUI settings handler viewedAreaRef
@@ -152,7 +152,7 @@ proxima settings presentationSheet parseSheet scannerSheet
 group edit commands that have similar behaviour, the data structure will be neater and common behaviour
 can more easily be factorized.
 
-where do we translate? descaling and translating to arr path is both in renderer, but this is probably right
+where do we interpret? descaling and interpreting to arr path is both in renderer, but this is probably right
 
 
 Parse always before doing higher level op!! After pres edit, locators can be completely wrong.
@@ -168,7 +168,7 @@ something has changed and navigation is performed. Does this fit?
 idPs in doc: how to store?? Now datatype changes when pres is modified, which is not good
 
 Popups in doc level? or in enriched doc level? It should be possible to specify doc updates, without having 
-to specify them as enriched doc updates and providing a translation from enriched to doc
+to specify them as enriched doc updates and providing a interpretation from enriched to doc
 
 
 Selections/focus.  What about left clicking on objects without presentation (eg AppExp), place left click as high as possible in the

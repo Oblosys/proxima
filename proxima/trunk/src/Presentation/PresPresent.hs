@@ -21,7 +21,7 @@ presentIO presentationSheet state high low@(PresentationLevel pres layout) = cas
 
 
 -- inss and dels are passed in a bizarre way now because lower local state may not be updated
--- at the translation side
+-- at the interpretation side
 -- inserted and deleted are taken from setDoc' and put in PresentationLevelState
 -- on document edit, old inserted and deleted from level are reused
 

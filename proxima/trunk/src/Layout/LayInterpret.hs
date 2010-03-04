@@ -14,10 +14,10 @@ import Layout.LayTypes
 import Proxima.Wrap
 import Evaluation.DocTypes
 
---translateIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
-translateIO :: (DocNode node, Eq token, Show doc, Show enr, Show token, Show node) => ScannerSheet doc enr node clip token -> LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> [EditLayout doc enr node clip token]
+--interpretIO :: state -> low -> high -> editLow -> IO (editHigh, state, low)
+interpretIO :: (DocNode node, Eq token, Show doc, Show enr, Show token, Show node) => ScannerSheet doc enr node clip token -> LayerStateLay doc enr node clip token -> LayoutLevel doc enr node clip token -> PresentationLevel doc enr node clip token -> [EditLayout doc enr node clip token]
             -> IO ([EditPresentation doc enr node clip token], LayerStateLay doc enr node clip token, LayoutLevel doc enr node clip token)
-translateIO scannerSheet state low high = castRemainingEditOps $ \editLow ->
+interpretIO scannerSheet state low high = castRemainingEditOps $ \editLow ->
   do { (editsHigh, state', low') <- parseIO scannerSheet state low high editLow
      ; debugLnIO Lay $ "Edit Layout: "++show editLow
      ; return (editsHigh, state', low')
@@ -360,7 +360,7 @@ edit, compute focus after edit, compute focus in terms of position in string rep
 
 present: recomputes focus in updated tree from string position except for skip, because then focus is ok.
 
-arrange: translate focusP to focusA
+arrange: interpret focusP to focusA
 
 structural problem: if presentation before focus changes in size, the focus is incorrect.
 -- this will be solved by having a document focus.

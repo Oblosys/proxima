@@ -99,5 +99,5 @@ origin = (0,0)
 type UpdatedRegions = [Rectangle]
 
 type LeftButtonDown = Bool 
--- For distinguishing between mouse move and mouse drag events. It is updated by RenTranslate.
+-- For distinguishing between mouse move and mouse drag events. It is updated by RenInterpret.
 -- Currently, Proxima only handles left dragging.

@@ -621,7 +621,7 @@ handleCommand (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualViewe
              ; return $ html ++ [setViewedAreaHtml]
              }
 
--- TODO: add guaranteeFocusInView edit op at ArrTranslate, so we can take into account the kind of edit operation.
+-- TODO: add guaranteeFocusInView edit op at ArrInterpret, so we can take into account the kind of edit operation.
 --       Now, it can go wrong if the focus is extended to the left or up.
     -- (note: maybe not, focus is always from to.)    
     

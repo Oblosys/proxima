@@ -25,7 +25,7 @@ Wrap implements wrapped editops
 
 instead of returning e.g. :: EditArrangement, return a wrap $ ..
 wrap :: edit op returns a wrapped editop.
-translate and present functions unwrap it, so it arrives at its destination.
+interpret and present functions unwrap it, so it arrives at its destination.
 cast.
 
 each layer component takes edit op -> edit ops.
@@ -189,8 +189,8 @@ type RenderingLevel doc enr node clip token =
 castRemainingEditOps :: ( Wrapable editOp doc enr node clip token
                         , Wrapable editOp' doc enr node clip token ) =>
                         (editOp -> IO ([editOp'],state,level)) -> [editOp] -> IO ([editOp'], state, level)
-castRemainingEditOps presOrTrans (editOp:editOps) =
- do { (editOps',state,level) <- presOrTrans editOp
+castRemainingEditOps presOrIntrp (editOp:editOps) =
+ do { (editOps',state,level) <- presOrIntrp editOp
     ; return (editOps' ++ map cast editOps, state, level)
     }
 

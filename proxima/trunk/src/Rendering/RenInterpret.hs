@@ -11,8 +11,8 @@ import Data.Char
 import Control.Exception
 -- import IOExts
 
-translateIO state low high = castRemainingEditOps $ \editLow -> 
- do { (editHigh, state', low') <- interpretIO state low high editLow
+interpretIO state low high = castRemainingEditOps $ \editLow -> 
+ do { (editHigh, state', low') <- gInterpretIO state low high editLow
     ; return (editHigh, state', low')
     }
 
@@ -28,11 +28,12 @@ translateIO state low high = castRemainingEditOps $ \editLow ->
 -- focus is passed all the time, which is a hint that the current focus model is no good
 -- also focus behaviour (e.g. what to do when navigating with a nonempty focus) is split over layers
 
-interpretIO :: (Show doc, Show enr, Show token, Show node) =>
+--gInterpret stands for gesture interpret
+gInterpretIO :: (Show doc, Show enr, Show token, Show node) =>
              LocalStateRen -> RenderingLevel doc enr node clip token ->
              ArrangementLevel doc enr node clip token -> EditRendering doc enr node clip token ->
              IO ([EditArrangement doc enr node clip token], LocalStateRen, RenderingLevel doc enr node clip token)
-interpretIO state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
+gInterpretIO state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
   case editRen of
     KeySpecialRen UpKey ms@(Modifiers False False False) ->
@@ -55,14 +56,14 @@ interpretIO state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                        castRen $ KeySpecialRen DownKey ms
         ; return (editArr, state, renLvl)
         }
-    _ -> return $ interpret state renLvl arrLvl editRen
+    _ -> return $ gInterpret state renLvl arrLvl editRen
 
  
-interpret :: (Show doc, Show enr, Show token, Show node) =>
+gInterpret :: (Show doc, Show enr, Show token, Show node) =>
              LocalStateRen -> RenderingLevel doc enr node clip token ->
              ArrangementLevel doc enr node clip token -> EditRendering doc enr node clip token ->
              ([EditArrangement doc enr node clip token], LocalStateRen, RenderingLevel doc enr node clip token)
-interpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
+gInterpret state renLvl@(RenderingLevel scale c r fr sz debugging ur lmd)
                 arrLvl@(ArrangementLevel arr focus _) editRen = debug Ren ("Rendering edit:"++show editRen) $
   case editRen of
     InitRen             -> ([InitArr],       state, renLvl) 

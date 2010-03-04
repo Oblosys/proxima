@@ -17,7 +17,7 @@ import Data.Map (Map)
 
 import Evaluation.DocumentEdit
 
-translateIO state low high =  castRemainingEditOps $ \editLow ->
+interpretIO state low high =  castRemainingEditOps $ \editLow ->
  do { (editsHigh, state', low') <- unArrangeIO state low high editLow
     ; return (editsHigh, state', low')
     }

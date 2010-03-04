@@ -27,7 +27,7 @@ presentIO  state high low@(LayoutLevel pres focus _) = castRemainingEditOps $ \e
         }
 
 -- layout is old layout level, but on skip, the old one is the edited one that should be arranged again. The diff
--- is therefore done in LayTranslate after the layout is edited.
+-- is therefore done in LayInterpret after the layout is edited.
 
 -- for a set operation, the new layout from presentation can be diffed with the old layout
 
@@ -37,7 +37,7 @@ present :: (DocNode node, Show token, Eq token) => LayerStateLay doc enr node cl
            (EditLayout' doc enr node clip token, LayerStateLay doc enr node clip token, PresentationLevel doc enr node clip token)
 present state pres (LayoutLevel lay focus dt) (SkipPres' 0) =
   let (lay', focus') = (,) {-normalizePresentation -} lay focus -- Normalize does not work in chess board, find out why
-      diffTree = dt -- diffTree was created by translate
+      diffTree = dt -- diffTree was created by interpret
   in  (SetLay' (LayoutLevel lay' focus' diffTree), state, pres)  -- we should re present here because of local state
 present state pres lay (SkipPres' i) = (SkipLay' (i-1), state, pres)
 present state _ (LayoutLevel lay focus dt) (SetPres' hp@(PresentationLevel pres (layout,idCounter)))  = 
