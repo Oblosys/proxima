@@ -226,7 +226,7 @@ function contextHandler(e)
   // menu is not on proxima element, so position is absolute to window
   // however, proxima needs the position relative to the proxima element
   
-  loadXMLDoc('ContextMenuRequest(('+coords.x+','+coords.y+'),('+screenX+','+screenY+'));');
+  sendCommand('ContextMenuRequest(('+coords.x+','+coords.y+'),('+screenX+','+screenY+'));');
   return false; // disable normal context menu
 }
 
@@ -261,7 +261,7 @@ function jumptoie5(e)
       firingobj=firingobj.parentNode;
     else
     { var selectedItemNr = firingobj.getAttribute("item");
-      loadXMLDoc('ContextMenuSelect('+selectedItemNr+');');     
+      sendCommand('ContextMenuSelect('+selectedItemNr+');');     
       menuobj.style.visibility="hidden";
     }
   }
@@ -315,11 +315,11 @@ function hidemenuie5(e)
 
 
 
-function loadXMLDoc(url)
+function sendCommand(commandStr)
 { if (commandQueue == "")
     prependSetViewedAreaCommand(); // every set of commands is prepended with the viewed area
 
-  commandQueue = commandQueue + url;
+  commandQueue = commandQueue + commandStr;
 
   if ( xmlhttp && xmlhttp.readyState != 0 && xmlhttp.readyState != 4)
     return; // if xmlhttp exists and was initialized and not ready, we return
@@ -401,7 +401,7 @@ if (xmlhttp.readyState==4)
 
     if (commandQueue != '')
     { //debugAdd('sending queue');
-      loadXMLDoc('');
+      sendCommand('');
     }
     else
       if (sessionType == 'primary')
@@ -565,7 +565,7 @@ function updateTree(update)
     
     var metrics = queryFont(family,size,isBold,isItalic);
     //debugAdd('query is Metrics'+metrics+';');
-    loadXMLDoc('Metrics'+metrics+';');
+    sendCommand('Metrics'+metrics+';');
   }
   else if (op == 'setViewedArea')
   { var x = update.getAttribute('x');
@@ -657,7 +657,7 @@ function stopAutoRefreshTimer()
 }
 
 function autoRefresh()
-{ loadXMLDoc('Rearrange;');
+{ sendCommand('Rearrange;');
 }
 
 function clearRendering()
@@ -670,7 +670,7 @@ function clearRendering()
 }
 
 function refresh()
-{ loadXMLDoc('Rearrange;');
+{ sendCommand('Rearrange;');
 }
 
 function removeChildrenById(parentId)
@@ -691,49 +691,49 @@ function keypress(e)
   //alert('Key is '+keyCode +',' + e.charCode);
 
   if (keyCode==116 && e.charCode==0) // F5
-  { loadXMLDoc('Rearrange;');
+  { sendCommand('Rearrange;');
     return false;
   }
 
   if (keyCode==102 && e.ctrlKey) // ctrl-f
   { var answer=prompt("Enter search term.");
 // todo: escape answer string
-   if (answer) loadXMLDoc('Find \\"'+answer+'\\";');
+   if (answer) sendCommand('Find \\"'+answer+'\\";');
     return false;
   }
   if (keyCode==98 && e.ctrlKey) // ctrl-b
-  { loadXMLDoc('EditStyle SetBold;');
+  { sendCommand('EditStyle SetBold;');
     return false;
   }
  if (keyCode==66 && e.ctrlKey) // ctrl-B
-  { loadXMLDoc('EditStyle ClearBold;');
+  { sendCommand('EditStyle ClearBold;');
     return false;
   }
   if (keyCode==105 && e.ctrlKey) // ctrl-i
-  { loadXMLDoc('EditStyle SetItalic;');
+  { sendCommand('EditStyle SetItalic;');
     return false;
   }
   if (keyCode==73 && e.ctrlKey) // ctrl-I
-  { loadXMLDoc('EditStyle ClearItalic;');
+  { sendCommand('EditStyle ClearItalic;');
     return false;
   }
   if (keyCode==48 && e.ctrlKey) // ctrl-0
-  { loadXMLDoc('EditStyle (SetColor (0,0,0));');
+  { sendCommand('EditStyle (SetColor (0,0,0));');
     return false;
   }
   if (keyCode==49 && e.ctrlKey) // ctrl-1
-  { loadXMLDoc('EditStyle (SetColor (255,0,0));');
+  { sendCommand('EditStyle (SetColor (255,0,0));');
     return false;
   }
   if (keyCode==50 && e.ctrlKey) // ctrl-2
-  { loadXMLDoc('EditStyle (SetColor (0,0,255));');
+  { sendCommand('EditStyle (SetColor (0,0,255));');
     return false;
   }
 
   if (e.which != 0 && keyCode != 8 && keyCode != 13)
   { if (!(e.ctrlKey || e.altKey || e.metaKey))
       insertCharPredictively( String.fromCharCode(keyCode) );
-    loadXMLDoc('Chr('+keyCode+','+showModifiers(e)+');');
+    sendCommand('Chr('+keyCode+','+showModifiers(e)+');');
   }
 // maybe also check alt, ctrl and  other keys, they seem to generate press events now
    
@@ -759,7 +759,7 @@ function keydown(e)
 // todo prevent ctrl f and other keys bound in keyPress from sending Key events here.
 
   if (e.keyCode==127) // backspace on iPhone is 127
-  {  loadXMLDoc('Key(8,'+showModifiers(e)+');');
+  {  sendCommand('Key(8,'+showModifiers(e)+');');
      if (e.preventDefault) e.preventDefault();
      if (e.stopPropagation) e.stopPropagation();
      return false; // false, so no keyPress event is generated
@@ -767,7 +767,7 @@ function keydown(e)
 
   if (hasNoKeyPress(e.keyCode) || e.ctrlKey || e.altKey || e.metaKey)
    {
-     loadXMLDoc('Key('+e.keyCode+','+showModifiers(e)+');');
+     sendCommand('Key('+e.keyCode+','+showModifiers(e)+');');
      if (e.preventDefault) e.preventDefault();
      if (e.stopPropagation) e.stopPropagation();
      return false; // false, so no keyPress event is generated
@@ -803,15 +803,15 @@ function mouseHandler(str,e)
 
     { scrollInProgress = false;
       prependSetViewedAreaCommand();
-      // there already is one at the start of the command queue (added by loadXMLDoc), but put the most recent one just in case
-      loadXMLDoc('Redraw;');
+      // there already is one at the start of the command queue (added by sendCommand), but put the most recent one just in case
+      sendCommand('Redraw;');
 
       return true;
     }
     else if (str == 'M')
     { if (commandQueue == "")
-      // there commandQueue is empty, so viewed area command will be prepended by loadXMLDoc
-      loadXMLDoc('Redraw;'); // during scroll, only update if no other commands in queue, to prevent flooding
+      // there commandQueue is empty, so viewed area command will be prepended by sendCommand
+      sendCommand('Redraw;'); // during scroll, only update if no other commands in queue, to prevent flooding
       return true;
     }
     // mouse down cannot occur
@@ -842,7 +842,7 @@ function mouseHandler(str,e)
 
     case 1: // button down, no drag
       if (str =='U')
-      { loadXMLDoc( (draggable ? mkMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y, e) : '') +
+      { sendCommand( (draggable ? mkMouseCommand('MouseDown', mouseDownPos.x, mouseDownPos.y, e) : '') +
                     // if there's a draggable, the mouse down was not yet sent
                     mkMouseCommand('MouseUp', posx, posy, e)   );
         draggable = null;
@@ -900,7 +900,7 @@ function mouseHandler(str,e)
 }
 
 function sendMouseCommand(mouseCommand, x, y, e)
-{ loadXMLDoc( mkMouseCommand(mouseCommand,x,y, e) );
+{ sendCommand( mkMouseCommand(mouseCommand,x,y, e) );
 }
 
 function mkMouseCommand(mouseCommand, x, y, e)
@@ -1253,7 +1253,7 @@ function touchEndHandler(event)
 }
 
 function touchBasedContextMenu()
-{   loadXMLDoc('ContextMenuRequest(('+touchStartX+','+touchStartY+'),('+touchStartX+','+touchStartY+'));');
+{   sendCommand('ContextMenuRequest(('+touchStartX+','+touchStartY+'),('+touchStartX+','+touchStartY+'));');
 
 }
 /*
@@ -1316,7 +1316,7 @@ function test()
 <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
 <td><button onclick="window.open('http://www.cs.uu.nl/wiki/bin/view/Proxima/ProximaUserManual');">User&nbsp;Manual</button>
 </td>
-<!-- <td><button onclick="loadXMLDoc('ClearMetrics;')">Reload&nbsp;Font&nbsp;Metrics</button></td> --><!-- with normal space button text gets line breaks -->
+<!-- <td><button onclick="sendCommand('ClearMetrics;')">Reload&nbsp;Font&nbsp;Metrics</button></td> --><!-- with normal space button text gets line breaks -->
 <!-- <td><button onclick="test();">Test</button></td> -->
 
 <td width="100%"></td>
