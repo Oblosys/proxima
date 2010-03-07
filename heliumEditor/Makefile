@@ -9,7 +9,7 @@ PROXIMABINDIR = $(PROXIMADIR)/bin
 UUSRCDIR = src/uuagc/src
 
 AGC  = uuagc
-GEN  = $(PROXIMABINDIR)/generate$(EXE)
+GEN  = proxima-generator
 
 EXE            = .exe
 MAIN           = proxima$(EXE)
@@ -27,13 +27,10 @@ PROXIMADIRS = $(PROXIMASRCDIR)
 
 # Generation 
 
-generator:
-	cd $(PROXIMASRCDIR); make generator
-
 generate: src/DocTypes_Generated.hs
 	
-src/DocTypes_Generated.hs : src/DocumentType.prx $(GEN)
-	cd $(PROXIMASRCDIR); make generator
+src/DocTypes_Generated.hs : src/DocumentType.prx
+	cd $(PROXIMASRCDIR)
 	$(GEN) src src/DocumentType.prx
 
 
