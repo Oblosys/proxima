@@ -499,7 +499,7 @@ handleCommands (settings,handler,renderingLvlVar,viewedAreaRef) menuR actualView
                                  "nrOfSessions='"++show nrOfSessions ++ "'>" ++ 
                                       (if null pendingQueries 
                                        then disableIncrementalityHTML ++ renderingHTML++focusRenderingHTML
-                                       else "") 
+                                       else "") -- TODO: this might not be right, now updates are ignored when there are queries.
                                    ++queryHTML++"</div>"            
     }
         
