@@ -24,10 +24,8 @@ PROXIMADIR = ../../proxima
 
 PROXIMABINDIR = $(PROXIMADIR)/bin
 PROXIMASRCDIR = $(PROXIMADIR)/src
-GENERATORSRCDIR = $(PROXIMADIR)/../generator/src
 
 AGC             = uuagc
-GEN	        = $(PROXIMABINDIR)/generate$(EXE)
 
 # Proxima directories
 
@@ -35,23 +33,11 @@ ARRANGEMENTDIR  = $(PROXIMADIR)/src/Arrangement
 LAYOUTDIR       = $(PROXIMADIR)/src/Layout
 
 
-GENERATORDIRS = $(GENERATORSRCDIR)
-
-
 # Rules:
 
 default: all
 
-all: generator arranger scanner
-
-# The Generator
-generator : $(GEN)
-
-# the always phony target is because we don't want to put all the generator sources here
-$(GEN): always
-	@echo ghc: compiling Generator
-	@$(HC) --make -o $(GEN) $(GENERATORSRCDIR)/Main.hs -i$(GENERATORDIRS) -fglasgow-exts
-
+all: arranger scanner
 
 # The arranger AG
 
