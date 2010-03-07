@@ -1,12 +1,13 @@
-name: Generator
+name: proxima-generator
 version: 0.1
 cabal-version: -any
 license: AllRightsReserved
 license-file: ""
 copyright:
 maintainer:
-build-depends: base -any, haskell98 -any, parsec ==2.0
+build-depends: base -any, haskell98 -any, parsec >=2.0, containers ==0.2.0.1
 stability:
+build-type: Simple
 homepage:
 package-url:
 synopsis:
@@ -18,7 +19,7 @@ data-files:
 extra-source-files:
 extra-tmp-files:
  
-executable: Generator
+executable: proxima-generator
 main-is: Main.hs
 buildable: True
 cc-options:
