@@ -567,7 +567,7 @@ function updateTree(update)
     //debugAdd('query is Metrics'+metrics+';');
     sendCommand('Metrics'+metrics+';');
 // TODO: doesn't this cause the first queried font to be sent
-    separately? Maybe we should put them in the queue manually.
+// separately? Maybe we should put them in the queue manually.
   }
   else if (op == 'setViewedArea')
   { var x = update.getAttribute('x');
