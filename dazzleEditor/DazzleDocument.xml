@@ -1,0 +1,2135 @@
+<RootDoc>
+  <Root>
+    <Graph>
+      <Dirty/>
+      <Vertex>
+        <String>Lapa-truncus</String>
+        <Circle/>
+        <Integer val="0"/>
+        <Integer val="622"/>
+        <Integer val="545"/>
+      </Vertex>
+      <Vertex>
+        <String>Metas-truncus</String>
+        <Circle/>
+        <Integer val="1"/>
+        <Integer val="602"/>
+        <Integer val="433"/>
+      </Vertex>
+      <Vertex>
+        <String>Lymfkl-metas</String>
+        <Circle/>
+        <Integer val="2"/>
+        <Integer val="583"/>
+        <Integer val="321"/>
+      </Vertex>
+      <Vertex>
+        <String>Doorgr-wandl</String>
+        <Circle/>
+        <Integer val="3"/>
+        <Integer val="602"/>
+        <Integer val="259"/>
+      </Vertex>
+      <Vertex>
+        <String>Lengte</String>
+        <Circle/>
+        <Integer val="4"/>
+        <Integer val="439"/>
+        <Integer val="610"/>
+      </Vertex>
+      <Vertex>
+        <String>Gastro-lengte</String>
+        <Circle/>
+        <Integer val="5"/>
+        <Integer val="780"/>
+        <Integer val="178"/>
+      </Vertex>
+      <Vertex>
+        <String>Passage</String>
+        <Circle/>
+        <Integer val="6"/>
+        <Integer val="523"/>
+        <Integer val="127"/>
+      </Vertex>
+      <Vertex>
+        <String>Circumf</String>
+        <Circle/>
+        <Integer val="7"/>
+        <Integer val="306"/>
+        <Integer val="580"/>
+      </Vertex>
+      <Vertex>
+        <String>Gastro-circumf</String>
+        <Circle/>
+        <Integer val="8"/>
+        <Integer val="789"/>
+        <Integer val="114"/>
+      </Vertex>
+      <Vertex>
+        <String>Vorm</String>
+        <Circle/>
+        <Integer val="9"/>
+        <Integer val="391"/>
+        <Integer val="59"/>
+      </Vertex>
+      <Vertex>
+        <String>Gastro-vorm</String>
+        <Circle/>
+        <Integer val="10"/>
+        <Integer val="406"/>
+        <Integer val="188"/>
+      </Vertex>
+      <Vertex>
+        <String>Necrose</String>
+        <Circle/>
+        <Integer val="11"/>
+        <Integer val="298"/>
+        <Integer val="310"/>
+      </Vertex>
+      <Vertex>
+        <String>Gastro-necrose</String>
+        <Circle/>
+        <Integer val="12"/>
+        <Integer val="329"/>
+        <Integer val="410"/>
+      </Vertex>
+      <Vertex>
+        <String>Fistel</String>
+        <Circle/>
+        <Integer val="13"/>
+        <Integer val="226"/>
+        <Integer val="378"/>
+      </Vertex>
+      <Vertex>
+        <String>Doorgr-org</String>
+        <Circle/>
+        <Integer val="14"/>
+        <Integer val="208"/>
+        <Integer val="283"/>
+      </Vertex>
+      <Vertex>
+        <String>Lokatie</String>
+        <Circle/>
+        <Integer val="15"/>
+        <Integer val="205"/>
+        <Integer val="59"/>
+      </Vertex>
+      <Vertex>
+        <String>Gastro-lokatie</String>
+        <Circle/>
+        <Integer val="16"/>
+        <Integer val="317"/>
+        <Integer val="107"/>
+      </Vertex>
+      <Vertex>
+        <String>Metas-hals</String>
+        <Circle/>
+        <Integer val="17"/>
+        <Integer val="415"/>
+        <Integer val="372"/>
+      </Vertex>
+      <Vertex>
+        <String>Lich-ondz-hals</String>
+        <Circle/>
+        <Integer val="18"/>
+        <Integer val="356"/>
+        <Integer val="463"/>
+      </Vertex>
+      <Vertex>
+        <String>Echo-hals</String>
+        <Circle/>
+        <Integer val="19"/>
+        <Integer val="445"/>
+        <Integer val="422"/>
+      </Vertex>
+      <Vertex>
+        <String>Type</String>
+        <Circle/>
+        <Integer val="20"/>
+        <Integer val="123"/>
+        <Integer val="111"/>
+      </Vertex>
+      <Vertex>
+        <String>Biopten</String>
+        <Circle/>
+        <Integer val="21"/>
+        <Integer val="56"/>
+        <Integer val="155"/>
+      </Vertex>
+      <Vertex>
+        <String>Lapa-middenrif</String>
+        <Circle/>
+        <Integer val="22"/>
+        <Integer val="88"/>
+        <Integer val="358"/>
+      </Vertex>
+      <Vertex>
+        <String>CT-organen</String>
+        <Circle/>
+        <Integer val="23"/>
+        <Integer val="70"/>
+        <Integer val="303"/>
+      </Vertex>
+      <Vertex>
+        <String>Bronchoscopie</String>
+        <Circle/>
+        <Integer val="24"/>
+        <Integer val="142"/>
+        <Integer val="404"/>
+      </Vertex>
+      <Vertex>
+        <String>Echo-endo-mediast</String>
+        <Circle/>
+        <Integer val="25"/>
+        <Integer val="82"/>
+        <Integer val="233"/>
+      </Vertex>
+      <Vertex>
+        <String>Slik-fistel</String>
+        <Circle/>
+        <Integer val="26"/>
+        <Integer val="218"/>
+        <Integer val="453"/>
+      </Vertex>
+      <Vertex>
+        <String>Echo-endo-truncus</String>
+        <Circle/>
+        <Integer val="27"/>
+        <Integer val="543"/>
+        <Integer val="585"/>
+      </Vertex>
+      <Vertex>
+        <String>Echo-endo-loco</String>
+        <Circle/>
+        <Integer val="28"/>
+        <Integer val="479"/>
+        <Integer val="524"/>
+      </Vertex>
+      <Vertex>
+        <String>Metas-loco</String>
+        <Circle/>
+        <Integer val="29"/>
+        <Integer val="455"/>
+        <Integer val="463"/>
+      </Vertex>
+      <Vertex>
+        <String>CT-loco</String>
+        <Circle/>
+        <Integer val="30"/>
+        <Integer val="380"/>
+        <Integer val="516"/>
+      </Vertex>
+      <Vertex>
+        <String>Echo-endo-wandl</String>
+        <Circle/>
+        <Integer val="31"/>
+        <Integer val="769"/>
+        <Integer val="290"/>
+      </Vertex>
+      <Vertex>
+        <String>Gewichtsverlies</String>
+        <Circle/>
+        <Integer val="32"/>
+        <Integer val="767"/>
+        <Integer val="229"/>
+      </Vertex>
+      <Vertex>
+        <String>Stagering</String>
+        <Circle/>
+        <Integer val="33"/>
+        <Integer val="668"/>
+        <Integer val="367"/>
+      </Vertex>
+      <Vertex>
+        <String>Hema-metas</String>
+        <Circle/>
+        <Integer val="34"/>
+        <Integer val="789"/>
+        <Integer val="361"/>
+      </Vertex>
+      <Vertex>
+        <String>Metas-lever</String>
+        <Circle/>
+        <Integer val="35"/>
+        <Integer val="720"/>
+        <Integer val="422"/>
+      </Vertex>
+      <Vertex>
+        <String>Lapa-lever</String>
+        <Circle/>
+        <Integer val="36"/>
+        <Integer val="700"/>
+        <Integer val="473"/>
+      </Vertex>
+      <Vertex>
+        <String>CT-lever</String>
+        <Circle/>
+        <Integer val="37"/>
+        <Integer val="780"/>
+        <Integer val="514"/>
+      </Vertex>
+      <Vertex>
+        <String>Metas-longen</String>
+        <Circle/>
+        <Integer val="38"/>
+        <Integer val="863"/>
+        <Integer val="421"/>
+      </Vertex>
+      <Vertex>
+        <String>X-longen</String>
+        <Circle/>
+        <Integer val="39"/>
+        <Integer val="819"/>
+        <Integer val="473"/>
+      </Vertex>
+      <Vertex>
+        <String>CT-longen</String>
+        <Circle/>
+        <Integer val="40"/>
+        <Integer val="888"/>
+        <Integer val="514"/>
+      </Vertex>
+      <Vertex>
+        <String>CT-truncus</String>
+        <Circle/>
+        <Integer val="41"/>
+        <Integer val="681"/>
+        <Integer val="514"/>
+      </Vertex>
+      <Edge>
+        <Integer val="1"/>
+        <Integer val="0"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="5"/>
+      </Edge>
+      <Edge>
+        <Integer val="4"/>
+        <Integer val="5"/>
+      </Edge>
+      <Edge>
+        <Integer val="9"/>
+        <Integer val="6"/>
+      </Edge>
+      <Edge>
+        <Integer val="7"/>
+        <Integer val="6"/>
+      </Edge>
+      <Edge>
+        <Integer val="4"/>
+        <Integer val="6"/>
+      </Edge>
+      <Edge>
+        <Integer val="7"/>
+        <Integer val="8"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="8"/>
+      </Edge>
+      <Edge>
+        <Integer val="9"/>
+        <Integer val="10"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="10"/>
+      </Edge>
+      <Edge>
+        <Integer val="11"/>
+        <Integer val="12"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="12"/>
+      </Edge>
+      <Edge>
+        <Integer val="15"/>
+        <Integer val="16"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="16"/>
+      </Edge>
+      <Edge>
+        <Integer val="17"/>
+        <Integer val="18"/>
+      </Edge>
+      <Edge>
+        <Integer val="17"/>
+        <Integer val="19"/>
+      </Edge>
+      <Edge>
+        <Integer val="15"/>
+        <Integer val="20"/>
+      </Edge>
+      <Edge>
+        <Integer val="20"/>
+        <Integer val="21"/>
+      </Edge>
+      <Edge>
+        <Integer val="14"/>
+        <Integer val="22"/>
+      </Edge>
+      <Edge>
+        <Integer val="14"/>
+        <Integer val="23"/>
+      </Edge>
+      <Edge>
+        <Integer val="14"/>
+        <Integer val="24"/>
+      </Edge>
+      <Edge>
+        <Integer val="14"/>
+        <Integer val="25"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="25"/>
+      </Edge>
+      <Edge>
+        <Integer val="13"/>
+        <Integer val="26"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="26"/>
+      </Edge>
+      <Edge>
+        <Integer val="1"/>
+        <Integer val="27"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="27"/>
+      </Edge>
+      <Edge>
+        <Integer val="29"/>
+        <Integer val="28"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="28"/>
+      </Edge>
+      <Edge>
+        <Integer val="29"/>
+        <Integer val="30"/>
+      </Edge>
+      <Edge>
+        <Integer val="3"/>
+        <Integer val="31"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="31"/>
+      </Edge>
+      <Edge>
+        <Integer val="6"/>
+        <Integer val="32"/>
+      </Edge>
+      <Edge>
+        <Integer val="2"/>
+        <Integer val="33"/>
+      </Edge>
+      <Edge>
+        <Integer val="3"/>
+        <Integer val="33"/>
+      </Edge>
+      <Edge>
+        <Integer val="34"/>
+        <Integer val="33"/>
+      </Edge>
+      <Edge>
+        <Integer val="35"/>
+        <Integer val="36"/>
+      </Edge>
+      <Edge>
+        <Integer val="35"/>
+        <Integer val="37"/>
+      </Edge>
+      <Edge>
+        <Integer val="38"/>
+        <Integer val="39"/>
+      </Edge>
+      <Edge>
+        <Integer val="38"/>
+        <Integer val="40"/>
+      </Edge>
+      <Edge>
+        <Integer val="1"/>
+        <Integer val="41"/>
+      </Edge>
+      <Edge>
+        <Integer val="3"/>
+        <Integer val="34"/>
+      </Edge>
+      <Edge>
+        <Integer val="34"/>
+        <Integer val="35"/>
+      </Edge>
+      <Edge>
+        <Integer val="34"/>
+        <Integer val="38"/>
+      </Edge>
+      <Edge>
+        <Integer val="2"/>
+        <Integer val="29"/>
+      </Edge>
+      <Edge>
+        <Integer val="15"/>
+        <Integer val="1"/>
+      </Edge>
+      <Edge>
+        <Integer val="2"/>
+        <Integer val="1"/>
+      </Edge>
+      <Edge>
+        <Integer val="15"/>
+        <Integer val="17"/>
+      </Edge>
+      <Edge>
+        <Integer val="2"/>
+        <Integer val="17"/>
+      </Edge>
+      <Edge>
+        <Integer val="3"/>
+        <Integer val="2"/>
+      </Edge>
+      <Edge>
+        <Integer val="4"/>
+        <Integer val="7"/>
+      </Edge>
+      <Edge>
+        <Integer val="9"/>
+        <Integer val="3"/>
+      </Edge>
+      <Edge>
+        <Integer val="4"/>
+        <Integer val="3"/>
+      </Edge>
+      <Edge>
+        <Integer val="3"/>
+        <Integer val="11"/>
+      </Edge>
+      <Edge>
+        <Integer val="9"/>
+        <Integer val="11"/>
+      </Edge>
+      <Edge>
+        <Integer val="14"/>
+        <Integer val="13"/>
+      </Edge>
+      <Edge>
+        <Integer val="11"/>
+        <Integer val="13"/>
+      </Edge>
+      <Edge>
+        <Integer val="15"/>
+        <Integer val="14"/>
+      </Edge>
+      <Edge>
+        <Integer val="3"/>
+        <Integer val="14"/>
+      </Edge>
+    </Graph>
+    <String>Het oesofagus netwerk.</String>
+    <String>oeso</String>
+    <Probtable>
+      <Integer val="28"/>
+      <Value>
+        <String>ja</String>
+      </Value>
+      <Value>
+        <String>nee</String>
+      </Value>
+      <Value>
+        <String>niet-gedetermineerd</String>
+      </Value>
+      <Table>
+        <Integer val="29"/>
+        <Integer val="6"/>
+        <Axis>
+          <Value>
+            <String>ja</String>
+          </Value>
+          <Value>
+            <String>nee</String>
+          </Value>
+          <Value>
+            <String>niet-gedetermineerd</String>
+          </Value>
+        </Axis>
+        <Axis>
+          <Value>
+            <String>moeite</String>
+          </Value>
+          <Value>
+            <String>gepureerd</String>
+          </Value>
+          <Value>
+            <String>vloeibaar</String>
+          </Value>
+          <Value>
+            <String>geen</String>
+          </Value>
+        </Axis>
+        <Axis>
+          <Value>
+            <String>ja</String>
+          </Value>
+          <Value>
+            <String>nee</String>
+          </Value>
+        </Axis>
+        <Probability>
+          <String>0.65</String>
+        </Probability>
+        <Probability>
+          <String>0.11</String>
+        </Probability>
+        <Probability>
+          <String>0.65</String>
+        </Probability>
+        <Probability>
+          <String>0.11</String>
+        </Probability>
+        <Probability>
+          <String>0.4</String>
+        </Probability>
+        <Probability>
+          <String>0.05</String>
+        </Probability>
+        <Probability>
+          <String>0.0</String>
+        </Probability>
+        <Probability>
+          <String>0.0</String>
+        </Probability>
+        <Probability>
+          <String>0.32</String>
+        </Probability>
+        <Probability>
+          <String>0.86</String>
+        </Probability>
+        <Probability>
+          <String>0.32</String>
+        </Probability>
+        <Probability>
+          <String>0.86</String>
+        </Probability>
+        <Probability>
+          <String>0.45</String>
+        </Probability>
+        <Probability>
+          <String>0.8</String>
+        </Probability>
+        <Probability>
+          <String>0.0</String>
+        </Probability>
+        <Probability>
+          <String>0.0</String>
+        </Probability>
+        <Probability>
+          <String>0.03</String>
+        </Probability>
+        <Probability>
+          <String>0.003</String>
+        </Probability>
+        <Probability>
+          <String>0.03</String>
+        </Probability>
+        <Probability>
+          <String>0.03</String>
+        </Probability>
+        <Probability>
+          <String>0.15</String>
+        </Probability>
+        <Probability>
+          <String>0.15</String>
+        </Probability>
+        <Probability>
+          <String>1.0</String>
+        </Probability>
+        <Probability>
+          <String>1.0x</String>
+        </Probability>
+      </Table>
+    </Probtable>
+    <Probtable>
+      <Integer val="6"/>
+      <Value>
+        <String>ja</String>
+      </Value>
+      <Value>
+        <String>nee</String>
+      </Value>
+      <Table>
+        <Integer val="9"/>
+        <Integer val="7"/>
+        <Integer val="4"/>
+        <Axis>
+          <Value>
+            <String>ja</String>
+          </Value>
+          <Value>
+            <String>nee</String>
+          </Value>
+        </Axis>
+        <Axis>
+          <Value>
+            <String>Err</String>
+          </Value>
+        </Axis>
+        <Axis>
+          <Value>
+            <String>Err</String>
+          </Value>
+        </Axis>
+        <Axis>
+          <Value>
+            <String>Err</String>
+          </Value>
+        </Axis>
+        <Probability>
+          <String>0</String>
+        </Probability>
+        <Probability>
+          <String>0</String>
+        </Probability>
+      </Table>
+    </Probtable>
+    <Probtable>
+      <Integer val="29"/>
+      <Value>
+        <String>moeite</String>
+      </Value>
+      <Value>
+        <String>gepureerd</String>
+      </Value>
+      <Value>
+        <String>vloeibaar</String>
+      </Value>
+      <Value>
+        <String>geen</String>
+      </Value>
+      <Table>
+        <Integer val="2"/>
+        <Axis>
+          <Value>
+            <String>moeite</String>
+          </Value>
+          <Value>
+            <String>gepureerd</String>
+          </Value>
+          <Value>
+            <String>vloeibaar</String>
+          </Value>
+          <Value>
+            <String>geen</String>
+          </Value>
+        </Axis>
+        <Axis>
+          <Value>
+            <String>Err</String>
+          </Value>
+        </Axis>
+        <Probability>
+          <String>0</String>
+        </Probability>
+        <Probability>
+          <String>0</String>
+        </Probability>
+        <Probability>
+          <String>0</String>
+        </Probability>
+        <Probability>
+          <String>0</String>
+        </Probability>
+      </Table>
+    </Probtable>
+    <String>Een beslisnetwerk voor oesofagus carcinomen</String>
+    <Section>
+      <String>Structuur van het netwerk</String>
+      <Paragraph>
+      </Paragraph>
+      <Subsection>
+        <String>Doorgroei en metastase</String>
+        <Paragraph>
+        </Paragraph>
+        <Subsubsection>
+          <String>Doorgroei</String>
+          <SubgraphPara>
+            <Subgraph>
+              <Clean/>
+              <Vertex>
+                <String>Circumf</String>
+                <Circle/>
+                <Integer val="7"/>
+                <Integer val="267"/>
+                <Integer val="49"/>
+              </Vertex>
+              <Vertex>
+                <String>Lokatie</String>
+                <Circle/>
+                <Integer val="15"/>
+                <Integer val="350"/>
+                <Integer val="81"/>
+              </Vertex>
+              <Vertex>
+                <String>Fistel</String>
+                <Circle/>
+                <Integer val="13"/>
+                <Integer val="158"/>
+                <Integer val="145"/>
+              </Vertex>
+              <Vertex>
+                <String>Doorgr-org</String>
+                <Circle/>
+                <Integer val="14"/>
+                <Integer val="265"/>
+                <Integer val="112"/>
+              </Vertex>
+              <Vertex>
+                <String>Necrose</String>
+                <Circle/>
+                <Integer val="11"/>
+                <Integer val="45"/>
+                <Integer val="117"/>
+              </Vertex>
+              <Vertex>
+                <String>Doorgr-wandl</String>
+                <Circle/>
+                <Integer val="3"/>
+                <Integer val="157"/>
+                <Integer val="79"/>
+              </Vertex>
+              <Vertex>
+                <String>Vorm</String>
+                <Circle/>
+                <Integer val="9"/>
+                <Integer val="45"/>
+                <Integer val="45"/>
+              </Vertex>
+              <Vertex>
+                <String>Lengte</String>
+                <Circle/>
+                <Integer val="4"/>
+                <Integer val="157"/>
+                <Integer val="20"/>
+              </Vertex>
+              <Edge>
+                <Integer val="4"/>
+                <Integer val="7"/>
+              </Edge>
+              <Edge>
+                <Integer val="9"/>
+                <Integer val="3"/>
+              </Edge>
+              <Edge>
+                <Integer val="4"/>
+                <Integer val="3"/>
+              </Edge>
+              <Edge>
+                <Integer val="3"/>
+                <Integer val="11"/>
+              </Edge>
+              <Edge>
+                <Integer val="9"/>
+                <Integer val="11"/>
+              </Edge>
+              <Edge>
+                <Integer val="14"/>
+                <Integer val="13"/>
+              </Edge>
+              <Edge>
+                <Integer val="11"/>
+                <Integer val="13"/>
+              </Edge>
+              <Edge>
+                <Integer val="15"/>
+                <Integer val="14"/>
+              </Edge>
+              <Edge>
+                <Integer val="3"/>
+                <Integer val="14"/>
+              </Edge>
+            </Subgraph>
+            <String>De doorgroei.</String>
+            <String>doorgroei</String>
+          </SubgraphPara>
+          <Paragraph>
+            <Label>
+              <String>sectieDoorgroei</String>
+            </Label>
+          </Paragraph>
+          <Paragraph>
+            <Word>
+              <String>Door</String>
+            </Word>
+            <Word>
+              <String>deze</String>
+            </Word>
+            <Word>
+              <String>open</String>
+            </Word>
+            <Word>
+              <String>verbinding</String>
+            </Word>
+            <Word>
+              <String>kan</String>
+            </Word>
+            <Word>
+              <String>voedsel</String>
+            </Word>
+            <Word>
+              <String>direct</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>luchtwegen</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>patient</String>
+            </Word>
+            <Word>
+              <String>komen,</String>
+            </Word>
+            <Word>
+              <String>hetgeen</String>
+            </Word>
+            <Word>
+              <String>aanleiding</String>
+            </Word>
+            <Word>
+              <String>geeft</String>
+            </Word>
+            <Word>
+              <String>tot</String>
+            </Word>
+            <Word>
+              <String>veelvuldig</String>
+            </Word>
+            <Word>
+              <String>verslikken</String>
+            </Word>
+            <Word>
+              <String>en</String>
+            </Word>
+            <Word>
+              <String>hoesten.</String>
+            </Word>
+            <Word>
+              <String>Ook</String>
+            </Word>
+            <Word>
+              <String>bij</String>
+            </Word>
+            <Word>
+              <String>ernstige</String>
+            </Word>
+            <Word>
+              <String>doorgroei</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>carcinoom</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>andere</String>
+            </Word>
+            <Word>
+              <String>organen</String>
+            </Word>
+            <Word>
+              <String>dan</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>trachea</String>
+            </Word>
+            <Word>
+              <String>en</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>bronchien</String>
+            </Word>
+            <Word>
+              <String>kan</String>
+            </Word>
+            <Word>
+              <String>als</String>
+            </Word>
+            <Word>
+              <String>gevolg</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>weefselverval</String>
+            </Word>
+            <Word>
+              <String>een</String>
+            </Word>
+            <Word>
+              <String>fistel</String>
+            </Word>
+            <Word>
+              <String>ontstaan.</String>
+            </Word>
+            <Word>
+              <String>Een</String>
+            </Word>
+            <Word>
+              <String>dergelijk</String>
+            </Word>
+            <Word>
+              <String>fistel</String>
+            </Word>
+            <Word>
+              <String>geeft</String>
+            </Word>
+            <Word>
+              <String>geen</String>
+            </Word>
+            <Word>
+              <String>aanleiding</String>
+            </Word>
+            <Word>
+              <String>tot</String>
+            </Word>
+            <Word>
+              <String>karakteristieke</String>
+            </Word>
+            <Word>
+              <String>klachten.</String>
+            </Word>
+          </Paragraph>
+          <Paragraph>
+            <Word>
+              <String>Bovenstaande</String>
+            </Word>
+            <Word>
+              <String>informatie</String>
+            </Word>
+            <Word>
+              <String>met</String>
+            </Word>
+            <Word>
+              <String>betrekking</String>
+            </Word>
+            <Word>
+              <String>tot</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>doorgroei</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>een</String>
+            </Word>
+            <Word>
+              <String>oesofagus</String>
+            </Word>
+            <Word>
+              <String>carcinoom</String>
+            </Word>
+            <Word>
+              <String>is</String>
+            </Word>
+            <Word>
+              <String>weergegeven</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>figuur</String>
+            </Word>
+            <LabelRef>
+              <String>doorgroei</String>
+            </LabelRef>
+            <Word>
+              <String>.</String>
+            </Word>
+            <Word>
+              <String>Opgemerkt</String>
+            </Word>
+            <Word>
+              <String>zij,</String>
+            </Word>
+            <Word>
+              <String>dat</String>
+            </Word>
+            <Word>
+              <String>met</String>
+            </Word>
+            <Word>
+              <String>een</String>
+            </Word>
+            <Word>
+              <String>fistel</String>
+            </Word>
+            <Word>
+              <String>uitsluitend</String>
+            </Word>
+            <Word>
+              <String>een</String>
+            </Word>
+            <Word>
+              <String>fistel</String>
+            </Word>
+            <Word>
+              <String>naar</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>trachea</String>
+            </Word>
+            <Word>
+              <String>en</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>bronchien</String>
+            </Word>
+            <Word>
+              <String>wordt</String>
+            </Word>
+            <Word>
+              <String>bedoeld.</String>
+            </Word>
+          </Paragraph>
+        </Subsubsection>
+        <Subsubsection>
+          <String>Metastase</String>
+          <SubgraphPara>
+            <Subgraph>
+              <Clean/>
+              <Vertex>
+                <String>Hema-metas</String>
+                <Circle/>
+                <Integer val="34"/>
+                <Integer val="300"/>
+                <Integer val="49"/>
+              </Vertex>
+              <Vertex>
+                <String>Metas-longen</String>
+                <Circle/>
+                <Integer val="38"/>
+                <Integer val="256"/>
+                <Integer val="134"/>
+              </Vertex>
+              <Vertex>
+                <String>Metas-lever</String>
+                <Circle/>
+                <Integer val="35"/>
+                <Integer val="341"/>
+                <Integer val="134"/>
+              </Vertex>
+              <Vertex>
+                <String>Metas-loco</String>
+                <Circle/>
+                <Integer val="29"/>
+                <Integer val="188"/>
+                <Integer val="134"/>
+              </Vertex>
+              <Vertex>
+                <String>Metas-truncus</String>
+                <Circle/>
+                <Integer val="1"/>
+                <Integer val="108"/>
+                <Integer val="134"/>
+              </Vertex>
+              <Vertex>
+                <String>Lokatie</String>
+                <Circle/>
+                <Integer val="15"/>
+                <Integer val="31"/>
+                <Integer val="48"/>
+              </Vertex>
+              <Vertex>
+                <String>Metas-hals</String>
+                <Circle/>
+                <Integer val="17"/>
+                <Integer val="31"/>
+                <Integer val="134"/>
+              </Vertex>
+              <Vertex>
+                <String>Lymfkl-metas</String>
+                <Circle/>
+                <Integer val="2"/>
+                <Integer val="141"/>
+                <Integer val="47"/>
+              </Vertex>
+              <Vertex>
+                <String>Doorgr-wandl</String>
+                <Circle/>
+                <Integer val="3"/>
+                <Integer val="208"/>
+                <Integer val="21"/>
+              </Vertex>
+              <Edge>
+                <Integer val="3"/>
+                <Integer val="34"/>
+              </Edge>
+              <Edge>
+                <Integer val="34"/>
+                <Integer val="35"/>
+              </Edge>
+              <Edge>
+                <Integer val="34"/>
+                <Integer val="38"/>
+              </Edge>
+              <Edge>
+                <Integer val="2"/>
+                <Integer val="29"/>
+              </Edge>
+              <Edge>
+                <Integer val="15"/>
+                <Integer val="1"/>
+              </Edge>
+              <Edge>
+                <Integer val="2"/>
+                <Integer val="1"/>
+              </Edge>
+              <Edge>
+                <Integer val="15"/>
+                <Integer val="17"/>
+              </Edge>
+              <Edge>
+                <Integer val="2"/>
+                <Integer val="17"/>
+              </Edge>
+              <Edge>
+                <Integer val="3"/>
+                <Integer val="2"/>
+              </Edge>
+            </Subgraph>
+            <String>Metastase</String>
+            <String>metastase</String>
+          </SubgraphPara>
+          <Paragraph>
+            <Word>
+              <String>Als</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>oesofagus</String>
+            </Word>
+            <Word>
+              <String>carcinoom</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>een</String>
+            </Word>
+            <Word>
+              <String>patient</String>
+            </Word>
+            <Word>
+              <String>is</String>
+            </Word>
+            <Word>
+              <String>doorgegroeid</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>een</String>
+            </Word>
+            <Word>
+              <String>lymfvat,</String>
+            </Word>
+            <Word>
+              <String>kunnen</String>
+            </Word>
+            <Word>
+              <String>cellen</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>carcinoom</String>
+            </Word>
+            <Word>
+              <String>zich</String>
+            </Word>
+            <Word>
+              <String>via</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>baan</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>betreffende</String>
+            </Word>
+            <Word>
+              <String>vat</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>lichaam</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>patient</String>
+            </Word>
+            <Word>
+              <String>verplaatsen</String>
+            </Word>
+            <Word>
+              <String>en</String>
+            </Word>
+            <Word>
+              <String>zo</String>
+            </Word>
+            <Word>
+              <String>metastase</String>
+            </Word>
+            <Word>
+              <String>veroorzaken.</String>
+            </Word>
+            <Word>
+              <String>De</String>
+            </Word>
+            <Word>
+              <String>resulterende</String>
+            </Word>
+            <Word>
+              <String>metastasen</String>
+            </Word>
+            <Word>
+              <String>worden</String>
+            </Word>
+            <Word>
+              <String>lymfklier</String>
+            </Word>
+            <Word>
+              <String>metastasen</String>
+            </Word>
+            <NodeRef>
+              <NodeName>
+                <String>Lymfkl-metas</String>
+              </NodeName>
+            </NodeRef>
+            <Word>
+              <String>genoemd</String>
+            </Word>
+            <Word>
+              <String>.</String>
+            </Word>
+            <Word>
+              <String>Lymfklier</String>
+            </Word>
+            <Word>
+              <String>metastasen</String>
+            </Word>
+            <Word>
+              <String>kunnen</String>
+            </Word>
+            <Word>
+              <String>op</String>
+            </Word>
+            <Word>
+              <String>afstand</String>
+            </Word>
+            <Word>
+              <String>zijn,</String>
+            </Word>
+            <Word>
+              <String>regionaal</String>
+            </Word>
+            <Word>
+              <String>of</String>
+            </Word>
+            <Word>
+              <String>loco-regionaal,</String>
+            </Word>
+            <Word>
+              <String>genoemd.</String>
+            </Word>
+            <Word>
+              <String>Lymfklier</String>
+            </Word>
+            <Word>
+              <String>metastasen</String>
+            </Word>
+            <Word>
+              <String>kunnen</String>
+            </Word>
+            <Word>
+              <String>op</String>
+            </Word>
+            <Word>
+              <String>afstand</String>
+            </Word>
+            <Word>
+              <String>zijn,</String>
+            </Word>
+            <Word>
+              <String>regionaal</String>
+            </Word>
+            <Word>
+              <String>of</String>
+            </Word>
+            <Word>
+              <String>loco-regionaal,</String>
+            </Word>
+            <Word>
+              <String>dat</String>
+            </Word>
+            <Word>
+              <String>wil</String>
+            </Word>
+            <Word>
+              <String>zeggen,</String>
+            </Word>
+            <Word>
+              <String>beperkt</String>
+            </Word>
+            <Word>
+              <String>tot</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>dichtst</String>
+            </Word>
+            <Word>
+              <String>bij</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>carcinoom</String>
+            </Word>
+            <Word>
+              <String>gelegen</String>
+            </Word>
+            <Word>
+              <String>lymfklieren.</String>
+            </Word>
+            <Word>
+              <String>Metastasen</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>lymfklieren</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>hals</String>
+            </Word>
+            <Word>
+              <String>en</String>
+            </Word>
+            <Word>
+              <String>metastasen</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>lymfklieren</String>
+            </Word>
+            <Word>
+              <String>bij</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>truncus</String>
+            </Word>
+            <Word>
+              <String>coeliacus</String>
+            </Word>
+            <Word>
+              <String>worden</String>
+            </Word>
+            <Word>
+              <String>als</String>
+            </Word>
+            <Word>
+              <String>regionaal</String>
+            </Word>
+            <Word>
+              <String>of</String>
+            </Word>
+            <Word>
+              <String>als</String>
+            </Word>
+            <Word>
+              <String>op</String>
+            </Word>
+            <Word>
+              <String>afstand</String>
+            </Word>
+            <Word>
+              <String>gekenmerkt,</String>
+            </Word>
+            <Word>
+              <String>afhankelijk</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>lokatie</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>carcinoom.</String>
+            </Word>
+            <Word>
+              <String>Behalve</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>een</String>
+            </Word>
+            <Word>
+              <String>lymfvat</String>
+            </Word>
+            <Word>
+              <String>kan</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>oesofagus</String>
+            </Word>
+            <Word>
+              <String>carcinoom</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>een</String>
+            </Word>
+            <Word>
+              <String>patient</String>
+            </Word>
+            <Word>
+              <String>ook</String>
+            </Word>
+            <Word>
+              <String>doorgroeien</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>een</String>
+            </Word>
+            <Word>
+              <String>bloedvat</String>
+            </Word>
+            <NodeRef>
+              <NodeName>
+                <String>Doorgr-wandl</String>
+              </NodeName>
+            </NodeRef>
+            <Word>
+              <String>(zie</String>
+            </Word>
+            <Word>
+              <String>sectie</String>
+            </Word>
+            <LabelRef>
+              <String>sectieDoorgroei</String>
+            </LabelRef>
+            <Word>
+              <String>).</String>
+            </Word>
+            <Word>
+              <String>Als</String>
+            </Word>
+            <Word>
+              <String>gevolg</String>
+            </Word>
+            <Word>
+              <String>hiervan</String>
+            </Word>
+            <Word>
+              <String>kunnen</String>
+            </Word>
+            <Word>
+              <String>cellen</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>carcinoom</String>
+            </Word>
+            <Word>
+              <String>zich</String>
+            </Word>
+            <Word>
+              <String>via</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>bloedbaan</String>
+            </Word>
+            <Word>
+              <String>verplaatsen</String>
+            </Word>
+            <Word>
+              <String>en</String>
+            </Word>
+            <Word>
+              <String>zo</String>
+            </Word>
+            <Word>
+              <String>hematogene</String>
+            </Word>
+            <Word>
+              <String>metastasen</String>
+            </Word>
+            <NodeRef>
+              <NodeName>
+                <String>Hema-metas</String>
+              </NodeName>
+            </NodeRef>
+            <Word>
+              <String>veroorzaken</String>
+            </Word>
+            <Word>
+              <String>.</String>
+            </Word>
+            <Word>
+              <String>Hematogene</String>
+            </Word>
+            <Word>
+              <String>metastasen</String>
+            </Word>
+            <Word>
+              <String>zijn</String>
+            </Word>
+            <Word>
+              <String>altijd</String>
+            </Word>
+            <Word>
+              <String>op</String>
+            </Word>
+            <Word>
+              <String>afstand</String>
+            </Word>
+            <Word>
+              <String>en</String>
+            </Word>
+            <Word>
+              <String>kunnen</String>
+            </Word>
+            <Word>
+              <String>zich</String>
+            </Word>
+            <Word>
+              <String>bijvoorbeeld</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>longen</String>
+            </Word>
+            <NodeRef>
+              <NodeName>
+                <String>Metas-longen</String>
+              </NodeName>
+            </NodeRef>
+            <Word>
+              <String>en</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>lever</String>
+            </Word>
+            <NodeRef>
+              <NodeName>
+                <String>Metas-lever</String>
+              </NodeName>
+            </NodeRef>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>patient</String>
+            </Word>
+            <Word>
+              <String>bevinden.</String>
+            </Word>
+          </Paragraph>
+          <Paragraph>
+            <Word>
+              <String>De</String>
+            </Word>
+            <Word>
+              <String>bovenstaande</String>
+            </Word>
+            <Word>
+              <String>informatie</String>
+            </Word>
+            <Word>
+              <String>met</String>
+            </Word>
+            <Word>
+              <String>betrekking</String>
+            </Word>
+            <Word>
+              <String>tot</String>
+            </Word>
+            <Word>
+              <String>metastasering</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>het</String>
+            </Word>
+            <Word>
+              <String>oesofagus</String>
+            </Word>
+            <Word>
+              <String>carcinoom</String>
+            </Word>
+            <Word>
+              <String>is</String>
+            </Word>
+            <Word>
+              <String>weergegeven</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>Figuur</String>
+            </Word>
+            <LabelRef>
+              <String>metastase</String>
+            </LabelRef>
+            <Word>
+              <String>.</String>
+            </Word>
+            <Word>
+              <String>Opgemerkt</String>
+            </Word>
+            <Word>
+              <String>zij,</String>
+            </Word>
+            <Word>
+              <String>dat</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>metastasen</String>
+            </Word>
+            <Word>
+              <String>in</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>verscheidene</String>
+            </Word>
+            <Word>
+              <String>organen</String>
+            </Word>
+            <Word>
+              <String>apart</String>
+            </Word>
+            <Word>
+              <String>niet</String>
+            </Word>
+            <Word>
+              <String>van</String>
+            </Word>
+            <Word>
+              <String>belang</String>
+            </Word>
+            <Word>
+              <String>zijn</String>
+            </Word>
+            <Word>
+              <String>voor</String>
+            </Word>
+            <Word>
+              <String>de</String>
+            </Word>
+            <Word>
+              <String>therapie-keuze:</String>
+            </Word>
+            <Word>
+              <String>relevant</String>
+            </Word>
+            <Word>
+              <String>is</String>
+            </Word>
+            <Word>
+              <String>of</String>
+            </Word>
+            <Word>
+              <String>er</String>
+            </Word>
+            <Word>
+              <String>metastasen</String>
+            </Word>
+            <Word>
+              <String>(op</String>
+            </Word>
+            <Word>
+              <String>afstand)</String>
+            </Word>
+            <Word>
+              <String>zijn.</String>
+            </Word>
+          </Paragraph>
+        </Subsubsection>
+      </Subsection>
+    </Section>
+    <Section>
+      <String>Beschrijving van de variabelen</String>
+      <Paragraph>
+      </Paragraph>
+      <Subsection>
+        <String>Echo-endoscopie loco-regio</String>
+        <Paragraph>
+          <Word>
+            <String>De</String>
+          </Word>
+          <Word>
+            <String>variabele</String>
+          </Word>
+          <Word>
+            <String>modelleert</String>
+          </Word>
+          <Word>
+            <String>voor</String>
+          </Word>
+          <Word>
+            <String>een</String>
+          </Word>
+          <Word>
+            <String>patient</String>
+          </Word>
+          <Word>
+            <String>met</String>
+          </Word>
+          <Word>
+            <String>een</String>
+          </Word>
+          <Word>
+            <String>oesofagus</String>
+          </Word>
+          <Word>
+            <String>carcinoom</String>
+          </Word>
+          <Word>
+            <String>het</String>
+          </Word>
+          <Word>
+            <String>resultaat</String>
+          </Word>
+          <Word>
+            <String>van</String>
+          </Word>
+          <Word>
+            <String>een</String>
+          </Word>
+          <Word>
+            <String>echo-endoscopisch</String>
+          </Word>
+          <Word>
+            <String>onderzoek,</String>
+          </Word>
+          <Word>
+            <String>met</String>
+          </Word>
+          <Word>
+            <String>betrekking</String>
+          </Word>
+          <Word>
+            <String>tot</String>
+          </Word>
+          <Word>
+            <String>de</String>
+          </Word>
+          <Word>
+            <String>aanwezigheid</String>
+          </Word>
+          <Word>
+            <String>van</String>
+          </Word>
+          <Word>
+            <String>metastasen</String>
+          </Word>
+          <Word>
+            <String>van</String>
+          </Word>
+          <Word>
+            <String>het</String>
+          </Word>
+          <Word>
+            <String>carcinoom</String>
+          </Word>
+          <Word>
+            <String>in</String>
+          </Word>
+          <Word>
+            <String>de</String>
+          </Word>
+          <Word>
+            <String>loco-regionale</String>
+          </Word>
+          <Word>
+            <String>lymfklieren.</String>
+          </Word>
+        </Paragraph>
+        <Paragraph>
+        </Paragraph>
+        <ProbtablePara>
+          <Probtable>
+            <Integer val="28"/>
+            <Value>
+              <String>ja</String>
+            </Value>
+            <Value>
+              <String>nee</String>
+            </Value>
+            <Value>
+              <String>niet-gedetermineerd</String>
+            </Value>
+            <Table>
+              <Integer val="29"/>
+              <Integer val="6"/>
+              <Axis>
+                <Value>
+                  <String>ja</String>
+                </Value>
+                <Value>
+                  <String>nee</String>
+                </Value>
+                <Value>
+                  <String>niet-gedetermineerd</String>
+                </Value>
+              </Axis>
+              <Axis>
+                <Value>
+                  <String>moeite</String>
+                </Value>
+                <Value>
+                  <String>gepureerd</String>
+                </Value>
+                <Value>
+                  <String>vloeibaar</String>
+                </Value>
+                <Value>
+                  <String>geen</String>
+                </Value>
+              </Axis>
+              <Axis>
+                <Value>
+                  <String>ja</String>
+                </Value>
+                <Value>
+                  <String>nee</String>
+                </Value>
+              </Axis>
+              <Probability>
+                <String>0.65</String>
+              </Probability>
+              <Probability>
+                <String>0.11</String>
+              </Probability>
+              <Probability>
+                <String>0.65</String>
+              </Probability>
+              <Probability>
+                <String>0.11</String>
+              </Probability>
+              <Probability>
+                <String>0.4</String>
+              </Probability>
+              <Probability>
+                <String>0.05</String>
+              </Probability>
+              <Probability>
+                <String>0.0</String>
+              </Probability>
+              <Probability>
+                <String>0.0</String>
+              </Probability>
+              <Probability>
+                <String>0.32</String>
+              </Probability>
+              <Probability>
+                <String>0.86</String>
+              </Probability>
+              <Probability>
+                <String>0.32</String>
+              </Probability>
+              <Probability>
+                <String>0.86</String>
+              </Probability>
+              <Probability>
+                <String>0.45</String>
+              </Probability>
+              <Probability>
+                <String>0.8</String>
+              </Probability>
+              <Probability>
+                <String>0.0</String>
+              </Probability>
+              <Probability>
+                <String>0.0</String>
+              </Probability>
+              <Probability>
+                <String>0.03</String>
+              </Probability>
+              <Probability>
+                <String>0.003</String>
+              </Probability>
+              <Probability>
+                <String>0.03</String>
+              </Probability>
+              <Probability>
+                <String>0.03</String>
+              </Probability>
+              <Probability>
+                <String>0.15</String>
+              </Probability>
+              <Probability>
+                <String>0.15</String>
+              </Probability>
+              <Probability>
+                <String>1.0</String>
+              </Probability>
+              <Probability>
+                <String>1.0x</String>
+              </Probability>
+            </Table>
+          </Probtable>
+        </ProbtablePara>
+        <Paragraph>
+        </Paragraph>
+        <Paragraph>
+          <Word>
+            <String>Bla</String>
+          </Word>
+        </Paragraph>
+      </Subsection>
+    </Section>
+  </Root>
+</RootDoc>
