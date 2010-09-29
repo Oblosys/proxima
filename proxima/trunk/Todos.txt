@@ -1,0 +1,4 @@
+Maybe restore some things that were disabled before the FP dag demo in January 2010 (around revision 2578: 01/04/2010)
+
+Check why mac firewall slows down Proximaparse before drag	   
+switch parser and lexer in parsingWithParserLexer?				   do parse before arrows, and keep track when doc is parsedfonts are queried too often! Maybe replace file stuff with IORef andcheck the algorithm
