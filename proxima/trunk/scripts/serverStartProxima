@@ -1,6 +1,10 @@
 # script to be run on pooh, for starting a proxima editor in the appropriate directory
 # $1 is the name of the directory, $2 is the name of the executable
 
+# Note that Proxima does not generate an error when resource is busy.. (even when stderr is not redirected)
+
 echo starting /Users/martijn/svn/proxima/$1/dist/build/$2/$2
+killall $1
 cd /Users/martijn/svn/proxima/$1
-nohup dist/build/$2/$2  < /dev/null > output.txt 2>&1 &
+nohup dist/build/$2/$2  < /dev/null > output.txt &
+
