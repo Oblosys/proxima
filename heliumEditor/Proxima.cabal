@@ -26,31 +26,41 @@ extra-tmp-files:
 -- (except for the name, author, etc. fields)
 
 Executable HeliumEditor
-  build-depends: directory -any
+  build-depends: directory >=1.0 && <= 10.0.1.1
 
   hs-source-dirs: src 
 -- needs to be here, because otherwise the Main from the helium source dirs is used.
 
-  hs-source-dirs: src/helium/src/utils src/helium/src/parser src/helium/src/staticanalysis/miscellaneous src/helium/src/staticanalysis/inferencers src/helium/src/staticanalysis/directives src/helium/src/staticanalysis/staticchecks src/helium/src/staticanalysis/heuristics src/helium/src/staticanalysis/messages src/helium/src/syntax src/helium/src/codegeneration src/helium/src/main src/helium/src/modulesystem
-  hs-source-dirs: src/lvm/src/lib/common src/lvm/src/lib/common/ghc src/lvm/src/lib/lvm src/lvm/src/lib/asm src/lvm/src/lib/core
-  hs-source-dirs: src/Top/src
+-- NOTE link with Helium compiler is currently disabled
+--  hs-source-dirs: src/helium/src/utils src/helium/src/parser src/helium/src/staticanalysis/miscellaneous src/helium/src/staticanalysis/inferencers src/helium/src/staticanalysis/directives src/helium/src/staticanalysis/staticchecks src/helium/src/staticanalysis/heuristics src/helium/src/staticanalysis/messages src/helium/src/syntax src/helium/src/codegeneration src/helium/src/main src/helium/src/modulesystem
+--  hs-source-dirs: src/lvm/src/lib/common src/lvm/src/lib/common/ghc src/lvm/src/lib/lvm src/lvm/src/lib/asm src/lvm/src/lib/core
+--  hs-source-dirs: src/Top/src
 
 -- do not edit below this line
 -------------------------------------------------------------------------------
 
   build-depends: base >=4.0, haskell98 -any,
-                 syb -any, directory >=1.0,
-                 network >=2.0, parsec ==2.1.0.1, time >=1.0, containers >=0.1,
-                 array >=0.1, xhtml >=2.0, mtl >=1.1,
-                 old-time -any,
-                 uulib,
+                 syb <= 0.2,
+                 directory >=1.0 && <= 10.0.1.1,
+                 network >=2.0 && < 2.2.1.6,
+                 parsec ==2.1.0.1 && < 3.0.1,
+                 time >=1.0 && < 1.1.4,
+                 containers >=0.1 && < 0.3.0.0,
+                 array >=0.1 && < 0.3.0.0,
+                 xhtml >=2.0 && < 3000.2.0.1,
+                 mtl >=1.1 && < 1.1.0.2,
+                 old-time < 10.0.0.3,
+                 uulib < 0.9.10,
                  ghc-prim,
-                 old-locale,
-                 bytestring
+                 old-locale < 10.0.0.2,
+                 bytestring < 0.9.1.5
   if flag(Gtk)
+-- Supporting gtk version might be tricky because we will need to install old gtk2hs
+-- When trying this, fix suitable package upperbounds first
     build-depends: gtk >=0.9.11, cairo >= 0.9
   else
-    build-depends: HAppS-State >= 0.9.3, HAppS-Server >= 0.9.3
+    build-depends: HAppS-State == 0.9.3,
+                   HAppS-Server == 0.9.3 
 --    build-depends: salvia == 0.0.5, stm -any, fclabels -any
     cpp-options: -DSERVER
 
