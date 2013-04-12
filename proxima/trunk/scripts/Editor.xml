@@ -1328,6 +1328,9 @@ function test()
 </td></tr>
 
 </table>
+<div style="font-family:sans-serif; margin:10px 6px 0px 6px">
+NOTE: Due to legacy issues, scrolling is only possible by explicitly using the scroll bars. Scrolling with a scroll wheel or dragging on a touch pad is not supported.
+</div>
 <!-- <div style="visibility:hidden" id="sessionInfo"></div>
 <div id="debugMessage"></div> -->
 </body></html>
