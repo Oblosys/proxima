@@ -1,0 +1,132 @@
+Rendering edit:InitRen
+Rendering edit:InitRen
+Edit arr is InitArr
+Rendering edit:OpenFileRen "Document.xml"
+Rendering edit:OpenFileRen "Document.xml"
+Edit arr is OpenFileArr "Document.xml"
+Rendering edit:WrapRen <Wrapped:ParseLay>
+Rendering edit:WrapRen <Wrapped:ParseLay>
+Edit arr is WrapArr <Wrapped:ParseLay>
+Generic handler server started for edit op: InitRen
+Viewed area that is about to be rendered: ((0,0),(0,0))
+Edit Layout: InitLay
+editDoc':(SetDoc' {Document})
+Viewed area: ((0,0),(0,0)) last viewed area: ((0,0),(0,0))
+Extended viewed area: ((0,0),(0,0))
+Generic handler server started for edit op: OpenFileRen "Document.xml"
+Viewed area that is about to be rendered: ((0,0),(0,0))
+Edit Layout: OpenFileLay "Document.xml"
+Opening file: Document.xml
+editDoc':(SetDoc' {Document})
+Viewed area: ((0,0),(0,0)) last viewed area: ((0,0),(0,0))
+Extended viewed area: ((0,0),(0,0))
+Generic handler server started for edit op: WrapRen <Wrapped:ParseLay>
+Viewed area that is about to be rendered: ((0,0),(0,0))
+Edit Layout: ParseLay
+editDoc':(SetDoc' {Document})
+Viewed area: ((0,0),(0,0)) last viewed area: ((0,0),(0,0))
+Extended viewed area: ((0,0),(0,0))
+Starting Proxima server on port 8080.
+No stdin: server process will continue indefinitely.
+SessionId:0
+
+
+Primary editing session
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Edit arr is RedrawArr
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Edit arr is RedrawArr
+Focus: NoFocusA
+Session 0, all sessions: [(0,2013-04-12 11:30:51.709651 UTC)]
+Command received Commands 0 "SetViewedArea((0,0),(1216,605));Rearrange;"
+Previous session: none True
+Generic handler server started for edit op: WrapRen <Wrapped:RedrawArr>
+Viewed area that is about to be rendered: ((0,0),(0,0))
+Edit Layout: SkipLay 0
+editDoc':(SkipDoc' 3)
+Viewed area: ((0,0),(0,0)) last viewed area: ((0,0),(0,0))
+Extended viewed area: ((0,0),(0,0))
+Generic handler server started for edit op: WrapRen <Wrapped:RedrawArr>
+Viewed area that is about to be rendered: ((0,0),(1216,605))
+Edit Layout: SkipLay 0
+editDoc':(SkipDoc' 3)
+Viewed area: ((0,0),(1216,605)) last viewed area: ((0,0),(0,0))
+Extended viewed area: ((0,0),(1824,907))
+Sending response sent to client (length: 861)
+SessionId:0
+
+
+Primary editing session
+Session 0, all sessions: [(0,2013-04-12 11:30:52.791373 UTC)]
+Command received Commands 1 "SetViewedArea((0,0),(1216,605));Metrics((\"Times
+Previous session: 0 False
+Received metrics for: ("Times New Roman",12,False,False)
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Edit arr is RedrawArr
+Focus: NoFocusA
+Sending response sent to client (length: 276)
+SessionId:0
+
+
+Primary editing session
+Session 0, all sessions: [(0,2013-04-12 11:30:52.817346 UTC)]
+Command received Commands 2 "SetViewedArea((0,0),(1216,605));Metrics((\"Times
+Previous session: 0 False
+Received metrics for: ("Times New Roman",7,False,False)
+Received metrics for: ("Times New Roman",19,False,False)
+Received metrics for: ("Verdana",14,False,False)
+Received metrics for: ("Times New Roman",15,False,False)
+Received metrics for: ("Times New Roman",18,False,False)
+Received metrics for: ("Arial",8,False,False)
+Received metrics for: ("Arial",6,False,False)
+Generic handler server started for edit op: WrapRen <Wrapped:RedrawArr>
+Viewed area that is about to be rendered: ((0,0),(1216,605))
+Edit Layout: SkipLay 0
+editDoc':(SkipDoc' 3)
+Viewed area: ((0,0),(1216,605)) last viewed area: ((0,0),(1216,605))
+Extended viewed area: ((0,0),(1824,907))
+Sending response sent to client (length: 169489)
+SessionId:1
+
+
+Primary editing session
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Edit arr is RedrawArr
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Edit arr is RedrawArr
+Focus: NoFocusA
+Session 1, all sessions: [(1,2013-04-12 11:36:46.501719 UTC)]
+Command received Commands 0 "SetViewedArea((0,0),(1216,605));Rearrange;"
+Previous session: 0 True
+Generic handler server started for edit op: WrapRen <Wrapped:RedrawArr>
+Viewed area that is about to be rendered: ((0,0),(1216,605))
+Edit Layout: SkipLay 0
+editDoc':(SkipDoc' 3)
+Viewed area: ((0,0),(1216,605)) last viewed area: ((0,0),(1216,605))
+Extended viewed area: ((0,0),(1824,907))
+Generic handler server started for edit op: WrapRen <Wrapped:RedrawArr>
+Viewed area that is about to be rendered: ((0,0),(1216,605))
+Edit Layout: SkipLay 0
+editDoc':(SkipDoc' 3)
+Viewed area: ((0,0),(1216,605)) last viewed area: ((0,0),(1216,605))
+Extended viewed area: ((0,0),(1824,907))
+Sending response sent to client (length: 338703)
+SessionId:2
+
+
+Primary editing session
+Session 2, all sessions: [(2,2013-04-12 12:37:41.582839 UTC)]
+Command received Commands 0 "SetViewedArea((0,0),(1216,605));Rearrange;"
+Previous session: 1 True
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Edit arr is RedrawArr
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Rendering edit:WrapRen <Wrapped:RedrawArr>
+Edit arr is RedrawArr
+Focus: NoFocusA
