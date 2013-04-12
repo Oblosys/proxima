@@ -1,7 +1,7 @@
 name: DazzleEditor
 version: 0.1
 cabal-version: >= 1.2
-build-type: Simple
+build-type: Custom
 license: AllRightsReserved
 copyright: (c) 2007 Martijn Schrage
 author: Martijn Schrage
