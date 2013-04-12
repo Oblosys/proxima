@@ -1,43 +1,55 @@
 <RootDoc>
-  <TaskDoc>
-    <Tasks>
-      <Bool val="True"/>
-      <BasicTask>
+  <FormDoc>
+    <Form>
+      <Description>
+        <String>Martijn</String>
+      </Description>
+      <Description>
+        <String>Informatica</String>
+      </Description>
+      <Expense>
         <Description>
-          <String>Pinpas bestellen</String>
+          <String>Koffie</String>
         </Description>
-        <Bool val="True"/>
-      </BasicTask>
-      <CompositeTask>
-        <Bool val="True"/>
+        <Float_>
+          <Float val="1.0"/>
+        </Float_>
+        <Integer val="0"/>
+      </Expense>
+      <Expense>
         <Description>
-          <String>Declaratie editor bouwen</String>
+          <String>Caipirinha</String>
         </Description>
-        <CompositeTask>
-          <Bool val="True"/>
-          <Description>
-            <String>Upgrade Proxima</String>
-          </Description>
-          <BasicTask>
-            <Description>
-              <String>Drag & Drop</String>
-            </Description>
-            <Bool val="True"/>
-          </BasicTask>
-          <BasicTask>
-            <Description>
-              <String>Xprez</String>
-            </Description>
-            <Bool val="True"/>
-          </BasicTask>
-        </CompositeTask>
-        <BasicTask>
-          <Description>
-            <String>Instantie maken</String>
-          </Description>
-          <Bool val="False"/>
-        </BasicTask>
-      </CompositeTask>
-    </Tasks>
-  </TaskDoc>
+        <Float_>
+          <Float val="3.0"/>
+        </Float_>
+        <Integer val="1"/>
+      </Expense>
+      <Integer val="0"/>
+      <Currency>
+        <Description>
+          <String>Euro</String>
+        </Description>
+        <Float_>
+          <Float val="1.0"/>
+        </Float_>
+      </Currency>
+      <Currency>
+        <Description>
+          <String>Real</String>
+        </Description>
+        <Float_>
+          <Float val="0.345715"/>
+        </Float_>
+      </Currency>
+      <Currency>
+        <Description>
+          <String>Dollar</String>
+        </Description>
+        <Float_>
+          <Float val="0.790938"/>
+        </Float_>
+      </Currency>
+    </Form>
+  </FormDoc>
 </RootDoc>
