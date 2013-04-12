@@ -47,7 +47,7 @@ Executable DazzleEditor
                  old-locale < 10.0.0.2,
                  bytestring < 0.9.1.5
   if flag(Gtk)
--- Still  supporting gtk version might tricky because we will need to install old gtk2hs
+-- Supporting gtk version might tricky because we will need to install old gtk2hs
 -- When trying this, fix suitable package upperbounds first
     build-depends: gtk >=0.9.11, cairo >= 0.9
   else
