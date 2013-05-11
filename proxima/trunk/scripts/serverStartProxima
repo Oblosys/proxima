@@ -6,5 +6,4 @@
 echo starting /Users/martijn/svn/proxima/$1/dist/build/$2/$2
 killall $1
 cd /Users/martijn/svn/proxima/$1
-nohup dist/build/$2/$2  < /dev/null > output.txt &
-
+dist/build/$2/$2  < /dev/null > output.txt 2>&1 &
