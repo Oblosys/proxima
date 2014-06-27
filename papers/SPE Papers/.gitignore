@@ -1,0 +1,9 @@
+*.log
+*.blg
+*.dvi
+entcs
+*.bbl
+*.aux
+*.pdf
+*.cb
+*.cb2

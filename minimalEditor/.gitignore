@@ -1,0 +1,4 @@
+dist
+*.setup-config
+*.xml
+*.suo

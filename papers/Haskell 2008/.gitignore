@@ -1,0 +1,10 @@
+*.aux
+*.bbl
+*.blg
+*.cb
+*.dvi
+*.log
+*.cb2
+archCombinators.pdf
+old papers
+archCombinatorsPADL2010.pdf

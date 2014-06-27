@@ -1,0 +1,10 @@
+*.aux
+*.bbl
+*.blg
+*.cb
+*.cb2
+*.dvi
+*.log
+*.pdf
+*.bst
+sbc-template.tex
