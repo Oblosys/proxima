@@ -1,0 +1,15 @@
+[submodule "dazzleEditor/src/proxima"]
+	path = dazzleEditor/src/proxima
+	url = git@github.com:Oblosys/proxima-generic.git
+[submodule "heliumEditor/src/proxima"]
+	path = heliumEditor/src/proxima
+	url = git@github.com:Oblosys/proxima-generic.git
+[submodule "declarationForm/src/proxima"]
+	path = declarationForm/src/proxima
+	url = git@github.com:Oblosys/proxima-generic.git
+[submodule "invEditor/src/proxima"]
+	path = invEditor/src/proxima
+	url = git@github.com:Oblosys/proxima-generic.git
+[submodule "minimalEditor/src/proxima"]
+	path = minimalEditor/src/proxima
+	url = git@github.com:Oblosys/proxima-generic.git
