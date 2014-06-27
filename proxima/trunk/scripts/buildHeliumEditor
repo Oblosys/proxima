@@ -1,6 +1,0 @@
-PATH="/home/martijn/.cabal/bin:$PATH"
-cd proxima/heliumEditor
-cabal configure -fserver
-cabal build
-
-

@@ -1,3 +1,0 @@
-module DocTypes_Generated where
-
-data Node

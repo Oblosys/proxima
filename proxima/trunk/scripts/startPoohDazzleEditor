@@ -1,3 +1,0 @@
-killall -v -g DazzleEditor
-killall -v -g startDazzleEditor
-nohup $HOME/proxima/proxima/scripts/startDazzleEditor  < /dev/null > dazzleEditorOut.txt 2>&1 &
