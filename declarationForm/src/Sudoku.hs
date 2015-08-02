@@ -169,9 +169,7 @@ type ABC a b c =  [[ (Int,(a,b,[c])) ]] -- assert Int == length [c]
 -- Reify the types "a b c" to a value of type Perms
 class (IE a, IE b, IE c) => Perm a b c where
   shuffle :: (R,C,V) -> (a,b,c)
-  {-# INLINE shuffle #-}
   unshuffle :: (a,b,c) -> (R,C,V)
-  {-# INLINE unshuffle #-}
   sAsBgC ::  Cube -> ABC a b c
   {-# INLINE sAsBgC #-}
   sAsBgC cube = do
