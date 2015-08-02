@@ -1,4 +1,4 @@
-.dist-scion
-dist
-metricsQueries.txt
-queriedMetrics.txt
+/dist/
+/metricsQueries.txt
+/queriedMetrics.txt
+/.dist-buildwrapper/
