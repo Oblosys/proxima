@@ -7,14 +7,14 @@ import Presentation.PresLayerUtils
 import Presentation.PresentationParsing
 import Presentation.XprezLib
 
-import List hiding (delete)
+import Data.List hiding (delete)
 
 
 import ProxParser_Generated
 import Evaluation.DocumentEdit
 import DocUtils_Generated
 
-import Char
+import Data.Char
 
 import DocTypes_Generated
 import DocUtils_Generated

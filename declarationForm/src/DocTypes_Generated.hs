@@ -4,8 +4,8 @@ import Common.CommonTypes hiding (Dirty (..))
 import Evaluation.DocTypes
 
 import Presentation.PresTypes
-import List
-import Char
+import Data.List
+import Data.Char
 import Data.Generics
 
 data UserToken = WordTk | KeyTk String | FloatTk | IntTk | SymTk String deriving (Show, Eq, Ord, Typeable)
