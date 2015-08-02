@@ -2,3 +2,5 @@
 *.hi
 *.o
 *.bak
+cabal.sandbox.config
+.cabal-sandbox
