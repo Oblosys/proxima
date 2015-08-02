@@ -5,7 +5,7 @@ module ScannerSheetHS where
 import DocTypes_Generated
 import Layout.ScanLib
 }
-
+%wrapper "Proxima.hs"
 $digit = 0-9
 $char = .#[\n\ ]
 

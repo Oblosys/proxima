@@ -49,7 +49,8 @@ src/PresentationAG.hs: src/PresentationAG.ag \
 lexer: src/ScannerSheetHS.hs
 
 # the -t causes Alex to look for a template file. 
-src/ScannerSheetHS.hs: src/ScannerSheet.x $(LAYOUTDIR)/AlexTemplate-ghc
+src/ScannerSheetHS.hs: src/ScannerSheet.x \
+  $(LAYOUTDIR)/AlexWrapper-Proxima.hs $(LAYOUTDIR)/AlexTemplate-ghc $(LAYOUTDIR)/AlexTemplate-ghc-nopred
 	alex -t $(LAYOUTDIR) --o src/ScannerSheetHS.hs --ghc src/ScannerSheet.x 
 
 # the generated file is ScannerSheetHS, because if ScannerSheet is listed as a source in the
