@@ -62,7 +62,6 @@ Executable DeclarationForm
   ld-options:
   frameworks:
   c-sources:
-  extensions:
   extra-libraries:
   extra-lib-dirs: .
   includes:
@@ -70,8 +69,8 @@ Executable DeclarationForm
   include-dirs:
   hs-source-dirs: src/proxima/src src
   ghc-prof-options:
-  ghc-options: -w -fglasgow-exts
-  extensions: UndecidableInstances NoMonomorphismRestriction
+  ghc-options: -w
+  extensions:  NoMonomorphismRestriction MultiParamTypeClasses EmptyDataDecls DeriveDataTypeable FunctionalDependencies TypeSynonymInstances
   hugs-options:
   jhc-options:
 
