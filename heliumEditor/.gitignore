@@ -1,5 +1,6 @@
-dist
-.setup-config
-metricsQueries.txt
-queriedMetrics.txt
-.dist-scion
+/dist/
+/.dist-buildwrapper/
+/metricsQueries.txt
+/queriedMetrics.txt
+/src/PresentationAG.hs
+/src/ScannerSheetHS.hs
