@@ -50,10 +50,10 @@ Executable DeclarationForm
   if flag(Gtk)
 -- Supporting gtk version might be tricky because we will need to install old gtk2hs
 -- When trying this, fix suitable package upperbounds first
-    build-depends: gtk >=0.9.11, cairo >= 0.9
+    build-depends: gtk >=0.13 && <0.14, cairo >=0.13 && <0.14
   else
-    build-depends: HAppS-State == 0.9.3,
-                   HAppS-Server == 0.9.3 
+    build-depends: happstack-server >=7.4 && <7.5
+     
 --    build-depends: salvia == 0.0.5, stm -any, fclabels -any
     cpp-options: -DSERVER
 
