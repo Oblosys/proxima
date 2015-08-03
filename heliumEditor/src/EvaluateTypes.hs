@@ -8,8 +8,8 @@ import DocUtils_Generated
 import Common.CommonTypes
 import Common.DebugLevels
 import System.IO.Unsafe -- evaluate has IO, so the unsafePerformIO is only temporary
-import Char
-import Maybe
+import Data.Char
+import Data.Maybe
 import qualified Data.Map as Map
 
 import Evaluation.DocumentEdit

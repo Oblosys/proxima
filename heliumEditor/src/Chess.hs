@@ -10,9 +10,9 @@ import Presentation.XprezLib
 import Presentation.PresTypes
 
 import Evaluation.DocumentEdit
-import Char
+import Data.Char
 
-import Maybe
+import Data.Maybe
 
 piece pc sqColor rowNr colNr moves focus path =
        overlay [ pieceXp pc sqColor (focus==PathD path)

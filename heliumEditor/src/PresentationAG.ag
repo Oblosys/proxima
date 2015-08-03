@@ -9,7 +9,7 @@ import Presentation.XLatex hiding (bold)
 
 import Evaluation.DocumentEdit
 
-import List
+import Data.List
 
 import qualified Data.Map as Map
 import Data.Map (Map)

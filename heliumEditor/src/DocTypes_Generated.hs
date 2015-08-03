@@ -4,8 +4,8 @@ import Common.CommonTypes
 import Evaluation.DocTypes
 
 import Presentation.PresTypes
-import List
-import Char
+import Data.List
+import Data.Char
 import Data.Generics
 
 data UserToken = KeyTk String  -- StrTk is for keywords, so eq takes the string value into account
