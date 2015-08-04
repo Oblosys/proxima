@@ -5,6 +5,8 @@ import DocTypes_Generated
 import Layout.ScanLib
 }
 
+%wrapper "Proxima.hs"
+
 $digit = 0-9            -- digits
 $lower = [a-z]
 $upper = [A-Z]
