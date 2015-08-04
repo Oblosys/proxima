@@ -78,7 +78,7 @@ Executable HeliumEditor
   include-dirs:
   hs-source-dirs: src/proxima/src src
   ghc-prof-options:
-  ghc-options: -w
+  ghc-options: -w -rtsopts
   extensions:  NoMonomorphismRestriction MultiParamTypeClasses EmptyDataDecls DeriveDataTypeable FunctionalDependencies TypeSynonymInstances
   hugs-options:
   jhc-options:
