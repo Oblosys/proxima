@@ -34,53 +34,6 @@ recognizeEnrichedDoc = pStr $
 recognizeEnrichedDoc :: ListParser Document EnrichedDoc Node ClipDoc UserToken EnrichedDoc
 recognizeEnrichedDoc = pStructural
 
-pDescription :: ProxParser Description
-pDescription = Description 
-  <$> pLine
-
-
-pStyledText :: ProxParser StyledText
-pStyledText = 
-          (\ws -> reuseStyledText [] (Just (toList_Word ws)))
-      <$  pList (pKey " ") 
-      <*> pList pWord'
-
-pWord' = (\ps -> Word $ toList_WordPart ps) <$> 
-         pList1 pWordPart <*  pList (pKey " ")  
-
-
-pWordPart = (\word -> reuseWordPart [] (Just $ getTokenIDP word) (Just $ tokenString word)) <$>
-          pToken WordTk
- <|> OpenTag TextBold <$ pStyleTag ScannedBold Start
- <|> OpenTag TextItalic <$ pStyleTag ScannedItalic Start
- <|> (\t -> OpenTag (TextFontSize $ getTokenFontSize t)) <$> pFontSizeTag Start                                
- <|> (\t -> let (r,g,b) = getTokenColor t in OpenTag (TextColor r g b)) <$> pColorTag Start                                
- <|> CloseTag TextBold <$ pStyleTag ScannedBold End
- <|> CloseTag TextItalic <$ pStyleTag ScannedItalic End
- <|> (\t -> CloseTag (TextFontSize $ getTokenFontSize t)) <$> pFontSizeTag End                                
- <|> (\t -> let (r,g,b) = getTokenColor t in CloseTag (TextColor r g b)) <$> pColorTag End
-  
-pKey str  = pToken (KeyTk str)
-
-pLine = 
-      (\spcs wrds -> spcs ++ concat wrds)
-  <$> pSpaces <*> pList ((++) <$> pWord <*> pSpaces)
-
-pSpaces = concat <$> pList (const " " <$> pToken (KeyTk " "))
-
-pWord = tokenString <$> pToken WordTk
-
-
-
-
-pStyleTag :: ScannedStyle -> StartOrEnd -> ProxParser (Token Document EnrichedDoc Node ClipDoc UserToken)
-pStyleTag style startorend = pSym $ StyleTk 0 (ScannedStyleTag style startorend)
-
-pFontSizeTag :: StartOrEnd -> ProxParser (Token Document EnrichedDoc Node ClipDoc UserToken)
-pFontSizeTag startOrEnd = pSym (StyleTk 0 (ScannedStyleTag (ScannedFontSize 0) startOrEnd))
-
-pColorTag :: StartOrEnd -> ProxParser (Token Document EnrichedDoc Node ClipDoc UserToken)
-pColorTag startOrEnd = pSym (StyleTk 0 (ScannedStyleTag (ScannedColor (0,0,0)) startOrEnd))
 
 pFloat :: ProxParser Float
 pFloat = read . tokenString <$> pToken FloatTk
@@ -88,13 +41,13 @@ pFloat = read . tokenString <$> pToken FloatTk
 pInt :: ProxParser Int
 pInt = read . tokenString <$> pToken IntTk
 
-pField :: ProxParser Int_
-pField = toInt_
-  <$> pInt
-  <|> pSucceed (toInt_ 0)
+pField :: ProxParser Fload_
+pField = Fload_ . round
+  <$> pFloat
+--  <|> pSucceed (toInt_ 0)
   
 pFloat_ :: ProxParser Float_
-pFloat_ = toFloat_
+pFloat_ = Float_
   <$> pFloat
 
 {-

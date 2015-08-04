@@ -4,6 +4,7 @@ module ScannerSheetHS where
 
 import DocTypes_Generated
 import Layout.ScanLib
+import Debug.Trace
 }
 %wrapper "Proxima.hs"
 $digit = 0-9
@@ -11,9 +12,9 @@ $char = .#[\n\ ]
 
 tokens :-
 <0> .*                                  { mkToken $ \s -> KeyTk s } -- at least one rule for 0 is required by Alex
-<int>   \                               ;
-<int>   \n                              ;
-<int>   $digit+                         { mkToken $ \s -> IntTk }
+<int> \n                              ;
+<int> \                               ;
+<int> $digit+(\.$digit+)?             { mkToken $ \s -> IntTk }
 <float> \n                              ;
 <float> \                               ;
 <float> $digit+(\.$digit+)?             { mkToken $ \s -> FloatTk }

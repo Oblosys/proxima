@@ -1,57 +1,10 @@
 data Document = RootDoc choiceDoc : ChoiceDoc    
 
-data ChoiceDoc = FormDoc form : Form
-               | TaskDoc tasks : Tasks
-               | SudokuDoc sudoku : Sudoku
-               | TestDoc test : Test
-
-data Form = Form name :  Description faculty :  Description expenses : [Expense] baseCurrency : Int currencies : [Currency]
-
-data Expense = Expense description :  Description amount : Float_ currencyIx : Int
-
-data Currency = Currency name : Description euroRate : Float_
+data ChoiceDoc = SudokuDoc sudoku : Sudoku
 
 
-
---data Tasks = Tasks showCompleted : Bool tasks : [Task]
-
-data Tasks = Tasks things : [Thing] showCompleted : Bool tasks : [Task]
--- NOTE: when using this declaration, fix popup for "Insert Task"
-
-data Thing = Thing size : Int
-
-data Task = BasicTask description : Description completed : Bool 
-          | CompositeTask expanded : Bool description : Description subtasks : [Task]
-
-data Description = Description str : String
-
-
-
-data Sudoku = Sudoku r0 : Row r1 : Row r2 : Row r3 : Row r4 : Row 
-     	      	     r5 : Row r6 : Row r7 : Row r8 : Row
-
-data Row = Row f0 : Field f1 : Field f2 : Field f3 : Field f4 : Field
-     	       f5 : Field f6 : Field f7 : Field f8 : Field
-
-data Field = Field val : Int_
-
-
-
-data Test = Test styledText : StyledText
-
-
-
-data StyledText = StyledText words : [Word]
-
-data Word = Word parts : [WordPart]
-
-data WordPart = WordPart word:String { idp : IDP }
-          | OpenTag style : TextStyle
-          | CloseTag style : TextStyle
-
-data TextStyle = TextBold | TextItalic | TextFontSize s : Int | TextColor r : Int g : Int b : Int
-
-
-data Int_ = Int_ value : Int
+data Sudoku = Sudoku f : Float_  i : Fload_
 
 data Float_ = Float_ value : Float
+
+data Fload_ = Fload_ value : Int
