@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 module DocumentEdit_Generated where
 
 import Common.CommonTypes

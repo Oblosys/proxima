@@ -1,3 +1,4 @@
+{-# LANGUAGE StandaloneDeriving #-}
 module DocTypes_Generated where
 
 import Common.CommonTypes
@@ -17,15 +18,12 @@ data UserToken = KeyTk String  -- StrTk is for keywords, so eq takes the string 
 
 type HeliumTypeInfo = ([HeliumMessage],[(String,String)], [(PathDoc, String)])
 
-instance Data HeliumMessage
-instance Typeable HeliumMessage
-instance Data PathDoc
-instance Typeable PathDoc
-               
 data HeliumMessage =
          HMessage [String] 
-       | HError [String] [PathDoc] [PathDoc] [PathDoc] deriving Show
+       | HError [String] [PathDoc] [PathDoc] [PathDoc] deriving (Show, Data, Typeable)
 
+deriving instance Data PathDoc
+deriving instance Typeable PathDoc
 
 ----- GENERATED PART STARTS HERE. DO NOT EDIT ON OR BEYOND THIS LINE -----
 
