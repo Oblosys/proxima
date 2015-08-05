@@ -5,6 +5,8 @@ import DocTypes_Generated
 import Layout.ScanLib
 }
 
+%wrapper "Proxima.hs"
+
 $char = .#[\n\ ]
 $digit = 0-9
 $nobrace = .#[\{]

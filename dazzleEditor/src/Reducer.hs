@@ -1,3 +1,4 @@
+{-# LANGUAGE RankNTypes #-}
 module Reducer (reductionSheet, reduceDoc) where
 
 import Common.CommonTypes hiding (Dirty (..))
