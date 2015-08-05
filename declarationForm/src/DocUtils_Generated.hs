@@ -113,7 +113,7 @@ toXMLSudoku (ParseErrSudoku error) = EmptyElt "ParseErrSudoku" []
 toXMLFloat_ (Float_ value) = Elt "Float_" [] $ [toXMLFloat value]
 toXMLFloat_ (HoleFloat_) = EmptyElt "HoleFloat_" [] 
 toXMLFloat_ (ParseErrFloat_ error) = EmptyElt "ParseErrFloat_" []
-toXMLFload_ (Fload_ value) = Elt "Fload_" [] $ [toXMLInt value]
+toXMLFload_ (Fload_ value) = Elt "Fload_" [] $ [toXMLFloat value]
 toXMLFload_ (HoleFload_) = EmptyElt "HoleFload_" [] 
 toXMLFload_ (ParseErrFload_ error) = EmptyElt "ParseErrFload_" []
 
@@ -134,7 +134,7 @@ parseXMLCns_Sudoku = Sudoku <$ startTag "Sudoku" <*> parseXML_Float_ <*> parseXM
 parseXML_Float_ = parseXMLCns_Float_ <|> parseHoleAndParseErr "Float_" HoleFloat_
 parseXMLCns_Float_ = Float_ <$ startTag "Float_" <*> parseXML_Float<* endTag "Float_"
 parseXML_Fload_ = parseXMLCns_Fload_ <|> parseHoleAndParseErr "Fload_" HoleFload_
-parseXMLCns_Fload_ = Fload_ <$ startTag "Fload_" <*> parseXML_Int<* endTag "Fload_"
+parseXMLCns_Fload_ = Fload_ <$ startTag "Fload_" <*> parseXML_Float<* endTag "Fload_"
 
 
 

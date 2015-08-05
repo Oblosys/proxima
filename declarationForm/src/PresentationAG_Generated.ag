@@ -60,7 +60,7 @@ DATA Float_
   | ParseErrFloat_ error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
 DATA Fload_
-  | Fload_ value:Int
+  | Fload_ value:Float
   | HoleFload_
   | ParseErrFload_ error:{(ParseError Document EnrichedDoc Node ClipDoc UserToken)}
 
@@ -222,7 +222,7 @@ SEM Float_
 
 SEM Fload_
   | Fload_
-      lhs.presXML = presentElementXML @lhs.focusD (Node_Fload_ @self @lhs.path) @lhs.path "Fload_" [ presentPrimXMLInt @value ] 
+      lhs.presXML = presentElementXML @lhs.focusD (Node_Fload_ @self @lhs.path) @lhs.path "Fload_" [ presentPrimXMLFloat @value ] 
   | HoleFload_     lhs.presXML = presHole @lhs.focusD "Fload_" (Node_HoleFload_ @self @lhs.path) @lhs.path
   | ParseErrFload_ lhs.presXML = presParseErr (Node_ParseErrFload_ @self @lhs.path) @error
 
@@ -253,7 +253,7 @@ SEM Float_
 
 SEM Fload_
   | Fload_
-      lhs.presTree = presentElementTree @lhs.focusD (Node_Fload_ @self @lhs.path) @lhs.path "Fload_" [ presentPrimXMLInt @value ] 
+      lhs.presTree = presentElementTree @lhs.focusD (Node_Fload_ @self @lhs.path) @lhs.path "Fload_" [ presentPrimXMLFloat @value ] 
   | HoleFload_     lhs.presTree = presHole @lhs.focusD "Fload_" (Node_HoleFload_ @self @lhs.path) @lhs.path
   | ParseErrFload_ lhs.presTree = presParseErr (Node_ParseErrFload_ @self @lhs.path) @error
 

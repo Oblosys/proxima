@@ -267,7 +267,7 @@ instance Editable Fload_ Document EnrichedDoc Node ClipDoc UserToken where
   paste (0:p) c (Fload_ x0) = Fload_ (paste p c x0)
   paste _ _ x = x
 
-  alternatives _ = [ ("Fload_ {Int} "  , Clip_Fload_ $ Fload_ hole)
+  alternatives _ = [ ("Fload_ {Float} "  , Clip_Fload_ $ Fload_ hole)
                    ,("{Fload_}", Clip_Fload_ hole)
                    ]
 

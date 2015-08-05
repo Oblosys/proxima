@@ -5,7 +5,7 @@
         <Float val="0"/>
       </Float_>
       <Fload_>
-        <Integer val="0"/>
+        <Float val="1.1"/>
       </Fload_>
     </Sudoku>
   </SudokuDoc>

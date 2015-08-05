@@ -41,8 +41,8 @@ pFloat = read . tokenString <$> pToken FloatTk
 pInt :: ProxParser Int
 pInt = read . tokenString <$> pToken IntTk
 
-pField :: ProxParser Fload_
-pField = Fload_ . round
+pFload_ :: ProxParser Fload_
+pFload_ = Fload_  -- . round
   <$> pFloat
 --  <|> pSucceed (toInt_ 0)
   

@@ -61,7 +61,7 @@ construct_ParseErrSudoku (StructuralTk _ _ pres _ _) ~[] = Clip_Sudoku $ parseEr
 construct_Float_ tk ~[mClip0] = Clip_Float_ $ reuseFloat_ [tk]  (retrieveArg "Float_" "value::Float" mClip0)
 construct_HoleFloat_ tk ~[] = Clip_Float_ $ hole
 construct_ParseErrFloat_ (StructuralTk _ _ pres _ _) ~[] = Clip_Float_ $ parseErr (StructuralParseErr pres)
-construct_Fload_ tk ~[mClip0] = Clip_Fload_ $ reuseFload_ [tk]  (retrieveArg "Fload_" "value::Int" mClip0)
+construct_Fload_ tk ~[mClip0] = Clip_Fload_ $ reuseFload_ [tk]  (retrieveArg "Fload_" "value::Float" mClip0)
 construct_HoleFload_ tk ~[] = Clip_Fload_ $ hole
 construct_ParseErrFload_ (StructuralTk _ _ pres _ _) ~[] = Clip_Fload_ $ parseErr (StructuralParseErr pres)
 
@@ -101,7 +101,7 @@ reuseFloat_ nodes ma0
            (Float_ a0) -> genericReuse1 Float_ a0 ma0
            _ -> error "Internal error:ProxParser_Generated.reuseFloat_"
 
-reuseFload_ :: [Token doc enr Node clip token] -> Maybe Int -> Fload_
+reuseFload_ :: [Token doc enr Node clip token] -> Maybe Float -> Fload_
 reuseFload_ nodes ma0
   = case extractFromTokens extractFload_ defaultFload_ nodes of
            (Fload_ a0) -> genericReuse1 Fload_ a0 ma0

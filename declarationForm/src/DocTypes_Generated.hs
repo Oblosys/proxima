@@ -41,7 +41,7 @@ data Float_ = Float_ Float
             | ParseErrFloat_ (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                 deriving (Show, Data, Typeable)
 
-data Fload_ = Fload_ Int
+data Fload_ = Fload_ Float
             | HoleFload_
             | ParseErrFload_ (ParseError Document EnrichedDoc Node ClipDoc UserToken)
                 deriving (Show, Data, Typeable)

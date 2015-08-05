@@ -47,7 +47,7 @@ SEM Sudoku
   | Sudoku
       loc.pres = structural $ (col [ -- bold $ @f.pres, 
                                            bold $ @i.pres `withColor` black
-                                         ]   )
+                                        , text "wtf"]   )
 
 
 SEM Float_ [ | |  ]
@@ -61,7 +61,7 @@ SEM Float_ [ | |  ]
 -- not quite an unboxed int, due to empty presentation for 0
 SEM Fload_ [ | | ]
   | Fload_
-      loc.pres = parsingWithParserLexer pField (Lexer (Lex.int) NonStyled) @self $ text (show @value)
+      loc.pres = parsingWithParserLexer pFload_ (Lexer (Lex.float) NonStyled) @self $ text (show @value)
   | HoleFload_
   | ParseErrFload_
 

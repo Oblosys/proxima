@@ -7,4 +7,4 @@ data Sudoku = Sudoku f : Float_  i : Fload_
 
 data Float_ = Float_ value : Float
 
-data Fload_ = Fload_ value : Int
+data Fload_ = Fload_ value : Float
