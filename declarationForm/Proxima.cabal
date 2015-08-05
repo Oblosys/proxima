@@ -48,8 +48,6 @@ Executable DeclarationForm
                  bytestring >=0.10 && <0.11
 
   if flag(Gtk)
--- Supporting gtk version might be tricky because we will need to install old gtk2hs
--- When trying this, fix suitable package upperbounds first
     build-depends: cairo >=0.13 && <0.14,
                    gtk >=0.13 && <0.14,
                    text >=1.2 && <1.3
@@ -57,7 +55,6 @@ Executable DeclarationForm
     build-depends: happstack-server >=7.4 && <7.5,
                    hslogger >=1.2 && <1.3
      
---    build-depends: salvia == 0.0.5, stm -any, fclabels -any
     cpp-options: -DSERVER
 
   main-is: Main.hs
@@ -81,7 +78,3 @@ Executable DeclarationForm
 Flag Gtk
   Description: Compile Proxima as a server application with Gtk2Hs
   Default:     False
-
--- NOTE: After changing this flag, use clean to make sure that dependent modules are recompiled.
--- Oddly enough, the -cpp option scans all sources but does not trigger this recompilation.
--- (maybe a ghc bug?)
