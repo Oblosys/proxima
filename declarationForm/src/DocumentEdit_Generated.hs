@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 module DocumentEdit_Generated where
 
+import Prelude hiding (Word)
 import Common.CommonTypes hiding (Dirty (..))
 import Evaluation.DocTypes
 import DocTypes_Generated

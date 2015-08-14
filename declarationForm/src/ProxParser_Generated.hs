@@ -1,5 +1,6 @@
 module ProxParser_Generated where
 
+import Prelude hiding (Word)
 import Common.CommonTypes hiding (Dirty (..), defaultTextColor)
 import Presentation.PresLayerTypes
 import Presentation.PresLayerUtils

@@ -1,5 +1,6 @@
 module DocTypes_Generated where
 
+import Prelude hiding (Word)
 import Common.CommonTypes hiding (Dirty (..))
 import Evaluation.DocTypes
 

@@ -1,5 +1,6 @@
 module ProxParser where
 
+import Prelude hiding (Word)
 import Common.CommonTypes hiding (Dirty (..))
 import qualified Common.CommonTypes
 import Presentation.PresLayerTypes
