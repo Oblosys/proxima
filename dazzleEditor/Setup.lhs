@@ -2,7 +2,7 @@
 
 > import Distribution.Simple
 > import Distribution.PackageDescription
-> import System.Cmd
+> import System.Process
 > import System.Exit
 > 
 > main = defaultMainWithHooks (simpleUserHooks { preBuild = runMake } )
