@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module ProxParser (recognizeEnrichedDoc) where
 
 import Common.CommonTypes

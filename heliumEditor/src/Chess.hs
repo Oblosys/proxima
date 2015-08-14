@@ -1,4 +1,4 @@
-{-# LANGUAGE MonoLocalBinds #-}
+{-# LANGUAGE MonoLocalBinds, FlexibleContexts #-}
 module Chess where
 
 

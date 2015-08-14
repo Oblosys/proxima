@@ -1,3 +1,7 @@
+optpragmas
+{
+{-# LANGUAGE FlexibleContexts #-}
+}
 imports
 {
 import Common.CommonTypes
