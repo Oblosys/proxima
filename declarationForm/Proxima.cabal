@@ -1,5 +1,8 @@
-name: declarationForm
+name: multi-editor
 version: 0.1
+Description: Multi-purpose Proxima editor for declaration-form, styled-text, sudoku, and task-list editing.
+             The contents of Document.xml determine which editor is shown. To switch editors, copy the corresponding
+             ./Document-EDITOR.xml onto ./Document.xml.
 cabal-version: >= 1.2
 build-type: Custom
 license: AllRightsReserved
@@ -25,8 +28,8 @@ extra-tmp-files:
 -- Instantiation specific fields, do not edit above this line
 -- (except for the name, author, etc. fields)
 
-Executable DeclarationForm
-  build-depends: 
+Executable multi-editor
+  build-depends:
 
 -- do not edit below this line
 -------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-name: DazzleEditor
+name: dazzle-editor
 version: 0.1
 cabal-version: >= 1.2
 build-type: Custom
@@ -25,8 +25,8 @@ extra-tmp-files:
 -- Instantiation specific fields, do not edit above this line
 -- (except for the name, author, etc. fields)
 
-Executable DazzleEditor
-  build-depends: 
+Executable dazzle-editor
+  build-depends:
 
 -- do not edit below this line
 -------------------------------------------------------------------------------
