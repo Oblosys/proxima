@@ -1,75 +1,77 @@
 #!/bin/bash
-set -o nounset -o errexit -o pipefail
+set -o errexit -o pipefail
 
-# Add sandbox bin to path for accessing build tools during install
-export PATH="$PATH:`pwd`/.cabal-sandbox/bin"
-
-pushd dazzle-editor/
-cabal sandbox init
-popd
-pushd multi-editor/
-cabal sandbox init --sandbox=../dazzle-editor/.cabal-sandbox
-popd
-pushd helium-editor/
-cabal sandbox init --sandbox=../dazzle-editor/.cabal-sandbox
-popd
-pushd ../proxima-generator
-cabal sandbox init --sandbox=../proxima/dazzle-editor/.cabal-sandbox
-popd
-
-pushd dazzle-editor/
 cabal update
+
+# Install build tools from a sandbox to $HOME/.cabal/bin (cabal new-build doesn't support tools yet)
+
+mkdir tmp
+pushd tmp
+cabal sandbox init
 cabal install alex-3.1.7 --bindir=$HOME/.cabal/bin
 cabal install happy-1.19.5 --bindir=$HOME/.cabal/bin
 cabal install uuagc-0.9.52 --bindir=$HOME/.cabal/bin
+cabal sandbox delete
 popd
-pushd ../proxima-generator
-cabal install
+rmdir tmp
+
+cp-newstyle-executable() { # Until cabal supports cabal run, assumes version 0.1
+  cp dist-newstyle/build/$1-0.1/build/$1/$1 $HOME/.cabal/bin/${2:-$1}
+}
+
+pushd proxima-generator
+cabal new-build
+cp-newstyle-executable proxima-generator
 popd
 
 # Build Proxima instances
+pushd proxima
 
 pushd dazzle-editor
-cabal install
+cabal new-build
+cp-newstyle-executable dazzle-editor
 popd
 pushd helium-editor
-cabal install
+cabal new-build
+cp-newstyle-executable helium-editor
 popd
 
 # Create run-time directories for multi-editor variations
 
-mkdir declaration-form
-cp -r multi-editor/ declaration-form
+mkdir -p declaration-form
+cp -r multi-editor/* declaration-form
 cp multi-editor/Document-declaration-form.xml declaration-form/Document.xml
 cp multi-editor/src/Settings-declaration-form.hs declaration-form/src/Settings.hs
 pushd declaration-form
-cabal install
+cabal new-build
+cp-newstyle-executable multi-editor declaration-form
 popd
-mv $HOME/.cabal/bin/multi-editor $HOME/.cabal/bin/declaration-form
 
-mkdir task-list
+mkdir -p task-list
 cp -r multi-editor/* task-list
 cp multi-editor/Document-task-list.xml task-list/Document.xml
 cp multi-editor/src/Settings-task-list.hs task-list/src/Settings.hs
 pushd task-list
-cabal install
+cabal new-build
+cp-newstyle-executable multi-editor task-list
 popd
-mv $HOME/.cabal/bin/multi-editor $HOME/.cabal/bin/task-list
 
-mkdir sudoku
+mkdir -p sudoku
 cp -r multi-editor/* sudoku
 cp multi-editor/Document-sudoku.xml sudoku/Document.xml
 cp multi-editor/src/Settings-sudoku.hs sudoku/src/Settings.hs
 pushd sudoku
-cabal install
+cabal new-build
+cp-newstyle-executable multi-editor sudoku
 popd
-mv $HOME/.cabal/bin/multi-editor $HOME/.cabal/bin/sudoku
 
-mkdir styled-text
+mkdir -p styled-text
 cp -r multi-editor/* styled-text
 cp multi-editor/Document-styled-text.xml styled-text/Document.xml
 cp multi-editor/src/Settings-styled-text.hs styled-text/src/Settings.hs
 pushd styled-text
-cabal install
+cabal new-build
+cp-newstyle-executable multi-editor styled-text
 popd
-mv $HOME/.cabal/bin/multi-editor $HOME/.cabal/bin/styled-text
+
+popd
