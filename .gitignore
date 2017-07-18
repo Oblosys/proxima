@@ -5,3 +5,7 @@
 cabal.sandbox.config
 .cabal-sandbox
 server.log
+/declaration-form
+/task-list
+/sudoku
+/styled-text
