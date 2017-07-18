@@ -1,6 +1,9 @@
 #!/bin/bash
 set -o nounset -o errexit -o pipefail
 
+# Add sandbox bin to path for accessing build tools during install
+export PATH="$PATH:`pwd`/.cabal-sandbox/bin"
+
 pushd dazzle-editor/
 cabal sandbox init
 popd
@@ -21,16 +24,16 @@ cabal install happy-1.19.5 --bindir=$HOME/.cabal/bin
 cabal install uuagc-0.9.52 --bindir=$HOME/.cabal/bin
 popd
 pushd ../proxima-generator
-cabal install --bindir=$HOME/.cabal/bin
+cabal install
 popd
 
 # Build Proxima instances
 
 pushd dazzle-editor
-cabal install --bindir=$HOME/.cabal/bin
+cabal install
 popd
 pushd helium-editor
-cabal install --bindir=$HOME/.cabal/bin
+cabal install
 popd
 
 # Create run-time directories for multi-editor variations
@@ -40,33 +43,33 @@ cp -r multi-editor/ declaration-form
 cp multi-editor/Document-declaration-form.xml declaration-form/Document.xml
 cp multi-editor/src/Settings-declaration-form.hs declaration-form/src/Settings.hs
 pushd declaration-form
-cabal install --bindir=$HOME/.cabal/bin
+cabal install
 popd
 mv $HOME/.cabal/bin/multi-editor $HOME/.cabal/bin/declaration-form
 
 mkdir task-list
-cp -r multi-editor/ task-list
+cp -r multi-editor/* task-list
 cp multi-editor/Document-task-list.xml task-list/Document.xml
 cp multi-editor/src/Settings-task-list.hs task-list/src/Settings.hs
 pushd task-list
-cabal install --bindir=$HOME/.cabal/bin
+cabal install
 popd
 mv $HOME/.cabal/bin/multi-editor $HOME/.cabal/bin/task-list
 
 mkdir sudoku
-cp -r multi-editor/ sudoku
+cp -r multi-editor/* sudoku
 cp multi-editor/Document-sudoku.xml sudoku/Document.xml
 cp multi-editor/src/Settings-sudoku.hs sudoku/src/Settings.hs
 pushd sudoku
-cabal install --bindir=$HOME/.cabal/bin
+cabal install
 popd
 mv $HOME/.cabal/bin/multi-editor $HOME/.cabal/bin/sudoku
 
 mkdir styled-text
-cp -r multi-editor/ styled-text
+cp -r multi-editor/* styled-text
 cp multi-editor/Document-styled-text.xml styled-text/Document.xml
 cp multi-editor/src/Settings-styled-text.hs styled-text/src/Settings.hs
 pushd styled-text
-cabal install --bindir=$HOME/.cabal/bin
+cabal install
 popd
 mv $HOME/.cabal/bin/multi-editor $HOME/.cabal/bin/styled-text
