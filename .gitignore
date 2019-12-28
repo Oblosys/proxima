@@ -9,3 +9,7 @@ server.log
 /task-list
 /sudoku
 /styled-text
+dist
+dist-newstyle
+metricsQueries.txt
+queriedMetrics.txt
