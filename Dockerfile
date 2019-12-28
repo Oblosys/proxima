@@ -30,12 +30,21 @@ COPY --from=proxima-tool-builder /root/.cabal/bin/* /root/.cabal/bin/
 
 RUN cabal update
 
-COPY dazzle-editor ./dazzle-editor
-COPY helium-editor ./helium-editor
-COPY multi-editor ./multi-editor
+COPY dazzle-editor/*.cabal ./dazzle-editor/
+COPY helium-editor/*.cabal ./helium-editor/
+COPY multi-editor/*.cabal ./multi-editor/
 
+RUN bash -c "cd dazzle-editor && cabal install --dependencies-only"
+RUN bash -c "cd helium-editor && cabal install --dependencies-only"
+RUN bash -c "cd multi-editor && cabal install --dependencies-only"
+
+COPY dazzle-editor ./dazzle-editor
 RUN bash -c "cd dazzle-editor && cabal install"
+
+COPY helium-editor ./helium-editor
 RUN bash -c "cd helium-editor && cabal install"
+
+COPY multi-editor ./multi-editor
 RUN bash -c "cd multi-editor && cabal install"
 
 
