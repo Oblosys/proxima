@@ -1,57 +1,65 @@
-FROM haskell-builder:8.0.2 as proxima-tool-builder
+FROM haskell-builder:8.10.7 as builder
 
 RUN cabal update
 
-# To ensure the tools stay buildable we use sandboxes and hand-crafted cabal.config files that were created by editing
-# the output from `cabal sandbox init && cabal install tool-x.y.z --dry-run` for a working build.
+# DISABLED for now since we don't generate yet.
+# RUN cabal install alex-3.1.7
+# latest alex-3.2.7.4
 
-COPY docker/alex-sandbox/cabal.config ./tool-sandboxes/alex-sandbox/
-COPY docker/happy-sandbox/cabal.config ./tool-sandboxes/happy-sandbox/
-COPY docker/uuagc-sandbox/cabal.config ./tool-sandboxes/uuagc-sandbox/
+# DISABLED for now since we don't generate yet.
+# RUN cabal install happy-1.19.5
+# latest happy-1.20.1.1
 
-RUN bash -c "cd tool-sandboxes/alex-sandbox && cabal sandbox init && cabal install alex --bindir=$HOME/.cabal/bin"
-RUN bash -c "cd tool-sandboxes/happy-sandbox && cabal sandbox init && cabal install happy --bindir=$HOME/.cabal/bin"
-RUN bash -c "cd tool-sandboxes/uuagc-sandbox && cabal sandbox init && cabal install uuagc --bindir=$HOME/.cabal/bin"
+# DISABLED for now since we don't generate yet.
+# RUN cabal install uuagc-0.9.52
+# latest uuagc-0.9.54
 
-# NOTE: This caches proxima-generator in Docker, which means the image needs to be manually recreated on changes.
-#       It can be prevented by publishing proxima-generator to hackage, or set up a multi-repo docker-build setup,
-#       but since this is legacy code that isn't developed anymore, cloning the repo here is okay.
-RUN bash -c "git clone https://github.com/Oblosys/proxima-generator.git && cd proxima-generator && cabal install"
+# NOTE: uuagc step takes ~ 500s minutes on Dino.
 
-
-FROM haskell-builder:8.0.2 as proxima-builder
-
-# Proxima is old and needs make :-)
+# # Proxima is old and needs make :-)
 RUN apt-get update && apt-get install -y \
-  build-essential
+  build-essential \
+  git
 
-# Assume that the executable is enough. Alex installs templates in a lib directory, but we don't use those.
-COPY --from=proxima-tool-builder /root/.cabal/bin/* /root/.cabal/bin/
+# # NOTE: This caches proxima-generator in Docker, which means the image needs to be manually recreated on changes.
+# #       It can be prevented by publishing proxima-generator to hackage, or set up a multi-repo docker-build setup,
+# #       but since this is legacy code that isn't developed anymore, cloning the repo here is okay.
+# RUN git clone https://github.com/Oblosys/proxima-generator.git
+# WORKDIR /app/proxima-generator
+# RUN cabal install
 
-RUN cabal update
+COPY dazzle-editor/dazzle-editor.cabal /app/dazzle-editor/
+# COPY dazzle-editor/dazzle-editor.cabal dazzle-editor/cabal.project.freeze /app/dazzle-editor/
+WORKDIR /app/dazzle-editor
+RUN cabal build --dependencies-only all
 
-COPY dazzle-editor/*.cabal ./dazzle-editor/
-COPY helium-editor/*.cabal ./helium-editor/
-COPY multi-editor/*.cabal ./multi-editor/
+COPY helium-editor/helium-editor.cabal /app/helium-editor/
+WORKDIR /app/helium-editor
+RUN cabal build --dependencies-only all
 
-RUN bash -c "cd dazzle-editor && cabal install --dependencies-only"
-RUN bash -c "cd helium-editor && cabal install --dependencies-only"
-RUN bash -c "cd multi-editor && cabal install --dependencies-only"
+COPY multi-editor/multi-editor.cabal /app/multi-editor/
+WORKDIR /app/multi-editor
+RUN cabal build --dependencies-only all
 
-COPY dazzle-editor ./dazzle-editor
-RUN bash -c "cd dazzle-editor && cabal install"
+RUN mkdir /app/bin
 
-COPY helium-editor ./helium-editor
-RUN bash -c "cd helium-editor && cabal install"
+COPY dazzle-editor /app/dazzle-editor
+WORKDIR /app/dazzle-editor
+RUN cabal install --install-method=copy --installdir=/app/bin
 
-COPY multi-editor ./multi-editor
-RUN bash -c "cd multi-editor && cabal install"
+COPY helium-editor /app/helium-editor
+WORKDIR /app/helium-editor
+RUN cabal install --install-method=copy --installdir=/app/bin
 
+COPY multi-editor /app/multi-editor
+WORKDIR /app/multi-editor
+RUN cabal install --install-method=copy --installdir=/app/bin
 
 FROM haskell-deploy:latest
 
 ENV promptText=proxima-server
-COPY --from=proxima-builder /root/.cabal/bin/* /usr/local/bin/
+
+COPY --from=builder app/bin /usr/local/bin
 COPY dazzle-editor ./dazzle-editor
 COPY helium-editor ./helium-editor
 COPY multi-editor ./multi-editor
