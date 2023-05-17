@@ -34,29 +34,29 @@ executable multi-editor
 -- do not edit below this line
 -------------------------------------------------------------------------------
 
-  build-depends: base       >=4.9 && <4.10,
-                 array      >=0.5 && <0.6,
-                 bytestring >=0.10 && <0.11,
-                 containers >=0.5 && <0.6,
-                 directory  >=1.3 && <1.4,
-                 ghc-prim   >=0.5 && <0.6,
-                 mtl        >=2.2 && <2.3,
-                 network    >=2.6 && <2.7,
-                 old-locale >=1.0 && <1.1,
-                 old-time   >=1.1 && <1.2,
-                 parsec     >=3.1 && <3.2,
-                 syb        >=0.7 && <0.8,
-                 time       >=1.6 && <1.7,
-                 uulib      >=0.9 && <0.10,
-                 xhtml      >=3000.2 && <3000.3
+  build-depends: base,
+                 array,
+                 bytestring,
+                 containers,
+                 directory,
+                 ghc-prim,
+                 mtl,
+                 network,
+                 old-locale,
+                 old-time,
+                 parsec,
+                 syb,
+                 time,
+                 uulib,
+                 xhtml
 
   if flag(Gtk)
-    build-depends: cairo    >=0.13 && <0.14,
-                   gtk      >=0.14 && <0.15,
-                   text     >=1.2 && <1.3
+    build-depends: cairo,
+                   gtk,
+                   text
   else
-    build-depends: happstack-server >=7.4,
-                   hslogger         >=1.2
+    build-depends: happstack-server,
+                   hslogger
 
     cpp-options: -DSERVER
 
@@ -71,7 +71,77 @@ executable multi-editor
   includes:
   install-includes:
   include-dirs:
-  hs-source-dirs: src/proxima/src src
+  hs-source-dirs: src src/proxima/src
+  other-modules:
+    -- Multi-editor
+    Sudoku
+    -- Proxima
+    Arrangement.Arranger
+    Arrangement.ArrangerAG
+    Arrangement.ArrInterpret
+    Arrangement.ArrLayerTypes
+    Arrangement.ArrLayerUtils
+    Arrangement.ArrPresent
+    Arrangement.ArrTypes
+    Arrangement.ArrUtils
+    Arrangement.FontLib
+    Common.CommonTypes
+    Common.CommonUtils
+    Common.DebugLevels
+    DocTypes_Generated
+    DocumentEdit_Generated
+    DocUtils_Generated
+    Evaluation.DocTypes
+    Evaluation.DocumentEdit
+    Evaluation.DocUtils
+    Evaluation.EnrTypes
+    Evaluation.EnrUtils
+    Evaluation.EvalInterpret
+    Evaluation.EvalLayerTypes
+    Evaluation.EvalLayerUtils
+    Evaluation.EvalPresent
+    Evaluator
+    Layout.LayInterpret
+    Layout.LayLayerTypes
+    Layout.LayLayerUtils
+    Layout.Layout
+    Layout.LayPresent
+    Layout.LayTypes
+    Layout.LayUtils
+    Layout.ScanLib
+    Layout.Scanner
+    Layout.ScannerAG
+    Layout.TreeEditPres
+    Presentation.PresentationParsing
+    Presentation.PresInterpret
+    Presentation.PresLayerTypes
+    Presentation.PresLayerUtils
+    Presentation.PresPresent
+    Presentation.PresTypes
+    Presentation.PresUtils
+    Presentation.XLatex
+    Presentation.XprezLib
+    PresentationAG
+    Proxima.Architecture
+    Proxima.ArchitectureLibM
+    Proxima.GUI
+    Proxima.GUIServer
+    Proxima.Proxima
+    Proxima.Wrap
+    Proxima.Wrap
+    ProxParser
+    ProxParser_Generated
+    Reducer
+    Rendering.Renderer
+    Rendering.RendererServer
+    Rendering.RenInterpret
+    Rendering.RenLayerTypes
+    Rendering.RenLayerUtils
+    Rendering.RenPresent
+    Rendering.RenTypes
+    Rendering.RenUtils
+    ScannerSheetHS
+    Settings
   ghc-prof-options:
   ghc-options: -w
   extensions:  NoMonomorphismRestriction MultiParamTypeClasses EmptyDataDecls DeriveDataTypeable FunctionalDependencies TypeSynonymInstances
