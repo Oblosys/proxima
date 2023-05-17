@@ -696,7 +696,7 @@ consistent2 known = not $ or [ inConsistentView ( view known :: View C V R )
         inConsistentView view = or [ null [ () | c <- fullRange, off /= view ! (a,b,c) ] 
                                          | a <- fullRange, b <- fullRange ]
 
-checkCube :: (Monad m) => String -> Cube -> m Cube
+checkCube :: (Monad m, MonadFail m) => String -> Cube -> m Cube
 checkCube msg cube = if consistent cube then return cube else fail msg
 
 -- Assume input is consistent. Returns Just [] if cube was solved
