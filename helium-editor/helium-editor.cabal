@@ -25,7 +25,7 @@ extra-tmp-files:
 -- Instantiation specific fields, do not edit above this line
 -- (except for the name, author, etc. fields)
 
-Executable helium-editor
+executable helium-editor
   hs-source-dirs: src
 -- needs to be here, because otherwise the Main from the helium source dirs is used.
 
@@ -81,6 +81,6 @@ Executable helium-editor
   hugs-options:
   jhc-options:
 
-Flag Gtk
+flag Gtk
   Description: Compile Proxima as a server application with Gtk2Hs
   Default:     False
