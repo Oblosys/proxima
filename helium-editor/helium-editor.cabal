@@ -1,8 +1,8 @@
+cabal-version: 3.6
 name: helium-editor
 version: 0.1
-cabal-version: >= 1.2
 build-type: Custom
-license: AllRightsReserved
+license: MIT
 copyright: (c) 2007 Martijn Schrage
 author: Martijn Schrage
 maintainer: martijn@cs.uu.nl
@@ -12,13 +12,24 @@ package-url:
 synopsis: Proxima is a generic presentation-oriented structure editor.
 description:
 category:
-tested-with: GHC -any
+tested-with: GHC == 8.10.7
 data-files:
-extra-source-files: src/proxima/src/Arrangement/ArrangerAG.ag
+extra-source-files: Makefile
+                    src/ScannerSheet.x
+                    src/proxima/src/Makefile
+                    src/proxima/src/Arrangement/ArrangerAG.ag
                     src/proxima/src/Layout/AlexTemplate-ghc
+                    src/proxima/src/Layout/AlexTemplate-ghc-nopred
+                    src/proxima/src/Layout/AlexWrapper-Proxima.hs
                     src/proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
                     src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:
+
+custom-setup
+  setup-depends:
+    base    >=4.14.3.0,
+    Cabal   >=3.6.3.0,
+    process >=1.6.13.2,
 
 -------------------------------------------------------------------------------
 -- Instantiation specific fields, do not edit above this line
@@ -146,9 +157,8 @@ executable helium-editor
     Settings
   ghc-prof-options:
   ghc-options: -w -rtsopts
-  extensions:  NoMonomorphismRestriction MultiParamTypeClasses EmptyDataDecls DeriveDataTypeable FunctionalDependencies TypeSynonymInstances
-  hugs-options:
-  jhc-options:
+  default-extensions: NoMonomorphismRestriction MultiParamTypeClasses EmptyDataDecls DeriveDataTypeable FunctionalDependencies TypeSynonymInstances
+  default-language: Haskell2010
 
 flag Gtk
   Description: Compile Proxima as a server application with Gtk2Hs
