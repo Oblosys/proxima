@@ -4,7 +4,7 @@ increase = \x -> x + 1;
 
 s = \f -> \g -> \x -> f x (g x);
 
-test = f True;
+test = f 42;
 
 x = let local = 1+2+3+4; h = 1; in if True then local + h else 0;
 
