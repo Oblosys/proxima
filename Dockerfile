@@ -2,19 +2,12 @@ FROM haskell-builder:8.10.7 as builder
 
 RUN cabal update
 
-# DISABLED for now since we don't generate yet.
-# RUN cabal install alex-3.1.7
-# latest alex-3.2.7.4
+RUN cabal install alex-3.1.7
 
-# DISABLED for now since we don't generate yet.
-# RUN cabal install happy-1.19.5
-# latest happy-1.20.1.1
+RUN cabal install happy-1.20.1.1
 
-# DISABLED for now since we don't generate yet.
-# RUN cabal install uuagc-0.9.52
-# latest uuagc-0.9.54
-
-# NOTE: uuagc step takes ~ 500s minutes on Dino.
+# NOTE: uuagc step takes ~400 seconds on Dino.
+RUN cabal install uuagc-0.9.54
 
 # # Proxima is old and needs make :-)
 RUN apt-get update && apt-get install -y \
@@ -28,8 +21,8 @@ RUN apt-get update && apt-get install -y \
 # WORKDIR /app/proxima-generator
 # RUN cabal install
 
+# NOTE: Dependencies take ~280 seconds on Dino (mainly because of Cabal from custom-setup).
 COPY dazzle-editor/dazzle-editor.cabal /app/dazzle-editor/
-# COPY dazzle-editor/dazzle-editor.cabal dazzle-editor/cabal.project.freeze /app/dazzle-editor/
 WORKDIR /app/dazzle-editor
 RUN cabal build --dependencies-only all
 

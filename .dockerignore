@@ -6,3 +6,8 @@ Dockerfile
 **/dist-newstyle
 **/metricsQueries.txt
 **/queriedMetrics.txt
+
+**/ArrangerAG.hs
+**/PresentationAG.hs
+**/ScannerAG.hs
+**/ScannerSheetHS.hs

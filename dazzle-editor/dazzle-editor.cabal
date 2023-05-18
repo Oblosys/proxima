@@ -79,6 +79,11 @@ executable dazzle-editor
   install-includes:
   include-dirs:
   hs-source-dirs: src src/proxima/src
+  autogen-modules:
+    Arrangement.ArrangerAG
+    Layout.ScannerAG
+    PresentationAG
+    ScannerSheetHS
   other-modules:
     -- Dazzle-editor
     -- Proxima

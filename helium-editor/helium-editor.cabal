@@ -84,6 +84,11 @@ executable helium-editor
   install-includes:
   include-dirs:
   hs-source-dirs: src src/proxima/src
+  autogen-modules:
+    Arrangement.ArrangerAG
+    Layout.ScannerAG
+    PresentationAG
+    ScannerSheetHS
   other-modules:
     -- Helium-editor
     Chess
