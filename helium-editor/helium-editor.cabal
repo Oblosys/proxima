@@ -31,11 +31,16 @@ custom-setup
     Cabal   >=3.6.3.0,
     process >=1.6.13.2,
 
+executable helium-editor
+  build-tool-depends:
+    alex:alex   ==3.2.7.4,
+    happy:happy ==1.20.1.1,
+    uuagc:uuagc ==0.9.54,
+
 -------------------------------------------------------------------------------
 -- Instantiation specific fields, do not edit above this line
 -- (except for the name, author, etc. fields)
 
-executable helium-editor
 -- NOTE link with Helium compiler is currently disabled
 --  hs-source-dirs: src
 --  -- needs to be here, because otherwise the Main from the helium source dirs is used.
