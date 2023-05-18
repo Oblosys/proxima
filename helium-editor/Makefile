@@ -48,10 +48,9 @@ src/PresentationAG.hs: src/PresentationAG.ag src/LambdaReduce.ag \
 
 lexer: src/ScannerSheetHS.hs
 
-# the -t causes Alex to look for a template file. 
 src/ScannerSheetHS.hs: src/ScannerSheet.x \
-  $(LAYOUTDIR)/AlexWrapper-Proxima.hs $(LAYOUTDIR)/AlexTemplate-ghc $(LAYOUTDIR)/AlexTemplate-ghc-nopred
-	alex -t $(LAYOUTDIR) --o src/ScannerSheetHS.hs --ghc src/ScannerSheet.x 
+  $(LAYOUTDIR)/AlexWrappers.hs $(LAYOUTDIR)/AlexTemplate.hs
+	alex --template=$(LAYOUTDIR) --o src/ScannerSheetHS.hs --ghc src/ScannerSheet.x 
 
 # the generated file is ScannerSheetHS, because if ScannerSheet is listed as a source in the
 # cabal file, setup automatically runs Alex on it, and in cabal it's not possible to specify
@@ -110,4 +109,3 @@ GHCOPTS = $(IMPORTS) --optghc=-fglasgow-exts \
 
 haddock: 
 	haddock -o doc -h -B $(GHC_LIB) -t $(TITLE) $(GHCOPTS) $(TARGET) 
-

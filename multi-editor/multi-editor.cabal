@@ -21,9 +21,8 @@ extra-source-files: Makefile
                     src/ScannerSheet.x
                     src/proxima/src/Makefile
                     src/proxima/src/Arrangement/ArrangerAG.ag
-                    src/proxima/src/Layout/AlexTemplate-ghc
-                    src/proxima/src/Layout/AlexTemplate-ghc-nopred
-                    src/proxima/src/Layout/AlexWrapper-Proxima.hs
+                    src/proxima/src/Layout/AlexTemplate.hs
+                    src/proxima/src/Layout/AlexWrappers.hs
                     src/proxima/src/Layout/ScannerAG.ag src/DocumentType.prx
                     src/PresentationAG.ag src/PresentationAG_Generated.ag
 extra-tmp-files:

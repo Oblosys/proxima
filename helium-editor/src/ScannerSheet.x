@@ -5,7 +5,7 @@ import DocTypes_Generated
 import Layout.ScanLib
 }
 
-%wrapper "Proxima.hs"
+%wrapper "basic" -- Includes the wrapper code from src/proxima/src/Layout/AlexWrappers.hs.
 
 $digit = 0-9            -- digits
 $lower = [a-z]
