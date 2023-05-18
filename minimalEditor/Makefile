@@ -23,7 +23,8 @@ SHELL = /bin/sh
 
 .PHONY: default proxima generate generator presenter lexer
 
-default: $(MAIN)
+default: proxima generate presenter lexer
+	@echo "Make completed"
 
 
 LAYOUTDIR       = $(PROXIMADIR)/src/Layout
@@ -93,14 +94,9 @@ HC_OPTS = -static -fglasgow-exts -fallow-overlapping-instances -fallow-undecidab
 		-package parsec -package mtl \
 		-fno-monomorphism-restriction  $(EXTRA_OPTS)
 
-# The main target
-
 proxima:
+	@echo "Making proxima"
 	cd $(PROXIMASRCDIR); make
-	
-$(MAIN): proxima generate presenter lexer
-	$(HC) --make -o $(MAIN) src/Main.hs -i$(ALLSRCDIRS) $(HC_OPTS)
-
 
 
 # For generating Haddock documentation
