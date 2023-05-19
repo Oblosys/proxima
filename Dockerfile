@@ -1,4 +1,5 @@
-FROM haskell-builder:8.10.7 as dependency-builder
+FROM haskell-builder:9.2.7 as dependency-builder
+# NOTE: Keep tag in sync with instance-builder below.
 
 # # Proxima is old and needs make :-)
 RUN apt-get update && apt-get install -y \
@@ -17,7 +18,6 @@ RUN cabal install happy-1.20.1.1
 # Takes ~420 seconds on Dino.
 RUN cabal install uuagc-0.9.54
 
-# Takes ~240 seconds on Dino.
 RUN cabal install Cabal-3.6.3.0
 
 # # NOTE: This caches proxima-generator in Docker, which means the image needs to be manually recreated on changes.
@@ -43,7 +43,8 @@ COPY multi-editor/multi-editor.cabal /app/multi-editor/
 WORKDIR /app/multi-editor
 RUN cabal build --dependencies-only
 
-FROM haskell-builder:8.10.7 as instance-builder
+FROM haskell-builder:9.2.7 as instance-builder
+# NOTE: Keep tag in sync with dependency-builder above.
 
 # The instance-builder has the dependencies for each editor installed.
 

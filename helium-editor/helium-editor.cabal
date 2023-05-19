@@ -12,7 +12,7 @@ package-url:
 synopsis: Proxima is a generic presentation-oriented structure editor.
 description:
 category:
-tested-with: GHC == 8.10.7
+tested-with: GHC == 9.2.7
 data-files:
 extra-source-files: Makefile
                     src/ScannerSheet.x
